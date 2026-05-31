@@ -5,9 +5,13 @@
  *
  * PORT: 4580
  */
-import { tenantMiddleware } from '../shared/middleware/tenant';
-import { createLogger } from '../shared/utils/logger';
-import { createResponse, createErrorResponse } from '../shared/types';
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import { tenantMiddleware } from '../../shared/middleware/tenant';
+import { createLogger } from '../../shared/utils/logger';
+import { createResponse, createErrorResponse } from '../../shared/types';
 const logger = createLogger('hojai-hyperlocal');
 // ============================================
 // STORAGE
@@ -245,7 +249,6 @@ export class HojaiHyperlocalPlatform {
 // ============================================
 // EXPRESS ROUTES
 // ============================================
-import express from 'express';
 export function createHyperlocalRoutes(platform) {
     const router = express.Router();
     // Zones
@@ -376,7 +379,18 @@ export function createHyperlocalRoutes(platform) {
 export async function bootstrap(port = 4580) {
     const platform = new HojaiHyperlocalPlatform();
     const app = express();
+    // Security middleware
+    app.use(helmet());
+    app.use(cors());
     app.use(express.json());
+    // Rate limiting
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 1000,
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+    app.use(limiter);
     app.get('/health', (req, res) => {
         res.json({ status: 'healthy', service: 'hojai-hyperlocal', version: '1.0.0' });
     });

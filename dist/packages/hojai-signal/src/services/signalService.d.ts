@@ -5,8 +5,8 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     issues: string[];
     validationActions: string[];
     confidence?: number | null | undefined;
-    processedAt?: NativeDate | null | undefined;
     quality?: string | null | undefined;
+    processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
     canonicalTimestamp?: NativeDate | null | undefined;
@@ -24,8 +24,8 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     issues: string[];
     validationActions: string[];
     confidence?: number | null | undefined;
-    processedAt?: NativeDate | null | undefined;
     quality?: string | null | undefined;
+    processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
     canonicalTimestamp?: NativeDate | null | undefined;
@@ -45,8 +45,8 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     issues: string[];
     validationActions: string[];
     confidence?: number | null | undefined;
-    processedAt?: NativeDate | null | undefined;
     quality?: string | null | undefined;
+    processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
     canonicalTimestamp?: NativeDate | null | undefined;
@@ -70,8 +70,8 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     issues: string[];
     validationActions: string[];
     confidence?: number | null | undefined;
-    processedAt?: NativeDate | null | undefined;
     quality?: string | null | undefined;
+    processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
     canonicalTimestamp?: NativeDate | null | undefined;
@@ -89,8 +89,8 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     issues: string[];
     validationActions: string[];
     confidence?: number | null | undefined;
-    processedAt?: NativeDate | null | undefined;
     quality?: string | null | undefined;
+    processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
     canonicalTimestamp?: NativeDate | null | undefined;
@@ -110,8 +110,8 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     issues: string[];
     validationActions: string[];
     confidence?: number | null | undefined;
-    processedAt?: NativeDate | null | undefined;
     quality?: string | null | undefined;
+    processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
     canonicalTimestamp?: NativeDate | null | undefined;
@@ -130,7 +130,7 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const IdentityModel: mongoose.Model<{
-    status: "active" | "merged" | "flagged" | "archived";
+    status: "active" | "archived" | "merged" | "flagged";
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
@@ -156,14 +156,14 @@ export declare const IdentityModel: mongoose.Model<{
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        method?: string | null | undefined;
         confidence?: number | null | undefined;
+        method?: string | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: "active" | "merged" | "flagged" | "archived";
+    status: "active" | "archived" | "merged" | "flagged";
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
@@ -189,8 +189,8 @@ export declare const IdentityModel: mongoose.Model<{
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        method?: string | null | undefined;
         confidence?: number | null | undefined;
+        method?: string | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -198,7 +198,7 @@ export declare const IdentityModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: "active" | "merged" | "flagged" | "archived";
+    status: "active" | "archived" | "merged" | "flagged";
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
@@ -224,8 +224,8 @@ export declare const IdentityModel: mongoose.Model<{
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        method?: string | null | undefined;
         confidence?: number | null | undefined;
+        method?: string | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -237,7 +237,7 @@ export declare const IdentityModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: "active" | "merged" | "flagged" | "archived";
+    status: "active" | "archived" | "merged" | "flagged";
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
@@ -263,14 +263,14 @@ export declare const IdentityModel: mongoose.Model<{
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        method?: string | null | undefined;
         confidence?: number | null | undefined;
+        method?: string | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: "active" | "merged" | "flagged" | "archived";
+    status: "active" | "archived" | "merged" | "flagged";
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
@@ -296,8 +296,8 @@ export declare const IdentityModel: mongoose.Model<{
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        method?: string | null | undefined;
         confidence?: number | null | undefined;
+        method?: string | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -305,7 +305,7 @@ export declare const IdentityModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: "active" | "merged" | "flagged" | "archived";
+    status: "active" | "archived" | "merged" | "flagged";
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
@@ -331,8 +331,8 @@ export declare const IdentityModel: mongoose.Model<{
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        method?: string | null | undefined;
         confidence?: number | null | undefined;
+        method?: string | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -346,12 +346,12 @@ export declare const AnomalyModel: mongoose.Model<{
     status: "blocked" | "resolved" | "detected" | "investigating" | "false_positive";
     tenantId: string;
     affectedEvents: string[];
-    details?: any;
     type?: string | null | undefined;
-    userId?: string | null | undefined;
-    sessionId?: string | null | undefined;
+    details?: any;
     description?: string | null | undefined;
+    userId?: string | null | undefined;
     severity?: string | null | undefined;
+    sessionId?: string | null | undefined;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -362,12 +362,12 @@ export declare const AnomalyModel: mongoose.Model<{
     status: "blocked" | "resolved" | "detected" | "investigating" | "false_positive";
     tenantId: string;
     affectedEvents: string[];
-    details?: any;
     type?: string | null | undefined;
-    userId?: string | null | undefined;
-    sessionId?: string | null | undefined;
+    details?: any;
     description?: string | null | undefined;
+    userId?: string | null | undefined;
     severity?: string | null | undefined;
+    sessionId?: string | null | undefined;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -380,12 +380,12 @@ export declare const AnomalyModel: mongoose.Model<{
     status: "blocked" | "resolved" | "detected" | "investigating" | "false_positive";
     tenantId: string;
     affectedEvents: string[];
-    details?: any;
     type?: string | null | undefined;
-    userId?: string | null | undefined;
-    sessionId?: string | null | undefined;
+    details?: any;
     description?: string | null | undefined;
+    userId?: string | null | undefined;
     severity?: string | null | undefined;
+    sessionId?: string | null | undefined;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -402,12 +402,12 @@ export declare const AnomalyModel: mongoose.Model<{
     status: "blocked" | "resolved" | "detected" | "investigating" | "false_positive";
     tenantId: string;
     affectedEvents: string[];
-    details?: any;
     type?: string | null | undefined;
-    userId?: string | null | undefined;
-    sessionId?: string | null | undefined;
+    details?: any;
     description?: string | null | undefined;
+    userId?: string | null | undefined;
     severity?: string | null | undefined;
+    sessionId?: string | null | undefined;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -418,12 +418,12 @@ export declare const AnomalyModel: mongoose.Model<{
     status: "blocked" | "resolved" | "detected" | "investigating" | "false_positive";
     tenantId: string;
     affectedEvents: string[];
-    details?: any;
     type?: string | null | undefined;
-    userId?: string | null | undefined;
-    sessionId?: string | null | undefined;
+    details?: any;
     description?: string | null | undefined;
+    userId?: string | null | undefined;
     severity?: string | null | undefined;
+    sessionId?: string | null | undefined;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -436,12 +436,12 @@ export declare const AnomalyModel: mongoose.Model<{
     status: "blocked" | "resolved" | "detected" | "investigating" | "false_positive";
     tenantId: string;
     affectedEvents: string[];
-    details?: any;
     type?: string | null | undefined;
-    userId?: string | null | undefined;
-    sessionId?: string | null | undefined;
+    details?: any;
     description?: string | null | undefined;
+    userId?: string | null | undefined;
     severity?: string | null | undefined;
+    sessionId?: string | null | undefined;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;

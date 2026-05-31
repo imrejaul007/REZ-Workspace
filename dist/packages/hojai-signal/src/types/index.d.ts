@@ -47,9 +47,11 @@ export declare const EventSchema: z.ZodObject<{
     id: string;
     type: string;
     tenantId: string;
-    timestamp: string;
     category: string;
+    timestamp: string;
+    userId?: string | undefined;
     channel?: string | undefined;
+    metrics?: Record<string, number> | undefined;
     location?: {
         city?: string | undefined;
         country?: string | undefined;
@@ -57,18 +59,18 @@ export declare const EventSchema: z.ZodObject<{
         longitude?: number | undefined;
     } | undefined;
     source?: string | undefined;
-    userId?: string | undefined;
     sessionId?: string | undefined;
     properties?: Record<string, any> | undefined;
-    metrics?: Record<string, number> | undefined;
     deviceId?: string | undefined;
 }, {
     id: string;
     type: string;
     tenantId: string;
-    timestamp: string;
     category: string;
+    timestamp: string;
+    userId?: string | undefined;
     channel?: string | undefined;
+    metrics?: Record<string, number> | undefined;
     location?: {
         city?: string | undefined;
         country?: string | undefined;
@@ -76,10 +78,8 @@ export declare const EventSchema: z.ZodObject<{
         longitude?: number | undefined;
     } | undefined;
     source?: string | undefined;
-    userId?: string | undefined;
     sessionId?: string | undefined;
     properties?: Record<string, any> | undefined;
-    metrics?: Record<string, number> | undefined;
     deviceId?: string | undefined;
 }>;
 export type Event = z.infer<typeof EventSchema>;
@@ -119,14 +119,14 @@ export declare const IdentitySchema: z.ZodObject<{
         lastSeen: z.ZodDate;
         linkCount: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        method: "probabilistic" | "exact" | "fuzzy" | "inferred";
         confidence: number;
+        method: "exact" | "probabilistic" | "fuzzy" | "inferred";
         firstSeen: Date;
         lastSeen: Date;
         linkCount: number;
     }, {
-        method: "probabilistic" | "exact" | "fuzzy" | "inferred";
         confidence: number;
+        method: "exact" | "probabilistic" | "fuzzy" | "inferred";
         firstSeen: Date;
         lastSeen: Date;
         linkCount: number;
@@ -152,8 +152,10 @@ export declare const IdentitySchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    status: "active" | "merged" | "flagged" | "archived";
+    status: "active" | "archived" | "merged" | "flagged";
     tenantId: string;
+    createdAt: Date;
+    updatedAt: Date;
     identifiers: {
         email?: string[] | undefined;
         phone?: string[] | undefined;
@@ -161,12 +163,10 @@ export declare const IdentitySchema: z.ZodObject<{
         externalId?: Record<string, string[]> | undefined;
         deviceId?: string[] | undefined;
     };
-    createdAt: Date;
-    updatedAt: Date;
     primaryId: string;
     resolution: {
-        method: "probabilistic" | "exact" | "fuzzy" | "inferred";
         confidence: number;
+        method: "exact" | "probabilistic" | "fuzzy" | "inferred";
         firstSeen: Date;
         lastSeen: Date;
         linkCount: number;
@@ -179,8 +179,10 @@ export declare const IdentitySchema: z.ZodObject<{
     }[] | undefined;
 }, {
     id: string;
-    status: "active" | "merged" | "flagged" | "archived";
+    status: "active" | "archived" | "merged" | "flagged";
     tenantId: string;
+    createdAt: Date;
+    updatedAt: Date;
     identifiers: {
         email?: string[] | undefined;
         phone?: string[] | undefined;
@@ -188,12 +190,10 @@ export declare const IdentitySchema: z.ZodObject<{
         externalId?: Record<string, string[]> | undefined;
         deviceId?: string[] | undefined;
     };
-    createdAt: Date;
-    updatedAt: Date;
     primaryId: string;
     resolution: {
-        method: "probabilistic" | "exact" | "fuzzy" | "inferred";
         confidence: number;
+        method: "exact" | "probabilistic" | "fuzzy" | "inferred";
         firstSeen: Date;
         lastSeen: Date;
         linkCount: number;
@@ -231,15 +231,15 @@ export declare const DeduplicationConfigSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    active: boolean;
     id: string;
-    tenantId: string;
-    keys: ("type" | "userId" | "sessionId" | "properties" | "deviceId")[];
+    active: boolean;
     windowMs: number;
+    keys: ("type" | "userId" | "sessionId" | "properties" | "deviceId")[];
+    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
     eventTypes: string[];
-    strategy: "probabilistic" | "exact" | "fuzzy" | "sliding_window";
+    strategy: "exact" | "probabilistic" | "fuzzy" | "sliding_window";
     categories?: string[] | undefined;
     fuzzyConfig?: {
         enabled: boolean;
@@ -248,12 +248,12 @@ export declare const DeduplicationConfigSchema: z.ZodObject<{
     } | undefined;
 }, {
     id: string;
-    tenantId: string;
     keys: ("type" | "userId" | "sessionId" | "properties" | "deviceId")[];
+    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
     eventTypes: string[];
-    strategy: "probabilistic" | "exact" | "fuzzy" | "sliding_window";
+    strategy: "exact" | "probabilistic" | "fuzzy" | "sliding_window";
     active?: boolean | undefined;
     windowMs?: number | undefined;
     categories?: string[] | undefined;
@@ -283,14 +283,14 @@ export declare const AnomalySchema: z.ZodObject<{
     resolution: z.ZodOptional<z.ZodString>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    details: Record<string, any>;
     id: string;
-    type: "velocity_spike" | "impossible_sequence" | "duplicate_burst" | "schema_drift" | "data_poisoning" | "timing_anomaly" | "geographic_impossible" | "device_anomaly";
     status: "blocked" | "resolved" | "detected" | "investigating" | "false_positive";
-    tenantId: string;
+    type: "velocity_spike" | "impossible_sequence" | "duplicate_burst" | "schema_drift" | "data_poisoning" | "timing_anomaly" | "geographic_impossible" | "device_anomaly";
+    details: Record<string, any>;
     description: string;
+    tenantId: string;
     createdAt: Date;
-    severity: "info" | "critical" | "low" | "medium" | "high";
+    severity: "info" | "critical" | "low" | "high" | "medium";
     affectedEvents: string[];
     eventCount: number;
     userId?: string | undefined;
@@ -301,14 +301,14 @@ export declare const AnomalySchema: z.ZodObject<{
     actualValue?: any;
     deviation?: number | undefined;
 }, {
-    details: Record<string, any>;
     id: string;
-    type: "velocity_spike" | "impossible_sequence" | "duplicate_burst" | "schema_drift" | "data_poisoning" | "timing_anomaly" | "geographic_impossible" | "device_anomaly";
     status: "blocked" | "resolved" | "detected" | "investigating" | "false_positive";
-    tenantId: string;
+    type: "velocity_spike" | "impossible_sequence" | "duplicate_burst" | "schema_drift" | "data_poisoning" | "timing_anomaly" | "geographic_impossible" | "device_anomaly";
+    details: Record<string, any>;
     description: string;
+    tenantId: string;
     createdAt: Date;
-    severity: "info" | "critical" | "low" | "medium" | "high";
+    severity: "info" | "critical" | "low" | "high" | "medium";
     affectedEvents: string[];
     eventCount: number;
     userId?: string | undefined;
@@ -337,14 +337,14 @@ export declare const QualityMetricsSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         excellent: number;
         good: number;
-        fair: number;
         poor: number;
+        fair: number;
         invalid: number;
     }, {
         excellent: number;
         good: number;
-        fair: number;
         poor: number;
+        fair: number;
         invalid: number;
     }>;
     issues: z.ZodObject<{
@@ -357,16 +357,16 @@ export declare const QualityMetricsSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         identity: number;
         schema: number;
+        timing: number;
         duplicates: number;
         malformed: number;
-        timing: number;
         anomalies: number;
     }, {
         identity: number;
         schema: number;
+        timing: number;
         duplicates: number;
         malformed: number;
-        timing: number;
         anomalies: number;
     }>;
     avgProcessingMs: z.ZodNumber;
@@ -379,9 +379,9 @@ export declare const QualityMetricsSchema: z.ZodObject<{
     issues: {
         identity: number;
         schema: number;
+        timing: number;
         duplicates: number;
         malformed: number;
-        timing: number;
         anomalies: number;
     };
     createdAt: Date;
@@ -392,8 +392,8 @@ export declare const QualityMetricsSchema: z.ZodObject<{
     qualityDistribution: {
         excellent: number;
         good: number;
-        fair: number;
         poor: number;
+        fair: number;
         invalid: number;
     };
     avgProcessingMs: number;
@@ -405,9 +405,9 @@ export declare const QualityMetricsSchema: z.ZodObject<{
     issues: {
         identity: number;
         schema: number;
+        timing: number;
         duplicates: number;
         malformed: number;
-        timing: number;
         anomalies: number;
     };
     createdAt: Date;
@@ -418,8 +418,8 @@ export declare const QualityMetricsSchema: z.ZodObject<{
     qualityDistribution: {
         excellent: number;
         good: number;
-        fair: number;
         poor: number;
+        fair: number;
         invalid: number;
     };
     avgProcessingMs: number;

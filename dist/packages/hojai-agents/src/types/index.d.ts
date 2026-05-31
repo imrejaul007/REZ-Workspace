@@ -94,12 +94,6 @@ export declare const AgentSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    schedule: {
-        enabled: boolean;
-        runOnStartup: boolean;
-        cron?: string | undefined;
-        intervalMs?: number | undefined;
-    };
     id: string;
     version: string;
     stats: {
@@ -109,9 +103,17 @@ export declare const AgentSchema: z.ZodObject<{
         avgExecutionTime: number;
         lastRunAt?: Date | undefined;
     };
-    name: string;
-    type: AgentType;
     status: AgentStatus;
+    type: AgentType;
+    schedule: {
+        enabled: boolean;
+        runOnStartup: boolean;
+        cron?: string | undefined;
+        intervalMs?: number | undefined;
+    };
+    name: string;
+    description: string;
+    capabilities: AgentCapability[];
     config: {
         model: string;
         temperature: number;
@@ -121,18 +123,10 @@ export declare const AgentSchema: z.ZodObject<{
         tools?: string[] | undefined;
     };
     tenantId: string;
-    description: string;
-    capabilities: AgentCapability[];
-    permissions: string[];
     createdAt: Date;
     updatedAt: Date;
+    permissions: string[];
 }, {
-    schedule: {
-        enabled?: boolean | undefined;
-        cron?: string | undefined;
-        intervalMs?: number | undefined;
-        runOnStartup?: boolean | undefined;
-    };
     id: string;
     stats: {
         totalRuns?: number | undefined;
@@ -141,8 +135,16 @@ export declare const AgentSchema: z.ZodObject<{
         lastRunAt?: Date | undefined;
         avgExecutionTime?: number | undefined;
     };
-    name: string;
     type: AgentType;
+    schedule: {
+        enabled?: boolean | undefined;
+        cron?: string | undefined;
+        intervalMs?: number | undefined;
+        runOnStartup?: boolean | undefined;
+    };
+    name: string;
+    description: string;
+    capabilities: AgentCapability[];
     config: {
         model?: string | undefined;
         temperature?: number | undefined;
@@ -152,8 +154,6 @@ export declare const AgentSchema: z.ZodObject<{
         learningEnabled?: boolean | undefined;
     };
     tenantId: string;
-    description: string;
-    capabilities: AgentCapability[];
     createdAt: Date;
     updatedAt: Date;
     version?: string | undefined;
@@ -176,13 +176,13 @@ export declare const AgentRunSchema: z.ZodObject<{
         result: z.ZodAny;
         duration: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        action: string;
         duration: number;
+        action: string;
         step: string;
         result?: any;
     }, {
-        action: string;
         duration: number;
+        action: string;
         step: string;
         result?: any;
     }>, "many">>;
@@ -193,44 +193,44 @@ export declare const AgentRunSchema: z.ZodObject<{
     completedAt: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    status: "running" | "completed" | "failed" | "pending";
-    tenantId: string;
-    agentId: string;
-    trigger: "manual" | "event" | "api" | "scheduled";
+    status: "completed" | "running" | "pending" | "failed";
     input: Record<string, any>;
+    agentId: string;
+    tenantId: string;
     startedAt: Date;
+    trigger: "manual" | "event" | "scheduled" | "api";
     error?: string | undefined;
     duration?: number | undefined;
+    cost?: number | undefined;
+    completedAt?: Date | undefined;
     output?: Record<string, any> | undefined;
     steps?: {
-        action: string;
         duration: number;
+        action: string;
         step: string;
         result?: any;
     }[] | undefined;
     tokensUsed?: number | undefined;
-    cost?: number | undefined;
-    completedAt?: Date | undefined;
 }, {
     id: string;
-    status: "running" | "completed" | "failed" | "pending";
-    tenantId: string;
-    agentId: string;
-    trigger: "manual" | "event" | "api" | "scheduled";
+    status: "completed" | "running" | "pending" | "failed";
     input: Record<string, any>;
+    agentId: string;
+    tenantId: string;
     startedAt: Date;
+    trigger: "manual" | "event" | "scheduled" | "api";
     error?: string | undefined;
     duration?: number | undefined;
+    cost?: number | undefined;
+    completedAt?: Date | undefined;
     output?: Record<string, any> | undefined;
     steps?: {
-        action: string;
         duration: number;
+        action: string;
         step: string;
         result?: any;
     }[] | undefined;
     tokensUsed?: number | undefined;
-    cost?: number | undefined;
-    completedAt?: Date | undefined;
 }>;
 export type AgentRun = z.infer<typeof AgentRunSchema>;
 export declare const ToolSchema: z.ZodObject<{
@@ -250,31 +250,31 @@ export declare const ToolSchema: z.ZodObject<{
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    name: string;
     type: "function" | "workflow" | "api" | "external";
+    name: string;
+    description: string;
     tenantId: string;
     timeout: number;
-    description: string;
     createdAt: Date;
     inputSchema: Record<string, any>;
     outputSchema: Record<string, any>;
     retries: number;
-    code?: string | undefined;
     handler?: string | undefined;
+    code?: string | undefined;
     endpoint?: string | undefined;
     rateLimit?: number | undefined;
 }, {
     id: string;
-    name: string;
     type: "function" | "workflow" | "api" | "external";
-    tenantId: string;
+    name: string;
     description: string;
+    tenantId: string;
     createdAt: Date;
     inputSchema: Record<string, any>;
     outputSchema: Record<string, any>;
+    handler?: string | undefined;
     code?: string | undefined;
     timeout?: number | undefined;
-    handler?: string | undefined;
     endpoint?: string | undefined;
     retries?: number | undefined;
     rateLimit?: number | undefined;
@@ -291,20 +291,20 @@ export declare const KnowledgeBaseSchema: z.ZodObject<{
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    tenantId: string;
     agentId: string;
-    source: string;
-    createdAt: Date;
+    tenantId: string;
     content: string;
+    createdAt: Date;
+    source: string;
     metadata?: Record<string, any> | undefined;
     embedding?: number[] | undefined;
 }, {
     id: string;
-    tenantId: string;
     agentId: string;
-    source: string;
-    createdAt: Date;
+    tenantId: string;
     content: string;
+    createdAt: Date;
+    source: string;
     metadata?: Record<string, any> | undefined;
     embedding?: number[] | undefined;
 }>;
@@ -338,15 +338,15 @@ export declare const AgentInsightSchema: z.ZodObject<{
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    tenantId: string;
-    agentId: string;
-    runId: string;
-    title: string;
+    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
     description: string;
+    agentId: string;
+    tenantId: string;
+    runId: string;
     createdAt: Date;
-    severity: "info" | "critical" | "low" | "medium" | "high";
+    title: string;
+    severity: "info" | "critical" | "low" | "high" | "medium";
     insight: Record<string, any>;
     action?: {
         type: string;
@@ -357,15 +357,15 @@ export declare const AgentInsightSchema: z.ZodObject<{
     acknowledgedAt?: Date | undefined;
 }, {
     id: string;
-    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    tenantId: string;
-    agentId: string;
-    runId: string;
-    title: string;
+    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
     description: string;
+    agentId: string;
+    tenantId: string;
+    runId: string;
     createdAt: Date;
-    severity: "info" | "critical" | "low" | "medium" | "high";
+    title: string;
+    severity: "info" | "critical" | "low" | "high" | "medium";
     insight: Record<string, any>;
     action?: {
         type: string;

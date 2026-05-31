@@ -20,7 +20,7 @@
  * Phase 3: Add tenant filtering to subscriptions
  * Phase 4: Full multi-tenant isolation
  */
-import { HojaiEvent } from '../shared/types';
+import { HojaiEvent } from '../../shared/types';
 /**
  * Hojai Event Platform
  * Wraps REZ-event-bus with Hojai identity

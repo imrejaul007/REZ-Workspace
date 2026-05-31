@@ -102,11 +102,13 @@ export declare const TenantSchema: z.ZodObject<{
     activatedAt: z.ZodOptional<z.ZodDate>;
     suspendedAt: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
-    namespace: string;
     id: string;
-    name: string;
-    type: TenantType;
     status: TenantStatus;
+    type: TenantType;
+    namespace: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
     features: {
         hyperlocal: boolean;
         eventIngestion: boolean;
@@ -117,8 +119,6 @@ export declare const TenantSchema: z.ZodObject<{
         whatsappAI: boolean;
         privilegedGraph: boolean;
     };
-    createdAt: Date;
-    updatedAt: Date;
     tier: TenantTier;
     quotas: {
         agents: number;
@@ -139,11 +139,13 @@ export declare const TenantSchema: z.ZodObject<{
     activatedAt?: Date | undefined;
     suspendedAt?: Date | undefined;
 }, {
-    namespace: string;
     id: string;
-    name: string;
-    type: TenantType;
     status: TenantStatus;
+    type: TenantType;
+    namespace: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
     features: {
         hyperlocal?: boolean | undefined;
         eventIngestion?: boolean | undefined;
@@ -154,8 +156,6 @@ export declare const TenantSchema: z.ZodObject<{
         whatsappAI?: boolean | undefined;
         privilegedGraph?: boolean | undefined;
     };
-    createdAt: Date;
-    updatedAt: Date;
     tier: TenantTier;
     quotas: {
         agents?: number | undefined;
@@ -251,8 +251,8 @@ export declare const UserSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    name: string;
     status: UserStatus;
+    name: string;
     tenantId: string;
     email: string;
     createdAt: Date;
@@ -265,8 +265,8 @@ export declare const UserSchema: z.ZodObject<{
     mfaEnabled: boolean;
     failedLoginAttempts: number;
     phone?: string | undefined;
-    organizationId?: string | undefined;
     avatar?: string | undefined;
+    organizationId?: string | undefined;
     lastLoginAt?: Date | undefined;
     lastLoginIP?: string | undefined;
     lockedUntil?: Date | undefined;
@@ -280,9 +280,9 @@ export declare const UserSchema: z.ZodObject<{
     passwordHash: string;
     status?: UserStatus | undefined;
     phone?: string | undefined;
+    avatar?: string | undefined;
     timezone?: string | undefined;
     organizationId?: string | undefined;
-    avatar?: string | undefined;
     locale?: string | undefined;
     emailVerified?: boolean | undefined;
     phoneVerified?: boolean | undefined;
@@ -324,43 +324,43 @@ export declare const ApiKeySchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    name: string;
-    type: ApiKeyType;
     status: ApiKeyStatus;
+    type: ApiKeyType;
+    name: string;
     tenantId: string;
-    permissions: string[];
     createdAt: Date;
     updatedAt: Date;
-    keyPrefix: string;
+    permissions: string[];
     keyHash: string;
+    keyPrefix: string;
     rateLimitPerMinute: number;
     usedToday: number;
     userId?: string | undefined;
+    lastUsedAt?: Date | undefined;
+    expiresAt?: Date | undefined;
     allowedIPs?: string[] | undefined;
     allowedOrigins?: string[] | undefined;
     quotaPerDay?: number | undefined;
-    expiresAt?: Date | undefined;
-    lastUsedAt?: Date | undefined;
     lastUsedIP?: string | undefined;
 }, {
     id: string;
-    name: string;
     type: ApiKeyType;
+    name: string;
     tenantId: string;
     createdAt: Date;
     updatedAt: Date;
-    keyPrefix: string;
     keyHash: string;
+    keyPrefix: string;
     status?: ApiKeyStatus | undefined;
     userId?: string | undefined;
+    lastUsedAt?: Date | undefined;
     permissions?: string[] | undefined;
+    expiresAt?: Date | undefined;
     allowedIPs?: string[] | undefined;
     allowedOrigins?: string[] | undefined;
     rateLimitPerMinute?: number | undefined;
     quotaPerDay?: number | undefined;
     usedToday?: number | undefined;
-    expiresAt?: Date | undefined;
-    lastUsedAt?: Date | undefined;
     lastUsedIP?: string | undefined;
 }>;
 export declare enum Permission {
@@ -417,10 +417,10 @@ export declare const RolePermissionsSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     tenantId: string;
-    permissions: Permission[];
     createdAt: Date;
     updatedAt: Date;
     roleId: string;
+    permissions: Permission[];
     roleName: string;
     resourceRestrictions?: Record<string, any> | undefined;
     timeRestrictions?: {
@@ -429,10 +429,10 @@ export declare const RolePermissionsSchema: z.ZodObject<{
     } | undefined;
 }, {
     tenantId: string;
-    permissions: Permission[];
     createdAt: Date;
     updatedAt: Date;
     roleId: string;
+    permissions: Permission[];
     roleName: string;
     resourceRestrictions?: Record<string, any> | undefined;
     timeRestrictions?: {
@@ -461,11 +461,11 @@ export declare const PolicySchema: z.ZodObject<{
     id: string;
     name: string;
     tenantId: string;
-    enabled: boolean;
+    priority: number;
     createdAt: Date;
     updatedAt: Date;
+    enabled: boolean;
     actions: string[];
-    priority: number;
     effect: PolicyEffect;
     resources: string[];
     description?: string | undefined;
@@ -480,8 +480,8 @@ export declare const PolicySchema: z.ZodObject<{
     effect: PolicyEffect;
     resources: string[];
     description?: string | undefined;
-    enabled?: boolean | undefined;
     priority?: number | undefined;
+    enabled?: boolean | undefined;
     conditions?: Record<string, any> | undefined;
 }>;
 export declare enum AuditAction {
@@ -532,16 +532,16 @@ export declare const AuditLogSchema: z.ZodObject<{
     error: z.ZodOptional<z.ZodString>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    action: AuditAction;
     id: string;
     tenantId: string;
-    success: boolean;
+    action: AuditAction;
     createdAt: Date;
     resource: string;
-    details?: Record<string, any> | undefined;
+    success: boolean;
     error?: string | undefined;
-    resourceId?: string | undefined;
+    details?: Record<string, any> | undefined;
     userId?: string | undefined;
+    resourceId?: string | undefined;
     ip?: string | undefined;
     userAgent?: string | undefined;
     organizationId?: string | undefined;
@@ -549,18 +549,18 @@ export declare const AuditLogSchema: z.ZodObject<{
     apiKeyId?: string | undefined;
     requestId?: string | undefined;
 }, {
-    action: AuditAction;
     id: string;
     tenantId: string;
+    action: AuditAction;
     createdAt: Date;
     resource: string;
-    details?: Record<string, any> | undefined;
     error?: string | undefined;
-    resourceId?: string | undefined;
+    details?: Record<string, any> | undefined;
     userId?: string | undefined;
-    success?: boolean | undefined;
+    resourceId?: string | undefined;
     ip?: string | undefined;
     userAgent?: string | undefined;
+    success?: boolean | undefined;
     organizationId?: string | undefined;
     userEmail?: string | undefined;
     apiKeyId?: string | undefined;
@@ -587,26 +587,26 @@ export declare const UsageRecordSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     tenantId: string;
-    metric: string;
-    value: number;
-    createdAt: Date;
-    unit: string;
     period: {
         end: Date;
         start: Date;
     };
+    metric: string;
+    value: number;
+    createdAt: Date;
+    unit: string;
     metadata?: Record<string, any> | undefined;
 }, {
     id: string;
     tenantId: string;
-    metric: string;
-    value: number;
-    createdAt: Date;
-    unit: string;
     period: {
         end: Date;
         start: Date;
     };
+    metric: string;
+    value: number;
+    createdAt: Date;
+    unit: string;
     metadata?: Record<string, any> | undefined;
 }>;
 export type Tenant = z.infer<typeof TenantSchema>;

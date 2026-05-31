@@ -184,11 +184,11 @@ export declare const MerchantCreateSchema: z.ZodObject<{
     categories: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
+    type: "franchise" | "brand" | "retailer" | "wholesaler" | "distributor" | "manufacturer";
     name: string;
-    type: "franchise" | "retailer" | "wholesaler" | "distributor" | "brand" | "manufacturer";
     email: string;
-    phone: string;
     tags: string[];
+    phone: string;
     slug: string;
     business_category: "retail" | "healthcare" | "jewellery" | "education" | "other" | "restaurant" | "salon" | "fitness" | "ecommerce" | "hotel";
     categories: string[];
@@ -196,8 +196,8 @@ export declare const MerchantCreateSchema: z.ZodObject<{
     gstin?: string | undefined;
     pan?: string | undefined;
 }, {
+    type: "franchise" | "brand" | "retailer" | "wholesaler" | "distributor" | "manufacturer";
     name: string;
-    type: "franchise" | "retailer" | "wholesaler" | "distributor" | "brand" | "manufacturer";
     email: string;
     phone: string;
     slug: string;
@@ -257,14 +257,14 @@ export declare const MerchantUpdateSchema: z.ZodObject<{
     specialties: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     status: z.ZodOptional<z.ZodEnum<["active", "pending", "suspended", "blocked", "churned"]>>;
 }, "strip", z.ZodTypeAny, {
-    name?: string | undefined;
     status?: "active" | "pending" | "suspended" | "churned" | "blocked" | undefined;
+    name?: string | undefined;
+    description?: string | undefined;
     email?: string | undefined;
-    phone?: string | undefined;
     tags?: string[] | undefined;
+    phone?: string | undefined;
     logo_url?: string | undefined;
     website?: string | undefined;
-    description?: string | undefined;
     categories?: string[] | undefined;
     banner_url?: string | undefined;
     tagline?: string | undefined;
@@ -283,14 +283,14 @@ export declare const MerchantUpdateSchema: z.ZodObject<{
     }[] | undefined;
     specialties?: string[] | undefined;
 }, {
-    name?: string | undefined;
     status?: "active" | "pending" | "suspended" | "churned" | "blocked" | undefined;
+    name?: string | undefined;
+    description?: string | undefined;
     email?: string | undefined;
-    phone?: string | undefined;
     tags?: string[] | undefined;
+    phone?: string | undefined;
     logo_url?: string | undefined;
     website?: string | undefined;
-    description?: string | undefined;
     categories?: string[] | undefined;
     banner_url?: string | undefined;
     tagline?: string | undefined;
@@ -323,7 +323,7 @@ export declare const MerchantAddressSchema: z.ZodObject<{
     contact_phone: z.ZodOptional<z.ZodString>;
     contact_email: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "business" | "warehouse" | "billing" | "shipping";
+    type: "warehouse" | "business" | "billing" | "shipping";
     city: string;
     state: string;
     postal_code: string;
@@ -336,7 +336,7 @@ export declare const MerchantAddressSchema: z.ZodObject<{
     contact_phone?: string | undefined;
     contact_email?: string | undefined;
 }, {
-    type: "business" | "warehouse" | "billing" | "shipping";
+    type: "warehouse" | "business" | "billing" | "shipping";
     city: string;
     state: string;
     postal_code: string;

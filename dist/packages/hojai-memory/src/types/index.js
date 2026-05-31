@@ -144,7 +144,7 @@ export const TimelineEventSchema = z.object({
     entityType: z.string().optional(),
     entityId: z.string().optional(),
     // Impact
-    impact: z.enum(['positive', 'negative', 'neutral']).default('neutral'),
+    impact: z.enum(['positive', 'negative', 'neutral']).optional(),
     value: z.number().optional(), // Monetary value if applicable
     // Memory links
     memoryIds: z.array(z.string().uuid()).optional(),
@@ -272,9 +272,9 @@ export const VectorMemorySchema = z.object({
 // CONVERSATION TYPES
 // ============================================================================
 export const ConversationMessageSchema = z.object({
-    id: z.string().uuid(),
-    tenantId: z.string().uuid(),
-    conversationId: z.string().uuid(),
+    id: z.string().uuid().optional(),
+    tenantId: z.string().uuid().optional(),
+    conversationId: z.string().uuid().optional(),
     // Who
     role: z.enum(['user', 'assistant', 'system']),
     userId: z.string().optional(),
@@ -298,6 +298,10 @@ export const ConversationMessageSchema = z.object({
         helpful: z.boolean().optional(),
         corrections: z.string().optional()
     }).optional(),
-    createdAt: z.date()
+    createdAt: z.date().optional()
 });
+// ============================================================================
+// TYPE EXPORTS
+// ============================================================================
+// MemoryTier, MemoryWithTier, MemoryTierConfig, and MEMORY_TIER_CONFIG are already exported above
 //# sourceMappingURL=index.js.map

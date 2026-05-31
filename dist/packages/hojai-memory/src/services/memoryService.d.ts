@@ -1,4 +1,4 @@
-import { Memory, MemoryType, TimelineEvent, Context, Profile, ConversationMessage } from '../types/index.js';
+import { Memory, MemoryType, MemoryTier, TimelineEvent, Context, Profile, ConversationMessage } from '../types/index.js';
 import { ConversationDocument } from '../models/memoryModel.js';
 export declare class MemoryService {
     private redis;
@@ -7,7 +7,24 @@ export declare class MemoryService {
     /**
      * Store a new memory
      */
-    storeMemory(tenantId: string, params: Omit<Memory, 'id' | 'createdAt' | 'updatedAt' | 'accessCount'>): Promise<Memory>;
+    storeMemory(tenantId: string, params: {
+        userId: string;
+        entityType: 'user' | 'merchant' | 'product' | 'session';
+        entityId: string;
+        type: MemoryType;
+        content: string;
+        data?: Record<string, unknown>;
+        importance?: number;
+        confidence?: number;
+        source?: string;
+        context?: {
+            channel?: string;
+            location?: string;
+            time?: string;
+            tags?: string[];
+        };
+        validUntil?: Date | string;
+    }): Promise<Memory>;
     /**
      * Get memories for a user
      */
@@ -42,7 +59,7 @@ export declare class MemoryService {
     /**
      * Add event to timeline
      */
-    addToTimeline(tenantId: string, event: Omit<TimelineEvent, 'id' | 'createdAt'>): Promise<TimelineEvent>;
+    addToTimeline(tenantId: string, event: Omit<TimelineEvent, 'id' | 'createdAt' | 'tenantId'>): Promise<TimelineEvent>;
     /**
      * Get user timeline
      */
@@ -115,7 +132,22 @@ export declare class MemoryService {
     addMessage(params: {
         tenantId: string;
         conversationId: string;
-        message: Omit<ConversationMessage, 'id' | 'createdAt'>;
+        message: {
+            role: 'user' | 'assistant' | 'system';
+            content: string;
+            userId?: string;
+            attachments?: Array<{
+                type: 'image' | 'document' | 'link';
+                url: string;
+                metadata?: Record<string, unknown>;
+            }>;
+            aiMetadata?: {
+                model?: string;
+                tokens?: number;
+                confidence?: number;
+                intent?: string;
+            };
+        };
     }): Promise<ConversationMessage>;
     private cacheMemory;
     getCachedMemory(tenantId: string, memoryId: string): Promise<Memory | null>;

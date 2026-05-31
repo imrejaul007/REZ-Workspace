@@ -9,18 +9,18 @@ export declare const MessageModel: mongoose.Model<{
     from: string;
     to: string;
     error?: string | null | undefined;
-    segments?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    cost?: number | null | undefined;
     subject?: string | null | undefined;
     templateId?: string | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
+    cost?: number | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    segments?: number | null | undefined;
+    externalId?: string | null | undefined;
+    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
     status: MessageStatus;
@@ -31,18 +31,18 @@ export declare const MessageModel: mongoose.Model<{
     from: string;
     to: string;
     error?: string | null | undefined;
-    segments?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    cost?: number | null | undefined;
     subject?: string | null | undefined;
     templateId?: string | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
+    cost?: number | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    segments?: number | null | undefined;
+    externalId?: string | null | undefined;
+    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
@@ -55,18 +55,18 @@ export declare const MessageModel: mongoose.Model<{
     from: string;
     to: string;
     error?: string | null | undefined;
-    segments?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    cost?: number | null | undefined;
     subject?: string | null | undefined;
     templateId?: string | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
+    cost?: number | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    segments?: number | null | undefined;
+    externalId?: string | null | undefined;
+    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -83,18 +83,18 @@ export declare const MessageModel: mongoose.Model<{
     from: string;
     to: string;
     error?: string | null | undefined;
-    segments?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    cost?: number | null | undefined;
     subject?: string | null | undefined;
     templateId?: string | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
+    cost?: number | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    segments?: number | null | undefined;
+    externalId?: string | null | undefined;
+    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     status: MessageStatus;
@@ -105,18 +105,18 @@ export declare const MessageModel: mongoose.Model<{
     from: string;
     to: string;
     error?: string | null | undefined;
-    segments?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    cost?: number | null | undefined;
     subject?: string | null | undefined;
     templateId?: string | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
+    cost?: number | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    segments?: number | null | undefined;
+    externalId?: string | null | undefined;
+    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
@@ -129,18 +129,18 @@ export declare const MessageModel: mongoose.Model<{
     from: string;
     to: string;
     error?: string | null | undefined;
-    segments?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    cost?: number | null | undefined;
     subject?: string | null | undefined;
     templateId?: string | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
+    cost?: number | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    segments?: number | null | undefined;
+    externalId?: string | null | undefined;
+    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
@@ -148,14 +148,14 @@ export declare const MessageModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const TemplateModel: mongoose.Model<{
-    name: string;
     status: "active" | "draft" | "archived";
+    name: string;
     tenantId: string;
     channel: Channel;
     variables: string[];
     stats?: {
-        sent: number;
         delivered: number;
+        sent: number;
         read: number;
         bounced: number;
     } | null | undefined;
@@ -178,14 +178,14 @@ export declare const TemplateModel: mongoose.Model<{
         imageUrl?: string | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    name: string;
     status: "active" | "draft" | "archived";
+    name: string;
     tenantId: string;
     channel: Channel;
     variables: string[];
     stats?: {
-        sent: number;
         delivered: number;
+        sent: number;
         read: number;
         bounced: number;
     } | null | undefined;
@@ -210,14 +210,14 @@ export declare const TemplateModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    name: string;
     status: "active" | "draft" | "archived";
+    name: string;
     tenantId: string;
     channel: Channel;
     variables: string[];
     stats?: {
-        sent: number;
         delivered: number;
+        sent: number;
         read: number;
         bounced: number;
     } | null | undefined;
@@ -246,14 +246,14 @@ export declare const TemplateModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    name: string;
     status: "active" | "draft" | "archived";
+    name: string;
     tenantId: string;
     channel: Channel;
     variables: string[];
     stats?: {
-        sent: number;
         delivered: number;
+        sent: number;
         read: number;
         bounced: number;
     } | null | undefined;
@@ -276,14 +276,14 @@ export declare const TemplateModel: mongoose.Model<{
         imageUrl?: string | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    name: string;
     status: "active" | "draft" | "archived";
+    name: string;
     tenantId: string;
     channel: Channel;
     variables: string[];
     stats?: {
-        sent: number;
         delivered: number;
+        sent: number;
         read: number;
         bounced: number;
     } | null | undefined;
@@ -308,14 +308,14 @@ export declare const TemplateModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    name: string;
     status: "active" | "draft" | "archived";
+    name: string;
     tenantId: string;
     channel: Channel;
     variables: string[];
     stats?: {
-        sent: number;
         delivered: number;
+        sent: number;
         read: number;
         bounced: number;
     } | null | undefined;
@@ -343,11 +343,20 @@ export declare const TemplateModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const CampaignModel: mongoose.Model<{
+    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    status: "paused" | "draft" | "running" | "completed" | "failed" | "scheduled";
     tenantId: string;
     channel: Channel;
     templateId: string;
+    stats?: {
+        failed: number;
+        delivered: number;
+        sent: number;
+        read: number;
+        clicked: number;
+        total: number;
+        bounced: number;
+    } | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -356,15 +365,6 @@ export declare const CampaignModel: mongoose.Model<{
             time?: string | null | undefined;
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
-    } | null | undefined;
-    stats?: {
-        failed: number;
-        sent: number;
-        delivered: number;
-        read: number;
-        bounced: number;
-        total: number;
-        clicked: number;
     } | null | undefined;
     description?: string | null | undefined;
     audience?: {
@@ -380,11 +380,20 @@ export declare const CampaignModel: mongoose.Model<{
         cap?: number | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
+    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    status: "paused" | "draft" | "running" | "completed" | "failed" | "scheduled";
     tenantId: string;
     channel: Channel;
     templateId: string;
+    stats?: {
+        failed: number;
+        delivered: number;
+        sent: number;
+        read: number;
+        clicked: number;
+        total: number;
+        bounced: number;
+    } | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -393,15 +402,6 @@ export declare const CampaignModel: mongoose.Model<{
             time?: string | null | undefined;
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
-    } | null | undefined;
-    stats?: {
-        failed: number;
-        sent: number;
-        delivered: number;
-        read: number;
-        bounced: number;
-        total: number;
-        clicked: number;
     } | null | undefined;
     description?: string | null | undefined;
     audience?: {
@@ -419,11 +419,20 @@ export declare const CampaignModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
+    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    status: "paused" | "draft" | "running" | "completed" | "failed" | "scheduled";
     tenantId: string;
     channel: Channel;
     templateId: string;
+    stats?: {
+        failed: number;
+        delivered: number;
+        sent: number;
+        read: number;
+        clicked: number;
+        total: number;
+        bounced: number;
+    } | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -432,15 +441,6 @@ export declare const CampaignModel: mongoose.Model<{
             time?: string | null | undefined;
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
-    } | null | undefined;
-    stats?: {
-        failed: number;
-        sent: number;
-        delivered: number;
-        read: number;
-        bounced: number;
-        total: number;
-        clicked: number;
     } | null | undefined;
     description?: string | null | undefined;
     audience?: {
@@ -462,11 +462,20 @@ export declare const CampaignModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
+    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    status: "paused" | "draft" | "running" | "completed" | "failed" | "scheduled";
     tenantId: string;
     channel: Channel;
     templateId: string;
+    stats?: {
+        failed: number;
+        delivered: number;
+        sent: number;
+        read: number;
+        clicked: number;
+        total: number;
+        bounced: number;
+    } | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -475,15 +484,6 @@ export declare const CampaignModel: mongoose.Model<{
             time?: string | null | undefined;
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
-    } | null | undefined;
-    stats?: {
-        failed: number;
-        sent: number;
-        delivered: number;
-        read: number;
-        bounced: number;
-        total: number;
-        clicked: number;
     } | null | undefined;
     description?: string | null | undefined;
     audience?: {
@@ -499,11 +499,20 @@ export declare const CampaignModel: mongoose.Model<{
         cap?: number | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
+    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    status: "paused" | "draft" | "running" | "completed" | "failed" | "scheduled";
     tenantId: string;
     channel: Channel;
     templateId: string;
+    stats?: {
+        failed: number;
+        delivered: number;
+        sent: number;
+        read: number;
+        clicked: number;
+        total: number;
+        bounced: number;
+    } | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -512,15 +521,6 @@ export declare const CampaignModel: mongoose.Model<{
             time?: string | null | undefined;
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
-    } | null | undefined;
-    stats?: {
-        failed: number;
-        sent: number;
-        delivered: number;
-        read: number;
-        bounced: number;
-        total: number;
-        clicked: number;
     } | null | undefined;
     description?: string | null | undefined;
     audience?: {
@@ -538,11 +538,20 @@ export declare const CampaignModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
+    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    status: "paused" | "draft" | "running" | "completed" | "failed" | "scheduled";
     tenantId: string;
     channel: Channel;
     templateId: string;
+    stats?: {
+        failed: number;
+        delivered: number;
+        sent: number;
+        read: number;
+        clicked: number;
+        total: number;
+        bounced: number;
+    } | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -551,15 +560,6 @@ export declare const CampaignModel: mongoose.Model<{
             time?: string | null | undefined;
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
-    } | null | undefined;
-    stats?: {
-        failed: number;
-        sent: number;
-        delivered: number;
-        read: number;
-        bounced: number;
-        total: number;
-        clicked: number;
     } | null | undefined;
     description?: string | null | undefined;
     audience?: {

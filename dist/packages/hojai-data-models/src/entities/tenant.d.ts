@@ -176,26 +176,26 @@ export declare const TenantCreateSchema: z.ZodObject<{
     }>;
     plan: z.ZodDefault<z.ZodEnum<["starter", "professional", "enterprise"]>>;
 }, "strip", z.ZodTypeAny, {
-    industry: "retail" | "healthcare" | "hospitality" | "jewellery" | "education" | "finance" | "real_estate" | "other" | "restaurant" | "salon" | "fitness" | "automotive" | "travel" | "ecommerce";
-    name: string;
     type: "enterprise" | "merchant" | "rez" | "rabtul";
-    contact: {
-        email: string;
-        phone?: string | undefined;
-        website?: string | undefined;
-    };
-    slug: string;
+    name: string;
     plan: "starter" | "professional" | "enterprise";
-}, {
-    industry: "retail" | "healthcare" | "hospitality" | "jewellery" | "education" | "finance" | "real_estate" | "other" | "restaurant" | "salon" | "fitness" | "automotive" | "travel" | "ecommerce";
-    name: string;
-    type: "enterprise" | "merchant" | "rez" | "rabtul";
     contact: {
         email: string;
         phone?: string | undefined;
         website?: string | undefined;
     };
     slug: string;
+    industry: "retail" | "healthcare" | "hospitality" | "jewellery" | "education" | "finance" | "real_estate" | "other" | "restaurant" | "salon" | "fitness" | "automotive" | "travel" | "ecommerce";
+}, {
+    type: "enterprise" | "merchant" | "rez" | "rabtul";
+    name: string;
+    contact: {
+        email: string;
+        phone?: string | undefined;
+        website?: string | undefined;
+    };
+    slug: string;
+    industry: "retail" | "healthcare" | "hospitality" | "jewellery" | "education" | "finance" | "real_estate" | "other" | "restaurant" | "salon" | "fitness" | "automotive" | "travel" | "ecommerce";
     plan?: "starter" | "professional" | "enterprise" | undefined;
 }>;
 /**

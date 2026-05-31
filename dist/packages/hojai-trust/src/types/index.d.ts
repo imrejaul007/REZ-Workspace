@@ -38,24 +38,24 @@ export declare const TrustScoreSchema: z.ZodObject<{
         tenure: z.ZodDefault<z.ZodNumber>;
         volumeScore: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
+        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
-        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
     }, {
+        deliveryRate?: number | undefined;
         tenure?: number | undefined;
         positiveReviews?: number | undefined;
         negativeReviews?: number | undefined;
         totalTransactions?: number | undefined;
         avgRating?: number | undefined;
         responseRate?: number | undefined;
-        deliveryRate?: number | undefined;
         disputeRate?: number | undefined;
         verifiedBadges?: string[] | undefined;
         volumeScore?: number | undefined;
@@ -81,20 +81,20 @@ export declare const TrustScoreSchema: z.ZodObject<{
     entityType: EntityType;
     entityId: string;
     factors: {
+        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
-        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
     };
-    overallScore: number;
-    reliabilityScore: number;
     qualityScore: number;
+    reliabilityScore: number;
+    overallScore: number;
     responsivenessScore: number;
     deliveryScore: number;
     trustLevel: TrustLevel;
@@ -111,20 +111,20 @@ export declare const TrustScoreSchema: z.ZodObject<{
     entityType: EntityType;
     entityId: string;
     factors: {
+        deliveryRate?: number | undefined;
         tenure?: number | undefined;
         positiveReviews?: number | undefined;
         negativeReviews?: number | undefined;
         totalTransactions?: number | undefined;
         avgRating?: number | undefined;
         responseRate?: number | undefined;
-        deliveryRate?: number | undefined;
         disputeRate?: number | undefined;
         verifiedBadges?: string[] | undefined;
         volumeScore?: number | undefined;
     };
-    overallScore: number;
-    reliabilityScore: number;
     qualityScore: number;
+    reliabilityScore: number;
+    overallScore: number;
     responsivenessScore: number;
     deliveryScore: number;
     trustLevel: TrustLevel;
@@ -152,33 +152,33 @@ export declare const VerificationSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    type: "identity" | "business" | "email" | "phone" | "document" | "address" | "social" | "bank_account" | "kyc";
-    status: "pending" | "expired" | "verified" | "rejected";
+    status: "pending" | "rejected" | "expired" | "verified";
+    type: "email" | "identity" | "document" | "phone" | "address" | "business" | "social" | "bank_account" | "kyc";
     tenantId: string;
-    level: "standard" | "basic" | "premium" | "enhanced";
     createdAt: Date;
     updatedAt: Date;
+    level: "standard" | "basic" | "premium" | "enhanced";
     entityType: EntityType;
     entityId: string;
     metadata?: Record<string, any> | undefined;
-    externalId?: string | undefined;
-    expiresAt?: Date | undefined;
     provider?: string | undefined;
+    expiresAt?: Date | undefined;
+    externalId?: string | undefined;
     verifiedAt?: Date | undefined;
 }, {
     id: string;
-    type: "identity" | "business" | "email" | "phone" | "document" | "address" | "social" | "bank_account" | "kyc";
-    status: "pending" | "expired" | "verified" | "rejected";
+    status: "pending" | "rejected" | "expired" | "verified";
+    type: "email" | "identity" | "document" | "phone" | "address" | "business" | "social" | "bank_account" | "kyc";
     tenantId: string;
-    level: "standard" | "basic" | "premium" | "enhanced";
     createdAt: Date;
     updatedAt: Date;
+    level: "standard" | "basic" | "premium" | "enhanced";
     entityType: EntityType;
     entityId: string;
     metadata?: Record<string, any> | undefined;
-    externalId?: string | undefined;
-    expiresAt?: Date | undefined;
     provider?: string | undefined;
+    expiresAt?: Date | undefined;
+    externalId?: string | undefined;
     verifiedAt?: Date | undefined;
 }>;
 export type Verification = z.infer<typeof VerificationSchema>;
@@ -217,9 +217,9 @@ export declare const ReviewSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    status: "flagged" | "hidden" | "published" | "disputed";
-    tenantId: string;
+    status: "hidden" | "flagged" | "published" | "disputed";
     helpful: number;
+    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
     entityType: EntityType;
@@ -235,14 +235,14 @@ export declare const ReviewSchema: z.ZodObject<{
         respondedAt: Date;
         respondedBy: string;
     } | undefined;
-    title?: string | undefined;
     content?: string | undefined;
+    title?: string | undefined;
     categories?: Record<string, number> | undefined;
     orderId?: string | undefined;
     transactionValue?: number | undefined;
 }, {
     id: string;
-    status: "flagged" | "hidden" | "published" | "disputed";
+    status: "hidden" | "flagged" | "published" | "disputed";
     tenantId: string;
     createdAt: Date;
     updatedAt: Date;
@@ -256,9 +256,9 @@ export declare const ReviewSchema: z.ZodObject<{
         respondedAt: Date;
         respondedBy: string;
     } | undefined;
-    title?: string | undefined;
     helpful?: number | undefined;
     content?: string | undefined;
+    title?: string | undefined;
     categories?: Record<string, number> | undefined;
     orderId?: string | undefined;
     isVerified?: boolean | undefined;
@@ -287,13 +287,13 @@ export declare const TrustEdgeSchema: z.ZodObject<{
     tenantId: string;
     createdAt: Date;
     updatedAt: Date;
-    relationship: "blocked" | "flagged" | "customer_of" | "partner_with" | "employee_of" | "supplier_of" | "member_of" | "endorsed_by" | "referred";
+    relationship: "blocked" | "flagged" | "referred" | "member_of" | "customer_of" | "partner_with" | "employee_of" | "supplier_of" | "endorsed_by";
     sourceType: EntityType;
+    sourceId: string;
+    targetId: string;
+    targetType: EntityType;
     strength: number;
     isVerified: boolean;
-    sourceId: string;
-    targetType: EntityType;
-    targetId: string;
     interactionCount: number;
     verifiedAt?: Date | undefined;
     lastInteraction?: Date | undefined;
@@ -302,12 +302,12 @@ export declare const TrustEdgeSchema: z.ZodObject<{
     tenantId: string;
     createdAt: Date;
     updatedAt: Date;
-    relationship: "blocked" | "flagged" | "customer_of" | "partner_with" | "employee_of" | "supplier_of" | "member_of" | "endorsed_by" | "referred";
+    relationship: "blocked" | "flagged" | "referred" | "member_of" | "customer_of" | "partner_with" | "employee_of" | "supplier_of" | "endorsed_by";
     sourceType: EntityType;
-    strength: number;
     sourceId: string;
-    targetType: EntityType;
     targetId: string;
+    targetType: EntityType;
+    strength: number;
     verifiedAt?: Date | undefined;
     isVerified?: boolean | undefined;
     lastInteraction?: Date | undefined;
@@ -344,11 +344,11 @@ export declare const BadgeSchema: z.ZodObject<{
     active: z.ZodDefault<z.ZodBoolean>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    active: boolean;
     id: string;
+    active: boolean;
     name: string;
-    tenantId: string;
     description: string;
+    tenantId: string;
     createdAt: Date;
     criteria: {
         minTransactions?: number | undefined;
@@ -363,8 +363,8 @@ export declare const BadgeSchema: z.ZodObject<{
 }, {
     id: string;
     name: string;
-    tenantId: string;
     description: string;
+    tenantId: string;
     createdAt: Date;
     criteria: {
         minTransactions?: number | undefined;

@@ -127,12 +127,12 @@ export declare const KnowledgeNodeCreateSchema: z.ZodObject<{
     effective_from: z.ZodOptional<z.ZodString>;
     expires_at: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "sop" | "rule" | "policy" | "fact" | "concept" | "entity" | "faq";
-    tags: string[];
+    type: "sop" | "fact" | "rule" | "policy" | "faq" | "concept" | "entity";
     category: string;
-    title: string;
     content: string;
+    tags: string[];
     format: "text" | "faq" | "markdown" | "html" | "structured";
+    title: string;
     source_type: "manual" | "api" | "imported" | "ai_generated" | "extracted";
     is_published: boolean;
     expires_at?: string | undefined;
@@ -141,14 +141,14 @@ export declare const KnowledgeNodeCreateSchema: z.ZodObject<{
     source_url?: string | undefined;
     effective_from?: string | undefined;
 }, {
-    type: "sop" | "rule" | "policy" | "fact" | "concept" | "entity" | "faq";
+    type: "sop" | "fact" | "rule" | "policy" | "faq" | "concept" | "entity";
     category: string;
-    title: string;
     content: string;
+    title: string;
     tags?: string[] | undefined;
+    format?: "text" | "faq" | "markdown" | "html" | "structured" | undefined;
     expires_at?: string | undefined;
     subcategory?: string | undefined;
-    format?: "text" | "faq" | "markdown" | "html" | "structured" | undefined;
     source_type?: "manual" | "api" | "imported" | "ai_generated" | "extracted" | undefined;
     source_id?: string | undefined;
     source_url?: string | undefined;
@@ -166,19 +166,19 @@ export declare const KnowledgeNodeUpdateSchema: z.ZodObject<{
     quality_score: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     status?: "active" | "draft" | "archived" | "pending_review" | undefined;
-    tags?: string[] | undefined;
     category?: string | undefined;
-    title?: string | undefined;
     content?: string | undefined;
+    tags?: string[] | undefined;
+    title?: string | undefined;
     subcategory?: string | undefined;
     is_published?: boolean | undefined;
     quality_score?: number | undefined;
 }, {
     status?: "active" | "draft" | "archived" | "pending_review" | undefined;
-    tags?: string[] | undefined;
     category?: string | undefined;
-    title?: string | undefined;
     content?: string | undefined;
+    tags?: string[] | undefined;
+    title?: string | undefined;
     subcategory?: string | undefined;
     is_published?: boolean | undefined;
     quality_score?: number | undefined;
@@ -205,8 +205,8 @@ export declare const KnowledgeEdgeCreateSchema: z.ZodObject<{
     relationship: "is_a" | "part_of" | "related_to" | "causes" | "enables" | "conflicts_with" | "depends_on" | "synonym_of" | "antonym_of" | "example_of" | "owned_by" | "located_in";
     context?: string | undefined;
     confidence?: number | undefined;
-    bidirectional?: boolean | undefined;
     weight?: number | undefined;
+    bidirectional?: boolean | undefined;
 }>;
 export declare const KnowledgeCollectionCreateSchema: z.ZodObject<{
     name: z.ZodString;

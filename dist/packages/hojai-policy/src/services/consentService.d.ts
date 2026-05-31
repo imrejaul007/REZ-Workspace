@@ -2,11 +2,11 @@ import mongoose from 'mongoose';
 import { Consent, ConsentType, ConsentStatus, ConsentSource, DataRightType, DataRightStatus, DataRightRequest, RetentionPolicy, DataCategory, ComplianceAudit } from '../types/index.js';
 export declare const ConsentModel: mongoose.Model<{
     version: string;
-    type: ConsentType;
     status: ConsentStatus;
+    type: ConsentType;
     tenantId: string;
-    source: ConsentSource;
     userId: string;
+    source: ConsentSource;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -14,7 +14,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "tenant" | "service" | "global" | "specific";
+        scope: "service" | "global" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -26,11 +26,11 @@ export declare const ConsentModel: mongoose.Model<{
     withdrawnAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
     version: string;
-    type: ConsentType;
     status: ConsentStatus;
+    type: ConsentType;
     tenantId: string;
-    source: ConsentSource;
     userId: string;
+    source: ConsentSource;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -38,7 +38,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "tenant" | "service" | "global" | "specific";
+        scope: "service" | "global" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -52,11 +52,11 @@ export declare const ConsentModel: mongoose.Model<{
     timestamps: true;
 }> & {
     version: string;
-    type: ConsentType;
     status: ConsentStatus;
+    type: ConsentType;
     tenantId: string;
-    source: ConsentSource;
     userId: string;
+    source: ConsentSource;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -64,7 +64,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "tenant" | "service" | "global" | "specific";
+        scope: "service" | "global" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -82,11 +82,11 @@ export declare const ConsentModel: mongoose.Model<{
     timestamps: true;
 }, {
     version: string;
-    type: ConsentType;
     status: ConsentStatus;
+    type: ConsentType;
     tenantId: string;
-    source: ConsentSource;
     userId: string;
+    source: ConsentSource;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -94,7 +94,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "tenant" | "service" | "global" | "specific";
+        scope: "service" | "global" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -106,11 +106,11 @@ export declare const ConsentModel: mongoose.Model<{
     withdrawnAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     version: string;
-    type: ConsentType;
     status: ConsentStatus;
+    type: ConsentType;
     tenantId: string;
-    source: ConsentSource;
     userId: string;
+    source: ConsentSource;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -118,7 +118,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "tenant" | "service" | "global" | "specific";
+        scope: "service" | "global" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -132,11 +132,11 @@ export declare const ConsentModel: mongoose.Model<{
     timestamps: true;
 }>> & mongoose.FlatRecord<{
     version: string;
-    type: ConsentType;
     status: ConsentStatus;
+    type: ConsentType;
     tenantId: string;
-    source: ConsentSource;
     userId: string;
+    source: ConsentSource;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -144,7 +144,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "tenant" | "service" | "global" | "specific";
+        scope: "service" | "global" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -160,36 +160,36 @@ export declare const ConsentModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const DataRightModel: mongoose.Model<{
-    type: DataRightType;
     status: DataRightStatus;
+    type: DataRightType;
     tenantId: string;
     userId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
-    reason?: string | null | undefined;
     description?: string | null | undefined;
+    reason?: string | null | undefined;
+    dueDate?: NativeDate | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
-    dueDate?: NativeDate | null | undefined;
     responseData?: Map<string, any> | null | undefined;
     responseAt?: NativeDate | null | undefined;
     responseBy?: string | null | undefined;
     fulfilledAt?: NativeDate | null | undefined;
     fulfillmentMethod?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    type: DataRightType;
     status: DataRightStatus;
+    type: DataRightType;
     tenantId: string;
     userId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
-    reason?: string | null | undefined;
     description?: string | null | undefined;
+    reason?: string | null | undefined;
+    dueDate?: NativeDate | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
-    dueDate?: NativeDate | null | undefined;
     responseData?: Map<string, any> | null | undefined;
     responseAt?: NativeDate | null | undefined;
     responseBy?: string | null | undefined;
@@ -198,18 +198,18 @@ export declare const DataRightModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    type: DataRightType;
     status: DataRightStatus;
+    type: DataRightType;
     tenantId: string;
     userId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
-    reason?: string | null | undefined;
     description?: string | null | undefined;
+    reason?: string | null | undefined;
+    dueDate?: NativeDate | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
-    dueDate?: NativeDate | null | undefined;
     responseData?: Map<string, any> | null | undefined;
     responseAt?: NativeDate | null | undefined;
     responseBy?: string | null | undefined;
@@ -222,36 +222,36 @@ export declare const DataRightModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    type: DataRightType;
     status: DataRightStatus;
+    type: DataRightType;
     tenantId: string;
     userId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
-    reason?: string | null | undefined;
     description?: string | null | undefined;
+    reason?: string | null | undefined;
+    dueDate?: NativeDate | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
-    dueDate?: NativeDate | null | undefined;
     responseData?: Map<string, any> | null | undefined;
     responseAt?: NativeDate | null | undefined;
     responseBy?: string | null | undefined;
     fulfilledAt?: NativeDate | null | undefined;
     fulfillmentMethod?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    type: DataRightType;
     status: DataRightStatus;
+    type: DataRightType;
     tenantId: string;
     userId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
-    reason?: string | null | undefined;
     description?: string | null | undefined;
+    reason?: string | null | undefined;
+    dueDate?: NativeDate | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
-    dueDate?: NativeDate | null | undefined;
     responseData?: Map<string, any> | null | undefined;
     responseAt?: NativeDate | null | undefined;
     responseBy?: string | null | undefined;
@@ -260,18 +260,18 @@ export declare const DataRightModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    type: DataRightType;
     status: DataRightStatus;
+    type: DataRightType;
     tenantId: string;
     userId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
-    reason?: string | null | undefined;
     description?: string | null | undefined;
+    reason?: string | null | undefined;
+    dueDate?: NativeDate | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
-    dueDate?: NativeDate | null | undefined;
     responseData?: Map<string, any> | null | undefined;
     responseAt?: NativeDate | null | undefined;
     responseBy?: string | null | undefined;
@@ -374,7 +374,7 @@ export declare const DataCategoryModel: mongoose.Model<{
     category: DataCategory;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -386,7 +386,7 @@ export declare const DataCategoryModel: mongoose.Model<{
     category: DataCategory;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -400,7 +400,7 @@ export declare const DataCategoryModel: mongoose.Model<{
     category: DataCategory;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -418,7 +418,7 @@ export declare const DataCategoryModel: mongoose.Model<{
     category: DataCategory;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -430,7 +430,7 @@ export declare const DataCategoryModel: mongoose.Model<{
     category: DataCategory;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -444,7 +444,7 @@ export declare const DataCategoryModel: mongoose.Model<{
     category: DataCategory;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -463,8 +463,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     priority: number;
     canOverride: boolean;
     overrideRoles: string[];
-    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     description?: string | null | undefined;
+    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
         consentStatus: string[];
         dataCategory: string[];
@@ -483,8 +483,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     priority: number;
     canOverride: boolean;
     overrideRoles: string[];
-    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     description?: string | null | undefined;
+    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
         consentStatus: string[];
         dataCategory: string[];
@@ -505,8 +505,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     priority: number;
     canOverride: boolean;
     overrideRoles: string[];
-    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     description?: string | null | undefined;
+    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
         consentStatus: string[];
         dataCategory: string[];
@@ -531,8 +531,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     priority: number;
     canOverride: boolean;
     overrideRoles: string[];
-    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     description?: string | null | undefined;
+    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
         consentStatus: string[];
         dataCategory: string[];
@@ -551,8 +551,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     priority: number;
     canOverride: boolean;
     overrideRoles: string[];
-    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     description?: string | null | undefined;
+    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
         consentStatus: string[];
         dataCategory: string[];
@@ -573,8 +573,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     priority: number;
     canOverride: boolean;
     overrideRoles: string[];
-    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     description?: string | null | undefined;
+    action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
         consentStatus: string[];
         dataCategory: string[];
@@ -593,50 +593,50 @@ export declare const PolicyRuleModel: mongoose.Model<{
 }>>;
 export declare const ComplianceAuditModel: mongoose.Model<{
     event: string;
-    action: string;
     tenantId: string;
     category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    action: string;
     dataCategories: string[];
     userId?: string | null | undefined;
     result?: "partial" | "success" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
-    processedBy?: string | null | undefined;
     requestId?: string | null | undefined;
     legalBasis?: string | null | undefined;
     gdprArticle?: string | null | undefined;
+    processedBy?: string | null | undefined;
     processingPurpose?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
     event: string;
-    action: string;
     tenantId: string;
     category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    action: string;
     dataCategories: string[];
     userId?: string | null | undefined;
     result?: "partial" | "success" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
-    processedBy?: string | null | undefined;
     requestId?: string | null | undefined;
     legalBasis?: string | null | undefined;
     gdprArticle?: string | null | undefined;
+    processedBy?: string | null | undefined;
     processingPurpose?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
     event: string;
-    action: string;
     tenantId: string;
     category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    action: string;
     dataCategories: string[];
     userId?: string | null | undefined;
     result?: "partial" | "success" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
-    processedBy?: string | null | undefined;
     requestId?: string | null | undefined;
     legalBasis?: string | null | undefined;
     gdprArticle?: string | null | undefined;
+    processedBy?: string | null | undefined;
     processingPurpose?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -646,50 +646,50 @@ export declare const ComplianceAuditModel: mongoose.Model<{
     timestamps: true;
 }, {
     event: string;
-    action: string;
     tenantId: string;
     category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    action: string;
     dataCategories: string[];
     userId?: string | null | undefined;
     result?: "partial" | "success" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
-    processedBy?: string | null | undefined;
     requestId?: string | null | undefined;
     legalBasis?: string | null | undefined;
     gdprArticle?: string | null | undefined;
+    processedBy?: string | null | undefined;
     processingPurpose?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     event: string;
-    action: string;
     tenantId: string;
     category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    action: string;
     dataCategories: string[];
     userId?: string | null | undefined;
     result?: "partial" | "success" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
-    processedBy?: string | null | undefined;
     requestId?: string | null | undefined;
     legalBasis?: string | null | undefined;
     gdprArticle?: string | null | undefined;
+    processedBy?: string | null | undefined;
     processingPurpose?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
     event: string;
-    action: string;
     tenantId: string;
     category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    action: string;
     dataCategories: string[];
     userId?: string | null | undefined;
     result?: "partial" | "success" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
-    processedBy?: string | null | undefined;
     requestId?: string | null | undefined;
     legalBasis?: string | null | undefined;
     gdprArticle?: string | null | undefined;
+    processedBy?: string | null | undefined;
     processingPurpose?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;

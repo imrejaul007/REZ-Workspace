@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { v4 as uuid } from 'uuid';
 import memoryRoutes from './routes/memory.js';
+import memoryTierRoutes from './routes/memoryTierRoutes.js';
 import profileRoutes from './routes/profile.js';
 import conversationRoutes from './routes/conversation.js';
 const PORT = process.env.PORT || 4520;
@@ -13,8 +14,9 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use((req, res, next) => {
-    req.requestId = req.headers['x-request-id'] || uuid();
-    res.setHeader('X-Request-ID', req.requestId);
+    const requestId = req.headers['x-request-id'] || uuid();
+    res.setHeader('X-Request-ID', requestId);
+    req.requestId = requestId;
     next();
 });
 app.get('/health', (req, res) => {
@@ -25,6 +27,7 @@ app.get('/ready', async (req, res) => {
     res.json({ status: 'ready', mongodb: mongoStatus, timestamp: new Date().toISOString() });
 });
 app.use('/api/memories', memoryRoutes);
+app.use('/api/memories', memoryTierRoutes); // Memory tier routes
 app.use('/api/timeline', memoryRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/conversations', conversationRoutes);

@@ -32,8 +32,6 @@ export interface RouterConfig {
 }
 export declare class RouterService {
     private config;
-    private intentService;
-    private voiceService;
     constructor(config?: Partial<RouterConfig>);
     /**
      * Route a request to the appropriate handler

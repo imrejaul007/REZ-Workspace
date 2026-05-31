@@ -43,13 +43,13 @@ export interface Merchant {
     updatedAt: Date;
 }
 export declare const MerchantModel: mongoose.Model<{
-    name: string;
     status: "active" | "inactive" | "suspended";
+    name: string;
     tenantId: string;
     email: string;
+    plan: "starter" | "professional" | "enterprise" | "trial";
     phone: string;
     language: string;
-    plan: "starter" | "professional" | "enterprise" | "trial";
     businessType: string;
     greeting: string;
     persona: string;
@@ -59,21 +59,21 @@ export declare const MerchantModel: mongoose.Model<{
         totalConversations: number;
         totalMessages: number;
     } | null | undefined;
+    description?: string | null | undefined;
+    whatsappAccessToken?: string | null | undefined;
     address?: string | null | undefined;
     city?: string | null | undefined;
     state?: string | null | undefined;
     features?: {
-        booking: boolean;
         feedback: boolean;
-        ordering: boolean;
+        booking: boolean;
         payments: boolean;
+        ordering: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
     apiKey?: string | null | undefined;
     pincode?: string | null | undefined;
     whatsappNumber?: string | null | undefined;
     whatsappPhoneId?: string | null | undefined;
-    whatsappAccessToken?: string | null | undefined;
     subscriptionEndsAt?: NativeDate | null | undefined;
     businessHours?: {
         close: string;
@@ -81,13 +81,13 @@ export declare const MerchantModel: mongoose.Model<{
     } | null | undefined;
     webhookSecret?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    name: string;
     status: "active" | "inactive" | "suspended";
+    name: string;
     tenantId: string;
     email: string;
+    plan: "starter" | "professional" | "enterprise" | "trial";
     phone: string;
     language: string;
-    plan: "starter" | "professional" | "enterprise" | "trial";
     businessType: string;
     greeting: string;
     persona: string;
@@ -97,21 +97,21 @@ export declare const MerchantModel: mongoose.Model<{
         totalConversations: number;
         totalMessages: number;
     } | null | undefined;
+    description?: string | null | undefined;
+    whatsappAccessToken?: string | null | undefined;
     address?: string | null | undefined;
     city?: string | null | undefined;
     state?: string | null | undefined;
     features?: {
-        booking: boolean;
         feedback: boolean;
-        ordering: boolean;
+        booking: boolean;
         payments: boolean;
+        ordering: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
     apiKey?: string | null | undefined;
     pincode?: string | null | undefined;
     whatsappNumber?: string | null | undefined;
     whatsappPhoneId?: string | null | undefined;
-    whatsappAccessToken?: string | null | undefined;
     subscriptionEndsAt?: NativeDate | null | undefined;
     businessHours?: {
         close: string;
@@ -121,13 +121,13 @@ export declare const MerchantModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    name: string;
     status: "active" | "inactive" | "suspended";
+    name: string;
     tenantId: string;
     email: string;
+    plan: "starter" | "professional" | "enterprise" | "trial";
     phone: string;
     language: string;
-    plan: "starter" | "professional" | "enterprise" | "trial";
     businessType: string;
     greeting: string;
     persona: string;
@@ -137,21 +137,21 @@ export declare const MerchantModel: mongoose.Model<{
         totalConversations: number;
         totalMessages: number;
     } | null | undefined;
+    description?: string | null | undefined;
+    whatsappAccessToken?: string | null | undefined;
     address?: string | null | undefined;
     city?: string | null | undefined;
     state?: string | null | undefined;
     features?: {
-        booking: boolean;
         feedback: boolean;
-        ordering: boolean;
+        booking: boolean;
         payments: boolean;
+        ordering: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
     apiKey?: string | null | undefined;
     pincode?: string | null | undefined;
     whatsappNumber?: string | null | undefined;
     whatsappPhoneId?: string | null | undefined;
-    whatsappAccessToken?: string | null | undefined;
     subscriptionEndsAt?: NativeDate | null | undefined;
     businessHours?: {
         close: string;
@@ -165,13 +165,13 @@ export declare const MerchantModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    name: string;
     status: "active" | "inactive" | "suspended";
+    name: string;
     tenantId: string;
     email: string;
+    plan: "starter" | "professional" | "enterprise" | "trial";
     phone: string;
     language: string;
-    plan: "starter" | "professional" | "enterprise" | "trial";
     businessType: string;
     greeting: string;
     persona: string;
@@ -181,21 +181,21 @@ export declare const MerchantModel: mongoose.Model<{
         totalConversations: number;
         totalMessages: number;
     } | null | undefined;
+    description?: string | null | undefined;
+    whatsappAccessToken?: string | null | undefined;
     address?: string | null | undefined;
     city?: string | null | undefined;
     state?: string | null | undefined;
     features?: {
-        booking: boolean;
         feedback: boolean;
-        ordering: boolean;
+        booking: boolean;
         payments: boolean;
+        ordering: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
     apiKey?: string | null | undefined;
     pincode?: string | null | undefined;
     whatsappNumber?: string | null | undefined;
     whatsappPhoneId?: string | null | undefined;
-    whatsappAccessToken?: string | null | undefined;
     subscriptionEndsAt?: NativeDate | null | undefined;
     businessHours?: {
         close: string;
@@ -203,13 +203,13 @@ export declare const MerchantModel: mongoose.Model<{
     } | null | undefined;
     webhookSecret?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    name: string;
     status: "active" | "inactive" | "suspended";
+    name: string;
     tenantId: string;
     email: string;
+    plan: "starter" | "professional" | "enterprise" | "trial";
     phone: string;
     language: string;
-    plan: "starter" | "professional" | "enterprise" | "trial";
     businessType: string;
     greeting: string;
     persona: string;
@@ -219,21 +219,21 @@ export declare const MerchantModel: mongoose.Model<{
         totalConversations: number;
         totalMessages: number;
     } | null | undefined;
+    description?: string | null | undefined;
+    whatsappAccessToken?: string | null | undefined;
     address?: string | null | undefined;
     city?: string | null | undefined;
     state?: string | null | undefined;
     features?: {
-        booking: boolean;
         feedback: boolean;
-        ordering: boolean;
+        booking: boolean;
         payments: boolean;
+        ordering: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
     apiKey?: string | null | undefined;
     pincode?: string | null | undefined;
     whatsappNumber?: string | null | undefined;
     whatsappPhoneId?: string | null | undefined;
-    whatsappAccessToken?: string | null | undefined;
     subscriptionEndsAt?: NativeDate | null | undefined;
     businessHours?: {
         close: string;
@@ -243,13 +243,13 @@ export declare const MerchantModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    name: string;
     status: "active" | "inactive" | "suspended";
+    name: string;
     tenantId: string;
     email: string;
+    plan: "starter" | "professional" | "enterprise" | "trial";
     phone: string;
     language: string;
-    plan: "starter" | "professional" | "enterprise" | "trial";
     businessType: string;
     greeting: string;
     persona: string;
@@ -259,21 +259,21 @@ export declare const MerchantModel: mongoose.Model<{
         totalConversations: number;
         totalMessages: number;
     } | null | undefined;
+    description?: string | null | undefined;
+    whatsappAccessToken?: string | null | undefined;
     address?: string | null | undefined;
     city?: string | null | undefined;
     state?: string | null | undefined;
     features?: {
-        booking: boolean;
         feedback: boolean;
-        ordering: boolean;
+        booking: boolean;
         payments: boolean;
+        ordering: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
     apiKey?: string | null | undefined;
     pincode?: string | null | undefined;
     whatsappNumber?: string | null | undefined;
     whatsappPhoneId?: string | null | undefined;
-    whatsappAccessToken?: string | null | undefined;
     subscriptionEndsAt?: NativeDate | null | undefined;
     businessHours?: {
         close: string;

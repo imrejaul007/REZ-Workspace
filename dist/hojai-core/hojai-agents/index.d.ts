@@ -6,7 +6,7 @@
  * SOURCE: REZ-Intelligence/REZ-autonomous-agents
  * PORT: 4550
  */
-import { AIEmployee } from '../shared/types';
+import { AIEmployee } from '../../shared/types';
 /**
  * Hojai Agent Platform
  */

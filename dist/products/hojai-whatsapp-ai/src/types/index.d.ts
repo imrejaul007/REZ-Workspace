@@ -19,12 +19,12 @@ export declare const WhatsAppMessageSchema: z.ZodObject<{
         caption: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         id?: string | undefined;
-        link?: string | undefined;
         caption?: string | undefined;
+        link?: string | undefined;
     }, {
         id?: string | undefined;
-        link?: string | undefined;
         caption?: string | undefined;
+        link?: string | undefined;
     }>>;
     template: z.ZodOptional<z.ZodObject<{
         name: z.ZodString;
@@ -79,17 +79,17 @@ export declare const WhatsAppMessageSchema: z.ZodObject<{
         footer?: any;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    type: "text" | "image" | "document" | "video" | "audio" | "template" | "interactive";
+    type: "image" | "video" | "audio" | "document" | "text" | "template" | "interactive";
     to: string;
     messaging_product: "whatsapp";
+    image?: {
+        id?: string | undefined;
+        caption?: string | undefined;
+        link?: string | undefined;
+    } | undefined;
     text?: {
         body: string;
         preview_url?: boolean | undefined;
-    } | undefined;
-    image?: {
-        id?: string | undefined;
-        link?: string | undefined;
-        caption?: string | undefined;
     } | undefined;
     template?: {
         name: string;
@@ -108,17 +108,17 @@ export declare const WhatsAppMessageSchema: z.ZodObject<{
         footer?: any;
     } | undefined;
 }, {
-    type: "text" | "image" | "document" | "video" | "audio" | "template" | "interactive";
+    type: "image" | "video" | "audio" | "document" | "text" | "template" | "interactive";
     to: string;
     messaging_product: "whatsapp";
+    image?: {
+        id?: string | undefined;
+        caption?: string | undefined;
+        link?: string | undefined;
+    } | undefined;
     text?: {
         body: string;
         preview_url?: boolean | undefined;
-    } | undefined;
-    image?: {
-        id?: string | undefined;
-        link?: string | undefined;
-        caption?: string | undefined;
     } | undefined;
     template?: {
         name: string;
@@ -339,28 +339,28 @@ export declare const ConversationSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     status: "active" | "escalated" | "resolved" | "waiting";
-    tenantId: string;
     customerId: string;
+    tenantId: string;
     channel: "whatsapp";
     createdAt: Date;
     updatedAt: Date;
-    merchantId: string;
-    customerPhone: string;
     lastMessageAt: Date;
+    merchantId: string;
     messageCount: number;
+    customerPhone: string;
     context?: Record<string, any> | undefined;
     customerName?: string | undefined;
 }, {
     id: string;
     status: "active" | "escalated" | "resolved" | "waiting";
-    tenantId: string;
     customerId: string;
+    tenantId: string;
     channel: "whatsapp";
     createdAt: Date;
     updatedAt: Date;
+    lastMessageAt: Date;
     merchantId: string;
     customerPhone: string;
-    lastMessageAt: Date;
     context?: Record<string, any> | undefined;
     customerName?: string | undefined;
     messageCount?: number | undefined;
@@ -383,33 +383,33 @@ export declare const MessageSchema: z.ZodObject<{
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    type: "text" | "image" | "document" | "video" | "audio" | "location" | "template" | "button";
-    tenantId: string;
+    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
     conversationId: string;
-    role: "system" | "user" | "assistant";
-    createdAt: Date;
+    tenantId: string;
     content: string;
-    direction: "inbound" | "outbound";
+    createdAt: Date;
     messageId: string;
+    role: "system" | "user" | "assistant";
+    direction: "inbound" | "outbound";
     merchantId: string;
-    intent?: string | undefined;
     confidence?: number | undefined;
     metadata?: Record<string, any> | undefined;
+    intent?: string | undefined;
     mediaUrl?: string | undefined;
 }, {
     id: string;
-    type: "text" | "image" | "document" | "video" | "audio" | "location" | "template" | "button";
-    tenantId: string;
+    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
     conversationId: string;
-    role: "system" | "user" | "assistant";
-    createdAt: Date;
+    tenantId: string;
     content: string;
-    direction: "inbound" | "outbound";
+    createdAt: Date;
     messageId: string;
+    role: "system" | "user" | "assistant";
+    direction: "inbound" | "outbound";
     merchantId: string;
-    intent?: string | undefined;
     confidence?: number | undefined;
     metadata?: Record<string, any> | undefined;
+    intent?: string | undefined;
     mediaUrl?: string | undefined;
 }>;
 export type Message = z.infer<typeof MessageSchema>;
@@ -563,35 +563,35 @@ export declare const BusinessProfileSchema: z.ZodObject<{
         feedback: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
         support: boolean;
-        booking: boolean;
         feedback: boolean;
-        ordering: boolean;
+        booking: boolean;
         catalog: boolean;
+        ordering: boolean;
     }, {
         support?: boolean | undefined;
-        booking?: boolean | undefined;
         feedback?: boolean | undefined;
-        ordering?: boolean | undefined;
+        booking?: boolean | undefined;
         catalog?: boolean | undefined;
+        ordering?: boolean | undefined;
     }>;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
     name: string;
-    tenantId: string;
-    language: string;
-    category: string;
-    features: {
-        support: boolean;
-        booking: boolean;
-        feedback: boolean;
-        ordering: boolean;
-        catalog: boolean;
-    };
     description: string;
+    tenantId: string;
+    category: string;
     createdAt: Date;
     updatedAt: Date;
+    language: string;
+    features: {
+        support: boolean;
+        feedback: boolean;
+        booking: boolean;
+        catalog: boolean;
+        ordering: boolean;
+    };
     timezone: string;
     merchantId: string;
     email?: string | undefined;
@@ -630,18 +630,18 @@ export declare const BusinessProfileSchema: z.ZodObject<{
 }, {
     id: string;
     name: string;
+    description: string;
     tenantId: string;
     category: string;
-    features: {
-        support?: boolean | undefined;
-        booking?: boolean | undefined;
-        feedback?: boolean | undefined;
-        ordering?: boolean | undefined;
-        catalog?: boolean | undefined;
-    };
-    description: string;
     createdAt: Date;
     updatedAt: Date;
+    features: {
+        support?: boolean | undefined;
+        feedback?: boolean | undefined;
+        booking?: boolean | undefined;
+        catalog?: boolean | undefined;
+        ordering?: boolean | undefined;
+    };
     merchantId: string;
     email?: string | undefined;
     address?: string | undefined;
@@ -697,17 +697,17 @@ export declare const KnowledgeBaseItemSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    active: boolean;
     id: string;
+    active: boolean;
     tenantId: string;
     category: string;
     confidence: number;
     createdAt: Date;
     updatedAt: Date;
-    merchantId: string;
-    question: string;
-    answer: string;
     usageCount: number;
+    question: string;
+    merchantId: string;
+    answer: string;
     helpfulCount: number;
     notHelpfulCount: number;
     keywords?: string[] | undefined;
@@ -718,14 +718,14 @@ export declare const KnowledgeBaseItemSchema: z.ZodObject<{
     category: string;
     createdAt: Date;
     updatedAt: Date;
-    merchantId: string;
     question: string;
+    merchantId: string;
     answer: string;
     active?: boolean | undefined;
     confidence?: number | undefined;
+    usageCount?: number | undefined;
     keywords?: string[] | undefined;
     intents?: string[] | undefined;
-    usageCount?: number | undefined;
     helpfulCount?: number | undefined;
     notHelpfulCount?: number | undefined;
 }>;
@@ -739,10 +739,10 @@ export declare const AutomationRuleSchema: z.ZodObject<{
         type: z.ZodEnum<["keyword", "intent", "time", "event", " inactivity"]>;
         config: z.ZodRecord<z.ZodString, z.ZodAny>;
     }, "strip", z.ZodTypeAny, {
-        type: "intent" | "event" | "keyword" | "time" | " inactivity";
+        type: "keyword" | "event" | "intent" | "time" | " inactivity";
         config: Record<string, any>;
     }, {
-        type: "intent" | "event" | "keyword" | "time" | " inactivity";
+        type: "keyword" | "event" | "intent" | "time" | " inactivity";
         config: Record<string, any>;
     }>;
     conditions: z.ZodOptional<z.ZodArray<z.ZodObject<{
@@ -762,10 +762,10 @@ export declare const AutomationRuleSchema: z.ZodObject<{
         type: z.ZodEnum<["reply", "template", "tag", "assign", "webhook", "workflow"]>;
         config: z.ZodRecord<z.ZodString, z.ZodAny>;
     }, "strip", z.ZodTypeAny, {
-        type: "workflow" | "template" | "tag" | "assign" | "reply" | "webhook";
+        type: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook";
         config: Record<string, any>;
     }, {
-        type: "workflow" | "template" | "tag" | "assign" | "reply" | "webhook";
+        type: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook";
         config: Record<string, any>;
     }>, "many">;
     priority: z.ZodDefault<z.ZodNumber>;
@@ -785,20 +785,20 @@ export declare const AutomationRuleSchema: z.ZodObject<{
     }>>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    active: boolean;
     id: string;
+    active: boolean;
     name: string;
     tenantId: string;
     trigger: {
-        type: "intent" | "event" | "keyword" | "time" | " inactivity";
+        type: "keyword" | "event" | "intent" | "time" | " inactivity";
         config: Record<string, any>;
     };
+    priority: number;
     createdAt: Date;
     actions: {
-        type: "workflow" | "template" | "tag" | "assign" | "reply" | "webhook";
+        type: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook";
         config: Record<string, any>;
     }[];
-    priority: number;
     merchantId: string;
     stats?: {
         success: number;
@@ -815,21 +815,21 @@ export declare const AutomationRuleSchema: z.ZodObject<{
     name: string;
     tenantId: string;
     trigger: {
-        type: "intent" | "event" | "keyword" | "time" | " inactivity";
+        type: "keyword" | "event" | "intent" | "time" | " inactivity";
         config: Record<string, any>;
     };
     createdAt: Date;
     actions: {
-        type: "workflow" | "template" | "tag" | "assign" | "reply" | "webhook";
+        type: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook";
         config: Record<string, any>;
     }[];
     merchantId: string;
-    active?: boolean | undefined;
     stats?: {
         success?: number | undefined;
         triggers?: number | undefined;
         failures?: number | undefined;
     } | undefined;
+    active?: boolean | undefined;
     priority?: number | undefined;
     conditions?: {
         field: string;

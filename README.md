@@ -8,97 +8,86 @@
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Core Platforms | 12 | ✅ |
-| ML Platform | 10 | ✅ |
-| HOJAI Intelligence | 5 | ✅ |
-| REZ Intelligence | 186+ | ✅ |
-| GENIE | 5 | ✅ |
-| AI Employees | 150+ | ✅ |
+| HOJAI CORE | 12 platforms | ✅ |
+| ML Platform | 10 services | ✅ |
+| HOJAI Intelligence | 5 services | ✅ |
+| REZ Intelligence | 186+ services | ✅ |
+| GENIE | 5 services | ✅ |
+| AI Employees | 176+ | ✅ |
 | Unified Platform | 1 | ✅ |
 | Training Pipeline | 1 | ✅ |
 
 ---
 
-## TWO INTELLIGENCE LAYERS
+## Architecture
 
 ```
-HOJAI AI (PARENT)
+HOJAI AI (PARENT COMPANY)
 │
 ├── HOJAI CORE (12 platforms, 4500-4610)
-├── HOJAI ML (10 services, 4710-4742)
+├── ML PLATFORM (10 services, 4710-4742)
 │
-├── HOJAI INTELLIGENCE (Commercial, 4750-4754)
-│   └── For EXTERNAL businesses
+├── HOJAI INTELLIGENCE (5 services, 4750-4754) ← Commercial
+│   └── Commerce Intelligence (4750) ✅
 │
-├── REZ INTELLIGENCE (Privileged Tenant, 3000-4300)
-│   └── Built ON HOJAI CORE
+├── REZ INTELLIGENCE (Privileged Tenant, 3000-4300) ← Built ON CORE
+│   ├── Intent Predictor (4018) ✅
+│   ├── Predictive Engine (4123) ✅
+│   └── Memory Layer (4201) ✅
 │
 ├── GENIE (Personal AI, 4702-4709)
-└── AI EMPLOYEES (150+, 4755-4899)
-    └── Commercial employees
+│   ├── Memory (4703) ✅
+│   ├── Relationship (4704) ✅
+│   └── Briefing (4706) ✅
+│
+├── UNIFIED PLATFORM (4850) ✅
+│   └── WhatsApp + Support + Commerce
+│
+└── TRAINING PIPELINE (4880) ✅
 ```
 
 ---
 
-## QUICK START
+## Services Running (June 1, 2026)
+
+| Service | Port | Status |
+|---------|------|--------|
+| Unified Platform | 4850 | ✅ |
+| Training Pipeline | 4880 | ✅ |
+| Event Bus | 4510 | ✅ |
+| Memory | 4520 | ✅ |
+| Commerce Intelligence | 4750 | ✅ |
+| GENIE Memory | 4703 | ✅ |
+| GENIE Relationship | 4704 | ✅ |
+| GENIE Briefing | 4706 | ✅ |
+| REZ Intent Predictor | 4018 | ✅ |
+| REZ Predictive Engine | 4123 | ✅ |
+| REZ Memory Layer | 4201 | ✅ |
+
+---
+
+## TWO INTELLIGENCE LAYERS
+
+| Intelligence | Type | Target | Ports |
+|-------------|------|--------|-------|
+| **HOJAI Intelligence** | Commercial | External businesses | 4750-4754 |
+| **REZ Intelligence** | Privileged | REZ ecosystem | 3000-4300 |
+
+---
+
+## Quick Start
 
 ```bash
 cd hojai-ai
 
-# Deploy all services
-./deploy/start-all.sh deploy
+# Health check
+curl http://localhost:4850/health
 
-# Health checks
-./deploy/start-all.sh health
-
-# View logs
-./deploy/start-all.sh logs
+# Demo
+npx tsx demo/scripts/final-demo.ts
 ```
 
 ---
 
-## HOJAI INTELLIGENCE (Ports 4750-4754)
-
-| Port | Service | Purpose |
-|------|---------|---------|
-| 4750 | Commerce Intelligence | E-commerce AI |
-| 4751 | Merchant Intelligence | Business AI |
-| 4752 | Customer Intelligence | Customer 360 |
-| 4753 | Marketing Intelligence | Campaigns |
-| 4754 | Financial Intelligence | Finance AI |
-
----
-
-## GENIE (Ports 4702-4709)
-
-| Port | Service |
-|------|---------|
-| 4702 | Relationship |
-| 4703 | Memory |
-| 4704 | Briefing |
-| 4708 | Project |
-| 4709 | Privacy |
-
----
-
-## UNIFIED PLATFORM (Port 4850)
-
-WhatsApp + Support + Commerce all-in-one.
-
-## TRAINING PIPELINE (Port 4880)
-
-Learn from chat, signals, corrections, feedback.
-
----
-
-## KEY CONCEPT
-
-**HOJAI AI** is the PARENT company.
-
-**HOJAI Intelligence** = Commercial tenant (external businesses)
-**REZ Intelligence** = Privileged tenant (built ON HOJAI CORE)
-
----
-
-*Version: 2.0*
-*Last Updated: May 31, 2026*
+*Version: 3.0*
+*Last Updated: June 1, 2026*

@@ -11,9 +11,12 @@
  * - Real-time metrics
  */
 import express from 'express';
-import { tenantMiddleware } from '../shared/middleware/tenant';
-import { createLogger } from '../shared/utils/logger';
-import { createResponse, createErrorResponse } from '../shared/types';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import { tenantMiddleware } from '../../shared/middleware/tenant';
+import { createLogger } from '../../shared/utils/logger';
+import { createResponse, createErrorResponse } from '../../shared/types';
 const logger = createLogger('hojai-analytics');
 // ============================================
 // DASHBOARD ENGINE
@@ -515,7 +518,18 @@ export function createAnalyticsRoutes(platform) {
 export async function bootstrap(port = 4610) {
     const platform = new HojaiAnalyticsPlatform();
     const app = express();
+    // Security middleware
+    app.use(helmet());
+    app.use(cors());
     app.use(express.json());
+    // Rate limiting
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 1000,
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+    app.use(limiter);
     app.get('/health', (req, res) => {
         res.json({
             status: 'healthy',

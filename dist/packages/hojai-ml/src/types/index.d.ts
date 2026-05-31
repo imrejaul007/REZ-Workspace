@@ -89,8 +89,8 @@ export declare const ModelSchema: z.ZodObject<{
         latencyMs: z.ZodOptional<z.ZodNumber>;
         costPerCall: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        latencyMs?: number | undefined;
         accuracy?: number | undefined;
+        latencyMs?: number | undefined;
         precision?: number | undefined;
         recall?: number | undefined;
         f1?: number | undefined;
@@ -98,8 +98,8 @@ export declare const ModelSchema: z.ZodObject<{
         rmse?: number | undefined;
         costPerCall?: number | undefined;
     }, {
-        latencyMs?: number | undefined;
         accuracy?: number | undefined;
+        latencyMs?: number | undefined;
         precision?: number | undefined;
         recall?: number | undefined;
         f1?: number | undefined;
@@ -150,9 +150,11 @@ export declare const ModelSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     version: string;
-    name: string;
-    type: ModelType;
     status: ModelStatus;
+    type: ModelType;
+    name: string;
+    description: string;
+    capabilities: string[];
     config: {
         temperature?: number | undefined;
         maxTokens?: number | undefined;
@@ -160,12 +162,10 @@ export declare const ModelSchema: z.ZodObject<{
         frequencyPenalty?: number | undefined;
         presencePenalty?: number | undefined;
     };
-    description: string;
-    capabilities: string[];
+    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     createdAt: Date;
     updatedAt: Date;
     tier: ModelTier;
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     accessControl: {
         requiresLicense: boolean;
         tenantIds?: string[] | undefined;
@@ -186,11 +186,9 @@ export declare const ModelSchema: z.ZodObject<{
         learningRate?: number | undefined;
     } | undefined;
     tenantId?: string | undefined;
-    inputSchema?: Record<string, any> | undefined;
-    outputSchema?: Record<string, any> | undefined;
     metrics?: {
-        latencyMs?: number | undefined;
         accuracy?: number | undefined;
+        latencyMs?: number | undefined;
         precision?: number | undefined;
         recall?: number | undefined;
         f1?: number | undefined;
@@ -198,6 +196,8 @@ export declare const ModelSchema: z.ZodObject<{
         rmse?: number | undefined;
         costPerCall?: number | undefined;
     } | undefined;
+    inputSchema?: Record<string, any> | undefined;
+    outputSchema?: Record<string, any> | undefined;
     domain?: string | undefined;
     baseModel?: string | undefined;
     costPerCall?: number | undefined;
@@ -205,9 +205,11 @@ export declare const ModelSchema: z.ZodObject<{
 }, {
     id: string;
     version: string;
-    name: string;
-    type: ModelType;
     status: ModelStatus;
+    type: ModelType;
+    name: string;
+    description: string;
+    capabilities: string[];
     config: {
         temperature?: number | undefined;
         maxTokens?: number | undefined;
@@ -215,12 +217,10 @@ export declare const ModelSchema: z.ZodObject<{
         frequencyPenalty?: number | undefined;
         presencePenalty?: number | undefined;
     };
-    description: string;
-    capabilities: string[];
+    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     createdAt: Date;
     updatedAt: Date;
     tier: ModelTier;
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     accessControl: {
         tenantIds?: string[] | undefined;
         requiresLicense?: boolean | undefined;
@@ -241,11 +241,9 @@ export declare const ModelSchema: z.ZodObject<{
         learningRate?: number | undefined;
     } | undefined;
     tenantId?: string | undefined;
-    inputSchema?: Record<string, any> | undefined;
-    outputSchema?: Record<string, any> | undefined;
     metrics?: {
-        latencyMs?: number | undefined;
         accuracy?: number | undefined;
+        latencyMs?: number | undefined;
         precision?: number | undefined;
         recall?: number | undefined;
         f1?: number | undefined;
@@ -253,6 +251,8 @@ export declare const ModelSchema: z.ZodObject<{
         rmse?: number | undefined;
         costPerCall?: number | undefined;
     } | undefined;
+    inputSchema?: Record<string, any> | undefined;
+    outputSchema?: Record<string, any> | undefined;
     domain?: string | undefined;
     baseModel?: string | undefined;
     costPerCall?: number | undefined;
@@ -270,11 +270,11 @@ export declare const RoutingRuleSchema: z.ZodObject<{
         value: z.ZodAny;
     }, "strip", z.ZodTypeAny, {
         field: string;
-        operator: "contains" | "in" | "equals" | "greater_than" | "less_than";
+        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
         value?: any;
     }, {
         field: string;
-        operator: "contains" | "in" | "equals" | "greater_than" | "less_than";
+        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
         value?: any;
     }>, "many">;
     modelId: z.ZodString;
@@ -284,17 +284,17 @@ export declare const RoutingRuleSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    active: boolean;
     id: string;
+    active: boolean;
     name: string;
-    modelId: string;
     description: string;
+    priority: number;
     createdAt: Date;
     updatedAt: Date;
-    priority: number;
+    modelId: string;
     conditions: {
         field: string;
-        operator: "contains" | "in" | "equals" | "greater_than" | "less_than";
+        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
         value?: any;
     }[];
     tenantId?: string | undefined;
@@ -302,13 +302,13 @@ export declare const RoutingRuleSchema: z.ZodObject<{
 }, {
     id: string;
     name: string;
-    modelId: string;
     description: string;
     createdAt: Date;
     updatedAt: Date;
+    modelId: string;
     conditions: {
         field: string;
-        operator: "contains" | "in" | "equals" | "greater_than" | "less_than";
+        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
         value?: any;
     }[];
     active?: boolean | undefined;
@@ -358,38 +358,38 @@ export declare const InferenceLogSchema: z.ZodObject<{
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    tenantId: string;
     response: {
         output: Record<string, any>;
         latencyMs: number;
         tokensUsed?: number | undefined;
     };
-    modelId: string;
     request: {
         input: Record<string, any>;
         parameters?: Record<string, any> | undefined;
     };
-    createdAt: Date;
+    tenantId: string;
     cost: number;
+    createdAt: Date;
+    modelId: string;
     quality?: {
         confidence?: number | undefined;
         userFeedback?: number | undefined;
     } | undefined;
 }, {
     id: string;
-    tenantId: string;
     response: {
         output: Record<string, any>;
         latencyMs: number;
         tokensUsed?: number | undefined;
     };
-    modelId: string;
     request: {
         input: Record<string, any>;
         parameters?: Record<string, any> | undefined;
     };
-    createdAt: Date;
+    tenantId: string;
     cost: number;
+    createdAt: Date;
+    modelId: string;
     quality?: {
         confidence?: number | undefined;
         userFeedback?: number | undefined;
@@ -411,13 +411,13 @@ export declare const PromptTemplateSchema: z.ZodObject<{
         required: z.ZodDefault<z.ZodBoolean>;
         defaultValue: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         type: string;
+        name: string;
         required: boolean;
         defaultValue?: string | undefined;
     }, {
-        name: string;
         type: string;
+        name: string;
         required?: boolean | undefined;
         defaultValue?: string | undefined;
     }>, "many">;
@@ -435,46 +435,46 @@ export declare const PromptTemplateSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    active: boolean;
     id: string;
+    active: boolean;
     name: string;
+    description: string;
     config: {
         temperature?: number | undefined;
         maxTokens?: number | undefined;
     };
-    task: string;
-    description: string;
+    createdAt: Date;
+    updatedAt: Date;
     variables: {
-        name: string;
         type: string;
+        name: string;
         required: boolean;
         defaultValue?: string | undefined;
     }[];
-    createdAt: Date;
-    updatedAt: Date;
-    modelType: ModelType;
+    task: string;
     systemPrompt: string;
+    modelType: ModelType;
     userPromptTemplate: string;
     tenantId?: string | undefined;
 }, {
     id: string;
     name: string;
+    description: string;
     config: {
         temperature?: number | undefined;
         maxTokens?: number | undefined;
     };
-    task: string;
-    description: string;
+    createdAt: Date;
+    updatedAt: Date;
     variables: {
-        name: string;
         type: string;
+        name: string;
         required?: boolean | undefined;
         defaultValue?: string | undefined;
     }[];
-    createdAt: Date;
-    updatedAt: Date;
-    modelType: ModelType;
+    task: string;
     systemPrompt: string;
+    modelType: ModelType;
     userPromptTemplate: string;
     active?: boolean | undefined;
     tenantId?: string | undefined;

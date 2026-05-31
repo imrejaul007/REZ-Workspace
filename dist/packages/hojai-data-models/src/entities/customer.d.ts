@@ -217,14 +217,14 @@ export declare const CustomerCreateSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         currency: string;
         language: string;
-        notification_channel: "whatsapp" | "sms" | "email" | "app";
-        communication_tone: "formal" | "friendly" | "casual";
+        notification_channel: "whatsapp" | "email" | "sms" | "app";
+        communication_tone: "friendly" | "formal" | "casual";
         timezone: string;
     }, {
         currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
-        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
+        communication_tone?: "friendly" | "formal" | "casual" | undefined;
         timezone?: string | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
@@ -237,8 +237,8 @@ export declare const CustomerCreateSchema: z.ZodObject<{
     preferences?: {
         currency: string;
         language: string;
-        notification_channel: "whatsapp" | "sms" | "email" | "app";
-        communication_tone: "formal" | "friendly" | "casual";
+        notification_channel: "whatsapp" | "email" | "sms" | "app";
+        communication_tone: "friendly" | "formal" | "casual";
         timezone: string;
     } | undefined;
     first_name?: string | undefined;
@@ -255,8 +255,8 @@ export declare const CustomerCreateSchema: z.ZodObject<{
     preferences?: {
         currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
-        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
+        communication_tone?: "friendly" | "formal" | "casual" | undefined;
         timezone?: string | undefined;
     } | undefined;
     first_name?: string | undefined;
@@ -280,43 +280,43 @@ export declare const CustomerUpdateSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
-        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
+        communication_tone?: "friendly" | "formal" | "casual" | undefined;
         timezone?: string | undefined;
     }, {
         currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
-        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
+        communication_tone?: "friendly" | "formal" | "casual" | undefined;
         timezone?: string | undefined;
     }>>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     name?: string | undefined;
+    tags?: string[] | undefined;
     avatar_url?: string | undefined;
     birthday?: string | undefined;
     gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
-    tags?: string[] | undefined;
     preferences?: {
         currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
-        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
+        communication_tone?: "friendly" | "formal" | "casual" | undefined;
         timezone?: string | undefined;
     } | undefined;
     first_name?: string | undefined;
     last_name?: string | undefined;
 }, {
     name?: string | undefined;
+    tags?: string[] | undefined;
     avatar_url?: string | undefined;
     birthday?: string | undefined;
     gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
-    tags?: string[] | undefined;
     preferences?: {
         currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
-        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
+        communication_tone?: "friendly" | "formal" | "casual" | undefined;
         timezone?: string | undefined;
     } | undefined;
     first_name?: string | undefined;

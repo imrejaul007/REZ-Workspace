@@ -7,7 +7,7 @@ const AddMessageSchema = z.object({
     role: z.enum(['user', 'assistant', 'system']),
     content: z.string(),
     attachments: z.array(z.object({
-        type: z.enum(['Image', 'document', 'link']),
+        type: z.enum(['image', 'document', 'link']),
         url: z.string()
     })).optional(),
     aiMetadata: z.object({

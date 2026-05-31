@@ -125,7 +125,7 @@ export declare const ConsentCreateSchema: z.ZodObject<{
     valid_from: z.ZodOptional<z.ZodString>;
     expires_at: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    channel: "api" | "whatsapp" | "sms" | "email" | "app" | "web" | "in_person";
+    channel: "whatsapp" | "email" | "sms" | "api" | "app" | "web" | "in_person";
     customer_id: string;
     purpose: "analytics" | "marketing_communication" | "personalized_offers" | "third_party_sharing" | "data_processing" | "ai_processing" | "whatsapp_communication" | "email_communication" | "sms_communication" | "app_notification" | "health_data_processing" | "financial_data_processing" | "location_tracking" | "employment_verification";
     description?: string | undefined;
@@ -135,8 +135,8 @@ export declare const ConsentCreateSchema: z.ZodObject<{
 }, {
     customer_id: string;
     purpose: "analytics" | "marketing_communication" | "personalized_offers" | "third_party_sharing" | "data_processing" | "ai_processing" | "whatsapp_communication" | "email_communication" | "sms_communication" | "app_notification" | "health_data_processing" | "financial_data_processing" | "location_tracking" | "employment_verification";
-    channel?: "api" | "whatsapp" | "sms" | "email" | "app" | "web" | "in_person" | undefined;
     description?: string | undefined;
+    channel?: "whatsapp" | "email" | "sms" | "api" | "app" | "web" | "in_person" | undefined;
     consent_text?: string | undefined;
     valid_from?: string | undefined;
     expires_at?: string | undefined;

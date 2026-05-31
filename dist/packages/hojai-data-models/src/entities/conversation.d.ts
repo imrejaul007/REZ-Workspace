@@ -85,19 +85,19 @@ export declare const ConversationCreateSchema: z.ZodObject<{
     priority: z.ZodDefault<z.ZodEnum<["low", "normal", "high", "urgent"]>>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    channel: "api" | "whatsapp" | "sms" | "voice" | "instagram" | "facebook" | "webchat";
+    channel: "whatsapp" | "webchat" | "sms" | "voice" | "instagram" | "facebook" | "api";
+    priority: "low" | "normal" | "high" | "urgent";
     tags: string[];
     customer_id: string;
-    priority: "low" | "high" | "normal" | "urgent";
     first_message: string;
     subject?: string | undefined;
 }, {
-    channel: "api" | "whatsapp" | "sms" | "voice" | "instagram" | "facebook" | "webchat";
+    channel: "whatsapp" | "webchat" | "sms" | "voice" | "instagram" | "facebook" | "api";
     customer_id: string;
     first_message: string;
-    tags?: string[] | undefined;
-    priority?: "low" | "high" | "normal" | "urgent" | undefined;
+    priority?: "low" | "normal" | "high" | "urgent" | undefined;
     subject?: string | undefined;
+    tags?: string[] | undefined;
 }>;
 export declare const ConversationUpdateSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["open", "pending", "closed", "archived"]>>;
@@ -109,18 +109,18 @@ export declare const ConversationUpdateSchema: z.ZodObject<{
     resolution_summary: z.ZodOptional<z.ZodString>;
     csat_score: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    status?: "pending" | "open" | "closed" | "archived" | undefined;
+    status?: "pending" | "archived" | "open" | "closed" | undefined;
+    priority?: "low" | "normal" | "high" | "urgent" | undefined;
     tags?: string[] | undefined;
-    priority?: "low" | "high" | "normal" | "urgent" | undefined;
     assigned_to_type?: "user" | "ai_employee" | "team" | undefined;
     assigned_to_id?: string | undefined;
     resolution_type?: "escalated" | "resolved" | "closed_no_resolution" | "transferred" | undefined;
     resolution_summary?: string | undefined;
     csat_score?: number | undefined;
 }, {
-    status?: "pending" | "open" | "closed" | "archived" | undefined;
+    status?: "pending" | "archived" | "open" | "closed" | undefined;
+    priority?: "low" | "normal" | "high" | "urgent" | undefined;
     tags?: string[] | undefined;
-    priority?: "low" | "high" | "normal" | "urgent" | undefined;
     assigned_to_type?: "user" | "ai_employee" | "team" | undefined;
     assigned_to_id?: string | undefined;
     resolution_type?: "escalated" | "resolved" | "closed_no_resolution" | "transferred" | undefined;

@@ -27,36 +27,36 @@ export declare const CostEntrySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     tenantId: string;
+    category: CostCategory;
     currency: string;
     service: string;
-    category: CostCategory;
     createdAt: Date;
-    operation: string;
-    quantity: number;
-    unit: string;
-    unitCost: number;
     totalCost: number;
-    modelId?: string | undefined;
+    unit: string;
+    quantity: number;
+    operation: string;
+    unitCost: number;
     userId?: string | undefined;
     metadata?: Record<string, any> | undefined;
     tokensUsed?: number | undefined;
+    modelId?: string | undefined;
     latencyMs?: number | undefined;
 }, {
     id: string;
     tenantId: string;
-    service: string;
     category: CostCategory;
+    service: string;
     createdAt: Date;
-    operation: string;
-    quantity: number;
-    unit: string;
-    unitCost: number;
     totalCost: number;
-    currency?: string | undefined;
-    modelId?: string | undefined;
+    unit: string;
+    quantity: number;
+    operation: string;
+    unitCost: number;
     userId?: string | undefined;
+    currency?: string | undefined;
     metadata?: Record<string, any> | undefined;
     tokensUsed?: number | undefined;
+    modelId?: string | undefined;
     latencyMs?: number | undefined;
 }>;
 export type CostEntry = z.infer<typeof CostEntrySchema>;
@@ -75,8 +75,8 @@ export declare const BudgetSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    active: boolean;
     id: string;
+    active: boolean;
     name: string;
     tenantId: string;
     category: CostCategory;
@@ -123,11 +123,11 @@ export declare const CostReportSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     tenantId: string;
-    startDate: Date;
-    endDate: Date;
+    period: "daily" | "weekly" | "monthly";
     createdAt: Date;
     totalCost: number;
-    period: "daily" | "weekly" | "monthly";
+    startDate: Date;
+    endDate: Date;
     totalQuantity: number;
     byCategory: Record<string, number>;
     byService: Record<string, number>;
@@ -139,11 +139,11 @@ export declare const CostReportSchema: z.ZodObject<{
 }, {
     id: string;
     tenantId: string;
-    startDate: Date;
-    endDate: Date;
+    period: "daily" | "weekly" | "monthly";
     createdAt: Date;
     totalCost: number;
-    period: "daily" | "weekly" | "monthly";
+    startDate: Date;
+    endDate: Date;
     totalQuantity: number;
     byCategory: Record<string, number>;
     byService: Record<string, number>;

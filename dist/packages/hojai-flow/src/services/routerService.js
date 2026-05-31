@@ -8,7 +8,8 @@
  * - Agent Router
  * - Multi-Agent Router
  */
-import { IntentType } from './intentService.js';
+import { IntentType, intentService } from './intentService.js';
+import { voiceService } from './voiceService.js';
 const DEFAULT_CONFIG = {
     enableDictation: true,
     enableKnowledge: true,
@@ -54,12 +55,8 @@ const MULTI_AGENT_ACTIONS = {
 };
 export class RouterService {
     config;
-    intentService;
-    voiceService;
     constructor(config) {
         this.config = { ...DEFAULT_CONFIG, ...config };
-        this.intentService = require('./intentService.js').intentService;
-        this.voiceService = require('./voiceService.js').voiceService;
     }
     /**
      * Route a request to the appropriate handler
@@ -78,7 +75,7 @@ export class RouterService {
             }
         }
         // Detect intent
-        const intent = this.intentService.detect(text, context);
+        const intent = intentService.detect(text, context);
         // Map intent to router
         const routerType = this.mapIntentToRouter(intent.type);
         // Generate execution plan
@@ -348,7 +345,7 @@ export class RouterService {
      */
     async processAudio(audio) {
         // Detect language
-        const lang = await this.voiceService.detectLanguage(''); // Would use actual audio
+        const lang = voiceService.detectLanguage(''); // Would use actual audio
         // Would process audio through ASR
         console.log(`[Router] Processed audio in language: ${lang}`);
     }

@@ -62,12 +62,13 @@ export class WorkflowService {
     }
     async initializeQueue() {
         try {
-            const { Queue } = await import('bullmq');
-            const Redis = (await import('ioredis')).default;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const BullQueue = (await import('bullmq')).Queue;
+            const { Redis } = await import('ioredis');
             const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
             const connection = new Redis(redisUrl);
             // Store queue reference for later use
-            this._queue = new Queue('hojai-workflows', { connection });
+            this._queue = new BullQueue('hojai-workflows', { connection });
             this.queueEnabled = true;
         }
         catch {

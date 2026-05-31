@@ -11,9 +11,13 @@
  *
  * PORT: 4530
  */
-import { tenantMiddleware } from '../shared/middleware/tenant';
-import { createLogger } from '../shared/utils/logger';
-import { createResponse, createErrorResponse } from '../shared/types';
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import { tenantMiddleware } from '../../shared/middleware/tenant';
+import { createLogger } from '../../shared/utils/logger';
+import { createResponse, createErrorResponse } from '../../shared/types';
 const logger = createLogger('hojai-intelligence');
 // ============================================
 // ML FEATURE STORE
@@ -317,7 +321,6 @@ export class HojaiIntelligencePlatform {
 // ============================================
 // EXPRESS INTEGRATION
 // ============================================
-import express from 'express';
 /**
  * Create Express routes
  */
@@ -487,7 +490,18 @@ export function createIntelligenceRoutes(platform) {
 export async function bootstrap(port = 4530) {
     const platform = new HojaiIntelligencePlatform();
     const app = express();
+    // Security middleware
+    app.use(helmet());
+    app.use(cors());
     app.use(express.json());
+    // Rate limiting
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 1000,
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+    app.use(limiter);
     // Health check
     app.get('/health', (req, res) => {
         res.json({

@@ -6,9 +6,13 @@
  * SOURCE: REZ-Intelligence/REZ-autonomous-agents
  * PORT: 4550
  */
-import { tenantMiddleware } from '../shared/middleware/tenant';
-import { createLogger } from '../shared/utils/logger';
-import { createResponse, createErrorResponse } from '../shared/types';
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import { tenantMiddleware } from '../../shared/middleware/tenant';
+import { createLogger } from '../../shared/utils/logger';
+import { createResponse, createErrorResponse } from '../../shared/types';
 const logger = createLogger('hojai-agents');
 // ============================================
 // AGENT STORAGE
@@ -223,7 +227,6 @@ export class HojaiAgentPlatform {
 // ============================================
 // EXPRESS INTEGRATION
 // ============================================
-import express from 'express';
 /**
  * Create Express routes for Agent Platform
  */
@@ -356,7 +359,18 @@ export function createAgentRoutes(agentPlatform) {
 export async function bootstrap(port = 4550) {
     const agentPlatform = new HojaiAgentPlatform();
     const app = express();
+    // Security middleware
+    app.use(helmet());
+    app.use(cors());
     app.use(express.json());
+    // Rate limiting
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 1000,
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+    app.use(limiter);
     // Health check
     app.get('/health', (req, res) => {
         res.json({

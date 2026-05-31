@@ -13,6 +13,12 @@ export interface IndustryPattern {
     confidence: number;
     updated_at: string;
 }
+export interface HojaiResponse<T = any> {
+    success: boolean;
+    data?: T;
+    error?: string;
+    timestamp: string;
+}
 export declare class IndustryIntelligence {
     private patterns;
     contribute(tenant_id: string, industry: string, data: Record<string, number>): Promise<{
@@ -20,5 +26,15 @@ export declare class IndustryIntelligence {
     }>;
     getPatterns(industry: string): Promise<IndustryPattern[]>;
 }
-export default IndustryIntelligence;
+export declare function createIndustryRoutes(platform: IndustryIntelligence): import("express-serve-static-core").Router;
+export declare function bootstrap(port?: number): Promise<{
+    platform: IndustryIntelligence;
+    app: import("express-serve-static-core").Express;
+}>;
+declare const _default: {
+    IndustryIntelligence: typeof IndustryIntelligence;
+    createIndustryRoutes: typeof createIndustryRoutes;
+    bootstrap: typeof bootstrap;
+};
+export default _default;
 //# sourceMappingURL=index.d.ts.map

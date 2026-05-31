@@ -104,7 +104,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "probabilistic" | "exact" | "fuzzy" | null | undefined;
+    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
@@ -112,7 +112,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "probabilistic" | "exact" | "fuzzy" | null | undefined;
+    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
@@ -122,7 +122,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "probabilistic" | "exact" | "fuzzy" | null | undefined;
+    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps & {
@@ -136,7 +136,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "probabilistic" | "exact" | "fuzzy" | null | undefined;
+    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
@@ -144,7 +144,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "probabilistic" | "exact" | "fuzzy" | null | undefined;
+    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
@@ -154,7 +154,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "probabilistic" | "exact" | "fuzzy" | null | undefined;
+    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
@@ -168,11 +168,11 @@ export declare const BridgeEventModel: mongoose.Model<{
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
-    routingStatus: "failed" | "pending" | "forwarded" | "filtered";
+    routingStatus: "pending" | "failed" | "forwarded" | "filtered";
     sensitivity: DataSensitivity;
     piiFields: string[];
-    event?: string | null | undefined;
     error?: string | null | undefined;
+    event?: string | null | undefined;
     sourceApp?: string | null | undefined;
     processedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
@@ -181,11 +181,11 @@ export declare const BridgeEventModel: mongoose.Model<{
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
-    routingStatus: "failed" | "pending" | "forwarded" | "filtered";
+    routingStatus: "pending" | "failed" | "forwarded" | "filtered";
     sensitivity: DataSensitivity;
     piiFields: string[];
-    event?: string | null | undefined;
     error?: string | null | undefined;
+    event?: string | null | undefined;
     sourceApp?: string | null | undefined;
     processedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
@@ -196,11 +196,11 @@ export declare const BridgeEventModel: mongoose.Model<{
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
-    routingStatus: "failed" | "pending" | "forwarded" | "filtered";
+    routingStatus: "pending" | "failed" | "forwarded" | "filtered";
     sensitivity: DataSensitivity;
     piiFields: string[];
-    event?: string | null | undefined;
     error?: string | null | undefined;
+    event?: string | null | undefined;
     sourceApp?: string | null | undefined;
     processedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps & {
@@ -215,11 +215,11 @@ export declare const BridgeEventModel: mongoose.Model<{
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
-    routingStatus: "failed" | "pending" | "forwarded" | "filtered";
+    routingStatus: "pending" | "failed" | "forwarded" | "filtered";
     sensitivity: DataSensitivity;
     piiFields: string[];
-    event?: string | null | undefined;
     error?: string | null | undefined;
+    event?: string | null | undefined;
     sourceApp?: string | null | undefined;
     processedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
@@ -228,11 +228,11 @@ export declare const BridgeEventModel: mongoose.Model<{
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
-    routingStatus: "failed" | "pending" | "forwarded" | "filtered";
+    routingStatus: "pending" | "failed" | "forwarded" | "filtered";
     sensitivity: DataSensitivity;
     piiFields: string[];
-    event?: string | null | undefined;
     error?: string | null | undefined;
+    event?: string | null | undefined;
     sourceApp?: string | null | undefined;
     processedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
@@ -243,11 +243,11 @@ export declare const BridgeEventModel: mongoose.Model<{
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
-    routingStatus: "failed" | "pending" | "forwarded" | "filtered";
+    routingStatus: "pending" | "failed" | "forwarded" | "filtered";
     sensitivity: DataSensitivity;
     piiFields: string[];
-    event?: string | null | undefined;
     error?: string | null | undefined;
+    event?: string | null | undefined;
     sourceApp?: string | null | undefined;
     processedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
@@ -339,7 +339,7 @@ export declare const AudienceSyncModel: mongoose.Model<{
     userSample: string[];
     syncEnabled: boolean;
     syncFrequency: "daily" | "weekly" | "realtime" | "hourly";
-    syncStatus: "failed" | "pending" | "syncing" | "synced";
+    syncStatus: "pending" | "failed" | "syncing" | "synced";
     lastSyncedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
     tenantId: string;
@@ -350,7 +350,7 @@ export declare const AudienceSyncModel: mongoose.Model<{
     userSample: string[];
     syncEnabled: boolean;
     syncFrequency: "daily" | "weekly" | "realtime" | "hourly";
-    syncStatus: "failed" | "pending" | "syncing" | "synced";
+    syncStatus: "pending" | "failed" | "syncing" | "synced";
     lastSyncedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
@@ -363,7 +363,7 @@ export declare const AudienceSyncModel: mongoose.Model<{
     userSample: string[];
     syncEnabled: boolean;
     syncFrequency: "daily" | "weekly" | "realtime" | "hourly";
-    syncStatus: "failed" | "pending" | "syncing" | "synced";
+    syncStatus: "pending" | "failed" | "syncing" | "synced";
     lastSyncedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -380,7 +380,7 @@ export declare const AudienceSyncModel: mongoose.Model<{
     userSample: string[];
     syncEnabled: boolean;
     syncFrequency: "daily" | "weekly" | "realtime" | "hourly";
-    syncStatus: "failed" | "pending" | "syncing" | "synced";
+    syncStatus: "pending" | "failed" | "syncing" | "synced";
     lastSyncedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     tenantId: string;
@@ -391,7 +391,7 @@ export declare const AudienceSyncModel: mongoose.Model<{
     userSample: string[];
     syncEnabled: boolean;
     syncFrequency: "daily" | "weekly" | "realtime" | "hourly";
-    syncStatus: "failed" | "pending" | "syncing" | "synced";
+    syncStatus: "pending" | "failed" | "syncing" | "synced";
     lastSyncedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
@@ -404,7 +404,7 @@ export declare const AudienceSyncModel: mongoose.Model<{
     userSample: string[];
     syncEnabled: boolean;
     syncFrequency: "daily" | "weekly" | "realtime" | "hourly";
-    syncStatus: "failed" | "pending" | "syncing" | "synced";
+    syncStatus: "pending" | "failed" | "syncing" | "synced";
     lastSyncedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;

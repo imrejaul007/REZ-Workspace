@@ -1,206 +1,89 @@
-# HOJAI AI - Complete Documentation
+# HOJAI-AI - Developer Guide
 
-**Version:** 1.1 | **Date:** June 1, 2026
-
----
-
-## ARCHITECTURE
-
-```
-HOJAI AI (PARENT COMPANY)
-│
-├── HOJAI CORE (12 Platforms, 4500-4610)
-├── HOJAI ML PLATFORM (10 Services, 4710-4742)
-├── HOJAI INTELLIGENCE (Commercial, 4750-4754)
-├── REZ INTELLIGENCE (Privileged Tenant, 3000-4300)
-├── GENIE (Personal AI, 4702-4709)
-├── AI EMPLOYEES (150+, 4755-4900)
-├── UNIFIED PLATFORM (WhatsApp+Support+Commerce, 4850)
-├── TRAINING PIPELINE (Continuous Learning, 4880)
-└── AdBazaar INTEGRATION (4722)
-```
+**Version:** 2.0.0
+**Updated:** June 1, 2026
 
 ---
 
-## TWO INTELLIGENCE LAYERS
+## OVERVIEW
 
-| Intelligence | Type | Target | Ports |
-|-------------|------|--------|-------|
-| **HOJAI Intelligence** | Commercial | External businesses | 4750-4754 |
-| **REZ Intelligence** | Privileged Tenant | REZ ecosystem | 3000-4300 |
-| Both built ON | HOJAI CORE | Infrastructure | 4500-4610 |
+HOJAI-AI is an AI company that provides AI infrastructure services.
+
+HOJAI-AI is INDEPENDENT from other companies like RABTUL, REZ-Intelligence, AdBazaar, etc.
 
 ---
 
-## PORT REGISTRY
+## HOJAI-AI SERVICES
 
-### HOJAI CORE (4500-4610)
+HOJAI-AI provides AI infrastructure that any company can use:
+
+### HOJAI CORE (4500-4599)
 
 | Port | Service | Purpose |
 |------|---------|---------|
-| 4500 | API Gateway | Routing, auth, rate limiting |
-| 4501 | Governance | RBAC, audit, permissions |
-| 4510 | Event Bus | Event streaming |
-| 4515 | Signal | Signal processing |
-| 4517 | HITL | Human-in-the-loop |
-| 4518 | Trust | Trust scoring |
-| 4519 | Bridge | REZ integration |
-| 4520 | Memory | Vector store, customer memory |
-| 4530 | Intelligence | ML predictions |
-| 4540 | ML | Model registry |
-| 4550 | Agents | Autonomous agents |
-| 4560 | Workflows | Automation |
-| 4570 | Communications | WhatsApp, SMS, Email |
-| 4580 | Hyperlocal | Geo intelligence |
-| 4590 | Data | Data platform |
-| 4600 | Identity | User identity |
-| 4610 | Analytics | BI, dashboards |
+| 4500 | hojai-api-gateway | API Gateway |
+| 4501 | hojai-governance | RBAC, Audit, Policy |
+| 4510 | hojai-event | Event Bus |
+| 4520 | hojai-memory | Vector Store, Customer Memory |
+| 4530 | hojai-intelligence | ML predictions |
+| 4550 | hojai-agents | AI Agent Runtime |
+| 4560 | hojai-workflow | Flow Builder |
+| 4570 | hojai-communications | WhatsApp, SMS, Email |
+| 4580 | hojai-hyperlocal | Geo Intelligence |
+| 4580 | hojai-analytics | Insights |
+| 4590 | hojai-data | Feature Store |
 
-### HOJAI INTELLIGENCE (4750-4754)
+### HOJAI OTHER SERVICES
 
-| Port | Service | Purpose |
-|------|---------|---------|
-| 4750 | Commerce Intelligence | E-commerce AI |
-| 4751 | Merchant Intelligence | Business AI |
-| 4752 | Customer Intelligence | Customer 360 |
-| 4753 | Marketing Intelligence | Campaigns |
-| 4754 | Financial Intelligence | Finance AI |
-
-### GENIE (4702-4709)
-
-| Port | Service | Purpose |
-|------|---------|---------|
-| 4702 | Relationship | Relationship tracking |
-| 4703 | Memory Service | Personal memory |
-| 4704 | Briefing | Daily briefings |
-| 4706 | Privacy | Privacy controls |
-| 4708 | Project Service | Project tracking |
-| 4709 | Privacy Service | Data rights |
-
-### UNIFIED PLATFORM (4850)
-
-| Port | Service | Purpose |
-|------|---------|---------|
-| 4850 | Unified Platform | WhatsApp + Support + Commerce |
-
-### AdBazaar INTEGRATION (4722)
-
-| Port | Service | Purpose |
-|------|---------|---------|
-| 4721 | CorpPerks Bridge | CorpPerks ↔ AdBazaar |
-| 4722 | HOJAI Bridge | AdBazaar ↔ HOJAI (NEW) |
-
-### TRAINING (4880)
-
-| Port | Service | Purpose |
-|------|---------|---------|
-| 4880 | Training Pipeline | Batch model training |
-| 4881 | Self-Learning | Real-time memory updates |
-| 4890 | Training Connector | REZ ↔ HOJAI bridge |
-| 4891 | Continuous Learning | Learn from everything |
-
-### AI EMPLOYEES (150+)
-
-| Port Range | Count | Purpose |
-|-----------|-------|---------|
-| 4755-4799 | 50+ | Commercial employees |
-| 4800-4899 | 100+ | Industry-specific employees |
+| Service | Purpose |
+|---------|---------|
+| hojai-mlops | MLOps platform |
+| hojai-unified-platform | Unified platform |
+| hojai-llm | LLM management |
+| hojai-vector | Vector store |
+| hojai-flow-app | Flow app |
+| hojai-studio | AI studio |
+| hojai-agent-marketplace | Agent marketplace |
 
 ---
 
-## KEY SERVICES BUILT
+## RELATIONSHIP WITH OTHER COMPANIES
 
-### HOJAI Intelligence (5 services)
+HOJAI-AI is INDEPENDENT from:
 
-- hojai-commerce-intelligence
-- hojai-merchant-intelligence
-- hojai-customer-intelligence
-- hojai-marketing-intelligence
-- hojai-financial-intelligence
+- RABTUL-Technologies (core platform)
+- REZ-Intelligence (AI/ML services)
+- AdBazaar (advertising)
+- Axom (life AI)
+- All other companies
 
-### GENIE (5 services)
-
-- genie-memory-service
-- genie-relationship-service
-- genie-briefing-service
-- genie-project-service
-- genie-privacy-service
-
-### UNIFIED PLATFORM
-
-- WhatsApp + Web Chat
-- Support Tickets
-- Commerce (Products, Cart, Orders)
-- AI Brain (Intent routing)
-
-### TRAINING PIPELINE
-
-- Learn from chat
-- Learn from signals
-- Learn from corrections
-- Learn from feedback
+HOJAI-AI can be USED BY other companies for AI infrastructure, but is NOT their parent.
 
 ---
 
-## QUICK START
+## INTEGRATION
 
-```bash
-cd hojai-ai
+### Use RABTUL Services
 
-# Deploy all services
-./deploy/start-all.sh deploy
-
-# Check health
-./deploy/start-all.sh health
-
-# View logs
-./deploy/start-all.sh logs
-```
-
----
-
-## IMPORTANT CONCEPTS
-
-1. **HOJAI CORE** = Infrastructure (don't duplicate)
-2. **HOJAI Intelligence** = Commercial tenant
-3. **REZ Intelligence** = Privileged tenant (built ON CORE)
-4. **GENIE** = Personal AI for individuals
-5. **AI Employees** = Commercial workers for businesses
-
----
-
-## FILE PATTERNS
-
-| Pattern | Use |
-|---------|-----|
-| `src/index.ts` | Service entry point |
-| `src/routes/` | Express routes |
-| `src/services/` | Business logic |
-| `src/models/` | MongoDB/Mongoose |
-| `src/types/` | TypeScript + Zod |
-| `src/middleware/` | Auth, tenant, logging |
-| `src/utils/` | Helpers, logger |
-| `tests/*.test.ts` | Unit tests |
-
----
-
-## TENANT ISOLATION
-
-All services use `X-Tenant-Id` header for multi-tenant isolation.
+HOJAI-AI can integrate with RABTUL for core platform services:
 
 ```typescript
-import { tenantMiddleware } from './middleware/tenant';
-app.use(tenantMiddleware);
+AUTH_SERVICE_URL=http://localhost:4002
+PAYMENT_SERVICE_URL=http://localhost:4001
+WALLET_SERVICE_URL=http://localhost:4004
 ```
 
 ---
 
-## LEARNING SYSTEM
+## SECURITY
 
-```typescript
-import { learn } from '@hojai/learning';
+- Never commit `.env` files
+- Use Zod for input validation
+- All service-to-service calls require authentication
 
-learn.fromChat({ query, response });
-learn.fromSignal({ action, outcome });
-learn.fromCorrection({ wrong, right });
-```
+---
+
+## LAST UPDATED
+
+**Date:** June 1, 2026
+**Version:** 2.0.0

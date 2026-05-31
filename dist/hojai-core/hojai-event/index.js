@@ -21,9 +21,13 @@
  * Phase 4: Full multi-tenant isolation
  */
 import { EventEmitter } from 'events';
-import { tenantMiddleware } from '../shared/middleware/tenant';
-import { createLogger } from '../shared/utils/logger';
-import { createResponse, createErrorResponse } from '../shared/types';
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import { tenantMiddleware } from '../../shared/middleware/tenant';
+import { createLogger } from '../../shared/utils/logger';
+import { createResponse, createErrorResponse } from '../../shared/types';
 const logger = createLogger('hojai-event');
 // ============================================
 // EVENT PLATFORM WRAPPER
@@ -173,7 +177,6 @@ export class HojaiEventPlatform {
 // ============================================
 // EXPRESS INTEGRATION
 // ============================================
-import express from 'express';
 /**
  * Create Express routes for Event Platform
  */
@@ -294,7 +297,18 @@ export function createEventRoutes(eventPlatform) {
 export async function bootstrap(port = 4510) {
     const eventPlatform = new HojaiEventPlatform();
     const app = express();
+    // Security middleware
+    app.use(helmet());
+    app.use(cors());
     app.use(express.json());
+    // Rate limiting
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 1000, // limit each IP to 1000 requests per windowMs
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+    app.use(limiter);
     // Health check
     app.get('/health', (req, res) => {
         res.json({

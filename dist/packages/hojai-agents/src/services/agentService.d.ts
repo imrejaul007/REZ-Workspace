@@ -2,18 +2,12 @@ import mongoose from 'mongoose';
 import { Agent, AgentRun, AgentInsight, AgentType, AgentStatus, AgentCapability } from '../types/index.js';
 export declare const AgentModel: mongoose.Model<{
     version: string;
-    name: string;
-    type: AgentType;
     status: AgentStatus;
-    tenantId: string;
+    type: AgentType;
+    name: string;
     capabilities: AgentCapability[];
+    tenantId: string;
     permissions: string[];
-    schedule?: {
-        enabled: boolean;
-        runOnStartup: boolean;
-        cron?: string | null | undefined;
-        intervalMs?: number | null | undefined;
-    } | null | undefined;
     stats?: {
         totalRuns: number;
         successfulRuns: number;
@@ -21,6 +15,13 @@ export declare const AgentModel: mongoose.Model<{
         avgExecutionTime: number;
         lastRunAt?: NativeDate | null | undefined;
     } | null | undefined;
+    schedule?: {
+        enabled: boolean;
+        runOnStartup: boolean;
+        cron?: string | null | undefined;
+        intervalMs?: number | null | undefined;
+    } | null | undefined;
+    description?: string | null | undefined;
     config?: {
         model: string;
         temperature: number;
@@ -29,21 +30,14 @@ export declare const AgentModel: mongoose.Model<{
         memoryEnabled: boolean;
         learningEnabled: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
     version: string;
-    name: string;
-    type: AgentType;
     status: AgentStatus;
-    tenantId: string;
+    type: AgentType;
+    name: string;
     capabilities: AgentCapability[];
+    tenantId: string;
     permissions: string[];
-    schedule?: {
-        enabled: boolean;
-        runOnStartup: boolean;
-        cron?: string | null | undefined;
-        intervalMs?: number | null | undefined;
-    } | null | undefined;
     stats?: {
         totalRuns: number;
         successfulRuns: number;
@@ -51,6 +45,13 @@ export declare const AgentModel: mongoose.Model<{
         avgExecutionTime: number;
         lastRunAt?: NativeDate | null | undefined;
     } | null | undefined;
+    schedule?: {
+        enabled: boolean;
+        runOnStartup: boolean;
+        cron?: string | null | undefined;
+        intervalMs?: number | null | undefined;
+    } | null | undefined;
+    description?: string | null | undefined;
     config?: {
         model: string;
         temperature: number;
@@ -59,23 +60,16 @@ export declare const AgentModel: mongoose.Model<{
         memoryEnabled: boolean;
         learningEnabled: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
     version: string;
-    name: string;
-    type: AgentType;
     status: AgentStatus;
-    tenantId: string;
+    type: AgentType;
+    name: string;
     capabilities: AgentCapability[];
+    tenantId: string;
     permissions: string[];
-    schedule?: {
-        enabled: boolean;
-        runOnStartup: boolean;
-        cron?: string | null | undefined;
-        intervalMs?: number | null | undefined;
-    } | null | undefined;
     stats?: {
         totalRuns: number;
         successfulRuns: number;
@@ -83,6 +77,13 @@ export declare const AgentModel: mongoose.Model<{
         avgExecutionTime: number;
         lastRunAt?: NativeDate | null | undefined;
     } | null | undefined;
+    schedule?: {
+        enabled: boolean;
+        runOnStartup: boolean;
+        cron?: string | null | undefined;
+        intervalMs?: number | null | undefined;
+    } | null | undefined;
+    description?: string | null | undefined;
     config?: {
         model: string;
         temperature: number;
@@ -91,7 +92,6 @@ export declare const AgentModel: mongoose.Model<{
         memoryEnabled: boolean;
         learningEnabled: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -100,18 +100,12 @@ export declare const AgentModel: mongoose.Model<{
     timestamps: true;
 }, {
     version: string;
-    name: string;
-    type: AgentType;
     status: AgentStatus;
-    tenantId: string;
+    type: AgentType;
+    name: string;
     capabilities: AgentCapability[];
+    tenantId: string;
     permissions: string[];
-    schedule?: {
-        enabled: boolean;
-        runOnStartup: boolean;
-        cron?: string | null | undefined;
-        intervalMs?: number | null | undefined;
-    } | null | undefined;
     stats?: {
         totalRuns: number;
         successfulRuns: number;
@@ -119,6 +113,13 @@ export declare const AgentModel: mongoose.Model<{
         avgExecutionTime: number;
         lastRunAt?: NativeDate | null | undefined;
     } | null | undefined;
+    schedule?: {
+        enabled: boolean;
+        runOnStartup: boolean;
+        cron?: string | null | undefined;
+        intervalMs?: number | null | undefined;
+    } | null | undefined;
+    description?: string | null | undefined;
     config?: {
         model: string;
         temperature: number;
@@ -127,21 +128,14 @@ export declare const AgentModel: mongoose.Model<{
         memoryEnabled: boolean;
         learningEnabled: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     version: string;
-    name: string;
-    type: AgentType;
     status: AgentStatus;
-    tenantId: string;
+    type: AgentType;
+    name: string;
     capabilities: AgentCapability[];
+    tenantId: string;
     permissions: string[];
-    schedule?: {
-        enabled: boolean;
-        runOnStartup: boolean;
-        cron?: string | null | undefined;
-        intervalMs?: number | null | undefined;
-    } | null | undefined;
     stats?: {
         totalRuns: number;
         successfulRuns: number;
@@ -149,6 +143,13 @@ export declare const AgentModel: mongoose.Model<{
         avgExecutionTime: number;
         lastRunAt?: NativeDate | null | undefined;
     } | null | undefined;
+    schedule?: {
+        enabled: boolean;
+        runOnStartup: boolean;
+        cron?: string | null | undefined;
+        intervalMs?: number | null | undefined;
+    } | null | undefined;
+    description?: string | null | undefined;
     config?: {
         model: string;
         temperature: number;
@@ -157,23 +158,16 @@ export declare const AgentModel: mongoose.Model<{
         memoryEnabled: boolean;
         learningEnabled: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
     version: string;
-    name: string;
-    type: AgentType;
     status: AgentStatus;
-    tenantId: string;
+    type: AgentType;
+    name: string;
     capabilities: AgentCapability[];
+    tenantId: string;
     permissions: string[];
-    schedule?: {
-        enabled: boolean;
-        runOnStartup: boolean;
-        cron?: string | null | undefined;
-        intervalMs?: number | null | undefined;
-    } | null | undefined;
     stats?: {
         totalRuns: number;
         successfulRuns: number;
@@ -181,6 +175,13 @@ export declare const AgentModel: mongoose.Model<{
         avgExecutionTime: number;
         lastRunAt?: NativeDate | null | undefined;
     } | null | undefined;
+    schedule?: {
+        enabled: boolean;
+        runOnStartup: boolean;
+        cron?: string | null | undefined;
+        intervalMs?: number | null | undefined;
+    } | null | undefined;
+    description?: string | null | undefined;
     config?: {
         model: string;
         temperature: number;
@@ -189,217 +190,216 @@ export declare const AgentModel: mongoose.Model<{
         memoryEnabled: boolean;
         learningEnabled: boolean;
     } | null | undefined;
-    description?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }>>;
 export declare const AgentRunModel: mongoose.Model<{
-    status: "running" | "completed" | "failed" | "pending";
-    tenantId: string;
+    status: "completed" | "running" | "pending" | "failed";
     agentId: string;
-    steps: mongoose.Types.DocumentArray<{
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }> & {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }>;
+    tenantId: string;
     startedAt: NativeDate;
+    steps: mongoose.Types.DocumentArray<{
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }> & {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }>;
     error?: string | null | undefined;
-    duration?: number | null | undefined;
-    output?: Map<string, any> | null | undefined;
-    trigger?: "manual" | "event" | "api" | "scheduled" | null | undefined;
     input?: Map<string, any> | null | undefined;
-    tokensUsed?: number | null | undefined;
+    trigger?: "manual" | "event" | "scheduled" | "api" | null | undefined;
+    duration?: number | null | undefined;
     cost?: number | null | undefined;
     completedAt?: NativeDate | null | undefined;
+    output?: Map<string, any> | null | undefined;
+    tokensUsed?: number | null | undefined;
 }, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: "running" | "completed" | "failed" | "pending";
-    tenantId: string;
+    status: "completed" | "running" | "pending" | "failed";
     agentId: string;
-    steps: mongoose.Types.DocumentArray<{
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }> & {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }>;
+    tenantId: string;
     startedAt: NativeDate;
+    steps: mongoose.Types.DocumentArray<{
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }> & {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }>;
     error?: string | null | undefined;
-    duration?: number | null | undefined;
-    output?: Map<string, any> | null | undefined;
-    trigger?: "manual" | "event" | "api" | "scheduled" | null | undefined;
     input?: Map<string, any> | null | undefined;
-    tokensUsed?: number | null | undefined;
+    trigger?: "manual" | "event" | "scheduled" | "api" | null | undefined;
+    duration?: number | null | undefined;
     cost?: number | null | undefined;
     completedAt?: NativeDate | null | undefined;
+    output?: Map<string, any> | null | undefined;
+    tokensUsed?: number | null | undefined;
 }, {}, mongoose.DefaultSchemaOptions> & {
-    status: "running" | "completed" | "failed" | "pending";
-    tenantId: string;
+    status: "completed" | "running" | "pending" | "failed";
     agentId: string;
-    steps: mongoose.Types.DocumentArray<{
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }> & {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }>;
+    tenantId: string;
     startedAt: NativeDate;
+    steps: mongoose.Types.DocumentArray<{
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }> & {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }>;
     error?: string | null | undefined;
-    duration?: number | null | undefined;
-    output?: Map<string, any> | null | undefined;
-    trigger?: "manual" | "event" | "api" | "scheduled" | null | undefined;
     input?: Map<string, any> | null | undefined;
-    tokensUsed?: number | null | undefined;
+    trigger?: "manual" | "event" | "scheduled" | "api" | null | undefined;
+    duration?: number | null | undefined;
     cost?: number | null | undefined;
     completedAt?: NativeDate | null | undefined;
+    output?: Map<string, any> | null | undefined;
+    tokensUsed?: number | null | undefined;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, {
-    status: "running" | "completed" | "failed" | "pending";
-    tenantId: string;
+    status: "completed" | "running" | "pending" | "failed";
     agentId: string;
-    steps: mongoose.Types.DocumentArray<{
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }> & {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }>;
+    tenantId: string;
     startedAt: NativeDate;
+    steps: mongoose.Types.DocumentArray<{
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }> & {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }>;
     error?: string | null | undefined;
-    duration?: number | null | undefined;
-    output?: Map<string, any> | null | undefined;
-    trigger?: "manual" | "event" | "api" | "scheduled" | null | undefined;
     input?: Map<string, any> | null | undefined;
-    tokensUsed?: number | null | undefined;
+    trigger?: "manual" | "event" | "scheduled" | "api" | null | undefined;
+    duration?: number | null | undefined;
     cost?: number | null | undefined;
     completedAt?: NativeDate | null | undefined;
+    output?: Map<string, any> | null | undefined;
+    tokensUsed?: number | null | undefined;
 }, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: "running" | "completed" | "failed" | "pending";
-    tenantId: string;
+    status: "completed" | "running" | "pending" | "failed";
     agentId: string;
-    steps: mongoose.Types.DocumentArray<{
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }> & {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }>;
+    tenantId: string;
     startedAt: NativeDate;
+    steps: mongoose.Types.DocumentArray<{
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }> & {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }>;
     error?: string | null | undefined;
-    duration?: number | null | undefined;
-    output?: Map<string, any> | null | undefined;
-    trigger?: "manual" | "event" | "api" | "scheduled" | null | undefined;
     input?: Map<string, any> | null | undefined;
-    tokensUsed?: number | null | undefined;
+    trigger?: "manual" | "event" | "scheduled" | "api" | null | undefined;
+    duration?: number | null | undefined;
     cost?: number | null | undefined;
     completedAt?: NativeDate | null | undefined;
+    output?: Map<string, any> | null | undefined;
+    tokensUsed?: number | null | undefined;
 }>, {}, mongoose.DefaultSchemaOptions> & mongoose.FlatRecord<{
-    status: "running" | "completed" | "failed" | "pending";
-    tenantId: string;
+    status: "completed" | "running" | "pending" | "failed";
     agentId: string;
-    steps: mongoose.Types.DocumentArray<{
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }> & {
-        action?: string | null | undefined;
-        duration?: number | null | undefined;
-        step?: string | null | undefined;
-        result?: any;
-    }>;
+    tenantId: string;
     startedAt: NativeDate;
+    steps: mongoose.Types.DocumentArray<{
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }> & {
+        result?: any;
+        duration?: number | null | undefined;
+        action?: string | null | undefined;
+        step?: string | null | undefined;
+    }>;
     error?: string | null | undefined;
-    duration?: number | null | undefined;
-    output?: Map<string, any> | null | undefined;
-    trigger?: "manual" | "event" | "api" | "scheduled" | null | undefined;
     input?: Map<string, any> | null | undefined;
-    tokensUsed?: number | null | undefined;
+    trigger?: "manual" | "event" | "scheduled" | "api" | null | undefined;
+    duration?: number | null | undefined;
     cost?: number | null | undefined;
     completedAt?: NativeDate | null | undefined;
+    output?: Map<string, any> | null | undefined;
+    tokensUsed?: number | null | undefined;
 }> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }>>;
 export declare const ToolModel: mongoose.Model<{
-    name: string;
     type: "function" | "workflow" | "api" | "external";
+    name: string;
     tenantId: string;
     timeout: number;
     retries: number;
+    handler?: string | null | undefined;
     code?: string | null | undefined;
     description?: string | null | undefined;
-    handler?: string | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
     endpoint?: string | null | undefined;
     rateLimit?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    name: string;
     type: "function" | "workflow" | "api" | "external";
+    name: string;
     tenantId: string;
     timeout: number;
     retries: number;
+    handler?: string | null | undefined;
     code?: string | null | undefined;
     description?: string | null | undefined;
-    handler?: string | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
     endpoint?: string | null | undefined;
@@ -407,14 +407,14 @@ export declare const ToolModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    name: string;
     type: "function" | "workflow" | "api" | "external";
+    name: string;
     tenantId: string;
     timeout: number;
     retries: number;
+    handler?: string | null | undefined;
     code?: string | null | undefined;
     description?: string | null | undefined;
-    handler?: string | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
     endpoint?: string | null | undefined;
@@ -426,27 +426,27 @@ export declare const ToolModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    name: string;
     type: "function" | "workflow" | "api" | "external";
+    name: string;
     tenantId: string;
     timeout: number;
     retries: number;
+    handler?: string | null | undefined;
     code?: string | null | undefined;
     description?: string | null | undefined;
-    handler?: string | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
     endpoint?: string | null | undefined;
     rateLimit?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    name: string;
     type: "function" | "workflow" | "api" | "external";
+    name: string;
     tenantId: string;
     timeout: number;
     retries: number;
+    handler?: string | null | undefined;
     code?: string | null | undefined;
     description?: string | null | undefined;
-    handler?: string | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
     endpoint?: string | null | undefined;
@@ -454,14 +454,14 @@ export declare const ToolModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    name: string;
     type: "function" | "workflow" | "api" | "external";
+    name: string;
     tenantId: string;
     timeout: number;
     retries: number;
+    handler?: string | null | undefined;
     code?: string | null | undefined;
     description?: string | null | undefined;
-    handler?: string | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
     endpoint?: string | null | undefined;
@@ -472,100 +472,100 @@ export declare const ToolModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const KnowledgeBaseModel: mongoose.Model<{
-    tenantId: string;
     agentId: string;
-    createdAt: NativeDate;
+    tenantId: string;
     content: string;
+    createdAt: NativeDate;
     embedding: number[];
-    source?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    source?: string | null | undefined;
 }, {}, {}, {}, mongoose.Document<unknown, {}, {
-    tenantId: string;
     agentId: string;
-    createdAt: NativeDate;
+    tenantId: string;
     content: string;
+    createdAt: NativeDate;
     embedding: number[];
-    source?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    source?: string | null | undefined;
 }, {}, mongoose.DefaultSchemaOptions> & {
-    tenantId: string;
     agentId: string;
-    createdAt: NativeDate;
+    tenantId: string;
     content: string;
+    createdAt: NativeDate;
     embedding: number[];
-    source?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    source?: string | null | undefined;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, {
-    tenantId: string;
     agentId: string;
-    createdAt: NativeDate;
+    tenantId: string;
     content: string;
+    createdAt: NativeDate;
     embedding: number[];
-    source?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    source?: string | null | undefined;
 }, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    tenantId: string;
     agentId: string;
-    createdAt: NativeDate;
+    tenantId: string;
     content: string;
+    createdAt: NativeDate;
     embedding: number[];
-    source?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    source?: string | null | undefined;
 }>, {}, mongoose.DefaultSchemaOptions> & mongoose.FlatRecord<{
-    tenantId: string;
     agentId: string;
-    createdAt: NativeDate;
+    tenantId: string;
     content: string;
+    createdAt: NativeDate;
     embedding: number[];
-    source?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    source?: string | null | undefined;
 }> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }>>;
 export declare const AgentInsightModel: mongoose.Model<{
-    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    tenantId: string;
+    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
     agentId: string;
+    tenantId: string;
     runId: string;
     title: string;
-    severity: "info" | "critical" | "low" | "medium" | "high";
-    action?: string | null | undefined;
+    severity: "info" | "critical" | "low" | "high" | "medium";
     description?: string | null | undefined;
+    action?: string | null | undefined;
     insight?: Map<string, any> | null | undefined;
     acknowledgedBy?: string | null | undefined;
     acknowledgedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    tenantId: string;
+    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
     agentId: string;
+    tenantId: string;
     runId: string;
     title: string;
-    severity: "info" | "critical" | "low" | "medium" | "high";
-    action?: string | null | undefined;
+    severity: "info" | "critical" | "low" | "high" | "medium";
     description?: string | null | undefined;
+    action?: string | null | undefined;
     insight?: Map<string, any> | null | undefined;
     acknowledgedBy?: string | null | undefined;
     acknowledgedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    tenantId: string;
+    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
     agentId: string;
+    tenantId: string;
     runId: string;
     title: string;
-    severity: "info" | "critical" | "low" | "medium" | "high";
-    action?: string | null | undefined;
+    severity: "info" | "critical" | "low" | "high" | "medium";
     description?: string | null | undefined;
+    action?: string | null | undefined;
     insight?: Map<string, any> | null | undefined;
     acknowledgedBy?: string | null | undefined;
     acknowledgedAt?: NativeDate | null | undefined;
@@ -576,43 +576,43 @@ export declare const AgentInsightModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    tenantId: string;
+    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
     agentId: string;
+    tenantId: string;
     runId: string;
     title: string;
-    severity: "info" | "critical" | "low" | "medium" | "high";
-    action?: string | null | undefined;
+    severity: "info" | "critical" | "low" | "high" | "medium";
     description?: string | null | undefined;
+    action?: string | null | undefined;
     insight?: Map<string, any> | null | undefined;
     acknowledgedBy?: string | null | undefined;
     acknowledgedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    tenantId: string;
+    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
     agentId: string;
+    tenantId: string;
     runId: string;
     title: string;
-    severity: "info" | "critical" | "low" | "medium" | "high";
-    action?: string | null | undefined;
+    severity: "info" | "critical" | "low" | "high" | "medium";
     description?: string | null | undefined;
+    action?: string | null | undefined;
     insight?: Map<string, any> | null | undefined;
     acknowledgedBy?: string | null | undefined;
     acknowledgedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    tenantId: string;
+    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
     agentId: string;
+    tenantId: string;
     runId: string;
     title: string;
-    severity: "info" | "critical" | "low" | "medium" | "high";
-    action?: string | null | undefined;
+    severity: "info" | "critical" | "low" | "high" | "medium";
     description?: string | null | undefined;
+    action?: string | null | undefined;
     insight?: Map<string, any> | null | undefined;
     acknowledgedBy?: string | null | undefined;
     acknowledgedAt?: NativeDate | null | undefined;

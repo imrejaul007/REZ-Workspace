@@ -4,9 +4,9 @@ export declare const TrustScoreModel: mongoose.Model<{
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    overallScore: number;
-    reliabilityScore: number;
     qualityScore: number;
+    reliabilityScore: number;
+    overallScore: number;
     responsivenessScore: number;
     deliveryScore: number;
     trustLevel: TrustLevel;
@@ -21,13 +21,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
+        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
-        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -37,9 +37,9 @@ export declare const TrustScoreModel: mongoose.Model<{
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    overallScore: number;
-    reliabilityScore: number;
     qualityScore: number;
+    reliabilityScore: number;
+    overallScore: number;
     responsivenessScore: number;
     deliveryScore: number;
     trustLevel: TrustLevel;
@@ -54,13 +54,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
+        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
-        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -72,9 +72,9 @@ export declare const TrustScoreModel: mongoose.Model<{
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    overallScore: number;
-    reliabilityScore: number;
     qualityScore: number;
+    reliabilityScore: number;
+    overallScore: number;
     responsivenessScore: number;
     deliveryScore: number;
     trustLevel: TrustLevel;
@@ -89,13 +89,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
+        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
-        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -111,9 +111,9 @@ export declare const TrustScoreModel: mongoose.Model<{
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    overallScore: number;
-    reliabilityScore: number;
     qualityScore: number;
+    reliabilityScore: number;
+    overallScore: number;
     responsivenessScore: number;
     deliveryScore: number;
     trustLevel: TrustLevel;
@@ -128,13 +128,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
+        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
-        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -144,9 +144,9 @@ export declare const TrustScoreModel: mongoose.Model<{
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    overallScore: number;
-    reliabilityScore: number;
     qualityScore: number;
+    reliabilityScore: number;
+    overallScore: number;
     responsivenessScore: number;
     deliveryScore: number;
     trustLevel: TrustLevel;
@@ -161,13 +161,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
+        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
-        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -179,9 +179,9 @@ export declare const TrustScoreModel: mongoose.Model<{
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    overallScore: number;
-    reliabilityScore: number;
     qualityScore: number;
+    reliabilityScore: number;
+    overallScore: number;
     responsivenessScore: number;
     deliveryScore: number;
     trustLevel: TrustLevel;
@@ -196,13 +196,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
+        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
-        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -214,42 +214,42 @@ export declare const TrustScoreModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const VerificationModel: mongoose.Model<{
+    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
-    status: "pending" | "expired" | "verified" | "rejected";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    externalId?: string | null | undefined;
-    expiresAt?: NativeDate | null | undefined;
     provider?: string | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
+    expiresAt?: NativeDate | null | undefined;
+    externalId?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
+    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
-    status: "pending" | "expired" | "verified" | "rejected";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    externalId?: string | null | undefined;
-    expiresAt?: NativeDate | null | undefined;
     provider?: string | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
+    expiresAt?: NativeDate | null | undefined;
+    externalId?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
+    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
-    status: "pending" | "expired" | "verified" | "rejected";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    externalId?: string | null | undefined;
-    expiresAt?: NativeDate | null | undefined;
     provider?: string | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
+    expiresAt?: NativeDate | null | undefined;
+    externalId?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -258,42 +258,42 @@ export declare const VerificationModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
+    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
-    status: "pending" | "expired" | "verified" | "rejected";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    externalId?: string | null | undefined;
-    expiresAt?: NativeDate | null | undefined;
     provider?: string | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
+    expiresAt?: NativeDate | null | undefined;
+    externalId?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
+    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
-    status: "pending" | "expired" | "verified" | "rejected";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    externalId?: string | null | undefined;
-    expiresAt?: NativeDate | null | undefined;
     provider?: string | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
+    expiresAt?: NativeDate | null | undefined;
+    externalId?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
+    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
-    status: "pending" | "expired" | "verified" | "rejected";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     metadata?: Map<string, any> | null | undefined;
-    externalId?: string | null | undefined;
-    expiresAt?: NativeDate | null | undefined;
     provider?: string | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
+    expiresAt?: NativeDate | null | undefined;
+    externalId?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
@@ -301,9 +301,9 @@ export declare const VerificationModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const ReviewModel: mongoose.Model<{
-    status: "flagged" | "hidden" | "published" | "disputed";
-    tenantId: string;
+    status: "hidden" | "flagged" | "published" | "disputed";
     helpful: number;
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
@@ -317,15 +317,15 @@ export declare const ReviewModel: mongoose.Model<{
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    title?: string | null | undefined;
     content?: string | null | undefined;
+    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: "flagged" | "hidden" | "published" | "disputed";
-    tenantId: string;
+    status: "hidden" | "flagged" | "published" | "disputed";
     helpful: number;
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
@@ -339,17 +339,17 @@ export declare const ReviewModel: mongoose.Model<{
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    title?: string | null | undefined;
     content?: string | null | undefined;
+    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: "flagged" | "hidden" | "published" | "disputed";
-    tenantId: string;
+    status: "hidden" | "flagged" | "published" | "disputed";
     helpful: number;
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
@@ -363,8 +363,8 @@ export declare const ReviewModel: mongoose.Model<{
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    title?: string | null | undefined;
     content?: string | null | undefined;
+    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
@@ -375,9 +375,9 @@ export declare const ReviewModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: "flagged" | "hidden" | "published" | "disputed";
-    tenantId: string;
+    status: "hidden" | "flagged" | "published" | "disputed";
     helpful: number;
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
@@ -391,15 +391,15 @@ export declare const ReviewModel: mongoose.Model<{
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    title?: string | null | undefined;
     content?: string | null | undefined;
+    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: "flagged" | "hidden" | "published" | "disputed";
-    tenantId: string;
+    status: "hidden" | "flagged" | "published" | "disputed";
     helpful: number;
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
@@ -413,17 +413,17 @@ export declare const ReviewModel: mongoose.Model<{
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    title?: string | null | undefined;
     content?: string | null | undefined;
+    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: "flagged" | "hidden" | "published" | "disputed";
-    tenantId: string;
+    status: "hidden" | "flagged" | "published" | "disputed";
     helpful: number;
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
@@ -437,8 +437,8 @@ export declare const ReviewModel: mongoose.Model<{
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    title?: string | null | undefined;
     content?: string | null | undefined;
+    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
@@ -451,11 +451,11 @@ export declare const TrustEdgeModel: mongoose.Model<{
     tenantId: string;
     relationship: string;
     sourceType: EntityType;
+    sourceId: string;
+    targetId: string;
+    targetType: EntityType;
     strength: number;
     isVerified: boolean;
-    sourceId: string;
-    targetType: EntityType;
-    targetId: string;
     interactionCount: number;
     verifiedAt?: NativeDate | null | undefined;
     lastInteraction?: NativeDate | null | undefined;
@@ -463,11 +463,11 @@ export declare const TrustEdgeModel: mongoose.Model<{
     tenantId: string;
     relationship: string;
     sourceType: EntityType;
+    sourceId: string;
+    targetId: string;
+    targetType: EntityType;
     strength: number;
     isVerified: boolean;
-    sourceId: string;
-    targetType: EntityType;
-    targetId: string;
     interactionCount: number;
     verifiedAt?: NativeDate | null | undefined;
     lastInteraction?: NativeDate | null | undefined;
@@ -477,11 +477,11 @@ export declare const TrustEdgeModel: mongoose.Model<{
     tenantId: string;
     relationship: string;
     sourceType: EntityType;
+    sourceId: string;
+    targetId: string;
+    targetType: EntityType;
     strength: number;
     isVerified: boolean;
-    sourceId: string;
-    targetType: EntityType;
-    targetId: string;
     interactionCount: number;
     verifiedAt?: NativeDate | null | undefined;
     lastInteraction?: NativeDate | null | undefined;
@@ -495,11 +495,11 @@ export declare const TrustEdgeModel: mongoose.Model<{
     tenantId: string;
     relationship: string;
     sourceType: EntityType;
+    sourceId: string;
+    targetId: string;
+    targetType: EntityType;
     strength: number;
     isVerified: boolean;
-    sourceId: string;
-    targetType: EntityType;
-    targetId: string;
     interactionCount: number;
     verifiedAt?: NativeDate | null | undefined;
     lastInteraction?: NativeDate | null | undefined;
@@ -507,11 +507,11 @@ export declare const TrustEdgeModel: mongoose.Model<{
     tenantId: string;
     relationship: string;
     sourceType: EntityType;
+    sourceId: string;
+    targetId: string;
+    targetType: EntityType;
     strength: number;
     isVerified: boolean;
-    sourceId: string;
-    targetType: EntityType;
-    targetId: string;
     interactionCount: number;
     verifiedAt?: NativeDate | null | undefined;
     lastInteraction?: NativeDate | null | undefined;
@@ -521,11 +521,11 @@ export declare const TrustEdgeModel: mongoose.Model<{
     tenantId: string;
     relationship: string;
     sourceType: EntityType;
+    sourceId: string;
+    targetId: string;
+    targetType: EntityType;
     strength: number;
     isVerified: boolean;
-    sourceId: string;
-    targetType: EntityType;
-    targetId: string;
     interactionCount: number;
     verifiedAt?: NativeDate | null | undefined;
     lastInteraction?: NativeDate | null | undefined;

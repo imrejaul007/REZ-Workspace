@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 import { v4 as uuid } from 'uuid';
-import { MemoryType } from '../types/index.js';
+import { MemoryType, MemoryTier, MEMORY_TIER_CONFIG } from '../types/index.js';
 import { MemoryModel, TimelineEventModel, ContextModel, ProfileModel, ConversationModel } from '../models/memoryModel.js';
 // ============================================================================
 // MEMORY SERVICE
@@ -16,8 +16,23 @@ export class MemoryService {
      * Store a new memory
      */
     async storeMemory(tenantId, params) {
+        const validUntil = params.validUntil
+            ? (typeof params.validUntil === 'string' ? new Date(params.validUntil) : params.validUntil)
+            : undefined;
         const memory = new MemoryModel({
-            ...params,
+            userId: params.userId,
+            entityType: params.entityType,
+            entityId: params.entityId,
+            type: params.type,
+            tier: 'l4_semantic',
+            content: params.content,
+            data: params.data,
+            importance: params.importance ?? 5,
+            confidence: params.confidence ?? 0.7,
+            source: params.source,
+            context: params.context,
+            validUntil,
+            isPrivate: false,
             id: uuid(),
             tenantId
         });
@@ -287,10 +302,6 @@ export class MemoryService {
                 entityType: event.entityType,
                 entityId: event.entityId,
                 impact: 'neutral'
-            });
-            // Update profile last active
-            await this.updateProfile(tenantId, { userId: event.userId }, {
-                computed: { lastActiveAt: new Date() }
             });
         }
     }
