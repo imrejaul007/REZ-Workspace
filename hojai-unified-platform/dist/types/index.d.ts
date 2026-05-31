@@ -905,13 +905,13 @@ export declare const PlatformAnalyticsSchema: z.ZodObject<{
         messages: z.ZodNumber;
         avgResponseTime: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
+        messages: number;
         avgResponseTime: number;
         conversations: number;
-        messages: number;
     }, {
+        messages: number;
         avgResponseTime: number;
         conversations: number;
-        messages: number;
     }>>;
     commerce: z.ZodObject<{
         ordersCreated: z.ZodNumber;
@@ -969,6 +969,13 @@ export declare const PlatformAnalyticsSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     tenantId: string;
+    commerce: {
+        ordersCreated: number;
+        ordersCompleted: number;
+        revenue: number;
+        cartAbandonmentRate: number;
+        checkoutConversionRate: number;
+    };
     period: {
         end: Date;
         start: Date;
@@ -982,17 +989,10 @@ export declare const PlatformAnalyticsSchema: z.ZodObject<{
         csat?: number | undefined;
     };
     byChannel: Partial<Record<"email" | "push" | "whatsapp" | "instagram" | "webchat" | "sms" | "voice" | "telegram" | "rcs", {
+        messages: number;
         avgResponseTime: number;
         conversations: number;
-        messages: number;
     }>>;
-    commerce: {
-        ordersCreated: number;
-        ordersCompleted: number;
-        revenue: number;
-        cartAbandonmentRate: number;
-        checkoutConversionRate: number;
-    };
     campaigns: {
         sent: number;
         delivered: number;
@@ -1008,6 +1008,13 @@ export declare const PlatformAnalyticsSchema: z.ZodObject<{
     };
 }, {
     tenantId: string;
+    commerce: {
+        ordersCreated: number;
+        ordersCompleted: number;
+        revenue: number;
+        cartAbandonmentRate: number;
+        checkoutConversionRate: number;
+    };
     period: {
         end: Date;
         start: Date;
@@ -1021,17 +1028,10 @@ export declare const PlatformAnalyticsSchema: z.ZodObject<{
         csat?: number | undefined;
     };
     byChannel: Partial<Record<"email" | "push" | "whatsapp" | "instagram" | "webchat" | "sms" | "voice" | "telegram" | "rcs", {
+        messages: number;
         avgResponseTime: number;
         conversations: number;
-        messages: number;
     }>>;
-    commerce: {
-        ordersCreated: number;
-        ordersCompleted: number;
-        revenue: number;
-        cartAbandonmentRate: number;
-        checkoutConversionRate: number;
-    };
     campaigns: {
         sent: number;
         delivered: number;

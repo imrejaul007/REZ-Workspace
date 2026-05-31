@@ -15,6 +15,7 @@ import commerceRoutes from './routes/commerce.js';
 import ordersRoutes from './routes/orders.js';
 // Services
 import { unifiedBrain } from './services/unifiedBrain.js';
+import { serviceConnector } from './services/serviceConnector.js';
 // Auth utilities
 import { login, register, refreshAccessToken, successResponse, errorResponse, LoginSchema } from './middleware/auth.js';
 // ============================================================================
@@ -65,14 +66,41 @@ app.use((req, res, next) => {
 // HEALTH CHECKS
 // ============================================================================
 app.get('/health', async (req, res) => {
+    const mongoHealthy = mongoose.connection.readyState === 1;
+    // Get connected services health
+    let servicesHealth = {
+        memory: { service: 'hojai-memory', status: 'unknown', url: 'http://localhost:4520' },
+        event: { service: 'hojai-event', status: 'unknown', url: 'http://localhost:4510' },
+        training: { service: 'hojai-training-pipeline', status: 'unknown', url: 'http://localhost:4880' }
+    };
+    try {
+        if (serviceConnector.isInitialized()) {
+            const health = await serviceConnector.getAllServiceHealth();
+            health.forEach(h => {
+                if (h.service.includes('memory'))
+                    servicesHealth.memory = { ...h, url: 'http://localhost:4520' };
+                if (h.service.includes('event'))
+                    servicesHealth.event = { ...h, url: 'http://localhost:4510' };
+                if (h.service.includes('training'))
+                    servicesHealth.training = { ...h, url: 'http://localhost:4880' };
+            });
+        }
+    }
+    catch (error) {
+        console.warn('[Health] Failed to get services health:', error);
+    }
     const checks = {
         service: 'hojai-unified-platform',
         version: '1.0.0',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         dependencies: {
-            mongodb: mongoose.connection.readyState === 1 ? 'healthy' : 'unhealthy'
-        }
+            mongodb: mongoHealthy ? 'healthy' : 'unhealthy',
+            hojai_memory: servicesHealth.memory.status,
+            hojai_event: servicesHealth.event.status,
+            hojai_training: servicesHealth.training.status
+        },
+        connectedServices: servicesHealth
     };
     const allHealthy = Object.values(checks.dependencies).every(s => s === 'healthy');
     res.status(allHealthy ? 200 : 503).json(checks);
@@ -82,11 +110,84 @@ app.get('/health/live', (req, res) => {
 });
 app.get('/health/ready', async (req, res) => {
     const mongo = mongoose.connection.readyState === 1;
-    const ready = mongo;
+    // Check if service connector is ready
+    const connectorReady = serviceConnector.isInitialized();
+    // Optionally check if connected services are ready
+    let servicesReady = false;
+    try {
+        servicesReady = await serviceConnector.areAllServicesHealthy();
+    }
+    catch {
+        servicesReady = false;
+    }
+    // Ready if MongoDB is connected and connector is initialized
+    const ready = mongo && connectorReady;
     res.status(ready ? 200 : 503).json({
         status: ready ? 'ready' : 'not_ready',
-        mongodb: mongo ? 'connected' : 'disconnected'
+        mongodb: mongo ? 'connected' : 'disconnected',
+        connector: connectorReady ? 'initialized' : 'not_initialized',
+        allServicesHealthy: servicesReady
     });
+});
+/**
+ * GET /health/services
+ * Detailed health check for all connected HOJAI services
+ */
+app.get('/health/services', async (req, res) => {
+    try {
+        if (!serviceConnector.isInitialized()) {
+            await serviceConnector.initialize();
+        }
+        const health = await serviceConnector.getAllServiceHealth();
+        res.json({
+            success: true,
+            data: {
+                timestamp: new Date().toISOString(),
+                services: health,
+                summary: {
+                    total: health.length,
+                    healthy: health.filter(h => h.status === 'healthy').length,
+                    unhealthy: health.filter(h => h.status === 'unhealthy').length,
+                    unknown: health.filter(h => h.status === 'unknown').length
+                }
+            }
+        });
+    }
+    catch (error) {
+        res.status(503).json({
+            success: false,
+            error: {
+                code: 'HEALTH_CHECK_FAILED',
+                message: error instanceof Error ? error.message : 'Failed to check services health'
+            }
+        });
+    }
+});
+/**
+ * POST /health/services/refresh
+ * Force refresh health cache
+ */
+app.post('/health/services/refresh', async (req, res) => {
+    try {
+        serviceConnector.clearHealthCache();
+        const health = await serviceConnector.getAllServiceHealth();
+        res.json({
+            success: true,
+            data: {
+                refreshed: true,
+                services: health
+            }
+        });
+    }
+    catch (error) {
+        res.status(503).json({
+            success: false,
+            error: {
+                code: 'REFRESH_FAILED',
+                message: error instanceof Error ? error.message : 'Failed to refresh health'
+            }
+        });
+    }
 });
 // ============================================================================
 // INFO ENDPOINTS
@@ -335,7 +436,15 @@ async function initializeServices() {
     catch (error) {
         console.warn('[MongoDB] Connection failed, continuing without MongoDB:', error);
     }
-    // Initialize Unified Brain
+    // Initialize Service Connector (connects to Memory, Event, Training)
+    try {
+        await serviceConnector.initialize();
+        console.log('[ServiceConnector] Connected to HOJAI services');
+    }
+    catch (error) {
+        console.warn('[ServiceConnector] Connection failed, continuing without external services:', error);
+    }
+    // Initialize Unified Brain (uses Service Connector internally)
     await unifiedBrain.initialize();
     console.log('[UnifiedBrain] Initialized');
     console.log('[Startup] All services initialized');
@@ -366,6 +475,14 @@ async function shutdown() {
     console.log('[Server] Shutting down...');
     // Close Socket.IO connections
     io.close();
+    // Shutdown service connector
+    try {
+        await serviceConnector.shutdown();
+        console.log('[ServiceConnector] Shutdown complete');
+    }
+    catch (error) {
+        console.warn('[ServiceConnector] Shutdown error:', error);
+    }
     // Disconnect MongoDB
     await mongoose.disconnect();
     console.log('[Server] Shutdown complete');
@@ -391,6 +508,6 @@ startServer().catch((error) => {
 // ============================================================================
 // EXPORTS
 // ============================================================================
-export { app, io };
+export { app, io, serviceConnector };
 export default app;
 //# sourceMappingURL=index.js.map

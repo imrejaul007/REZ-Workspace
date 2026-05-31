@@ -1,3 +1,4 @@
+import { serviceConnector } from './serviceConnector.js';
 const INTENT_PATTERNS = [
     // Order intents
     {
@@ -211,24 +212,184 @@ const RESPONSE_TEMPLATES = {
 // ============================================================================
 class UnifiedBrain {
     initialized = false;
+    serviceConnector;
+    constructor(connector) {
+        this.serviceConnector = connector || serviceConnector;
+    }
     async initialize() {
         if (this.initialized)
             return;
+        console.log('[UnifiedBrain] Initializing...');
+        // Initialize service connector
+        try {
+            await this.serviceConnector.initialize();
+            console.log('[UnifiedBrain] Service connector initialized');
+        }
+        catch (error) {
+            console.warn('[UnifiedBrain] Service connector initialization failed, continuing without external services:', error);
+        }
         console.log('[UnifiedBrain] Initialized');
         this.initialized = true;
     }
     /**
      * Process incoming message and generate AI response
+     * This method:
+     * 1. Fetches user context from memory
+     * 2. Recognizes intent
+     * 3. Generates response
+     * 4. Stores conversation in memory
+     * 5. Emits events to event bus
+     * 6. Sends to training pipeline
      */
     async processMessage(message, context) {
-        const { intent, confidence, entities } = this.recognizeIntent(message, context);
-        const response = this.generateResponse(intent, message, context, entities);
-        return {
-            intent,
-            confidence,
-            entities,
-            response
-        };
+        const tenantId = context.tenantId || 'default';
+        const startTime = Date.now();
+        try {
+            // Step 1: Fetch user context from memory (Memory Before Models)
+            let enrichedContext = context;
+            try {
+                const memoryContext = await this.serviceConnector.getUserContext(tenantId, context.customerId);
+                if (memoryContext && memoryContext.preferences) {
+                    enrichedContext = {
+                        ...context,
+                        metadata: {
+                            ...context.metadata,
+                            preferences: memoryContext.preferences
+                        }
+                    };
+                }
+            }
+            catch (error) {
+                console.warn('[UnifiedBrain] Failed to fetch context from memory:', error);
+            }
+            // Step 2: Recognize intent
+            const { intent, confidence, entities } = this.recognizeIntent(message, enrichedContext);
+            // Step 3: Generate response
+            const response = this.generateResponse(intent, message, enrichedContext, entities);
+            // Step 4: Store conversation in memory (async, don't wait)
+            this.storeConversationAsync(tenantId, context, message, response.message);
+            // Step 5: Emit events to event bus (async, don't wait)
+            this.emitEventsAsync(tenantId, context, intent, confidence, message, response.message);
+            // Step 6: Send to training pipeline (async, don't wait)
+            this.sendToTrainingAsync(tenantId, context, message, response.message, intent);
+            const processingTime = Date.now() - startTime;
+            console.log(`[UnifiedBrain] Processed message in ${processingTime}ms, intent: ${intent}`);
+            return {
+                intent,
+                confidence,
+                entities,
+                response
+            };
+        }
+        catch (error) {
+            console.error('[UnifiedBrain] Error processing message:', error);
+            throw error;
+        }
+    }
+    /**
+     * Store conversation in memory (async, non-blocking)
+     */
+    storeConversationAsync(tenantId, context, userMessage, botMessage) {
+        setImmediate(async () => {
+            try {
+                const messages = [
+                    { role: 'user', content: userMessage, timestamp: new Date() },
+                    { role: 'assistant', content: botMessage, timestamp: new Date() }
+                ];
+                await this.serviceConnector.storeConversation(tenantId, context.customerId, context.conversationId, messages);
+            }
+            catch (error) {
+                console.warn('[UnifiedBrain] Failed to store conversation in memory:', error);
+            }
+        });
+    }
+    /**
+     * Emit events to event bus (async, non-blocking)
+     */
+    emitEventsAsync(tenantId, context, intent, confidence, userMessage, botMessage) {
+        setImmediate(async () => {
+            try {
+                // Emit conversation started if this is the first message
+                if (context.recentMessages.length === 0) {
+                    await this.serviceConnector.emitConversationStarted(tenantId, context.customerId, context.conversationId, context.channel);
+                }
+                // Emit user message event
+                await this.serviceConnector.emitMessageSent(tenantId, context.customerId, context.conversationId, userMessage, context.channel, false // from user, not bot
+                );
+                // Emit bot response event
+                await this.serviceConnector.emitMessageSent(tenantId, context.customerId, context.conversationId, botMessage, context.channel, true // from bot
+                );
+                // Emit intent recognized event
+                await this.serviceConnector.emitIntentRecognized(tenantId, context.customerId, context.conversationId, intent, confidence);
+            }
+            catch (error) {
+                console.warn('[UnifiedBrain] Failed to emit events:', error);
+            }
+        });
+    }
+    /**
+     * Send conversation to training pipeline (async, non-blocking)
+     */
+    sendToTrainingAsync(tenantId, context, userMessage, botMessage, intent) {
+        setImmediate(async () => {
+            try {
+                await this.serviceConnector.sendToTraining({
+                    conversationId: context.conversationId,
+                    messages: [
+                        { role: 'user', content: userMessage, metadata: { channel: context.channel } },
+                        { role: 'assistant', content: botMessage, metadata: { intent } }
+                    ],
+                    tenantId,
+                    userId: context.customerId
+                });
+                // Also send the recognized action as a signal
+                if (intent !== 'unknown' && intent !== 'greeting' && intent !== 'thanks' && intent !== 'farewell') {
+                    await this.serviceConnector.sendActionToTraining(tenantId, context.customerId, intent, {
+                        channel: context.channel,
+                        confidence: context.metadata?.confidence || 0.85
+                    });
+                }
+            }
+            catch (error) {
+                console.warn('[UnifiedBrain] Failed to send to training:', error);
+            }
+        });
+    }
+    /**
+     * Store user preference from conversation
+     */
+    async storePreference(tenantId, userId, preferenceType, value) {
+        try {
+            return await this.serviceConnector.storePreference(tenantId, userId, preferenceType, value);
+        }
+        catch (error) {
+            console.error('[UnifiedBrain] Failed to store preference:', error);
+            return false;
+        }
+    }
+    /**
+     * Send feedback to training pipeline
+     */
+    async sendFeedback(tenantId, userId, feedbackType, score, content) {
+        try {
+            return await this.serviceConnector.sendFeedbackToTraining(tenantId, userId, feedbackType, score, content);
+        }
+        catch (error) {
+            console.error('[UnifiedBrain] Failed to send feedback:', error);
+            return false;
+        }
+    }
+    /**
+     * Send correction to training pipeline (for AI mistakes)
+     */
+    async sendCorrection(tenantId, userId, originalContent, correctedContent, reason) {
+        try {
+            return await this.serviceConnector.sendCorrectionToTraining(tenantId, userId, originalContent, correctedContent, reason);
+        }
+        catch (error) {
+            console.error('[UnifiedBrain] Failed to send correction:', error);
+            return false;
+        }
     }
     /**
      * Recognize intent from message

@@ -1,3 +1,4 @@
+import { ServiceConnector } from './serviceConnector.js';
 export interface ConversationContext {
     conversationId: string;
     tenantId: string;
@@ -30,11 +31,44 @@ export interface ProcessedIntent {
 }
 declare class UnifiedBrain {
     private initialized;
+    private serviceConnector;
+    constructor(connector?: ServiceConnector);
     initialize(): Promise<void>;
     /**
      * Process incoming message and generate AI response
+     * This method:
+     * 1. Fetches user context from memory
+     * 2. Recognizes intent
+     * 3. Generates response
+     * 4. Stores conversation in memory
+     * 5. Emits events to event bus
+     * 6. Sends to training pipeline
      */
     processMessage(message: string, context: ConversationContext): Promise<ProcessedIntent>;
+    /**
+     * Store conversation in memory (async, non-blocking)
+     */
+    private storeConversationAsync;
+    /**
+     * Emit events to event bus (async, non-blocking)
+     */
+    private emitEventsAsync;
+    /**
+     * Send conversation to training pipeline (async, non-blocking)
+     */
+    private sendToTrainingAsync;
+    /**
+     * Store user preference from conversation
+     */
+    storePreference(tenantId: string, userId: string, preferenceType: string, value: unknown): Promise<boolean>;
+    /**
+     * Send feedback to training pipeline
+     */
+    sendFeedback(tenantId: string, userId: string, feedbackType: 'positive' | 'negative' | 'rating' | 'correction', score?: number, content?: string): Promise<boolean>;
+    /**
+     * Send correction to training pipeline (for AI mistakes)
+     */
+    sendCorrection(tenantId: string, userId: string, originalContent: string, correctedContent: string, reason?: string): Promise<boolean>;
     /**
      * Recognize intent from message
      */
