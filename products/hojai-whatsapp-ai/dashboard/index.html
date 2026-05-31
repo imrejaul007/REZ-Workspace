@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hojai WhatsApp AI - Merchant Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="js/api.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    [x-cloak] { display: none !important; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen" x-data="dashboard()">
+
+  <!-- Navigation -->
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900">Hojai AI</h1>
+              <p class="text-xs text-gray-500">WhatsApp Employee</p>
+            </div>
+          </div>
+
+          <div class="hidden md:flex ml-10 space-x-8">
+            <template x-for="tab in tabs" :key="tab.id">
+              <button
+                @click="currentTab = tab.id"
+                :class="currentTab === tab.id ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
+                x-text="tab.name"
+              ></button>
+            </template>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <div class="text-right">
+            <p class="text-sm font-medium text-gray-900" x-text="merchant?.name || 'Loading...'"></p>
+            <p class="text-xs text-gray-500 capitalize" x-text="merchant?.plan || '...'"></p>
+          </div>
+          <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+            <span class="text-sm font-medium text-indigo-600" x-text="merchant?.name?.charAt(0) || 'M'"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Loading -->
+  <div x-show="loading" x-cloak class="flex items-center justify-center py-20">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Stats Overview -->
+    <div x-show="!loading" x-cloak class="mb-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-500">Total Conversations</p>
+              <p class="text-3xl font-bold text-gray-900 mt-1" x-text="stats.conversations"></p>
+              <p class="text-sm text-green-600 mt-1">↑ <span x-text="stats.conversationsGrowth"></span>% vs last week</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-500">AI Automation</p>
+              <p class="text-3xl font-bold text-gray-900 mt-1" x-text="stats.automationRate + '%'"></p>
+              <p class="text-sm text-green-600 mt-1">↑ <span x-text="stats.automationGrowth"></span>% improvement</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-500">Avg Response Time</p>
+              <p class="text-3xl font-bold text-gray-900 mt-1"><span x-text="stats.avgResponseTime"></span>s</p>
+              <p class="text-sm text-green-600 mt-1">↓ Faster than avg</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3m0 0l-4 4m4-4l4 4M3 16v-3m8 0v-3m-8 6h8"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-500">CSAT Score</p>
+              <p class="text-3xl font-bold text-gray-900 mt-1" x-text="stats.csat + '%'"></p>
+              <p class="text-sm text-green-600 mt-1">↑ <span x-text="stats.csatGrowth"></span>% improvement</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversations Tab -->
+    <div x-show="!loading && currentTab === 'conversations'" x-cloak>
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-gray-900">Recent Conversations</h3>
+          <button @click="refreshConversations()" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">Refresh</button>
+        </div>
+        <div class="divide-y divide-gray-200">
+          <template x-for="conv in conversations" :key="conv.id">
+            <div class="px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    <span class="text-sm font-medium text-gray-600" x-text="conv.customerName?.charAt(0) || 'C'"></span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900" x-text="conv.customerName || 'Customer'"></p>
+                    <p class="text-sm text-gray-500 truncate max-w-md" x-text="conv.lastMessage"></p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs text-gray-500" x-text="formatTime(conv.lastMessageAt)"></p>
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1"
+                    :class="{
+                      'bg-green-100 text-green-800': conv.status === 'resolved',
+                      'bg-yellow-100 text-yellow-800': conv.status === 'pending',
+                      'bg-blue-100 text-blue-800': conv.status === 'ai'
+                    }"
+                    x-text="conv.status"
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div x-show="conversations.length === 0" class="px-6 py-8 text-center text-gray-500">
+            No conversations yet. Share your WhatsApp number to start receiving messages!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Knowledge Base Tab -->
+    <div x-show="!loading && currentTab === 'knowledge'" x-cloak>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Knowledge Base</h3>
+            <button @click="showAddModal = true" class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+              + Add Q&A
+            </button>
+          </div>
+          <div class="space-y-3">
+            <template x-for="item in knowledge" :key="item.id">
+              <div class="border border-gray-200 rounded-lg p-4">
+                <p class="text-sm font-medium text-gray-900">Q: <span x-text="item.question"></span></p>
+                <p class="text-sm text-gray-600 mt-1">A: <span x-text="item.answer"></span></p>
+                <div class="mt-2 flex items-center space-x-2">
+                  <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded" x-text="item.category"></span>
+                  <span class="text-xs text-gray-400" x-text="item.usageCount + ' uses'"></span>
+                  <button @click="deleteKnowledge(item.id)" class="text-xs text-red-600 hover:text-red-700 ml-auto">Delete</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Total Q&A</span>
+              <span class="font-medium" x-text="knowledge.length"></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Most Used</span>
+              <span class="font-medium" x-text="mostUsedQuestion"></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Categories</span>
+              <span class="font-medium" x-text="uniqueCategories"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div x-show="!loading && currentTab === 'settings'" x-cloak>
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Business Information</h3>
+        <form @submit.prevent="saveSettings()" class="space-y-4 max-w-lg">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+            <input type="text" x-model="merchant.name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">WhatsApp Number</label>
+            <input type="tel" x-model="merchant.whatsappNumber" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">AI Persona</label>
+            <textarea x-model="merchant.persona" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Friendly neighborhood salon assistant..."></textarea>
+          </div>
+          <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 font-medium">
+            Save Changes
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Add Q&A Modal -->
+  <div x-show="showAddModal" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-lg" @click.away="showAddModal = false">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Add Q&A</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <select x-model="newQA.category" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            <option value="general">General</option>
+            <option value="pricing">Pricing</option>
+            <option value="booking">Booking</option>
+            <option value="hours">Hours</option>
+            <option value="location">Location</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Question</label>
+          <input type="text" x-model="newQA.question" placeholder="What are your prices?" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Answer</label>
+          <textarea x-model="newQA.answer" rows="3" placeholder="Haircut ₹200-500, Facial ₹500-1500..." class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end space-x-3">
+        <button @click="showAddModal = false" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+        <button @click="addKnowledge()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function dashboard() {
+      return {
+        currentTab: 'conversations',
+        loading: true,
+        showAddModal: false,
+        tabs: [
+          { id: 'conversations', name: 'Conversations' },
+          { id: 'knowledge', name: 'Knowledge Base' },
+          { id: 'settings', name: 'Settings' }
+        ],
+        merchant: {},
+        stats: {
+          conversations: 0,
+          conversationsGrowth: 0,
+          automationRate: 0,
+          automationGrowth: 0,
+          avgResponseTime: 0,
+          csat: 0,
+          csatGrowth: 0
+        },
+        conversations: [],
+        knowledge: [],
+        newQA: { category: 'general', question: '', answer: '' },
+
+        async init() {
+          await this.loadData();
+          this.loading = false;
+        },
+
+        async loadData() {
+          try {
+            // Load merchant
+            const merchantRes = await window.hojai.getMerchant();
+            this.merchant = merchantRes.data;
+
+            // Load stats
+            const statsRes = await window.hojai.getStats();
+            this.stats = statsRes.data;
+
+            // Load knowledge
+            const kbRes = await window.hojai.getKnowledge();
+            this.knowledge = kbRes.data;
+          } catch (e) {
+            console.error('Failed to load data:', e);
+            // Use demo data
+            this.merchant = { name: 'Demo Merchant', plan: 'trial' };
+            this.stats = { conversations: 0, conversationsGrowth: 0, automationRate: 0, automationGrowth: 0, avgResponseTime: 0, csat: 0, csatGrowth: 0 };
+          }
+        },
+
+        async addKnowledge() {
+          try {
+            await window.hojai.addKnowledge(this.newQA);
+            this.knowledge.push({ ...this.newQA, usageCount: 0 });
+            this.newQA = { category: 'general', question: '', answer: '' };
+            this.showAddModal = false;
+          } catch (e) {
+            alert('Failed to add: ' + e.message);
+          }
+        },
+
+        async deleteKnowledge(id) {
+          if (confirm('Delete this Q&A?')) {
+            try {
+              await window.hojai.deleteKnowledge(id);
+              this.knowledge = this.knowledge.filter(k => k.id !== id);
+            } catch (e) {
+              alert('Failed to delete: ' + e.message);
+            }
+          }
+        },
+
+        async saveSettings() {
+          try {
+            await window.hojai.updateMerchant(this.merchant);
+            alert('Settings saved!');
+          } catch (e) {
+            alert('Failed to save: ' + e.message);
+          }
+        },
+
+        refreshConversations() {
+          this.loadData();
+        },
+
+        formatTime(date) {
+          if (!date) return '';
+          const d = new Date(date);
+          const now = new Date();
+          const diff = now - d;
+          if (diff < 60000) return 'Just now';
+          if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+          if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+          return d.toLocaleDateString();
+        }
+      };
+    }
+  </script>
+</body>
+</html>

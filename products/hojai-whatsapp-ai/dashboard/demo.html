@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hojai WhatsApp AI - Live Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .chat-bubble { max-width: 85%; }
+    .chat-in { background: #f3f4f6; border-radius: 18px 18px 18px 4px; }
+    .chat-out { background: #6366f1; color: white; border-radius: 18px 18px 4px 18px; }
+    .typing-indicator span { animation: bounce 1.4s infinite; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-4px); }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center" x-data="demo()">
+
+  <!-- Phone Frame -->
+  <div class="w-96 bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-gray-900" style="height: 700px;">
+
+    <!-- Status Bar -->
+    <div class="bg-gray-900 px-4 py-2 flex justify-between items-center text-white text-xs">
+      <span>9:41</span>
+      <div class="flex items-center space-x-1">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+      </div>
+    </div>
+
+    <!-- Chat Header -->
+    <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+          SM
+        </div>
+        <div>
+          <p class="font-semibold text-gray-900">Salon Magic</p>
+          <p class="text-xs text-green-500">● Online</p>
+        </div>
+      </div>
+      <div class="flex space-x-4">
+        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-4" style="height: 480px;">
+      <template x-for="msg in messages" :key="msg.id">
+        <div class="flex" :class="msg.from === 'ai' ? 'justify-start' : 'justify-end'">
+          <div class="chat-bubble px-4 py-2" :class="msg.from === 'ai' ? 'chat-in' : 'chat-out'">
+            <p class="text-sm" x-text="msg.text"></p>
+            <p class="text-xs mt-1" :class="msg.from === 'ai' ? 'text-gray-400' : 'text-indigo-200'" x-text="msg.time"></p>
+          </div>
+        </div>
+      </template>
+
+      <!-- Typing Indicator -->
+      <div x-show="isTyping" class="flex justify-start">
+        <div class="chat-bubble px-4 py-3 chat-in">
+          <div class="typing-indicator flex space-x-1">
+            <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
+            <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
+            <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="bg-white border-t border-gray-200 px-4 py-3">
+      <div class="flex items-center space-x-3">
+        <button class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </button>
+        <input
+          type="text"
+          x-model="newMessage"
+          @keydown.enter="sendMessage()"
+          placeholder="Type a message..."
+          class="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+        <button @click="sendMessage()" class="text-indigo-600 hover:text-indigo-700">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Demo Controls -->
+  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+    <div class="bg-white rounded-xl shadow-lg p-4 flex items-center space-x-4">
+      <span class="text-sm text-gray-600">Try:</span>
+      <button @click="quickReply('Hi!')" class="px-4 py-2 bg-gray-100 rounded-full text-sm hover:bg-gray-200">Hi 👋</button>
+      <button @click="quickReply('What are your prices?')" class="px-4 py-2 bg-gray-100 rounded-full text-sm hover:bg-gray-200">Prices 💰</button>
+      <button @click="quickReply('I want to book an appointment')" class="px-4 py-2 bg-gray-100 rounded-full text-sm hover:bg-gray-200">Book 📅</button>
+      <button @click="quickReply('Do you have home service?')" class="px-4 py-2 bg-gray-100 rounded-full text-sm hover:bg-gray-200">Home service 🏠</button>
+    </div>
+  </div>
+
+  <script>
+    function demo() {
+      return {
+        messages: [
+          { id: 1, from: 'user', text: 'Hi!', time: '10:30 AM' },
+          { id: 2, from: 'ai', text: 'Hi! 👋 Welcome to Salon Magic! How can I help you today?', time: '10:30 AM' },
+          { id: 3, from: 'user', text: 'What wax do you use for hair removal?', time: '10:31 AM' },
+          { id: 4, from: 'ai', text: 'We use premium Rica wax which is gentle on skin and provides smooth results. We also offer sugar waxing if you prefer natural options. Would you like to book a session? 💆‍♀️', time: '10:31 AM' }
+        ],
+        newMessage: '',
+        isTyping: false,
+        idCounter: 5,
+
+        sendMessage() {
+          if (!this.newMessage.trim()) return;
+
+          // Add user message
+          this.messages.push({
+            id: this.idCounter++,
+            from: 'user',
+            text: this.newMessage,
+            time: this.getTime()
+          });
+
+          const userMsg = this.newMessage;
+          this.newMessage = '';
+
+          // Simulate AI response
+          this.isTyping = true;
+          setTimeout(() => {
+            this.isTyping = false;
+            const response = this.getAIResponse(userMsg);
+            this.messages.push({
+              id: this.idCounter++,
+              from: 'ai',
+              text: response,
+              time: this.getTime()
+            });
+          }, 1500);
+        },
+
+        quickReply(text) {
+          this.newMessage = text;
+          this.sendMessage();
+        },
+
+        getAIResponse(msg) {
+          const lower = msg.toLowerCase();
+
+          if (lower.includes('price') || lower.includes('cost')) {
+            return 'Our services:\n• Haircut: ₹200-500\n• Haircolor: ₹1500-5000\n• Facial: ₹500-1500\n• Waxing: ₹300-800\n\nWould you like to know more about any service? 💇';
+          }
+
+          if (lower.includes('book') || lower.includes('appointment')) {
+            return 'I\'d love to help you book! What service do you need and when would you like to come in? We\'re open 9 AM - 9 PM daily. 📅';
+          }
+
+          if (lower.includes('home') || lower.includes('service')) {
+            return 'Yes! We offer home service with ₹200 extra charge within 10km. For bigger services like hair color, we need to visit your place for consultation first. Would you like to schedule a home visit? 🏠';
+          }
+
+          if (lower.includes('hour') || lower.includes('open') || lower.includes('timing')) {
+            return 'We\'re open:\n• Monday - Saturday: 9 AM - 9 PM\n• Sunday: 10 AM - 7 PM\n\nWalk-ins welcome, but booking is recommended! ⏰';
+          }
+
+          if (lower.includes('location') || lower.includes('address') || lower.includes('where')) {
+            return 'We\'re located at:\nShop 12, Sunrise Mall\nLink Road, Andheri West\nMumbai 400053\n\nFree parking available! 📍';
+          }
+
+          return 'Thanks for your message! I\'m here to help with bookings, pricing, and any questions about our services. What would you like to know? 😊';
+        },
+
+        getTime() {
+          const now = new Date();
+          return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+      }
+    }
+  </script>
+</body>
+</html>

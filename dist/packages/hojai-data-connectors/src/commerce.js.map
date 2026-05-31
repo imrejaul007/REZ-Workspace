@@ -1,0 +1,1 @@
+{"version":3,"file":"commerce.js","sourceRoot":"","sources":["../../../../packages/hojai-data-connectors/src/commerce.ts"],"names":[],"mappings":"AAAA;;;GAGG;AACH,OAAO,KAAK,MAAM,OAAO,CAAC;AAU1B,MAAM,CAAC,KAAK,UAAU,mBAAmB,CAAC,IAAkB;IAC1D,MAAM,KAAK,CAAC,IAAI,CAAC,GAAG,OAAO,CAAC,GAAG,CAAC,aAAa,mBAAmB,EAAE,IAAI,CAAC,CAAC;AAC1E,CAAC"}

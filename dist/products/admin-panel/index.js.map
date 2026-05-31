@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../products/admin-panel/index.ts"],"names":[],"mappings":"AAAA;;;GAGG;AASH,MAAM,OAAO,UAAU;IACrB,KAAK,CAAC,YAAY;QAChB,OAAO;YACL,aAAa,EAAE,GAAG;YAClB,YAAY,EAAE,IAAI;YAClB,SAAS,EAAE,KAAK;YAChB,OAAO,EAAE,OAAO;SACjB,CAAC;IACJ,CAAC;CACF;AACD,eAAe,UAAU,CAAC"}

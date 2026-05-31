@@ -1,0 +1,151 @@
+# HOJAI AI - Docker Compose
+# Version: 1.0 | Date: May 30, 2026
+
+version: '3.8'
+
+services:
+  # HOJAI API Gateway
+  hojai-api-gateway:
+    build: ./hojai-core/hojai-api-gateway
+    ports:
+      - "4500:4500"
+    networks:
+      - hojai-network
+
+  # HOJAI Platforms
+  hojai-governance:
+    build: ./hojai-core/hojai-governance
+    ports:
+      - "4501:4501"
+
+  hojai-event:
+    build: ./hojai-core/hojai-event
+    ports:
+      - "4510:4510"
+
+  hojai-memory:
+    build: ./hojai-core/hojai-memory
+    ports:
+      - "4520:4520"
+
+  hojai-intelligence:
+    build: ./hojai-core/hojai-intelligence
+    ports:
+      - "4530:4530"
+
+  hojai-agents:
+    build: ./hojai-core/hojai-agents
+    ports:
+      - "4550:4550"
+
+  hojai-workflow:
+    build: ./hojai-core/hojai-workflow
+    ports:
+      - "4560:4560"
+
+  hojai-communications:
+    build: ./hojai-core/hojai-communications
+    ports:
+      - "4570:4570"
+
+  hojai-hyperlocal:
+    build: ./hojai-core/hojai-hyperlocal
+    ports:
+      - "4580:4580"
+
+  hojai-data:
+    build: ./hojai-core/hojai-data
+    ports:
+      - "4590:4590"
+
+  hojai-identity:
+    build: ./hojai-core/hojai-identity
+    ports:
+      - "4600:4600"
+
+  hojai-analytics:
+    build: ./hojai-core/hojai-analytics
+    ports:
+      - "4610:4610"
+
+  hojai-industry:
+    build: ./hojai-industry
+    ports:
+      - "4700:4700"
+
+  # REZ Intelligence
+  rez-intelligence:
+    build: ./rez-intelligence
+    ports:
+      - "4100:4100"
+
+  # MongoDB
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - hojai-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - hojai-network
+
+  # LiveKit Server
+  livekit:
+    image: livekit/livekit-server
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    environment:
+      - KEY=${LIVEKIT_API_KEY:-dev-api-key}
+      - SECRET=${LIVEKIT_API_SECRET:-dev-secret}
+    networks:
+      - hojai-network
+
+  # Hojai Flow Service
+  hojai-flow:
+    build: ./hojai-flow-service
+    ports:
+      - "4580:4580"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/hojai_flow
+      - REDIS_URL=redis://redis:6379
+      - LIVEKIT_URL=http://livekit:7880
+      - WORKFLOW_URL=http://hojai-workflow:4560
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - hojai-network
+
+  # Voice Service (STT/TTS)
+  voice-service:
+    build: ./voice-service
+    ports:
+      - "4033:4033"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+    networks:
+      - hojai-network
+
+  # Merchant AI OS
+  merchant-ai-os:
+    build: ./products/merchant-ai-os
+    ports:
+      - "4620:4620"
+
+networks:
+  hojai-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

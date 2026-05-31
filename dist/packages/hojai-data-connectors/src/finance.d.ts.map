@@ -1,0 +1,1 @@
+{"version":3,"file":"finance.d.ts","sourceRoot":"","sources":["../../../../packages/hojai-data-connectors/src/finance.ts"],"names":[],"mappings":"AAAA;;;GAGG;AACH,wBAAsB,kBAAkB,CAAC,IAAI,EAAE;IAC7C,MAAM,EAAE,MAAM,CAAC;IACf,WAAW,EAAE;QAAE,MAAM,EAAE,MAAM,CAAC;QAAC,IAAI,EAAE,QAAQ,GAAG,SAAS,GAAG,YAAY,CAAC;KAC1E,CAAA;CAAA,GAAG,OAAO,CAAC,IAAI,CAAC,CAKhB"}

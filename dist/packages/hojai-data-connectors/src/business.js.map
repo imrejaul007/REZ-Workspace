@@ -1,0 +1,1 @@
+{"version":3,"file":"business.js","sourceRoot":"","sources":["../../../../packages/hojai-data-connectors/src/business.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,MAAM,CAAC,KAAK,UAAU,gBAAgB,CAAC,IAItC;IACC,MAAM,KAAK,CAAC,IAAI,CAAC,GAAG,OAAO,CAAC,GAAG,CAAC,aAAa,gBAAgB,EAAE;QAC7D,MAAM,EAAE,IAAI,CAAC,MAAM;QACnB,KAAK,EAAE,IAAI,CAAC,KAAK;KAClB,CAAC,CAAC;AACL,CAAC"}
