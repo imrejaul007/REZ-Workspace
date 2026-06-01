@@ -1,89 +1,141 @@
-# HOJAI-AI - Developer Guide
+# HOJAI AI - Complete Platform Documentation
 
-**Version:** 2.0.0
-**Updated:** June 1, 2026
-
----
-
-## OVERVIEW
-
-HOJAI-AI is an AI company that provides AI infrastructure services.
-
-HOJAI-AI is INDEPENDENT from other companies like RABTUL, REZ-Intelligence, AdBazaar, etc.
+**Version:** 3.0 | **Date:** June 1, 2026
 
 ---
 
-## HOJAI-AI SERVICES
+## VoiceOS Platform - Complete
 
-HOJAI-AI provides AI infrastructure that any company can use:
+### Architecture
 
-### HOJAI CORE (4500-4599)
-
-| Port | Service | Purpose |
-|------|---------|---------|
-| 4500 | hojai-api-gateway | API Gateway |
-| 4501 | hojai-governance | RBAC, Audit, Policy |
-| 4510 | hojai-event | Event Bus |
-| 4520 | hojai-memory | Vector Store, Customer Memory |
-| 4530 | hojai-intelligence | ML predictions |
-| 4550 | hojai-agents | AI Agent Runtime |
-| 4560 | hojai-workflow | Flow Builder |
-| 4570 | hojai-communications | WhatsApp, SMS, Email |
-| 4580 | hojai-hyperlocal | Geo Intelligence |
-| 4580 | hojai-analytics | Insights |
-| 4590 | hojai-data | Feature Store |
-
-### HOJAI OTHER SERVICES
-
-| Service | Purpose |
-|---------|---------|
-| hojai-mlops | MLOps platform |
-| hojai-unified-platform | Unified platform |
-| hojai-llm | LLM management |
-| hojai-vector | Vector store |
-| hojai-flow-app | Flow app |
-| hojai-studio | AI studio |
-| hojai-agent-marketplace | Agent marketplace |
-
----
-
-## RELATIONSHIP WITH OTHER COMPANIES
-
-HOJAI-AI is INDEPENDENT from:
-
-- RABTUL-Technologies (core platform)
-- REZ-Intelligence (AI/ML services)
-- AdBazaar (advertising)
-- Axom (life AI)
-- All other companies
-
-HOJAI-AI can be USED BY other companies for AI infrastructure, but is NOT their parent.
-
----
-
-## INTEGRATION
-
-### Use RABTUL Services
-
-HOJAI-AI can integrate with RABTUL for core platform services:
-
-```typescript
-AUTH_SERVICE_URL=http://localhost:4002
-PAYMENT_SERVICE_URL=http://localhost:4001
-WALLET_SERVICE_URL=http://localhost:4004
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    VOICE GATEWAY                              │
+├─────────────────────────────────────────────────────────────┤
+│  📞 Phone (Twilio, Exotel, Knowlarity)                      │
+│  💬 WhatsApp Voice                                        │
+│  🌐 Web Voice Widget                                     │
+│  📱 Mobile Voice                                        │
+│  📹 Video Agent                                         │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    SPEECH ENGINE                            │
+├─────────────────────────────────────────────────────────────┤
+│  🎤 STT: Whisper, Sarvam, Google                        │
+│  🔊 TTS: ElevenLabs, Cartesia, Sarvam                     │
+│  🌐 Translate: 10+ Indian Languages                     │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    VOICE BRAIN                             │
+├─────────────────────────────────────────────────────────────┤
+│  🧠 Intent Engine (detect what user wants)                │
+│  📋 Context Engine (understand the situation)           │
+│  💾 Memory Engine (remember everything)                 │
+│  😊 Emotion Engine (detect sentiment)                   │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    ACTION ENGINE                            │
+├─────────────────────────────────────────────────────────────┤
+│  🛒 Voice Commerce (order, checkout, pay)                │
+│  📅 Voice Bookings (appointments, reservations)          │
+│  💳 Voice Payments (UPI, Card, COD)                     │
+│  📞 Voice Support (complaints, refunds)                  │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    AI EMPLOYEES                            │
+├─────────────────────────────────────────────────────────────┤
+│  🤖 Receptionist (answer calls, book appointments)        │
+│  🤖 SDR (qualify leads, schedule demos)                  │
+│  🤖 Support Agent (handle complaints, refunds)            │
+│  🤖 Booking Agent (tables, services, rides)              │
+│  🤖 Collections Agent (payment follow-ups)               │
+│  🤖 CFO Agent (financial queries)                       │
+│  🤖 HR Agent (employee queries)                        │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## SECURITY
+## Services
 
-- Never commit `.env` files
-- Use Zod for input validation
-- All service-to-service calls require authentication
+### VoiceOS Services (NEW)
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| **3000** | VoiceOS Dashboard | Unified merchant dashboard |
+| **4112** | rez-ai-voice | Voice agents (Sales, Support, Info) |
+| **4860** | Telecom Bridge | Twilio, Exotel, Knowlarity |
+| **4870** | Multilingual | Hindi, Tamil, Telugu, 7 more |
+| **4880** | Voice Commerce | Orders, Bookings, Payments |
+| **4850** | Unified Platform | WhatsApp + Support + Commerce |
+
+### HOJAI Core
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| 4500 | API Gateway | Routing, auth, rate limiting |
+| 4501 | Governance | RBAC, audit, permissions |
+| 4510 | Event Bus | Pub/sub, streaming |
+| 4520 | Memory | Vector store, timeline |
+| 4530 | Intelligence | ML predictions |
+| 4550 | Agents | Agent orchestration |
+| 4560 | Workflows | Automation |
+| 4570 | Communications | WhatsApp, SMS, Email |
+| 4580 | Hyperlocal | Geo intelligence |
+| 4590 | Data | Feature store |
 
 ---
 
-## LAST UPDATED
+## Quick Start
 
-**Date:** June 1, 2026
-**Version:** 2.0.0
+```bash
+# VoiceOS
+cd hojai-voice-os && npm install && npm run dev
+
+# Telecom Bridge
+cd hojai-telecom-bridge && npm install && npm run dev
+
+# Multilingual
+cd hojai-multilingual && npm install && npm run dev
+
+# Voice Commerce
+cd hojai-voice-commerce && npm install && npm run dev
+```
+
+---
+
+## Integration
+
+### India Telecom
+
+| Provider | Status | Features |
+|----------|--------|----------|
+| Twilio | ✅ | International |
+| Exotel | ✅ | India, IVR |
+| Knowlarity | ✅ | Bulk calling |
+| Ozonetel | 🔜 | Coming |
+
+### Languages
+
+| Language | Status |
+|----------|--------|
+| English | ✅ |
+| Hindi | ✅ |
+| Tamil | ✅ |
+| Telugu | ✅ |
+| Bengali | ✅ |
+| Kannada | ✅ |
+| Malayalam | 🔜 |
+| Marathi | 🔜 |
+| Gujarati | 🔜 |
+| Punjabi | 🔜 |
+
+---
+
+## License
+
+Proprietary - HOJAI AI
