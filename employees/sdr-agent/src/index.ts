@@ -17,6 +17,7 @@ import {
   followupRoutes,
   qualificationRoutes
 } from './routes';
+import aiSDRRoutes from './ai-sdr.js';
 
 const app: Express = express();
 const PORT = process.env.PORT || 4757;
@@ -114,6 +115,9 @@ app.use('/api/leads', leadRoutes);
 app.use('/api/outreach', outreachRoutes);
 app.use('/api/followups', followupRoutes);
 app.use('/api/qualification', qualificationRoutes);
+
+// AI SDR routes (Real LLM-powered assistant)
+app.use('/api/ai', aiSDRRoutes);
 
 // Webhook endpoint for CRM callbacks
 app.post('/webhooks/crm', async (req: Request, res: Response) => {

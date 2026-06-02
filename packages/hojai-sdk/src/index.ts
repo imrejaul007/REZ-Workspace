@@ -1,64 +1,155 @@
 /**
  * HOJAI AI SDK - TypeScript Client
- * Version: 1.0.0 | Date: May 30, 2026
  *
- * Usage:
+ * A comprehensive SDK for interacting with HOJAI AI services.
+ *
+ * @example
  * ```typescript
- * import { HojaiClient } from '@hojai/sdk';
+ * import { HojaiClient, createAgentBuilder, HojaiError } from '@hojai/sdk';
  *
  * const client = new HojaiClient({
- *   baseUrl: 'http://localhost:4500',
- *   tenantId: 'merchant_123'
+ *   baseUrl: 'https://api.hojai.ai',
+ *   tenantId: 'my-tenant',
+ *   apiKey: process.env.HOJAI_API_KEY
  * });
  *
- * await client.health();
- * await client.predict('customer_456');
+ * // Health check
+ * const health = await client.health();
+ *
+ * // Create and use an agent
+ * const agent = await client.agents.create({
+ *   name: 'My Sales Agent',
+ *   type: 'sales'
+ * });
+ *
+ * const response = await client.agents.chat(agent.id, {
+ *   message: 'Find me enterprise software companies'
+ * });
  * ```
+ *
+ * @module @hojai/sdk
  */
 
-export interface HojaiConfig {
-  baseUrl: string;
-  tenantId: string;
-  apiKey?: string;
-}
+// ============================================================================
+// MAIN EXPORTS
+// ============================================================================
 
-export class HojaiClient {
-  private baseUrl: string;
-  private tenantId: string;
-  private apiKey?: string;
+export { HojaiClient, HojaiError } from './client.js';
 
-  constructor(config: HojaiConfig) {
-    this.baseUrl = config.baseUrl;
-    this.tenantId = config.tenantId;
-    this.apiKey = config.apiKey;
-  }
+export type { HojaiConfig } from './types.js';
 
-  private headers(): Record<string, string> {
-    return {
-      'Content-Type': 'application/json',
-      'X-Tenant-Id': this.tenantId,
-      ...(this.apiKey && { 'X-API-Key': this.apiKey })
-    };
-  }
+// ============================================================================
+// AGENT MODULE
+// ============================================================================
 
-  async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, { headers: this.headers() });
-    return res.json();
-  }
+export {
+  createAgentBuilder,
+  defineTool,
+  defineTools,
+  systemPromptTemplates,
+  getSystemPrompt,
+  createPredefinedAgent,
+  estimateAgentCost,
+  validateAgentConfig,
+  PredefinedAgentType,
+} from './agents.js';
 
-  async post<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      method: 'POST',
-      headers: this.headers(),
-      body: JSON.stringify(body)
-    });
-    return res.json();
-  }
+export type {
+  AgentBuilder,
+  AgentExecutionOptions,
+  AgentExecutionResult,
+} from './agents.js';
 
-  async health() { return this.get('/health'); }
-  async predict(customerId: string) { return this.post('/api/intelligence/predict', { customerId }); }
-  async createTenant(data: unknown) { return this.post('/api/governance/tenants', data); }
-  async publishEvent(type: string, data: unknown) { return this.post('/api/events/publish', { type, data }); }
-}
+// ============================================================================
+// SUB-CLIENT TYPES (re-exported for convenience)
+// ============================================================================
 
-export default HojaiClient;
+export type {
+  // Agent types
+  Agent,
+  AgentStatus,
+  AgentConfig,
+  AgentExecution,
+  CreateAgentRequest,
+  UpdateAgentRequest,
+  ToolDefinition,
+
+  // Memory types
+  Memory,
+  MemoryType,
+  CreateMemoryRequest,
+  SearchMemoriesRequest,
+  ConversationMessage,
+
+  // Workflow types
+  Workflow,
+  WorkflowStatus,
+  WorkflowStep,
+  WorkflowStepType,
+  CreateWorkflowRequest,
+  ExecuteWorkflowRequest,
+
+  // LLM types
+  Message,
+  MessageRole,
+  LLMRequest,
+  LLMResponse,
+  TokenUsage,
+  LLMProvider,
+
+  // Embedding types
+  EmbeddingRequest,
+  EmbeddingResponse,
+
+  // RAG types
+  RAGQuery,
+  RAGResponse,
+  RAGCitation,
+
+  // Compliance types
+  DataExportRequest,
+  DataExportResponse,
+  ConsentType,
+  ConsentStatus,
+
+  // Trust types
+  AgentTrustScore,
+  UserTrustLevel,
+
+  // Pagination types
+  PaginationParams,
+  PaginatedResponse,
+
+  // Error types
+  APIError,
+  ErrorCode,
+
+  // Webhook types
+  WebhookEventType,
+  WebhookPayload,
+
+  // Analytics types
+  UsageMetrics,
+  AgentAnalytics,
+} from './types.js';
+
+// ============================================================================
+// DEFAULT EXPORT
+// ============================================================================
+
+export default {
+  // Main client
+  HojaiClient,
+  HojaiError,
+
+  // Agent utilities
+  createAgentBuilder,
+  defineTool,
+  defineTools,
+  systemPromptTemplates,
+  getSystemPrompt,
+  createPredefinedAgent,
+  estimateAgentCost,
+  validateAgentConfig,
+  PredefinedAgentType,
+};

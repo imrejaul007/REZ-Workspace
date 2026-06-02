@@ -22,6 +22,7 @@ import emailRoutes from './modules/email.js';
 import notesRoutes from './modules/notes.js';
 import remindersRoutes from './modules/reminders.js';
 import tasksRoutes from './modules/tasks.js';
+import aiAssistantRoutes from './ai-assistant.js';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '4755', 10);
@@ -94,7 +95,8 @@ app.get('/health', (_: Request, res: Response) => {
       'email',
       'notes',
       'reminders',
-      'tasks'
+      'tasks',
+      'ai-assistant'
     ],
     modules: {
       calendar: {
@@ -111,6 +113,17 @@ app.get('/health', (_: Request, res: Response) => {
       },
       tasks: {
         features: ['create', 'subtasks', 'checklist', 'assign', 'priority']
+      },
+      aiAssistant: {
+        features: ['conversational', 'real-llm', 'tool-use', 'memory'],
+        endpoints: [
+          'POST /api/ai/chat',
+          'POST /api/ai/clear',
+          'POST /api/ai/remember',
+          'GET /api/ai/recall',
+          'GET /api/ai/tools',
+          'GET /api/ai/memory-context'
+        ]
       }
     },
     timestamp: new Date().toISOString()
@@ -213,6 +226,9 @@ app.use('/api/reminders', remindersRoutes);
 
 // Tasks routes
 app.use('/api/tasks', tasksRoutes);
+
+// AI Assistant routes (Real LLM-powered conversational assistant)
+app.use('/api/ai', aiAssistantRoutes);
 
 // ============================================================================
 // ERROR HANDLING

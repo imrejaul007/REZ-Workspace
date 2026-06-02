@@ -43,7 +43,7 @@ export interface LLMProvider {
   name: string;
 
   /** Provider type */
-  type: 'openai' | 'anthropic' | 'custom';
+  type: 'openai' | 'anthropic' | 'gemini' | 'llama' | 'mistral' | 'custom';
 
   /** Default model for this provider */
   defaultModel: string;
@@ -196,7 +196,7 @@ export interface FunctionParameter {
 /**
  * Supported provider types
  */
-export type ProviderType = 'openai' | 'anthropic';
+export type ProviderType = 'openai' | 'anthropic' | 'gemini' | 'llama' | 'mistral';
 
 /**
  * Cost information for a provider
