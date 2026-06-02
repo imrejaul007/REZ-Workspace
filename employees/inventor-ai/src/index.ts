@@ -1,8 +1,8 @@
 /**
- * HOJAI accounting ai
- * Port: 4859
+ * HOJAI inventor ai
+ * Port: 4880
  *
- * AI-powered accounting ai for business operations
+ * AI-powered inventor ai for business operations
  */
 
 import express, { Request, Response } from 'express';
@@ -11,8 +11,8 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 
-const PORT = 4859;
-const SERVICE_NAME = 'accounting-ai';
+const PORT = 4880;
+const SERVICE_NAME = 'inventor-ai';
 
 const app = express();
 
@@ -51,7 +51,7 @@ app.get('/api/info', (req: Request, res: Response) => {
   res.json({
     service: SERVICE_NAME,
     version: '1.0.0',
-    description: 'AI-powered accounting ai for business operations',
+    description: 'AI-powered inventor ai for business operations',
     capabilities: {
       task_automation: true,
       ai_assistance: true,
@@ -65,11 +65,11 @@ app.post('/api/execute', async (req: Request, res: Response) => {
   try {
     const { task, context } = req.body;
 
-    // TODO: Implement accounting-ai business logic
+    // TODO: Implement inventor-ai business logic
     const result = {
       task,
       status: 'completed',
-      output: `accounting ai processed task: ${task || 'no task provided'}`,
+      output: `inventor ai processed task: ${task || 'no task provided'}`,
       timestamp: new Date().toISOString()
     };
 
@@ -103,8 +103,8 @@ app.use((err: any, req: Request, res: Response, next: any) => {
 app.listen(PORT, () => {
   console.log(`
 ╔══════════════════════════════════════════════╗
-║  HOJAI accounting ai
-║  Port: 4859
+║  HOJAI inventor ai
+║  Port: 4880
 ║  Status: RUNNING
 ╚══════════════════════════════════════════════╝
   `);

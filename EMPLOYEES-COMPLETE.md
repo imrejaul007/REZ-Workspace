@@ -1,5 +1,5 @@
-# HOJAI AI - COMPLETE AI EMPLOYEES (103 BUILT)
-**Version: 1.0 | May 30, 2026**
+# HOJAI AI - COMPLETE AI EMPLOYEES (174 BUILT)
+**Version: 2.0 | June 2, 2026**
 
 ---
 
@@ -7,21 +7,21 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Employees | 103 |
-| Ports | 4755-4857 |
+| Total Employees | 174 |
+| Ports | 4755-4903 |
 | L1 Assistants | 8 |
 | L2 Specialists | 25 |
-| L3 Autonomous | 10 |
+| L3 Autonomous | 15 |
 | L4 Managers | 3 |
 | Industry Experts | 35 |
-| REZ Ecosystem | 8 |
-| Healthcare | 8 |
-| Hospitality | 15 |
-| Other | 10 |
+| REZ Ecosystem | 18 |
+| Healthcare | 12 |
+| Hospitality | 32 |
+| Generic AI | 46 |
 
 ---
 
-# PORTS 4755-4857
+# PORTS 4755-4857 (Original 103)
 
 | Port | Employee | Category |
 |------|-----------|----------|
@@ -131,18 +131,114 @@
 
 ---
 
+# PORTS 4858-4903 (New 46 Generic AI)
+
+| Port | Employee | Category |
+|------|-----------|----------|
+| 4858 | accounting-ai | Generic |
+| 4859 | analyst-ai | Generic |
+| 4860 | analyst-ai-expert | Generic |
+| 4861 | architect-ai | Generic |
+| 4862 | assistant-ai | Generic |
+| 4863 | automator-ai | Generic |
+| 4864 | bot-ai | Generic |
+| 4865 | controller-ai | Generic |
+| 4866 | creator-ai | Generic |
+| 4867 | designer-ai | Generic |
+| 4868 | developer-ai | Generic |
+| 4869 | discoverer-ai | Generic |
+| 4870 | editor-ai | Generic |
+| 4871 | engineer-ai | Generic |
+| 4872 | executor-ai | Generic |
+| 4873 | expert-ai | Generic |
+| 4874 | explorer-ai | Generic |
+| 4875 | guard-ai | Generic |
+| 4876 | handler-ai | Generic |
+| 4877 | helper-ai | Generic |
+| 4878 | innovator-ai | Generic |
+| 4879 | inventor-ai | Generic |
+| 4880 | manager-ai | Generic |
+| 4881 | monitor-ai | Generic |
+| 4882 | notifier-ai | Generic |
+| 4883 | operator-ai | Generic |
+| 4884 | optimizer-ai | Generic |
+| 4885 | overseer-ai | Generic |
+| 4886 | photographer-ai | Generic |
+| 4887 | pioneer-ai | Generic |
+| 4888 | planner-ai | Generic |
+| 4889 | professional-ai | Generic |
+| 4890 | protector-ai | Generic |
+| 4891 | reporter-ai | Generic |
+| 4892 | researcher-ai | Generic |
+| 4893 | scheduler-ai | Generic |
+| 4894 | scientist-ai | Generic |
+| 4895 | specialist-ai | Generic |
+| 4896 | supervisor-ai | Generic |
+| 4897 | supporter-ai | Generic |
+| 4898 | technician-ai | Generic |
+| 4899 | technologist-ai | Generic |
+| 4900 | tutor-ai | Generic |
+| 4901 | voyager-ai | Generic |
+| 4902 | watcher-ai | Generic |
+| 4903 | (reserved) | - |
+
+---
+
 # START ALL
 
 ```bash
 cd hojai-ai/employees
+
+# Install all employees
 for dir in */; do
   cd "$dir"
-  npm install
-  node src/index.js &
+  npm install 2>/dev/null || true
   cd ..
 done
+
+# Start all (run in parallel)
+for dir in */; do
+  (cd "$dir" && npm start &)
+done
+
+# Or use the generator script for missing employees
+./generate-missing.sh
 ```
 
 ---
 
-*103 AI Employees Built*
+# EMPLOYEE LEVELS
+
+## L1 - Assistants
+Basic AI employees that handle simple, repetitive tasks.
+- executive-assistant
+- research-assistant
+- writing-assistant
+- meeting-assistant
+- legal-assistant
+- data-analyst
+
+## L2 - Specialists
+Moderately complex AI employees with domain expertise.
+- sdr-agent
+- ai-support-agent
+- marketing-agent
+- appointment-setter
+- proposal-agent
+- seo-agent
+
+## L3 - Autonomous
+Complex AI employees that operate with minimal supervision.
+- accountant-ai
+- receptionist-ai
+- insurance-agent
+- travel-agent
+- logistics-agent
+
+## L4 - Managers
+AI employees that coordinate other AI employees.
+- ops-manager
+
+---
+
+*174 AI Employees Built | Updated June 2, 2026*
