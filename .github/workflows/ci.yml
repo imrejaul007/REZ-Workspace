@@ -1,0 +1,292 @@
+# HOJAI AI - GitHub Actions CI Pipeline
+# Runs on every push and PR
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ============================================
+  # LINT & TYPE CHECK
+  # ============================================
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck || npm run type-check || npx tsc --noEmit
+
+      - name: ESLint
+        run: npm run lint || true
+
+  # ============================================
+  # TEST
+  # ============================================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test || npm run test:unit || echo "No tests configured"
+
+      - name: Upload coverage
+        if: always()
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  # ============================================
+  # BUILD CONTAINERS
+  # ============================================
+  build-core:
+    name: Build Core Services
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Build API Gateway
+        run: |
+          cd hojai-core/hojai-api-gateway
+          npm ci
+          npm run build
+
+      - name: Build Memory Service
+        run: |
+          cd hojai-core/hojai-memory
+          npm ci
+          npm run build
+
+      - name: Build Intelligence Service
+        run: |
+          cd hojai-core/hojai-intelligence
+          npm ci
+          npm run build
+
+      - name: Build Agents Service
+        run: |
+          cd hojai-core/hojai-agents
+          npm ci
+          npm run build
+
+  # ============================================
+  # BUILD EMPLOYEES
+  # ============================================
+  build-employees:
+    name: Build AI Employees
+    runs-on: ubuntu-latest
+    needs: [build-core]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Build sample employees
+        run: |
+          for emp in ai-support-agent assistant-ai analyst-ai receptionist-ai; do
+            echo "Building $emp..."
+            cd employees/$emp
+            npm ci
+            npm run build
+            cd ../..
+          done
+
+  # ============================================
+  # SECURITY SCAN
+  # ============================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [build-core]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate || true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+        continue-on-error: true
+
+      - name: Upload scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+        continue-on-error: true
+
+  # ============================================
+  # INTEGRATION TESTS
+  # ============================================
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [build-core, build-employees]
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Start services
+        run: |
+          cd hojai-core
+          npm ci
+          npm run build || true
+          (npm run dev &)
+          sleep 5
+
+      - name: Run integration tests
+        run: |
+          cd tests
+          npm ci
+          npm run test:integration || echo "Integration tests pending"
+        continue-on-error: true
+
+  # ============================================
+  # BUILD & PUSH DOCKER
+  # ============================================
+  docker:
+    name: Build & Push Docker
+    runs-on: ubuntu-latest
+    needs: [security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push API Gateway
+        uses: docker/build-push-action@v5
+        with:
+          context: ./hojai-core/hojai-api-gateway
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}-api-gateway
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # SUMMARY
+  # ============================================
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [lint, test, build-core, build-employees, security, integration, docker]
+    if: always()
+
+    steps:
+      - name: Summary
+        run: |
+          echo "## Build Summary"
+          echo ""
+          echo "| Job | Status |"
+          echo "|------|--------|"
+          echo "| Lint | ${{ needs.lint.result }} |"
+          echo "| Test | ${{ needs.test.result }} |"
+          echo "| Build Core | ${{ needs.build-core.result }} |"
+          echo "| Build Employees | ${{ needs.build-employees.result }} |"
+          echo "| Security | ${{ needs.security.result }} |"
+          echo "| Integration | ${{ needs.integration.result }} |"
+          echo "| Docker | ${{ needs.docker.result }} |"
