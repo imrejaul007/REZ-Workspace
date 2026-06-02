@@ -1,147 +1,443 @@
-# HOJAI AI - Docker Compose
-# Version: 1.0 | Date: May 30, 2026
+# HOJAI AI - Production Docker Compose
+# Version: 2.0 | Date: June 2, 2026
 
 version: '3.8'
 
 services:
-  # HOJAI API Gateway
-  hojai-api-gateway:
-    build: ./hojai-core/hojai-api-gateway
-    ports:
-      - "4500:4500"
-    networks:
-      - hojai-network
+  # ============================================
+  # INFRASTRUCTURE
+  # ============================================
 
-  # HOJAI Platforms
-  hojai-governance:
-    build: ./hojai-core/hojai-governance
-    ports:
-      - "4501:4501"
-
-  hojai-event:
-    build: ./hojai-core/hojai-event
-    ports:
-      - "4510:4510"
-
-  hojai-memory:
-    build: ./hojai-core/hojai-memory
-    ports:
-      - "4520:4520"
-
-  hojai-intelligence:
-    build: ./hojai-core/hojai-intelligence
-    ports:
-      - "4530:4530"
-
-  hojai-agents:
-    build: ./hojai-core/hojai-agents
-    ports:
-      - "4550:4550"
-
-  hojai-workflow:
-    build: ./hojai-core/hojai-workflow
-    ports:
-      - "4560:4560"
-
-  hojai-communications:
-    build: ./hojai-core/hojai-communications
-    ports:
-      - "4570:4570"
-
-  hojai-hyperlocal:
-    build: ./hojai-core/hojai-hyperlocal
-    ports:
-      - "4580:4580"
-
-  hojai-data:
-    build: ./hojai-core/hojai-data
-    ports:
-      - "4590:4590"
-
-  hojai-identity:
-    build: ./hojai-core/hojai-identity
-    ports:
-      - "4600:4600"
-
-  hojai-analytics:
-    build: ./hojai-core/hojai-analytics
-    ports:
-      - "4610:4610"
-
-  hojai-industry:
-    build: ./hojai-industry
-    ports:
-      - "4700:4700"
-
-  # REZ Intelligence
-  rez-intelligence:
-    build: ./rez-intelligence
-    ports:
-      - "4100:4100"
-
-  # MongoDB
   mongodb:
-    image: mongo:7
+    image: mongo:7.0
+    container_name: hojai-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: hojai
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
       - hojai-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  # Redis
   redis:
     image: redis:7-alpine
+    container_name: hojai-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-password}
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # HOJAI CORE SERVICES
+  # ============================================
+
+  api-gateway:
+    build:
+      context: ./hojai-core/hojai-api-gateway
+      dockerfile: Dockerfile
+    container_name: hojai-api-gateway
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4500
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/hojai?authSource=admin
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-password}@redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    ports:
+      - "4500:4500"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4500/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  memory:
+    build:
+      context: ./hojai-core/hojai-memory
+      dockerfile: Dockerfile
+    container_name: hojai-memory
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4520
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/hojai?authSource=admin
+    ports:
+      - "4520:4520"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4520/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  intelligence:
+    build:
+      context: ./hojai-core/hojai-intelligence
+      dockerfile: Dockerfile
+    container_name: hojai-intelligence
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4530
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/hojai?authSource=admin
+    ports:
+      - "4530:4530"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4530/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  agents:
+    build:
+      context: ./hojai-core/hojai-agents
+      dockerfile: Dockerfile
+    container_name: hojai-agents
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4550
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/hojai?authSource=admin
+    ports:
+      - "4550:4550"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4550/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  governance:
+    build:
+      context: ./hojai-core/hojai-governance
+      dockerfile: Dockerfile
+    container_name: hojai-governance
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4501
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/hojai?authSource=admin
+    ports:
+      - "4501:4501"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4501/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  event:
+    build:
+      context: ./hojai-core/hojai-event
+      dockerfile: Dockerfile
+    container_name: hojai-event
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4510
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-password}@redis:6379
+    ports:
+      - "4510:4510"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4510/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  communications:
+    build:
+      context: ./hojai-core/hojai-communications
+      dockerfile: Dockerfile
+    container_name: hojai-communications
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4570
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+    ports:
+      - "4570:4570"
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4570/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  workflow:
+    build:
+      context: ./hojai-core/hojai-workflow
+      dockerfile: Dockerfile
+    container_name: hojai-workflow
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4560
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-password}@redis:6379
+    ports:
+      - "4560:4560"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - hojai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4560/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  hyperlocal:
+    build:
+      context: ./hojai-core/hojai-hyperlocal
+      dockerfile: Dockerfile
+    container_name: hojai-hyperlocal
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4580
+    ports:
+      - "4580:4580"
     networks:
       - hojai-network
 
-  # LiveKit Server
+  analytics:
+    build:
+      context: ./hojai-core/hojai-analytics
+      dockerfile: Dockerfile
+    container_name: hojai-analytics
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4610
+    ports:
+      - "4610:4610"
+    networks:
+      - hojai-network
+
+  identity:
+    build:
+      context: ./hojai-core/hojai-identity
+      dockerfile: Dockerfile
+    container_name: hojai-identity
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4600
+    ports:
+      - "4600:4600"
+    networks:
+      - hojai-network
+
+  # ============================================
+  # VOICE & TELECOM
+  # ============================================
+
+  voice-os:
+    build:
+      context: ./hojai-voice-os
+      dockerfile: Dockerfile
+    container_name: hojai-voice-os
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    networks:
+      - hojai-network
+
+  telecom-bridge:
+    build:
+      context: ./hojai-telecom-bridge
+      dockerfile: Dockerfile
+    container_name: hojai-telecom-bridge
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4860
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - EXOTEL_API_KEY=${EXOTEL_API_KEY}
+      - EXOTEL_API_TOKEN=${EXOTEL_API_TOKEN}
+    ports:
+      - "4860:4860"
+    networks:
+      - hojai-network
+
+  # ============================================
+  # KEY AI EMPLOYEES
+  # ============================================
+
+  ai-support-agent:
+    build:
+      context: ./employees/ai-support-agent
+      dockerfile: Dockerfile
+    container_name: hojai-ai-support
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4760
+    ports:
+      - "4760:4760"
+    networks:
+      - hojai-network
+
+  assistant-ai:
+    build:
+      context: ./employees/assistant-ai
+      dockerfile: Dockerfile
+    container_name: hojai-assistant
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4863
+    ports:
+      - "4863:4863"
+    networks:
+      - hojai-network
+
+  analyst-ai:
+    build:
+      context: ./employees/analyst-ai
+      dockerfile: Dockerfile
+    container_name: hojai-analyst
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4859
+    ports:
+      - "4859:4859"
+    networks:
+      - hojai-network
+
+  receptionist-ai:
+    build:
+      context: ./employees/receptionist-ai
+      dockerfile: Dockerfile
+    container_name: hojai-receptionist
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4783
+    ports:
+      - "4783:4783"
+    networks:
+      - hojai-network
+
+  # ============================================
+  # GENIE PERSONAL AI
+  # ============================================
+
+  genie-memory:
+    build:
+      context: ./genie-memory-service
+      dockerfile: Dockerfile
+    container_name: hojai-genie-memory
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4700
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/hojai?authSource=admin
+    ports:
+      - "4700:4700"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - hojai-network
+
+  genie-gateway:
+    build:
+      context: ./genie-personal-os-gateway
+      dockerfile: Dockerfile
+    container_name: hojai-genie-gateway
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4702
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/hojai?authSource=admin
+    ports:
+      - "4702:4702"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - hojai-network
+
+  # ============================================
+  # LIVEKIT (Optional - for voice)
+  # ============================================
+
   livekit:
     image: livekit/livekit-server
+    container_name: hojai-livekit
+    restart: unless-stopped
     ports:
       - "7880:7880"
       - "7881:7881"
       - "7882:7882/udp"
     environment:
-      - KEY=${LIVEKIT_API_KEY:-dev-api-key}
-      - SECRET=${LIVEKIT_API_SECRET:-dev-secret}
+      - KEY=${LIVEKIT_API_KEY:-devkey}
+      - SECRET=${LIVEKIT_API_SECRET:-devsecret}
     networks:
       - hojai-network
 
-  # Hojai Flow Service
-  hojai-flow:
-    build: ./hojai-flow-service
-    ports:
-      - "4580:4580"
-    environment:
-      - MONGODB_URI=mongodb://mongodb:27017/hojai_flow
-      - REDIS_URL=redis://redis:6379
-      - LIVEKIT_URL=http://livekit:7880
-      - WORKFLOW_URL=http://hojai-workflow:4560
-    depends_on:
-      - mongodb
-      - redis
-    networks:
-      - hojai-network
-
-  # Voice Service (STT/TTS)
-  voice-service:
-    build: ./voice-service
-    ports:
-      - "4033:4033"
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
-    networks:
-      - hojai-network
-
-  # Merchant AI OS
-  merchant-ai-os:
-    build: ./products/merchant-ai-os
-    ports:
-      - "4620:4620"
+# ============================================
+# NETWORKS & VOLUMES
+# ============================================
 
 networks:
   hojai-network:
@@ -149,3 +445,4 @@ networks:
 
 volumes:
   mongodb_data:
+  redis_data:
