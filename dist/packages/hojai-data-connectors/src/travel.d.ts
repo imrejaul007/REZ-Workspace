@@ -10,8 +10,8 @@ export declare function emitTravelSignals(data: {
             from: string;
             to: string;
         };
-        class: string;
-        loyalty: number;
     };
+    class: string;
+    loyalty: number;
 }): Promise<void>;
 //# sourceMappingURL=travel.d.ts.map

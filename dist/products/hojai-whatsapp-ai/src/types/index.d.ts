@@ -19,12 +19,12 @@ export declare const WhatsAppMessageSchema: z.ZodObject<{
         caption: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         id?: string | undefined;
-        caption?: string | undefined;
         link?: string | undefined;
+        caption?: string | undefined;
     }, {
         id?: string | undefined;
-        caption?: string | undefined;
         link?: string | undefined;
+        caption?: string | undefined;
     }>>;
     template: z.ZodOptional<z.ZodObject<{
         name: z.ZodString;
@@ -79,24 +79,17 @@ export declare const WhatsAppMessageSchema: z.ZodObject<{
         footer?: any;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    type: "image" | "video" | "audio" | "document" | "text" | "template" | "interactive";
+    type: "text" | "image" | "video" | "audio" | "document" | "interactive" | "template";
     to: string;
     messaging_product: "whatsapp";
-    image?: {
-        id?: string | undefined;
-        caption?: string | undefined;
-        link?: string | undefined;
-    } | undefined;
     text?: {
         body: string;
         preview_url?: boolean | undefined;
     } | undefined;
-    template?: {
-        name: string;
-        language: {
-            code: string;
-        };
-        components?: any[] | undefined;
+    image?: {
+        id?: string | undefined;
+        link?: string | undefined;
+        caption?: string | undefined;
     } | undefined;
     interactive?: {
         type: "product" | "button" | "list_reply" | "product_list";
@@ -106,26 +99,26 @@ export declare const WhatsAppMessageSchema: z.ZodObject<{
         actions?: any;
         header?: any;
         footer?: any;
+    } | undefined;
+    template?: {
+        name: string;
+        language: {
+            code: string;
+        };
+        components?: any[] | undefined;
     } | undefined;
 }, {
-    type: "image" | "video" | "audio" | "document" | "text" | "template" | "interactive";
+    type: "text" | "image" | "video" | "audio" | "document" | "interactive" | "template";
     to: string;
     messaging_product: "whatsapp";
-    image?: {
-        id?: string | undefined;
-        caption?: string | undefined;
-        link?: string | undefined;
-    } | undefined;
     text?: {
         body: string;
         preview_url?: boolean | undefined;
     } | undefined;
-    template?: {
-        name: string;
-        language: {
-            code: string;
-        };
-        components?: any[] | undefined;
+    image?: {
+        id?: string | undefined;
+        link?: string | undefined;
+        caption?: string | undefined;
     } | undefined;
     interactive?: {
         type: "product" | "button" | "list_reply" | "product_list";
@@ -135,6 +128,13 @@ export declare const WhatsAppMessageSchema: z.ZodObject<{
         actions?: any;
         header?: any;
         footer?: any;
+    } | undefined;
+    template?: {
+        name: string;
+        language: {
+            code: string;
+        };
+        components?: any[] | undefined;
     } | undefined;
 }>;
 export type WhatsAppMessage = z.infer<typeof WhatsAppMessageSchema>;
@@ -337,29 +337,29 @@ export declare const ConversationSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "active" | "escalated" | "resolved" | "waiting";
-    customerId: string;
-    tenantId: string;
     channel: "whatsapp";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    lastMessageAt: Date;
+    status: "active" | "resolved" | "escalated" | "waiting";
+    tenantId: string;
     merchantId: string;
     messageCount: number;
+    lastMessageAt: Date;
+    customerId: string;
     customerPhone: string;
     context?: Record<string, any> | undefined;
     customerName?: string | undefined;
 }, {
-    id: string;
-    status: "active" | "escalated" | "resolved" | "waiting";
-    customerId: string;
-    tenantId: string;
     channel: "whatsapp";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    lastMessageAt: Date;
+    status: "active" | "resolved" | "escalated" | "waiting";
+    tenantId: string;
     merchantId: string;
+    lastMessageAt: Date;
+    customerId: string;
     customerPhone: string;
     context?: Record<string, any> | undefined;
     customerName?: string | undefined;
@@ -382,34 +382,34 @@ export declare const MessageSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
-    conversationId: string;
-    tenantId: string;
+    role: "user" | "assistant" | "system";
+    type: "text" | "location" | "image" | "video" | "audio" | "document" | "button" | "template";
     content: string;
+    id: string;
     createdAt: Date;
-    messageId: string;
-    role: "system" | "user" | "assistant";
+    tenantId: string;
     direction: "inbound" | "outbound";
+    conversationId: string;
+    messageId: string;
     merchantId: string;
-    confidence?: number | undefined;
     metadata?: Record<string, any> | undefined;
     intent?: string | undefined;
+    confidence?: number | undefined;
     mediaUrl?: string | undefined;
 }, {
-    id: string;
-    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
-    conversationId: string;
-    tenantId: string;
+    role: "user" | "assistant" | "system";
+    type: "text" | "location" | "image" | "video" | "audio" | "document" | "button" | "template";
     content: string;
+    id: string;
     createdAt: Date;
-    messageId: string;
-    role: "system" | "user" | "assistant";
+    tenantId: string;
     direction: "inbound" | "outbound";
+    conversationId: string;
+    messageId: string;
     merchantId: string;
-    confidence?: number | undefined;
     metadata?: Record<string, any> | undefined;
     intent?: string | undefined;
+    confidence?: number | undefined;
     mediaUrl?: string | undefined;
 }>;
 export type Message = z.infer<typeof MessageSchema>;
@@ -563,32 +563,32 @@ export declare const BusinessProfileSchema: z.ZodObject<{
         feedback: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
         support: boolean;
-        feedback: boolean;
         booking: boolean;
+        feedback: boolean;
         catalog: boolean;
         ordering: boolean;
     }, {
         support?: boolean | undefined;
-        feedback?: boolean | undefined;
         booking?: boolean | undefined;
+        feedback?: boolean | undefined;
         catalog?: boolean | undefined;
         ordering?: boolean | undefined;
     }>;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     name: string;
+    language: string;
     description: string;
-    tenantId: string;
     category: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    language: string;
+    tenantId: string;
     features: {
         support: boolean;
-        feedback: boolean;
         booking: boolean;
+        feedback: boolean;
         catalog: boolean;
         ordering: boolean;
     };
@@ -628,26 +628,26 @@ export declare const BusinessProfileSchema: z.ZodObject<{
         } | undefined;
     } | undefined;
 }, {
-    id: string;
     name: string;
     description: string;
-    tenantId: string;
     category: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     features: {
         support?: boolean | undefined;
-        feedback?: boolean | undefined;
         booking?: boolean | undefined;
+        feedback?: boolean | undefined;
         catalog?: boolean | undefined;
         ordering?: boolean | undefined;
     };
     merchantId: string;
+    language?: string | undefined;
     email?: string | undefined;
     address?: string | undefined;
-    language?: string | undefined;
-    website?: string | undefined;
     timezone?: string | undefined;
+    website?: string | undefined;
     businessHours?: {
         monday?: {
             close: string;
@@ -697,15 +697,15 @@ export declare const KnowledgeBaseItemSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
-    tenantId: string;
     category: string;
-    confidence: number;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    usageCount: number;
+    active: boolean;
+    tenantId: string;
+    confidence: number;
     question: string;
+    usageCount: number;
     merchantId: string;
     answer: string;
     helpfulCount: number;
@@ -713,18 +713,18 @@ export declare const KnowledgeBaseItemSchema: z.ZodObject<{
     keywords?: string[] | undefined;
     intents?: string[] | undefined;
 }, {
-    id: string;
-    tenantId: string;
     category: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     question: string;
     merchantId: string;
     answer: string;
+    keywords?: string[] | undefined;
     active?: boolean | undefined;
     confidence?: number | undefined;
     usageCount?: number | undefined;
-    keywords?: string[] | undefined;
     intents?: string[] | undefined;
     helpfulCount?: number | undefined;
     notHelpfulCount?: number | undefined;
@@ -739,10 +739,10 @@ export declare const AutomationRuleSchema: z.ZodObject<{
         type: z.ZodEnum<["keyword", "intent", "time", "event", " inactivity"]>;
         config: z.ZodRecord<z.ZodString, z.ZodAny>;
     }, "strip", z.ZodTypeAny, {
-        type: "keyword" | "event" | "intent" | "time" | " inactivity";
+        type: "event" | "intent" | "keyword" | "time" | " inactivity";
         config: Record<string, any>;
     }, {
-        type: "keyword" | "event" | "intent" | "time" | " inactivity";
+        type: "event" | "intent" | "keyword" | "time" | " inactivity";
         config: Record<string, any>;
     }>;
     conditions: z.ZodOptional<z.ZodArray<z.ZodObject<{
@@ -751,21 +751,21 @@ export declare const AutomationRuleSchema: z.ZodObject<{
         value: z.ZodAny;
     }, "strip", z.ZodTypeAny, {
         field: string;
-        operator: "contains" | "equals" | "greater_than" | "less_than";
+        operator: "equals" | "contains" | "greater_than" | "less_than";
         value?: any;
     }, {
         field: string;
-        operator: "contains" | "equals" | "greater_than" | "less_than";
+        operator: "equals" | "contains" | "greater_than" | "less_than";
         value?: any;
     }>, "many">>;
     actions: z.ZodArray<z.ZodObject<{
         type: z.ZodEnum<["reply", "template", "tag", "assign", "webhook", "workflow"]>;
         config: z.ZodRecord<z.ZodString, z.ZodAny>;
     }, "strip", z.ZodTypeAny, {
-        type: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook";
+        type: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag";
         config: Record<string, any>;
     }, {
-        type: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook";
+        type: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag";
         config: Record<string, any>;
     }>, "many">;
     priority: z.ZodDefault<z.ZodNumber>;
@@ -785,20 +785,20 @@ export declare const AutomationRuleSchema: z.ZodObject<{
     }>>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
     name: string;
+    id: string;
+    createdAt: Date;
+    active: boolean;
     tenantId: string;
     trigger: {
-        type: "keyword" | "event" | "intent" | "time" | " inactivity";
+        type: "event" | "intent" | "keyword" | "time" | " inactivity";
         config: Record<string, any>;
     };
-    priority: number;
-    createdAt: Date;
     actions: {
-        type: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook";
+        type: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag";
         config: Record<string, any>;
     }[];
+    priority: number;
     merchantId: string;
     stats?: {
         success: number;
@@ -807,33 +807,33 @@ export declare const AutomationRuleSchema: z.ZodObject<{
     } | undefined;
     conditions?: {
         field: string;
-        operator: "contains" | "equals" | "greater_than" | "less_than";
+        operator: "equals" | "contains" | "greater_than" | "less_than";
         value?: any;
     }[] | undefined;
 }, {
-    id: string;
     name: string;
+    id: string;
+    createdAt: Date;
     tenantId: string;
     trigger: {
-        type: "keyword" | "event" | "intent" | "time" | " inactivity";
+        type: "event" | "intent" | "keyword" | "time" | " inactivity";
         config: Record<string, any>;
     };
-    createdAt: Date;
     actions: {
-        type: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook";
+        type: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag";
         config: Record<string, any>;
     }[];
     merchantId: string;
+    active?: boolean | undefined;
     stats?: {
         success?: number | undefined;
         triggers?: number | undefined;
         failures?: number | undefined;
     } | undefined;
-    active?: boolean | undefined;
     priority?: number | undefined;
     conditions?: {
         field: string;
-        operator: "contains" | "equals" | "greater_than" | "less_than";
+        operator: "equals" | "contains" | "greater_than" | "less_than";
         value?: any;
     }[] | undefined;
 }>;

@@ -346,6 +346,3 @@ export class HojaiSDK {
 export function createSDK(config: SDKConfig): HojaiSDK {
   return new HojaiSDK(config);
 }
-
-// Named export for convenience
-export { HojaiSDK };

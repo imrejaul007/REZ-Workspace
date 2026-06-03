@@ -3,7 +3,7 @@
  *
  * Emotional wellness, mood tracking, cosmic guidance
  */
-import type { WellnessScore, MoodState, CosmicState, WellnessCheckIn, CosmicReading, MindfulnessSession } from '../types/index.js';
+import type { WellnessScore, MoodState, CosmicState, WellnessCheckIn, CosmicReading, MindfulnessSession, JournalEntry } from '../types/index.js';
 export declare class WellnessService {
     private apiKey;
     constructor(apiKey: string);

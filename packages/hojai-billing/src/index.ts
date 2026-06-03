@@ -507,13 +507,13 @@ app.get('/api/ai-employees/billing/summary', authMiddleware, async (req: Request
 
     const billings = await AIEmployeeBilling.find({ tenantId, period });
 
-    const totalCost = billings.reduce((sum, b) => sum + b.basePrice, 0);
-    const byRole = billings.reduce((acc: any, b) => {
-      if (!acc[b.role]) acc[b.role] = { count: 0, cost: 0 };
-      acc[b.role].count++;
-      acc[b.role].cost += b.basePrice;
+    const totalCost = billings.reduce((sum: number, b: any) => sum + b.basePrice, 0);
+    const byRole = billings.reduce((acc: Record<string, { count: number; cost: number }>, b: any) => {
+      if (!acc[b.role as string]) acc[b.role as string] = { count: 0, cost: 0 };
+      acc[b.role as string].count++;
+      acc[b.role as string].cost += b.basePrice;
       return acc;
-    }, {});
+    }, {} as Record<string, { count: number; cost: number }>);
 
     res.json({
       success: true,
@@ -617,7 +617,7 @@ app.get('/api/invoices', authMiddleware, async (req: Request, res: Response) => 
 });
 
 // Generate Invoice (Admin)
-app.post('/api/invoices/generate', async (req: res) => {
+app.post('/api/invoices/generate', async (req: Request, res: Response) => {
   try {
     const { tenantId, subscriptionId, period } = req.body;
 

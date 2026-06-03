@@ -38,24 +38,24 @@ export declare const TrustScoreSchema: z.ZodObject<{
         tenure: z.ZodDefault<z.ZodNumber>;
         volumeScore: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
+        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
     }, {
-        deliveryRate?: number | undefined;
         tenure?: number | undefined;
         positiveReviews?: number | undefined;
         negativeReviews?: number | undefined;
         totalTransactions?: number | undefined;
         avgRating?: number | undefined;
         responseRate?: number | undefined;
+        deliveryRate?: number | undefined;
         disputeRate?: number | undefined;
         verifiedBadges?: string[] | undefined;
         volumeScore?: number | undefined;
@@ -75,19 +75,19 @@ export declare const TrustScoreSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     factors: {
-        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
+        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -105,19 +105,19 @@ export declare const TrustScoreSchema: z.ZodObject<{
     }[];
 }, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     factors: {
-        deliveryRate?: number | undefined;
         tenure?: number | undefined;
         positiveReviews?: number | undefined;
         negativeReviews?: number | undefined;
         totalTransactions?: number | undefined;
         avgRating?: number | undefined;
         responseRate?: number | undefined;
+        deliveryRate?: number | undefined;
         disputeRate?: number | undefined;
         verifiedBadges?: string[] | undefined;
         volumeScore?: number | undefined;
@@ -151,34 +151,34 @@ export declare const VerificationSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    type: "identity" | "email" | "phone" | "address" | "document" | "business" | "social" | "bank_account" | "kyc";
     id: string;
-    status: "pending" | "rejected" | "expired" | "verified";
-    type: "email" | "identity" | "document" | "phone" | "address" | "business" | "social" | "bank_account" | "kyc";
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    status: "pending" | "rejected" | "expired" | "verified";
+    tenantId: string;
     level: "standard" | "basic" | "premium" | "enhanced";
     entityType: EntityType;
     entityId: string;
     metadata?: Record<string, any> | undefined;
-    provider?: string | undefined;
     expiresAt?: Date | undefined;
     externalId?: string | undefined;
+    provider?: string | undefined;
     verifiedAt?: Date | undefined;
 }, {
+    type: "identity" | "email" | "phone" | "address" | "document" | "business" | "social" | "bank_account" | "kyc";
     id: string;
-    status: "pending" | "rejected" | "expired" | "verified";
-    type: "email" | "identity" | "document" | "phone" | "address" | "business" | "social" | "bank_account" | "kyc";
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    status: "pending" | "rejected" | "expired" | "verified";
+    tenantId: string;
     level: "standard" | "basic" | "premium" | "enhanced";
     entityType: EntityType;
     entityId: string;
     metadata?: Record<string, any> | undefined;
-    provider?: string | undefined;
     expiresAt?: Date | undefined;
     externalId?: string | undefined;
+    provider?: string | undefined;
     verifiedAt?: Date | undefined;
 }>;
 export type Verification = z.infer<typeof VerificationSchema>;
@@ -217,50 +217,50 @@ export declare const ReviewSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    status: "hidden" | "flagged" | "published" | "disputed";
-    helpful: number;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    status: "hidden" | "flagged" | "published" | "disputed";
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
     reviewerId: string;
+    helpful: number;
     reviewerType: EntityType;
     isVerified: boolean;
     isAnonymous: boolean;
     unhelpful: number;
+    title?: string | undefined;
+    content?: string | undefined;
     response?: {
         content: string;
         respondedAt: Date;
         respondedBy: string;
     } | undefined;
-    content?: string | undefined;
-    title?: string | undefined;
     categories?: Record<string, number> | undefined;
     orderId?: string | undefined;
     transactionValue?: number | undefined;
 }, {
     id: string;
-    status: "hidden" | "flagged" | "published" | "disputed";
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    status: "hidden" | "flagged" | "published" | "disputed";
+    tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
     reviewerId: string;
     reviewerType: EntityType;
+    title?: string | undefined;
+    content?: string | undefined;
     response?: {
         content: string;
         respondedAt: Date;
         respondedBy: string;
     } | undefined;
-    helpful?: number | undefined;
-    content?: string | undefined;
-    title?: string | undefined;
     categories?: Record<string, number> | undefined;
     orderId?: string | undefined;
+    helpful?: number | undefined;
     isVerified?: boolean | undefined;
     isAnonymous?: boolean | undefined;
     transactionValue?: number | undefined;
@@ -284,10 +284,10 @@ export declare const TrustEdgeSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
-    relationship: "blocked" | "flagged" | "referred" | "member_of" | "customer_of" | "partner_with" | "employee_of" | "supplier_of" | "endorsed_by";
+    tenantId: string;
+    relationship: "blocked" | "referred" | "member_of" | "flagged" | "customer_of" | "partner_with" | "employee_of" | "supplier_of" | "endorsed_by";
     sourceType: EntityType;
     sourceId: string;
     targetId: string;
@@ -299,10 +299,10 @@ export declare const TrustEdgeSchema: z.ZodObject<{
     lastInteraction?: Date | undefined;
 }, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
-    relationship: "blocked" | "flagged" | "referred" | "member_of" | "customer_of" | "partner_with" | "employee_of" | "supplier_of" | "endorsed_by";
+    tenantId: string;
+    relationship: "blocked" | "referred" | "member_of" | "flagged" | "customer_of" | "partner_with" | "employee_of" | "supplier_of" | "endorsed_by";
     sourceType: EntityType;
     sourceId: string;
     targetId: string;
@@ -344,12 +344,12 @@ export declare const BadgeSchema: z.ZodObject<{
     active: z.ZodDefault<z.ZodBoolean>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    name: string;
+    description: string;
     id: string;
+    createdAt: Date;
     active: boolean;
-    name: string;
-    description: string;
     tenantId: string;
-    createdAt: Date;
     criteria: {
         minTransactions?: number | undefined;
         minRating?: number | undefined;
@@ -358,14 +358,14 @@ export declare const BadgeSchema: z.ZodObject<{
         maxDisputeRate?: number | undefined;
     };
     tier: "bronze" | "silver" | "gold" | "platinum";
-    icon?: string | undefined;
     color?: string | undefined;
+    icon?: string | undefined;
 }, {
-    id: string;
     name: string;
     description: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
+    tenantId: string;
     criteria: {
         minTransactions?: number | undefined;
         minRating?: number | undefined;
@@ -374,9 +374,9 @@ export declare const BadgeSchema: z.ZodObject<{
         maxDisputeRate?: number | undefined;
     };
     tier: "bronze" | "silver" | "gold" | "platinum";
+    color?: string | undefined;
     active?: boolean | undefined;
     icon?: string | undefined;
-    color?: string | undefined;
 }>;
 export type Badge = z.infer<typeof BadgeSchema>;
 //# sourceMappingURL=index.d.ts.map

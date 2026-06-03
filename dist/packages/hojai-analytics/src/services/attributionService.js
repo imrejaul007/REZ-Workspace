@@ -146,7 +146,7 @@ export class AnalyticsService {
             if (events.length === 0)
                 continue;
             let channels = [];
-            const weights = [];
+            let weights = [];
             switch (model) {
                 case AttributionModel.FIRST_TOUCH:
                     channels = [events[events.length - 1].channel];

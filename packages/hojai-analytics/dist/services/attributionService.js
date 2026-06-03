@@ -182,7 +182,7 @@ class AnalyticsService {
             if (events.length === 0)
                 continue;
             let channels = [];
-            const weights = [];
+            let weights = [];
             switch (model) {
                 case index_js_1.AttributionModel.FIRST_TOUCH:
                     channels = [events[events.length - 1].channel];

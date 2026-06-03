@@ -51,12 +51,12 @@ export declare const ReviewRequestSchema: z.ZodObject<{
         confidence: z.ZodNumber;
         reasoning: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        confidence: number;
         action: string;
+        confidence: number;
         reasoning: string;
     }, {
-        confidence: number;
         action: string;
+        confidence: number;
         reasoning: string;
     }>;
     assignedTo: z.ZodOptional<z.ZodString>;
@@ -73,16 +73,16 @@ export declare const ReviewRequestSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: ReviewStatus;
-    type: ReviewType;
     context: Record<string, any>;
+    type: ReviewType;
+    title: string;
     description: string;
-    tenantId: string;
-    priority: ReviewPriority;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    title: string;
+    status: ReviewStatus;
+    tenantId: string;
+    priority: ReviewPriority;
     originalAction: {
         type: string;
         params: Record<string, any>;
@@ -90,13 +90,13 @@ export declare const ReviewRequestSchema: z.ZodObject<{
         confidence?: number | undefined;
     };
     aiRecommendation: {
-        confidence: number;
         action: string;
+        confidence: number;
         reasoning: string;
     };
     slaDeadline: Date;
     slaHours: number;
-    decision?: "escalate" | "approve" | "reject" | "override" | undefined;
+    decision?: "approve" | "reject" | "override" | "escalate" | undefined;
     assignedTo?: string | undefined;
     reviewerRole?: string | undefined;
     escalatedTo?: string | undefined;
@@ -106,14 +106,14 @@ export declare const ReviewRequestSchema: z.ZodObject<{
     overriddenBy?: string | undefined;
     overrideReason?: string | undefined;
 }, {
-    id: string;
-    type: ReviewType;
     context: Record<string, any>;
+    type: ReviewType;
+    title: string;
     description: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    title: string;
+    tenantId: string;
     originalAction: {
         type: string;
         params: Record<string, any>;
@@ -121,14 +121,14 @@ export declare const ReviewRequestSchema: z.ZodObject<{
         confidence?: number | undefined;
     };
     aiRecommendation: {
-        confidence: number;
         action: string;
+        confidence: number;
         reasoning: string;
     };
     slaDeadline: Date;
+    decision?: "approve" | "reject" | "override" | "escalate" | undefined;
     status?: ReviewStatus | undefined;
     priority?: ReviewPriority | undefined;
-    decision?: "escalate" | "approve" | "reject" | "override" | undefined;
     assignedTo?: string | undefined;
     reviewerRole?: string | undefined;
     escalatedTo?: string | undefined;
@@ -151,11 +151,11 @@ export declare const EscalationRuleSchema: z.ZodObject<{
         value: z.ZodAny;
     }, "strip", z.ZodTypeAny, {
         field: string;
-        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
+        operator: "equals" | "in" | "contains" | "greater_than" | "less_than";
         value?: any;
     }, {
         field: string;
-        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
+        operator: "equals" | "in" | "contains" | "greater_than" | "less_than";
         value?: any;
     }>, "many">;
     action: z.ZodEnum<["escalate", "block", "require_review", "notify"]>;
@@ -166,33 +166,33 @@ export declare const EscalationRuleSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
     name: string;
     description: string;
-    tenantId: string;
-    action: "escalate" | "notify" | "block" | "require_review";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    action: "escalate" | "block" | "require_review" | "notify";
+    active: boolean;
+    tenantId: string;
     conditions: {
         field: string;
-        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
+        operator: "equals" | "in" | "contains" | "greater_than" | "less_than";
         value?: any;
     }[];
     reason?: string | undefined;
     escalateTo?: string | undefined;
     priorityBoost?: number | undefined;
 }, {
-    id: string;
     name: string;
     description: string;
-    tenantId: string;
-    action: "escalate" | "notify" | "block" | "require_review";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    action: "escalate" | "block" | "require_review" | "notify";
+    tenantId: string;
     conditions: {
         field: string;
-        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
+        operator: "equals" | "in" | "contains" | "greater_than" | "less_than";
         value?: any;
     }[];
     active?: boolean | undefined;
@@ -211,38 +211,38 @@ export declare const ConfidenceThresholdSchema: z.ZodObject<{
         min: z.ZodDefault<z.ZodNumber>;
         max: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        max: number;
         min: number;
+        max: number;
     }, {
-        max?: number | undefined;
         min?: number | undefined;
+        max?: number | undefined;
     }>;
     autoApproveAbove: z.ZodDefault<z.ZodNumber>;
     canOverride: z.ZodDefault<z.ZodBoolean>;
     overrideRoles: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     active: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
+    category: string;
     id: string;
+    action: string;
     active: boolean;
     tenantId: string;
-    category: string;
-    action: string;
     autoApproveBelow: number;
     reviewRequired: {
-        max: number;
         min: number;
+        max: number;
     };
     autoApproveAbove: number;
     canOverride: boolean;
     overrideRoles?: string[] | undefined;
 }, {
-    id: string;
-    tenantId: string;
     category: string;
+    id: string;
     action: string;
+    tenantId: string;
     reviewRequired: {
-        max?: number | undefined;
         min?: number | undefined;
+        max?: number | undefined;
     };
     active?: boolean | undefined;
     autoApproveBelow?: number | undefined;
@@ -262,19 +262,19 @@ export declare const ReviewAuditSchema: z.ZodObject<{
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    details: Record<string, any>;
-    tenantId: string;
-    action: "escalated" | "assigned" | "expired" | "created" | "overridden" | "decided" | "commented";
     createdAt: Date;
+    action: "assigned" | "expired" | "escalated" | "created" | "overridden" | "decided" | "commented";
+    tenantId: string;
+    details: Record<string, any>;
     reviewId: string;
     performedBy: string;
     role?: string | undefined;
 }, {
     id: string;
-    details: Record<string, any>;
-    tenantId: string;
-    action: "escalated" | "assigned" | "expired" | "created" | "overridden" | "decided" | "commented";
     createdAt: Date;
+    action: "assigned" | "expired" | "escalated" | "created" | "overridden" | "decided" | "commented";
+    tenantId: string;
+    details: Record<string, any>;
     reviewId: string;
     performedBy: string;
     role?: string | undefined;

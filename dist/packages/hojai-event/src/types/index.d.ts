@@ -67,15 +67,15 @@ export declare const EventSchema: z.ZodObject<{
         city: z.ZodOptional<z.ZodString>;
         country: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        city?: string | undefined;
-        country?: string | undefined;
         latitude?: number | undefined;
         longitude?: number | undefined;
+        city?: string | undefined;
+        country?: string | undefined;
     }, {
-        city?: string | undefined;
-        country?: string | undefined;
         latitude?: number | undefined;
         longitude?: number | undefined;
+        city?: string | undefined;
+        country?: string | undefined;
     }>>;
     properties: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     metrics: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodNumber>>;
@@ -87,84 +87,84 @@ export declare const EventSchema: z.ZodObject<{
         os: z.ZodOptional<z.ZodString>;
         referrer: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        referrer?: string | undefined;
         ip?: string | undefined;
         userAgent?: string | undefined;
         deviceType?: string | undefined;
         browser?: string | undefined;
         os?: string | undefined;
+        referrer?: string | undefined;
     }, {
-        referrer?: string | undefined;
         ip?: string | undefined;
         userAgent?: string | undefined;
         deviceType?: string | undefined;
         browser?: string | undefined;
         os?: string | undefined;
+        referrer?: string | undefined;
     }>>;
     derivedFrom: z.ZodOptional<z.ZodString>;
     processed: z.ZodDefault<z.ZodBoolean>;
     processedAt: z.ZodOptional<z.ZodDate>;
     version: z.ZodDefault<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    name: string;
+    type: string;
+    category: EventCategory;
     id: string;
     version: string;
-    type: string;
-    name: string;
     tenantId: string;
-    category: EventCategory;
     timestamp: Date;
     processed: boolean;
     context?: {
-        referrer?: string | undefined;
         ip?: string | undefined;
         userAgent?: string | undefined;
         deviceType?: string | undefined;
         browser?: string | undefined;
         os?: string | undefined;
+        referrer?: string | undefined;
     } | undefined;
-    userId?: string | undefined;
-    channel?: string | undefined;
     metrics?: Record<string, number> | undefined;
+    source?: string | undefined;
+    channel?: string | undefined;
+    userId?: string | undefined;
+    sessionId?: string | undefined;
     location?: {
-        city?: string | undefined;
-        country?: string | undefined;
         latitude?: number | undefined;
         longitude?: number | undefined;
+        city?: string | undefined;
+        country?: string | undefined;
     } | undefined;
-    source?: string | undefined;
-    sessionId?: string | undefined;
     processedAt?: Date | undefined;
     entityType?: string | undefined;
     entityId?: string | undefined;
     properties?: Record<string, any> | undefined;
     derivedFrom?: string | undefined;
 }, {
-    id: string;
-    type: string;
     name: string;
-    tenantId: string;
+    type: string;
     category: EventCategory;
+    id: string;
+    tenantId: string;
     timestamp: Date;
-    version?: string | undefined;
     context?: {
-        referrer?: string | undefined;
         ip?: string | undefined;
         userAgent?: string | undefined;
         deviceType?: string | undefined;
         browser?: string | undefined;
         os?: string | undefined;
+        referrer?: string | undefined;
     } | undefined;
-    userId?: string | undefined;
-    channel?: string | undefined;
     metrics?: Record<string, number> | undefined;
+    source?: string | undefined;
+    channel?: string | undefined;
+    userId?: string | undefined;
+    sessionId?: string | undefined;
+    version?: string | undefined;
     location?: {
-        city?: string | undefined;
-        country?: string | undefined;
         latitude?: number | undefined;
         longitude?: number | undefined;
+        city?: string | undefined;
+        country?: string | undefined;
     } | undefined;
-    source?: string | undefined;
-    sessionId?: string | undefined;
     processedAt?: Date | undefined;
     entityType?: string | undefined;
     entityId?: string | undefined;
@@ -197,15 +197,15 @@ export declare const SubscriptionSchema: z.ZodObject<{
         password: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         type: "basic" | "api_key" | "bearer";
-        token?: string | undefined;
         username?: string | undefined;
         password?: string | undefined;
+        token?: string | undefined;
         apiKey?: string | undefined;
     }, {
         type: "basic" | "api_key" | "bearer";
-        token?: string | undefined;
         username?: string | undefined;
         password?: string | undefined;
+        token?: string | undefined;
         apiKey?: string | undefined;
     }>>;
     enabled: z.ZodDefault<z.ZodBoolean>;
@@ -218,11 +218,11 @@ export declare const SubscriptionSchema: z.ZodObject<{
     lastTriggeredAt: z.ZodOptional<z.ZodDate>;
     triggerCount: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     name: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     enabled: boolean;
     endpoint: string;
     protocol: SubscriptionProtocol;
@@ -230,38 +230,38 @@ export declare const SubscriptionSchema: z.ZodObject<{
     maxRetries: number;
     retryDelayMs: number;
     triggerCount: number;
-    filter?: Record<string, any> | undefined;
     description?: string | undefined;
     userId?: string | undefined;
+    filter?: Record<string, any> | undefined;
     auth?: {
         type: "basic" | "api_key" | "bearer";
-        token?: string | undefined;
         username?: string | undefined;
         password?: string | undefined;
+        token?: string | undefined;
         apiKey?: string | undefined;
     } | undefined;
     eventTypes?: string[] | undefined;
     eventCategories?: EventCategory[] | undefined;
     lastTriggeredAt?: Date | undefined;
 }, {
-    id: string;
     name: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     endpoint: string;
     protocol: SubscriptionProtocol;
-    filter?: Record<string, any> | undefined;
     description?: string | undefined;
     userId?: string | undefined;
+    filter?: Record<string, any> | undefined;
+    enabled?: boolean | undefined;
     auth?: {
         type: "basic" | "api_key" | "bearer";
-        token?: string | undefined;
         username?: string | undefined;
         password?: string | undefined;
+        token?: string | undefined;
         apiKey?: string | undefined;
     } | undefined;
-    enabled?: boolean | undefined;
     eventTypes?: string[] | undefined;
     eventCategories?: EventCategory[] | undefined;
     retryOnFailure?: boolean | undefined;
@@ -281,12 +281,12 @@ export declare const EventSchemaDefinitionSchema: z.ZodObject<{
         rule: z.ZodString;
         params: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     }, "strip", z.ZodTypeAny, {
-        rule: string;
         field: string;
+        rule: string;
         params?: Record<string, any> | undefined;
     }, {
-        rule: string;
         field: string;
+        rule: string;
         params?: Record<string, any> | undefined;
     }>, "many">>;
     description: z.ZodOptional<z.ZodString>;
@@ -294,16 +294,16 @@ export declare const EventSchemaDefinitionSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    version: string;
     name: string;
     createdAt: Date;
     updatedAt: Date;
+    version: string;
     schema: Record<string, any>;
     description?: string | undefined;
     tenantId?: string | undefined;
     validationRules?: {
-        rule: string;
         field: string;
+        rule: string;
         params?: Record<string, any> | undefined;
     }[] | undefined;
     examples?: Record<string, any>[] | undefined;
@@ -312,12 +312,12 @@ export declare const EventSchemaDefinitionSchema: z.ZodObject<{
     createdAt: Date;
     updatedAt: Date;
     schema: Record<string, any>;
-    version?: string | undefined;
     description?: string | undefined;
+    version?: string | undefined;
     tenantId?: string | undefined;
     validationRules?: {
-        rule: string;
         field: string;
+        rule: string;
         params?: Record<string, any> | undefined;
     }[] | undefined;
     examples?: Record<string, any>[] | undefined;
@@ -351,32 +351,32 @@ export declare const DLQEntrySchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    status: "pending" | "resolved" | "retrying" | "dead";
-    tenantId: string;
-    eventType: string;
-    failedAt: Date;
-    errorMessage: string;
     createdAt: Date;
     updatedAt: Date;
+    status: "pending" | "resolved" | "retrying" | "dead";
+    tenantId: string;
     reason: DLQReason;
+    eventType: string;
     maxRetries: number;
     originalEvent: Record<string, any>;
+    errorMessage: string;
     retryCount: number;
+    failedAt: Date;
     errorStack?: string | undefined;
     nextRetryAt?: Date | undefined;
     resolvedAt?: Date | undefined;
     resolvedBy?: string | undefined;
 }, {
     id: string;
-    status: "pending" | "resolved" | "retrying" | "dead";
-    tenantId: string;
-    eventType: string;
-    failedAt: Date;
-    errorMessage: string;
     createdAt: Date;
     updatedAt: Date;
+    status: "pending" | "resolved" | "retrying" | "dead";
+    tenantId: string;
     reason: DLQReason;
+    eventType: string;
     originalEvent: Record<string, any>;
+    errorMessage: string;
+    failedAt: Date;
     maxRetries?: number | undefined;
     errorStack?: string | undefined;
     retryCount?: number | undefined;
@@ -403,29 +403,29 @@ export declare const EventQuerySchema: z.ZodObject<{
     limit: number;
     tenantId: string;
     offset: number;
-    sortBy: "timestamp" | "createdAt";
+    sortBy: "createdAt" | "timestamp";
     sortOrder: "asc" | "desc";
-    userId?: string | undefined;
     source?: string | undefined;
+    userId?: string | undefined;
     startDate?: Date | undefined;
     endDate?: Date | undefined;
-    eventTypes?: string[] | undefined;
     entityType?: string | undefined;
     entityId?: string | undefined;
+    eventTypes?: string[] | undefined;
     eventCategories?: EventCategory[] | undefined;
 }, {
     tenantId: string;
     limit?: number | undefined;
-    userId?: string | undefined;
-    offset?: number | undefined;
     source?: string | undefined;
+    userId?: string | undefined;
     startDate?: Date | undefined;
     endDate?: Date | undefined;
-    eventTypes?: string[] | undefined;
     entityType?: string | undefined;
     entityId?: string | undefined;
+    eventTypes?: string[] | undefined;
     eventCategories?: EventCategory[] | undefined;
-    sortBy?: "timestamp" | "createdAt" | undefined;
+    offset?: number | undefined;
+    sortBy?: "createdAt" | "timestamp" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }>;
 export type EventQuery = z.infer<typeof EventQuerySchema>;
@@ -439,11 +439,11 @@ export declare const EventAggregationSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         name: string;
         field: string;
-        operation: "max" | "sum" | "avg" | "count" | "min" | "countDistinct";
+        operation: "min" | "max" | "count" | "sum" | "avg" | "countDistinct";
     }, {
         name: string;
         field: string;
-        operation: "max" | "sum" | "avg" | "count" | "min" | "countDistinct";
+        operation: "min" | "max" | "count" | "sum" | "avg" | "countDistinct";
     }>, "many">;
     eventTypes: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     userId: z.ZodOptional<z.ZodString>;
@@ -451,12 +451,12 @@ export declare const EventAggregationSchema: z.ZodObject<{
     endDate: z.ZodDate;
     granularity: z.ZodOptional<z.ZodEnum<["minute", "hour", "day", "week", "month"]>>;
 }, "strip", z.ZodTypeAny, {
-    tenantId: string;
     metrics: {
         name: string;
         field: string;
-        operation: "max" | "sum" | "avg" | "count" | "min" | "countDistinct";
+        operation: "min" | "max" | "count" | "sum" | "avg" | "countDistinct";
     }[];
+    tenantId: string;
     startDate: Date;
     endDate: Date;
     groupBy: string[];
@@ -464,12 +464,12 @@ export declare const EventAggregationSchema: z.ZodObject<{
     eventTypes?: string[] | undefined;
     granularity?: "hour" | "minute" | "week" | "day" | "month" | undefined;
 }, {
-    tenantId: string;
     metrics: {
         name: string;
         field: string;
-        operation: "max" | "sum" | "avg" | "count" | "min" | "countDistinct";
+        operation: "min" | "max" | "count" | "sum" | "avg" | "countDistinct";
     }[];
+    tenantId: string;
     startDate: Date;
     endDate: Date;
     groupBy: string[];

@@ -1,52 +1,58 @@
 /**
  * HOJAI AI SDK - TypeScript Client
- * Version: 1.0.0 | Date: May 30, 2026
  *
- * Usage:
+ * A comprehensive SDK for interacting with HOJAI AI services.
+ *
+ * @example
  * ```typescript
- * import { HojaiClient } from '@hojai/sdk';
+ * import { HojaiClient, createAgentBuilder, HojaiError } from '@hojai/sdk';
  *
  * const client = new HojaiClient({
- *   baseUrl: 'http://localhost:4500',
- *   tenantId: 'merchant_123'
+ *   baseUrl: 'https://api.hojai.ai',
+ *   tenantId: 'my-tenant',
+ *   apiKey: process.env.HOJAI_API_KEY
  * });
  *
- * await client.health();
- * await client.predict('customer_456');
+ * // Health check
+ * const health = await client.health();
+ *
+ * // Create and use an agent
+ * const agent = await client.agents.create({
+ *   name: 'My Sales Agent',
+ *   type: 'sales'
+ * });
+ *
+ * const response = await client.agents.chat(agent.id, {
+ *   message: 'Find me enterprise software companies'
+ * });
  * ```
+ *
+ * @module @hojai/sdk
  */
-export class HojaiClient {
-    baseUrl;
-    tenantId;
-    apiKey;
-    constructor(config) {
-        this.baseUrl = config.baseUrl;
-        this.tenantId = config.tenantId;
-        this.apiKey = config.apiKey;
-    }
-    headers() {
-        return {
-            'Content-Type': 'application/json',
-            'X-Tenant-Id': this.tenantId,
-            ...(this.apiKey && { 'X-API-Key': this.apiKey })
-        };
-    }
-    async get(path) {
-        const res = await fetch(`${this.baseUrl}${path}`, { headers: this.headers() });
-        return res.json();
-    }
-    async post(path, body) {
-        const res = await fetch(`${this.baseUrl}${path}`, {
-            method: 'POST',
-            headers: this.headers(),
-            body: JSON.stringify(body)
-        });
-        return res.json();
-    }
-    async health() { return this.get('/health'); }
-    async predict(customerId) { return this.post('/api/intelligence/predict', { customerId }); }
-    async createTenant(data) { return this.post('/api/governance/tenants', data); }
-    async publishEvent(type, data) { return this.post('/api/events/publish', { type, data }); }
-}
-export default HojaiClient;
+// ============================================================================
+// MAIN EXPORTS
+// ============================================================================
+export { HojaiClient, HojaiError } from './client.js';
+// ============================================================================
+// AGENT MODULE
+// ============================================================================
+export { createAgentBuilder, defineTool, defineTools, systemPromptTemplates, getSystemPrompt, createPredefinedAgent, estimateAgentCost, validateAgentConfig, PredefinedAgentType, } from './agents.js';
+// ============================================================================
+// DEFAULT EXPORT
+// ============================================================================
+export default {
+    // Main client
+    HojaiClient,
+    HojaiError,
+    // Agent utilities
+    createAgentBuilder,
+    defineTool,
+    defineTools,
+    systemPromptTemplates,
+    getSystemPrompt,
+    createPredefinedAgent,
+    estimateAgentCost,
+    validateAgentConfig,
+    PredefinedAgentType,
+};
 //# sourceMappingURL=index.js.map

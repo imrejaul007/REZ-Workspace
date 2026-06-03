@@ -131,19 +131,19 @@ export class AgentService {
   async createAgent(params: Omit<Agent, 'id' | 'stats' | 'createdAt' | 'updatedAt'>): Promise<Agent> {
     const agent = new AgentModel({ ...params, id: uuid() });
     await agent.save();
-    return agent.toObject() as Agent;
+    return agent.toObject() as unknown as Agent;
   }
 
   async getAgent(tenantId: string, agentId: string): Promise<Agent | null> {
     const agent = await AgentModel.findOne({ _id: agentId, tenantId });
-    return agent ? (agent.toObject() as Agent) : null;
+    return agent ? (agent.toObject() as unknown as Agent) : null;
   }
 
   async listAgents(tenantId: string, type?: AgentType): Promise<Agent[]> {
     const filter: Record<string, unknown> = { tenantId };
     if (type) filter.type = type;
     const agents = await AgentModel.find(filter).sort({ createdAt: -1 });
-    return agents.map(a => a.toObject() as Agent);
+    return agents.map(a => a.toObject() as unknown as Agent);
   }
 
   async updateAgent(tenantId: string, agentId: string, updates: Partial<Agent>): Promise<Agent | null> {
@@ -152,7 +152,7 @@ export class AgentService {
       { $set: updates },
       { new: true }
     );
-    return agent ? (agent.toObject() as Agent) : null;
+    return agent ? (agent.toObject() as unknown as Agent) : null;
   }
 
   async deleteAgent(tenantId: string, agentId: string): Promise<void> {
@@ -199,7 +199,7 @@ export class AgentService {
         }
       );
 
-      return { ...run.toObject() as AgentRun, status: 'completed' as const, output: result, duration };
+      return { ...run.toObject() as unknown as AgentRun, status: 'completed' as const, output: result, duration };
     } catch (error) {
       await AgentRunModel.findByIdAndUpdate(run._id, {
         status: 'failed',
@@ -448,7 +448,7 @@ export class AgentService {
                   description: llmInsight.description,
                   insight: { ...input, recommendedActions: llmInsight.recommendedActions }
                 });
-                insights.push(insight.toObject() as AgentInsight);
+                insights.push(insight.toObject() as unknown as AgentInsight);
               }
             } catch {
               // Fallback to simple insight
@@ -472,7 +472,7 @@ export class AgentService {
         description: `Generated insight based on input data`,
         insight: input
       });
-      insights.push(insight.toObject() as AgentInsight);
+      insights.push(insight.toObject() as unknown as AgentInsight);
     }
 
     return insights;
@@ -483,32 +483,15 @@ export class AgentService {
 
     for (const insight of insights) {
       // Determine action based on insight type and severity
-      const action = {
+      const action: Record<string, unknown> = {
         type: insight.type,
         priority: insight.severity === 'critical' ? 'high' : insight.severity === 'high' ? 'medium' : 'low',
         title: insight.title,
         description: insight.description,
         insightId: insight.id,
-        recommendedActions: (insight.insight as Record<string, unknown>)?.recommendedActions || []
+        recommendedActions: (insight.insight as Record<string, unknown>)?.recommendedActions || [],
+        nextStep: 'review'
       };
-
-      // Add specific actions based on agent type
-      switch (agent.type) {
-        case 'customer_service':
-          action.nextStep = 'send_response';
-          action.channel = 'whatsapp';
-          break;
-        case 'sales':
-          action.nextStep = 'create_lead';
-          action.assignTo = 'sales_team';
-          break;
-        case 'support':
-          action.nextStep = 'create_ticket';
-          action.sla = insight.severity === 'critical' ? '1h' : insight.severity === 'high' ? '4h' : '24h';
-          break;
-        default:
-          action.nextStep = 'review';
-      }
 
       actions.push(action);
     }
@@ -521,7 +504,7 @@ export class AgentService {
     const runs = await AgentRunModel.find({ tenantId, agentId })
       .sort({ startedAt: -1 })
       .limit(limit);
-    return runs.map(r => r.toObject() as AgentRun);
+    return runs.map(r => r.toObject() as unknown as AgentRun);
   }
 
   // Insights
@@ -539,7 +522,7 @@ export class AgentService {
     const insights = await AgentInsightModel.find(filter)
       .sort({ createdAt: -1 })
       .limit(params.limit || 50);
-    return insights.map(i => i.toObject() as AgentInsight);
+    return insights.map(i => i.toObject() as unknown as AgentInsight);
   }
 
   async acknowledgeInsight(tenantId: string, insightId: string, acknowledgedBy: string): Promise<void> {

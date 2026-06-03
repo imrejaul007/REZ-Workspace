@@ -1,37 +1,37 @@
 import mongoose from 'mongoose';
 import { Conversation, Message } from '../types/index.js';
 export declare const ConversationModel: mongoose.Model<{
-    status: "active" | "escalated" | "resolved" | "waiting";
-    customerId: string;
-    tenantId: string;
     channel: string;
-    lastMessageAt: NativeDate;
+    status: "active" | "resolved" | "escalated" | "waiting";
+    tenantId: string;
     merchantId: string;
     messageCount: number;
+    lastMessageAt: NativeDate;
+    customerId: string;
     customerPhone: string;
     context?: Map<string, any> | null | undefined;
     customerName?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: "active" | "escalated" | "resolved" | "waiting";
-    customerId: string;
-    tenantId: string;
     channel: string;
-    lastMessageAt: NativeDate;
+    status: "active" | "resolved" | "escalated" | "waiting";
+    tenantId: string;
     merchantId: string;
     messageCount: number;
+    lastMessageAt: NativeDate;
+    customerId: string;
     customerPhone: string;
     context?: Map<string, any> | null | undefined;
     customerName?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: "active" | "escalated" | "resolved" | "waiting";
-    customerId: string;
-    tenantId: string;
     channel: string;
-    lastMessageAt: NativeDate;
+    status: "active" | "resolved" | "escalated" | "waiting";
+    tenantId: string;
     merchantId: string;
     messageCount: number;
+    lastMessageAt: NativeDate;
+    customerId: string;
     customerPhone: string;
     context?: Map<string, any> | null | undefined;
     customerName?: string | null | undefined;
@@ -42,37 +42,37 @@ export declare const ConversationModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: "active" | "escalated" | "resolved" | "waiting";
-    customerId: string;
-    tenantId: string;
     channel: string;
-    lastMessageAt: NativeDate;
+    status: "active" | "resolved" | "escalated" | "waiting";
+    tenantId: string;
     merchantId: string;
     messageCount: number;
+    lastMessageAt: NativeDate;
+    customerId: string;
     customerPhone: string;
     context?: Map<string, any> | null | undefined;
     customerName?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: "active" | "escalated" | "resolved" | "waiting";
-    customerId: string;
-    tenantId: string;
     channel: string;
-    lastMessageAt: NativeDate;
+    status: "active" | "resolved" | "escalated" | "waiting";
+    tenantId: string;
     merchantId: string;
     messageCount: number;
+    lastMessageAt: NativeDate;
+    customerId: string;
     customerPhone: string;
     context?: Map<string, any> | null | undefined;
     customerName?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: "active" | "escalated" | "resolved" | "waiting";
-    customerId: string;
-    tenantId: string;
     channel: string;
-    lastMessageAt: NativeDate;
+    status: "active" | "resolved" | "escalated" | "waiting";
+    tenantId: string;
     merchantId: string;
     messageCount: number;
+    lastMessageAt: NativeDate;
+    customerId: string;
     customerPhone: string;
     context?: Map<string, any> | null | undefined;
     customerName?: string | null | undefined;
@@ -82,45 +82,45 @@ export declare const ConversationModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const MessageModel: mongoose.Model<{
-    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
-    conversationId: string;
-    tenantId: string;
+    role: "user" | "assistant" | "system";
+    type: "text" | "location" | "image" | "video" | "audio" | "document" | "button" | "template";
     content: string;
-    messageId: string;
-    role: "system" | "user" | "assistant";
+    tenantId: string;
     direction: "inbound" | "outbound";
+    conversationId: string;
+    messageId: string;
     merchantId: string;
-    confidence?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
     intent?: string | null | undefined;
+    confidence?: number | null | undefined;
     mediaUrl?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
-    conversationId: string;
-    tenantId: string;
+    role: "user" | "assistant" | "system";
+    type: "text" | "location" | "image" | "video" | "audio" | "document" | "button" | "template";
     content: string;
-    messageId: string;
-    role: "system" | "user" | "assistant";
+    tenantId: string;
     direction: "inbound" | "outbound";
+    conversationId: string;
+    messageId: string;
     merchantId: string;
-    confidence?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
     intent?: string | null | undefined;
+    confidence?: number | null | undefined;
     mediaUrl?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
-    conversationId: string;
-    tenantId: string;
+    role: "user" | "assistant" | "system";
+    type: "text" | "location" | "image" | "video" | "audio" | "document" | "button" | "template";
     content: string;
-    messageId: string;
-    role: "system" | "user" | "assistant";
+    tenantId: string;
     direction: "inbound" | "outbound";
+    conversationId: string;
+    messageId: string;
     merchantId: string;
-    confidence?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
     intent?: string | null | undefined;
+    confidence?: number | null | undefined;
     mediaUrl?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -129,45 +129,45 @@ export declare const MessageModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
-    conversationId: string;
-    tenantId: string;
+    role: "user" | "assistant" | "system";
+    type: "text" | "location" | "image" | "video" | "audio" | "document" | "button" | "template";
     content: string;
-    messageId: string;
-    role: "system" | "user" | "assistant";
+    tenantId: string;
     direction: "inbound" | "outbound";
+    conversationId: string;
+    messageId: string;
     merchantId: string;
-    confidence?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
     intent?: string | null | undefined;
+    confidence?: number | null | undefined;
     mediaUrl?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
-    conversationId: string;
-    tenantId: string;
+    role: "user" | "assistant" | "system";
+    type: "text" | "location" | "image" | "video" | "audio" | "document" | "button" | "template";
     content: string;
-    messageId: string;
-    role: "system" | "user" | "assistant";
+    tenantId: string;
     direction: "inbound" | "outbound";
+    conversationId: string;
+    messageId: string;
     merchantId: string;
-    confidence?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
     intent?: string | null | undefined;
+    confidence?: number | null | undefined;
     mediaUrl?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    type: "image" | "video" | "audio" | "document" | "text" | "location" | "template" | "button";
-    conversationId: string;
-    tenantId: string;
+    role: "user" | "assistant" | "system";
+    type: "text" | "location" | "image" | "video" | "audio" | "document" | "button" | "template";
     content: string;
-    messageId: string;
-    role: "system" | "user" | "assistant";
+    tenantId: string;
     direction: "inbound" | "outbound";
+    conversationId: string;
+    messageId: string;
     merchantId: string;
-    confidence?: number | null | undefined;
     metadata?: Map<string, any> | null | undefined;
     intent?: string | null | undefined;
+    confidence?: number | null | undefined;
     mediaUrl?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
@@ -176,60 +176,60 @@ export declare const MessageModel: mongoose.Model<{
 }>>;
 export declare const BusinessProfileModel: mongoose.Model<{
     name: string;
-    tenantId: string;
     language: string;
+    tenantId: string;
     timezone: string;
     merchantId: string;
     description?: string | null | undefined;
     category?: string | null | undefined;
-    email?: string | null | undefined;
-    address?: string | null | undefined;
-    website?: string | null | undefined;
     features?: {
         support: boolean;
-        feedback: boolean;
         booking: boolean;
+        feedback: boolean;
         catalog: boolean;
         ordering: boolean;
     } | null | undefined;
+    email?: string | null | undefined;
+    address?: string | null | undefined;
+    website?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
     name: string;
-    tenantId: string;
     language: string;
+    tenantId: string;
     timezone: string;
     merchantId: string;
     description?: string | null | undefined;
     category?: string | null | undefined;
-    email?: string | null | undefined;
-    address?: string | null | undefined;
-    website?: string | null | undefined;
     features?: {
         support: boolean;
-        feedback: boolean;
         booking: boolean;
+        feedback: boolean;
         catalog: boolean;
         ordering: boolean;
     } | null | undefined;
+    email?: string | null | undefined;
+    address?: string | null | undefined;
+    website?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
     name: string;
-    tenantId: string;
     language: string;
+    tenantId: string;
     timezone: string;
     merchantId: string;
     description?: string | null | undefined;
     category?: string | null | undefined;
-    email?: string | null | undefined;
-    address?: string | null | undefined;
-    website?: string | null | undefined;
     features?: {
         support: boolean;
-        feedback: boolean;
         booking: boolean;
+        feedback: boolean;
         catalog: boolean;
         ordering: boolean;
     } | null | undefined;
+    email?: string | null | undefined;
+    address?: string | null | undefined;
+    website?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -238,86 +238,86 @@ export declare const BusinessProfileModel: mongoose.Model<{
     timestamps: true;
 }, {
     name: string;
-    tenantId: string;
     language: string;
+    tenantId: string;
     timezone: string;
     merchantId: string;
     description?: string | null | undefined;
     category?: string | null | undefined;
-    email?: string | null | undefined;
-    address?: string | null | undefined;
-    website?: string | null | undefined;
     features?: {
         support: boolean;
-        feedback: boolean;
         booking: boolean;
+        feedback: boolean;
         catalog: boolean;
         ordering: boolean;
     } | null | undefined;
+    email?: string | null | undefined;
+    address?: string | null | undefined;
+    website?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     name: string;
-    tenantId: string;
     language: string;
+    tenantId: string;
     timezone: string;
     merchantId: string;
     description?: string | null | undefined;
     category?: string | null | undefined;
-    email?: string | null | undefined;
-    address?: string | null | undefined;
-    website?: string | null | undefined;
     features?: {
         support: boolean;
-        feedback: boolean;
         booking: boolean;
+        feedback: boolean;
         catalog: boolean;
         ordering: boolean;
     } | null | undefined;
+    email?: string | null | undefined;
+    address?: string | null | undefined;
+    website?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
     name: string;
-    tenantId: string;
     language: string;
+    tenantId: string;
     timezone: string;
     merchantId: string;
     description?: string | null | undefined;
     category?: string | null | undefined;
-    email?: string | null | undefined;
-    address?: string | null | undefined;
-    website?: string | null | undefined;
     features?: {
         support: boolean;
-        feedback: boolean;
         booking: boolean;
+        feedback: boolean;
         catalog: boolean;
         ordering: boolean;
     } | null | undefined;
+    email?: string | null | undefined;
+    address?: string | null | undefined;
+    website?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }>>;
 export declare const KnowledgeBaseModel: mongoose.Model<{
+    keywords: string[];
+    category: string;
     active: boolean;
     tenantId: string;
-    category: string;
     confidence: number;
-    usageCount: number;
     question: string;
-    keywords: string[];
+    usageCount: number;
     merchantId: string;
     answer: string;
     intents: string[];
     helpfulCount: number;
     notHelpfulCount: number;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
+    keywords: string[];
+    category: string;
     active: boolean;
     tenantId: string;
-    category: string;
     confidence: number;
-    usageCount: number;
     question: string;
-    keywords: string[];
+    usageCount: number;
     merchantId: string;
     answer: string;
     intents: string[];
@@ -326,13 +326,13 @@ export declare const KnowledgeBaseModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
+    keywords: string[];
+    category: string;
     active: boolean;
     tenantId: string;
-    category: string;
     confidence: number;
-    usageCount: number;
     question: string;
-    keywords: string[];
+    usageCount: number;
     merchantId: string;
     answer: string;
     intents: string[];
@@ -345,26 +345,26 @@ export declare const KnowledgeBaseModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
+    keywords: string[];
+    category: string;
     active: boolean;
     tenantId: string;
-    category: string;
     confidence: number;
-    usageCount: number;
     question: string;
-    keywords: string[];
+    usageCount: number;
     merchantId: string;
     answer: string;
     intents: string[];
     helpfulCount: number;
     notHelpfulCount: number;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
+    keywords: string[];
+    category: string;
     active: boolean;
     tenantId: string;
-    category: string;
     confidence: number;
-    usageCount: number;
     question: string;
-    keywords: string[];
+    usageCount: number;
     merchantId: string;
     answer: string;
     intents: string[];
@@ -373,13 +373,13 @@ export declare const KnowledgeBaseModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
+    keywords: string[];
+    category: string;
     active: boolean;
     tenantId: string;
-    category: string;
     confidence: number;
-    usageCount: number;
     question: string;
-    keywords: string[];
+    usageCount: number;
     merchantId: string;
     answer: string;
     intents: string[];
@@ -391,20 +391,20 @@ export declare const KnowledgeBaseModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const AutomationRuleModel: mongoose.Model<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
-    priority: number;
     actions: mongoose.Types.DocumentArray<{
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }> & {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }>;
+    priority: number;
     merchantId: string;
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
@@ -425,24 +425,24 @@ export declare const AutomationRuleModel: mongoose.Model<{
         failures: number;
     } | null | undefined;
     trigger?: {
-        type?: "keyword" | "event" | "intent" | "time" | "inactivity" | null | undefined;
+        type?: "event" | "intent" | "keyword" | "time" | "inactivity" | null | undefined;
         config?: Map<string, any> | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
-    priority: number;
     actions: mongoose.Types.DocumentArray<{
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }> & {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }>;
+    priority: number;
     merchantId: string;
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
@@ -463,26 +463,26 @@ export declare const AutomationRuleModel: mongoose.Model<{
         failures: number;
     } | null | undefined;
     trigger?: {
-        type?: "keyword" | "event" | "intent" | "time" | "inactivity" | null | undefined;
+        type?: "event" | "intent" | "keyword" | "time" | "inactivity" | null | undefined;
         config?: Map<string, any> | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
-    priority: number;
     actions: mongoose.Types.DocumentArray<{
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }> & {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }>;
+    priority: number;
     merchantId: string;
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
@@ -503,7 +503,7 @@ export declare const AutomationRuleModel: mongoose.Model<{
         failures: number;
     } | null | undefined;
     trigger?: {
-        type?: "keyword" | "event" | "intent" | "time" | "inactivity" | null | undefined;
+        type?: "event" | "intent" | "keyword" | "time" | "inactivity" | null | undefined;
         config?: Map<string, any> | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps & {
@@ -513,20 +513,20 @@ export declare const AutomationRuleModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
-    priority: number;
     actions: mongoose.Types.DocumentArray<{
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }> & {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }>;
+    priority: number;
     merchantId: string;
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
@@ -547,24 +547,24 @@ export declare const AutomationRuleModel: mongoose.Model<{
         failures: number;
     } | null | undefined;
     trigger?: {
-        type?: "keyword" | "event" | "intent" | "time" | "inactivity" | null | undefined;
+        type?: "event" | "intent" | "keyword" | "time" | "inactivity" | null | undefined;
         config?: Map<string, any> | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
-    priority: number;
     actions: mongoose.Types.DocumentArray<{
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }> & {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }>;
+    priority: number;
     merchantId: string;
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
@@ -585,26 +585,26 @@ export declare const AutomationRuleModel: mongoose.Model<{
         failures: number;
     } | null | undefined;
     trigger?: {
-        type?: "keyword" | "event" | "intent" | "time" | "inactivity" | null | undefined;
+        type?: "event" | "intent" | "keyword" | "time" | "inactivity" | null | undefined;
         config?: Map<string, any> | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
-    priority: number;
     actions: mongoose.Types.DocumentArray<{
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }> & {
-        type?: "workflow" | "tag" | "template" | "assign" | "reply" | "webhook" | null | undefined;
+        type?: "workflow" | "assign" | "reply" | "template" | "webhook" | "tag" | null | undefined;
         config?: Map<string, any> | null | undefined;
     }>;
+    priority: number;
     merchantId: string;
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
@@ -625,7 +625,7 @@ export declare const AutomationRuleModel: mongoose.Model<{
         failures: number;
     } | null | undefined;
     trigger?: {
-        type?: "keyword" | "event" | "intent" | "time" | "inactivity" | null | undefined;
+        type?: "event" | "intent" | "keyword" | "time" | "inactivity" | null | undefined;
         config?: Map<string, any> | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps> & {

@@ -416,25 +416,9 @@ export class AgentService {
                 title: insight.title,
                 description: insight.description,
                 insightId: insight.id,
-                recommendedActions: insight.insight?.recommendedActions || []
+                recommendedActions: insight.insight?.recommendedActions || [],
+                nextStep: 'review'
             };
-            // Add specific actions based on agent type
-            switch (agent.type) {
-                case 'customer_service':
-                    action.nextStep = 'send_response';
-                    action.channel = 'whatsapp';
-                    break;
-                case 'sales':
-                    action.nextStep = 'create_lead';
-                    action.assignTo = 'sales_team';
-                    break;
-                case 'support':
-                    action.nextStep = 'create_ticket';
-                    action.sla = insight.severity === 'critical' ? '1h' : insight.severity === 'high' ? '4h' : '24h';
-                    break;
-                default:
-                    action.nextStep = 'review';
-            }
             actions.push(action);
         }
         return actions;

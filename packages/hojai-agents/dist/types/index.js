@@ -99,7 +99,7 @@ exports.ToolSchema = zod_1.z.object({
     tenantId: zod_1.z.string().uuid(),
     name: zod_1.z.string(),
     description: zod_1.z.string(),
-    type: zod_1.z.enum(['api', 'function', 'workflow', 'external']),
+    type: zod_1.z.enum(['api', 'function', 'workflow', 'external', 'http', 'database']),
     // Schema
     inputSchema: zod_1.z.record(zod_1.z.any()),
     outputSchema: zod_1.z.record(zod_1.z.any()),
@@ -107,7 +107,9 @@ exports.ToolSchema = zod_1.z.object({
     endpoint: zod_1.z.string().optional(),
     handler: zod_1.z.string().optional(),
     code: zod_1.z.string().optional(),
-    // Config
+    // Config (for http and database types)
+    config: zod_1.z.record(zod_1.z.any()).optional(),
+    // Rate limiting
     timeout: zod_1.z.number().default(30000),
     retries: zod_1.z.number().default(3),
     rateLimit: zod_1.z.number().optional(),

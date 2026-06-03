@@ -29,10 +29,10 @@ export declare const BridgeConfigSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    active: boolean;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    active: boolean;
+    tenantId: string;
     tenantType: TenantType;
     rezEnabled: boolean;
     crossAppDataEnabled: boolean;
@@ -46,9 +46,9 @@ export declare const BridgeConfigSchema: z.ZodObject<{
     rezTenantId?: string | undefined;
 }, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     tenantType: TenantType;
     active?: boolean | undefined;
     rezEnabled?: boolean | undefined;
@@ -76,23 +76,23 @@ export declare const CrossAppIdentitySchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     rezUserId: string;
     appIds: Record<string, string>;
-    linkMethod: "manual" | "exact" | "probabilistic" | "fuzzy";
+    linkMethod: "exact" | "manual" | "fuzzy" | "probabilistic";
     linkConfidence: number;
     lastActivity: Record<string, string>;
     rezUnifiedId?: string | undefined;
 }, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     rezUserId: string;
     appIds: Record<string, string>;
-    linkMethod: "manual" | "exact" | "probabilistic" | "fuzzy";
+    linkMethod: "exact" | "manual" | "fuzzy" | "probabilistic";
     linkConfidence: number;
     lastActivity: Record<string, string>;
     rezUnifiedId?: string | undefined;
@@ -111,13 +111,13 @@ export declare const BridgeEventSchema: z.ZodObject<{
         data: z.ZodRecord<z.ZodString, z.ZodAny>;
         timestamp: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        type: string;
         data: Record<string, any>;
+        type: string;
         category: string;
         timestamp: string;
     }, {
-        type: string;
         data: Record<string, any>;
+        type: string;
         category: string;
         timestamp: string;
     }>;
@@ -129,19 +129,19 @@ export declare const BridgeEventSchema: z.ZodObject<{
     error: z.ZodOptional<z.ZodString>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    source: "hojai" | "rez_ecosystem" | "rez_intelligence";
     id: string;
+    createdAt: Date;
+    tenantId: string;
     event: {
-        type: string;
         data: Record<string, any>;
+        type: string;
         category: string;
         timestamp: string;
     };
-    tenantId: string;
-    createdAt: Date;
-    source: "rez_ecosystem" | "hojai" | "rez_intelligence";
     tenantType: TenantType;
     sourceService: string;
-    routeTo: ("rez_ecosystem" | "hojai" | "rez_intelligence")[];
+    routeTo: ("hojai" | "rez_ecosystem" | "rez_intelligence")[];
     routingStatus: "pending" | "failed" | "forwarded" | "filtered";
     sensitivity: DataSensitivity;
     error?: string | undefined;
@@ -149,19 +149,19 @@ export declare const BridgeEventSchema: z.ZodObject<{
     piiFields?: string[] | undefined;
     processedAt?: Date | undefined;
 }, {
+    source: "hojai" | "rez_ecosystem" | "rez_intelligence";
     id: string;
+    createdAt: Date;
+    tenantId: string;
     event: {
-        type: string;
         data: Record<string, any>;
+        type: string;
         category: string;
         timestamp: string;
     };
-    tenantId: string;
-    createdAt: Date;
-    source: "rez_ecosystem" | "hojai" | "rez_intelligence";
     tenantType: TenantType;
     sourceService: string;
-    routeTo: ("rez_ecosystem" | "hojai" | "rez_intelligence")[];
+    routeTo: ("hojai" | "rez_ecosystem" | "rez_intelligence")[];
     routingStatus: "pending" | "failed" | "forwarded" | "filtered";
     sensitivity: DataSensitivity;
     error?: string | undefined;
@@ -183,25 +183,25 @@ export declare const IntelligenceShareSchema: z.ZodObject<{
     model: z.ZodOptional<z.ZodString>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: "segment" | "intent" | "churn_risk" | "prediction" | "audience" | "behavioral_signal" | "trust_score" | "ltv_score";
+    source: string;
     data: Record<string, any>;
+    type: "audience" | "prediction" | "intent" | "segment" | "behavioral_signal" | "trust_score" | "churn_risk" | "ltv_score";
+    id: string;
+    createdAt: Date;
     tenantId: string;
     confidence: number;
-    createdAt: Date;
-    source: string;
     direction: "hojai_to_rez" | "rez_to_hojai";
     entityType: string;
     entityId: string;
     model?: string | undefined;
 }, {
-    id: string;
-    type: "segment" | "intent" | "churn_risk" | "prediction" | "audience" | "behavioral_signal" | "trust_score" | "ltv_score";
+    source: string;
     data: Record<string, any>;
+    type: "audience" | "prediction" | "intent" | "segment" | "behavioral_signal" | "trust_score" | "churn_risk" | "ltv_score";
+    id: string;
+    createdAt: Date;
     tenantId: string;
     confidence: number;
-    createdAt: Date;
-    source: string;
     direction: "hojai_to_rez" | "rez_to_hojai";
     entityType: string;
     entityId: string;
@@ -224,9 +224,9 @@ export declare const AudienceSyncSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     audienceId: string;
     audienceName: string;
     audienceType: "behavioral" | "demographic" | "predictive" | "rfm";
@@ -238,9 +238,9 @@ export declare const AudienceSyncSchema: z.ZodObject<{
     lastSyncedAt?: Date | undefined;
 }, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     audienceId: string;
     audienceName: string;
     audienceType: "behavioral" | "demographic" | "predictive" | "rfm";
@@ -284,11 +284,11 @@ export declare const CrossAppAttributionSchema: z.ZodObject<{
     attributedConversion: z.ZodOptional<z.ZodNumber>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     userId: string;
+    sessionId: string;
+    id: string;
     createdAt: Date;
     model: "first_touch" | "last_touch" | "linear" | "time_decay" | "position_based";
-    sessionId: string;
     touchpoints: {
         event: string;
         timestamp: string;
@@ -301,11 +301,11 @@ export declare const CrossAppAttributionSchema: z.ZodObject<{
     attributedChannel?: string | undefined;
     attributedConversion?: number | undefined;
 }, {
-    id: string;
     userId: string;
+    sessionId: string;
+    id: string;
     createdAt: Date;
     model: "first_touch" | "last_touch" | "linear" | "time_decay" | "position_based";
-    sessionId: string;
     touchpoints: {
         event: string;
         timestamp: string;
@@ -363,10 +363,10 @@ export declare const PrivilegedAccessSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    active: boolean;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    active: boolean;
+    tenantId: string;
     tenantType: TenantType.REZ_ECOSYSTEM;
     accessScope: {
         crossAppIdentity: boolean;
@@ -383,9 +383,9 @@ export declare const PrivilegedAccessSchema: z.ZodObject<{
     };
 }, {
     id: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     tenantType: TenantType.REZ_ECOSYSTEM;
     accessScope: {
         crossAppIdentity?: boolean | undefined;

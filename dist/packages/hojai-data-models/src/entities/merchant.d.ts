@@ -184,24 +184,24 @@ export declare const MerchantCreateSchema: z.ZodObject<{
     categories: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    type: "franchise" | "brand" | "retailer" | "wholesaler" | "distributor" | "manufacturer";
     name: string;
-    email: string;
+    type: "brand" | "retailer" | "wholesaler" | "distributor" | "franchise" | "manufacturer";
     tags: string[];
+    email: string;
     phone: string;
     slug: string;
-    business_category: "retail" | "healthcare" | "jewellery" | "education" | "other" | "restaurant" | "salon" | "fitness" | "ecommerce" | "hotel";
+    business_category: "jewellery" | "healthcare" | "retail" | "restaurant" | "salon" | "fitness" | "education" | "ecommerce" | "other" | "hotel";
     categories: string[];
     website?: string | undefined;
     gstin?: string | undefined;
     pan?: string | undefined;
 }, {
-    type: "franchise" | "brand" | "retailer" | "wholesaler" | "distributor" | "manufacturer";
     name: string;
+    type: "brand" | "retailer" | "wholesaler" | "distributor" | "franchise" | "manufacturer";
     email: string;
     phone: string;
     slug: string;
-    business_category: "retail" | "healthcare" | "jewellery" | "education" | "other" | "restaurant" | "salon" | "fitness" | "ecommerce" | "hotel";
+    business_category: "jewellery" | "healthcare" | "retail" | "restaurant" | "salon" | "fitness" | "education" | "ecommerce" | "other" | "hotel";
     tags?: string[] | undefined;
     website?: string | undefined;
     gstin?: string | undefined;
@@ -257,14 +257,14 @@ export declare const MerchantUpdateSchema: z.ZodObject<{
     specialties: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     status: z.ZodOptional<z.ZodEnum<["active", "pending", "suspended", "blocked", "churned"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "active" | "pending" | "suspended" | "churned" | "blocked" | undefined;
     name?: string | undefined;
     description?: string | undefined;
-    email?: string | undefined;
     tags?: string[] | undefined;
+    status?: "active" | "pending" | "blocked" | "suspended" | "churned" | undefined;
+    email?: string | undefined;
     phone?: string | undefined;
-    logo_url?: string | undefined;
     website?: string | undefined;
+    logo_url?: string | undefined;
     categories?: string[] | undefined;
     banner_url?: string | undefined;
     tagline?: string | undefined;
@@ -283,14 +283,14 @@ export declare const MerchantUpdateSchema: z.ZodObject<{
     }[] | undefined;
     specialties?: string[] | undefined;
 }, {
-    status?: "active" | "pending" | "suspended" | "churned" | "blocked" | undefined;
     name?: string | undefined;
     description?: string | undefined;
-    email?: string | undefined;
     tags?: string[] | undefined;
+    status?: "active" | "pending" | "blocked" | "suspended" | "churned" | undefined;
+    email?: string | undefined;
     phone?: string | undefined;
-    logo_url?: string | undefined;
     website?: string | undefined;
+    logo_url?: string | undefined;
     categories?: string[] | undefined;
     banner_url?: string | undefined;
     tagline?: string | undefined;
@@ -323,28 +323,28 @@ export declare const MerchantAddressSchema: z.ZodObject<{
     contact_phone: z.ZodOptional<z.ZodString>;
     contact_email: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "warehouse" | "business" | "billing" | "shipping";
+    type: "billing" | "business" | "shipping" | "warehouse";
+    is_primary: boolean;
+    address_line1: string;
     city: string;
     state: string;
     postal_code: string;
     country: string;
-    is_primary: boolean;
-    address_line1: string;
     address_line2?: string | undefined;
     landmark?: string | undefined;
     contact_name?: string | undefined;
     contact_phone?: string | undefined;
     contact_email?: string | undefined;
 }, {
-    type: "warehouse" | "business" | "billing" | "shipping";
+    type: "billing" | "business" | "shipping" | "warehouse";
+    address_line1: string;
     city: string;
     state: string;
     postal_code: string;
-    address_line1: string;
-    country?: string | undefined;
     is_primary?: boolean | undefined;
     address_line2?: string | undefined;
     landmark?: string | undefined;
+    country?: string | undefined;
     contact_name?: string | undefined;
     contact_phone?: string | undefined;
     contact_email?: string | undefined;

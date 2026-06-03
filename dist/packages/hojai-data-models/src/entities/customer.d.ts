@@ -215,54 +215,54 @@ export declare const CustomerCreateSchema: z.ZodObject<{
         timezone: z.ZodDefault<z.ZodString>;
         currency: z.ZodDefault<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        currency: string;
         language: string;
-        notification_channel: "whatsapp" | "email" | "sms" | "app";
-        communication_tone: "friendly" | "formal" | "casual";
+        currency: string;
         timezone: string;
+        notification_channel: "whatsapp" | "sms" | "email" | "app";
+        communication_tone: "formal" | "friendly" | "casual";
     }, {
-        currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
-        communication_tone?: "friendly" | "formal" | "casual" | undefined;
+        currency?: string | undefined;
         timezone?: string | undefined;
+        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
+        communication_tone?: "formal" | "friendly" | "casual" | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    type: "business" | "individual";
+    type: "individual" | "business";
     name?: string | undefined;
     email?: string | undefined;
     phone?: string | undefined;
+    first_name?: string | undefined;
+    last_name?: string | undefined;
     birthday?: string | undefined;
-    gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
+    gender?: "other" | "male" | "female" | "prefer_not_to_say" | undefined;
+    business_name?: string | undefined;
+    business_type?: string | undefined;
     preferences?: {
-        currency: string;
         language: string;
-        notification_channel: "whatsapp" | "email" | "sms" | "app";
-        communication_tone: "friendly" | "formal" | "casual";
+        currency: string;
         timezone: string;
+        notification_channel: "whatsapp" | "sms" | "email" | "app";
+        communication_tone: "formal" | "friendly" | "casual";
     } | undefined;
-    first_name?: string | undefined;
-    last_name?: string | undefined;
-    business_name?: string | undefined;
-    business_type?: string | undefined;
 }, {
-    type: "business" | "individual";
+    type: "individual" | "business";
     name?: string | undefined;
     email?: string | undefined;
     phone?: string | undefined;
-    birthday?: string | undefined;
-    gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
-    preferences?: {
-        currency?: string | undefined;
-        language?: string | undefined;
-        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
-        communication_tone?: "friendly" | "formal" | "casual" | undefined;
-        timezone?: string | undefined;
-    } | undefined;
     first_name?: string | undefined;
     last_name?: string | undefined;
+    birthday?: string | undefined;
+    gender?: "other" | "male" | "female" | "prefer_not_to_say" | undefined;
     business_name?: string | undefined;
     business_type?: string | undefined;
+    preferences?: {
+        language?: string | undefined;
+        currency?: string | undefined;
+        timezone?: string | undefined;
+        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
+        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+    } | undefined;
 }>;
 export declare const CustomerUpdateSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
@@ -278,49 +278,49 @@ export declare const CustomerUpdateSchema: z.ZodObject<{
         timezone: z.ZodOptional<z.ZodString>;
         currency: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
-        communication_tone?: "friendly" | "formal" | "casual" | undefined;
+        currency?: string | undefined;
         timezone?: string | undefined;
+        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
+        communication_tone?: "formal" | "friendly" | "casual" | undefined;
     }, {
-        currency?: string | undefined;
         language?: string | undefined;
-        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
-        communication_tone?: "friendly" | "formal" | "casual" | undefined;
+        currency?: string | undefined;
         timezone?: string | undefined;
+        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
+        communication_tone?: "formal" | "friendly" | "casual" | undefined;
     }>>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     name?: string | undefined;
     tags?: string[] | undefined;
-    avatar_url?: string | undefined;
-    birthday?: string | undefined;
-    gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
-    preferences?: {
-        currency?: string | undefined;
-        language?: string | undefined;
-        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
-        communication_tone?: "friendly" | "formal" | "casual" | undefined;
-        timezone?: string | undefined;
-    } | undefined;
     first_name?: string | undefined;
     last_name?: string | undefined;
+    birthday?: string | undefined;
+    gender?: "other" | "male" | "female" | "prefer_not_to_say" | undefined;
+    preferences?: {
+        language?: string | undefined;
+        currency?: string | undefined;
+        timezone?: string | undefined;
+        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
+        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+    } | undefined;
+    avatar_url?: string | undefined;
 }, {
     name?: string | undefined;
     tags?: string[] | undefined;
-    avatar_url?: string | undefined;
-    birthday?: string | undefined;
-    gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
-    preferences?: {
-        currency?: string | undefined;
-        language?: string | undefined;
-        notification_channel?: "whatsapp" | "email" | "sms" | "app" | undefined;
-        communication_tone?: "friendly" | "formal" | "casual" | undefined;
-        timezone?: string | undefined;
-    } | undefined;
     first_name?: string | undefined;
     last_name?: string | undefined;
+    birthday?: string | undefined;
+    gender?: "other" | "male" | "female" | "prefer_not_to_say" | undefined;
+    preferences?: {
+        language?: string | undefined;
+        currency?: string | undefined;
+        timezone?: string | undefined;
+        notification_channel?: "whatsapp" | "sms" | "email" | "app" | undefined;
+        communication_tone?: "formal" | "friendly" | "casual" | undefined;
+    } | undefined;
+    avatar_url?: string | undefined;
 }>;
 export declare function createCustomer(tenantId: string, data: z.infer<typeof CustomerCreateSchema>): Customer;
 export declare function updateCustomerMetrics(customer: Customer, metrics: {

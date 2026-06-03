@@ -21,13 +21,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
-        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
+        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -54,13 +54,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
-        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
+        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -89,13 +89,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
-        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
+        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -128,13 +128,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
-        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
+        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -161,13 +161,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
-        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
+        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -196,13 +196,13 @@ export declare const TrustScoreModel: mongoose.Model<{
         score?: number | null | undefined;
     }>;
     factors?: {
-        deliveryRate: number;
         tenure: number;
         positiveReviews: number;
         negativeReviews: number;
         totalTransactions: number;
         avgRating: number;
         responseRate: number;
+        deliveryRate: number;
         disputeRate: number;
         verifiedBadges: string[];
         volumeScore: number;
@@ -214,42 +214,42 @@ export declare const TrustScoreModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const VerificationModel: mongoose.Model<{
-    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
+    status: "pending" | "rejected" | "expired" | "verified";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     metadata?: Map<string, any> | null | undefined;
-    provider?: string | null | undefined;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     expiresAt?: NativeDate | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     externalId?: string | null | undefined;
+    provider?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
+    status: "pending" | "rejected" | "expired" | "verified";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     metadata?: Map<string, any> | null | undefined;
-    provider?: string | null | undefined;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     expiresAt?: NativeDate | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     externalId?: string | null | undefined;
+    provider?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
+    status: "pending" | "rejected" | "expired" | "verified";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     metadata?: Map<string, any> | null | undefined;
-    provider?: string | null | undefined;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     expiresAt?: NativeDate | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     externalId?: string | null | undefined;
+    provider?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -258,42 +258,42 @@ export declare const VerificationModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
+    status: "pending" | "rejected" | "expired" | "verified";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     metadata?: Map<string, any> | null | undefined;
-    provider?: string | null | undefined;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     expiresAt?: NativeDate | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     externalId?: string | null | undefined;
+    provider?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
+    status: "pending" | "rejected" | "expired" | "verified";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     metadata?: Map<string, any> | null | undefined;
-    provider?: string | null | undefined;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     expiresAt?: NativeDate | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     externalId?: string | null | undefined;
+    provider?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: "pending" | "rejected" | "expired" | "verified";
     type: string;
+    status: "pending" | "rejected" | "expired" | "verified";
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     metadata?: Map<string, any> | null | undefined;
-    provider?: string | null | undefined;
-    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     expiresAt?: NativeDate | null | undefined;
+    level?: "standard" | "basic" | "premium" | "enhanced" | null | undefined;
     externalId?: string | null | undefined;
+    provider?: string | null | undefined;
     verifiedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
@@ -302,45 +302,45 @@ export declare const VerificationModel: mongoose.Model<{
 }>>;
 export declare const ReviewModel: mongoose.Model<{
     status: "hidden" | "flagged" | "published" | "disputed";
-    helpful: number;
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
     reviewerId: string;
+    helpful: number;
     reviewerType: EntityType;
     isVerified: boolean;
     isAnonymous: boolean;
     unhelpful: number;
+    title?: string | null | undefined;
+    content?: string | null | undefined;
     response?: {
         content?: string | null | undefined;
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    content?: string | null | undefined;
-    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
     status: "hidden" | "flagged" | "published" | "disputed";
-    helpful: number;
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
     reviewerId: string;
+    helpful: number;
     reviewerType: EntityType;
     isVerified: boolean;
     isAnonymous: boolean;
     unhelpful: number;
+    title?: string | null | undefined;
+    content?: string | null | undefined;
     response?: {
         content?: string | null | undefined;
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    content?: string | null | undefined;
-    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
@@ -348,23 +348,23 @@ export declare const ReviewModel: mongoose.Model<{
     timestamps: true;
 }> & {
     status: "hidden" | "flagged" | "published" | "disputed";
-    helpful: number;
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
     reviewerId: string;
+    helpful: number;
     reviewerType: EntityType;
     isVerified: boolean;
     isAnonymous: boolean;
     unhelpful: number;
+    title?: string | null | undefined;
+    content?: string | null | undefined;
     response?: {
         content?: string | null | undefined;
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    content?: string | null | undefined;
-    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
@@ -376,45 +376,45 @@ export declare const ReviewModel: mongoose.Model<{
     timestamps: true;
 }, {
     status: "hidden" | "flagged" | "published" | "disputed";
-    helpful: number;
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
     reviewerId: string;
+    helpful: number;
     reviewerType: EntityType;
     isVerified: boolean;
     isAnonymous: boolean;
     unhelpful: number;
+    title?: string | null | undefined;
+    content?: string | null | undefined;
     response?: {
         content?: string | null | undefined;
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    content?: string | null | undefined;
-    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     status: "hidden" | "flagged" | "published" | "disputed";
-    helpful: number;
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
     reviewerId: string;
+    helpful: number;
     reviewerType: EntityType;
     isVerified: boolean;
     isAnonymous: boolean;
     unhelpful: number;
+    title?: string | null | undefined;
+    content?: string | null | undefined;
     response?: {
         content?: string | null | undefined;
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    content?: string | null | undefined;
-    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
@@ -422,23 +422,23 @@ export declare const ReviewModel: mongoose.Model<{
     timestamps: true;
 }>> & mongoose.FlatRecord<{
     status: "hidden" | "flagged" | "published" | "disputed";
-    helpful: number;
     tenantId: string;
     entityType: EntityType;
     entityId: string;
     rating: number;
     reviewerId: string;
+    helpful: number;
     reviewerType: EntityType;
     isVerified: boolean;
     isAnonymous: boolean;
     unhelpful: number;
+    title?: string | null | undefined;
+    content?: string | null | undefined;
     response?: {
         content?: string | null | undefined;
         respondedAt?: NativeDate | null | undefined;
         respondedBy?: string | null | undefined;
     } | null | undefined;
-    content?: string | null | undefined;
-    title?: string | null | undefined;
     categories?: Map<string, number> | null | undefined;
     orderId?: string | null | undefined;
     transactionValue?: number | null | undefined;
@@ -535,9 +535,10 @@ export declare const TrustEdgeModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const BadgeModel: mongoose.Model<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
+    color?: string | null | undefined;
     description?: string | null | undefined;
     criteria?: {
         requiredVerifications: string[];
@@ -547,12 +548,12 @@ export declare const BadgeModel: mongoose.Model<{
         maxDisputeRate?: number | null | undefined;
     } | null | undefined;
     icon?: string | null | undefined;
-    color?: string | null | undefined;
     tier?: "bronze" | "silver" | "gold" | "platinum" | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
+    color?: string | null | undefined;
     description?: string | null | undefined;
     criteria?: {
         requiredVerifications: string[];
@@ -562,14 +563,14 @@ export declare const BadgeModel: mongoose.Model<{
         maxDisputeRate?: number | null | undefined;
     } | null | undefined;
     icon?: string | null | undefined;
-    color?: string | null | undefined;
     tier?: "bronze" | "silver" | "gold" | "platinum" | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
+    color?: string | null | undefined;
     description?: string | null | undefined;
     criteria?: {
         requiredVerifications: string[];
@@ -579,7 +580,6 @@ export declare const BadgeModel: mongoose.Model<{
         maxDisputeRate?: number | null | undefined;
     } | null | undefined;
     icon?: string | null | undefined;
-    color?: string | null | undefined;
     tier?: "bronze" | "silver" | "gold" | "platinum" | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -588,9 +588,10 @@ export declare const BadgeModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
+    color?: string | null | undefined;
     description?: string | null | undefined;
     criteria?: {
         requiredVerifications: string[];
@@ -600,12 +601,12 @@ export declare const BadgeModel: mongoose.Model<{
         maxDisputeRate?: number | null | undefined;
     } | null | undefined;
     icon?: string | null | undefined;
-    color?: string | null | undefined;
     tier?: "bronze" | "silver" | "gold" | "platinum" | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
+    color?: string | null | undefined;
     description?: string | null | undefined;
     criteria?: {
         requiredVerifications: string[];
@@ -615,14 +616,14 @@ export declare const BadgeModel: mongoose.Model<{
         maxDisputeRate?: number | null | undefined;
     } | null | undefined;
     icon?: string | null | undefined;
-    color?: string | null | undefined;
     tier?: "bronze" | "silver" | "gold" | "platinum" | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
+    color?: string | null | undefined;
     description?: string | null | undefined;
     criteria?: {
         requiredVerifications: string[];
@@ -632,7 +633,6 @@ export declare const BadgeModel: mongoose.Model<{
         maxDisputeRate?: number | null | undefined;
     } | null | undefined;
     icon?: string | null | undefined;
-    color?: string | null | undefined;
     tier?: "bronze" | "silver" | "gold" | "platinum" | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;

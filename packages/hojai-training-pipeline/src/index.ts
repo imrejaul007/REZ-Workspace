@@ -130,7 +130,7 @@ app.post('/api/jobs', auth, async (req: Request, res: Response) {
   // Start training async
   simulateTraining(jobId);
 
-  res.status(201).json({ success: true, data: { jobId, status: 'pending' });
+  res.status(201).json({ success: true, data: { jobId, status: 'pending' } });
 });
 
 // List jobs
@@ -221,7 +221,7 @@ app.post('/api/train/employee/:id', auth, async (req: Request, res: Response) {
   });
   await job.save();
   simulateTraining(jobId);
-  res.status(201).json({ success: true, data: { jobId, status: 'pending' });
+  res.status(201).json({ success: true, data: { jobId, status: 'pending' } });
 });
 
 // Train Model
@@ -238,7 +238,7 @@ app.post('/api/train/model/:name', auth, async (req: Request, res: Response) {
   });
   await job.save();
   simulateTraining(jobId);
-  res.status(201).json({ success: true, data: { jobId, status: 'pending' });
+  res.status(201).json({ success: true, data: { jobId, status: 'pending' } });
 });
 
 // Train Agent
@@ -255,7 +255,7 @@ app.post('/api/train/agent/:id', auth, async (req: Request, res: Response) {
   });
   await job.save();
   simulateTraining(jobId);
-  res.status(201).json({ success: true, data: { jobId, status: 'pending' });
+  res.status(201).json({ success: true, data: { jobId, status: 'pending' } });
 });
 
 // ============================================
@@ -282,7 +282,7 @@ app.post('/api/train/batch', auth, async (req: Request, res: Response) {
     simulateTraining(jobId);
   }
 
-  res.status(201).json({ success: true, data: { jobs: jobs.length, jobIds: jobs.map(j => j.jobId) });
+  res.status(201).json({ success: true, data: { jobs: jobs.length, jobIds: jobs.map(j => j.jobId) } });
 });
 
 // ============================================
@@ -371,7 +371,7 @@ app.get('/api/analytics/training', auth, async (req: Request, res: Response) {
 
   const avgAccuracy = await TrainingJob.aggregate([
     { $match: { tenantId, status: TRAINING_STATUS.COMPLETED } },
-    { $group: { _id: null, avg: { $avg: '$results.finalAccuracy' } }
+    { $group: { _id: null, avg: { $avg: '$results.finalAccuracy' } } }
   ]);
 
   res.json({

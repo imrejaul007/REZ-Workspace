@@ -25,39 +25,39 @@ export declare const AttributionEventSchema: z.ZodObject<{
     device: z.ZodOptional<z.ZodString>;
     location: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: "conversion" | "click" | "impression";
-    tenantId: string;
-    userId: string;
-    timestamp: Date;
+    type: "impression" | "click" | "conversion";
     channel: string;
-    keyword?: string | undefined;
-    value?: number | undefined;
-    content?: string | undefined;
+    userId: string;
+    id: string;
+    tenantId: string;
+    timestamp: Date;
     medium?: string | undefined;
-    location?: string | undefined;
+    value?: number | undefined;
     source?: string | undefined;
-    campaign?: string | undefined;
+    content?: string | undefined;
     sessionId?: string | undefined;
+    campaign?: string | undefined;
+    keyword?: string | undefined;
     conversionId?: string | undefined;
     device?: string | undefined;
+    location?: string | undefined;
 }, {
-    id: string;
-    type: "conversion" | "click" | "impression";
-    tenantId: string;
-    userId: string;
-    timestamp: Date;
+    type: "impression" | "click" | "conversion";
     channel: string;
-    keyword?: string | undefined;
-    value?: number | undefined;
-    content?: string | undefined;
+    userId: string;
+    id: string;
+    tenantId: string;
+    timestamp: Date;
     medium?: string | undefined;
-    location?: string | undefined;
+    value?: number | undefined;
     source?: string | undefined;
-    campaign?: string | undefined;
+    content?: string | undefined;
     sessionId?: string | undefined;
+    campaign?: string | undefined;
+    keyword?: string | undefined;
     conversionId?: string | undefined;
     device?: string | undefined;
+    location?: string | undefined;
 }>;
 export type AttributionEvent = z.infer<typeof AttributionEventSchema>;
 export declare const ConversionSchema: z.ZodObject<{
@@ -70,23 +70,23 @@ export declare const ConversionSchema: z.ZodObject<{
     timestamp: z.ZodDate;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
+    value: number;
+    userId: string;
     id: string;
     tenantId: string;
-    userId: string;
-    currency: string;
-    value: number;
     timestamp: Date;
     conversionType: string;
+    currency: string;
     metadata?: Record<string, any> | undefined;
 }, {
+    value: number;
+    userId: string;
     id: string;
     tenantId: string;
-    userId: string;
-    value: number;
     timestamp: Date;
     conversionType: string;
-    currency?: string | undefined;
     metadata?: Record<string, any> | undefined;
+    currency?: string | undefined;
 }>;
 export type Conversion = z.infer<typeof ConversionSchema>;
 export declare const AttributionResultSchema: z.ZodObject<{
@@ -110,11 +110,11 @@ export declare const AttributionResultSchema: z.ZodObject<{
         touchpointDate: Date;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    revenue: number;
     channel: string;
-    cost: number;
     attribution: number;
+    cost: number;
     conversions: number;
+    revenue: number;
     roas: number;
     touchpoints: {
         value: number;
@@ -122,11 +122,11 @@ export declare const AttributionResultSchema: z.ZodObject<{
         touchpointDate: Date;
     }[];
 }, {
-    revenue: number;
     channel: string;
-    cost: number;
     attribution: number;
+    cost: number;
     conversions: number;
+    revenue: number;
     roas: number;
     touchpoints: {
         value: number;
@@ -155,14 +155,14 @@ export declare const ExperimentSchema: z.ZodObject<{
         traffic: z.ZodNumber;
         config: z.ZodRecord<z.ZodString, z.ZodAny>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         name: string;
+        id: string;
         config: Record<string, any>;
         traffic: number;
         description?: string | undefined;
     }, {
-        id: string;
         name: string;
+        id: string;
         config: Record<string, any>;
         traffic: number;
         description?: string | undefined;
@@ -173,32 +173,32 @@ export declare const ExperimentSchema: z.ZodObject<{
         minSampleSize: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
         minSampleSize: number;
-        channels?: string[] | undefined;
         userSegments?: string[] | undefined;
+        channels?: string[] | undefined;
     }, {
-        channels?: string[] | undefined;
         userSegments?: string[] | undefined;
+        channels?: string[] | undefined;
         minSampleSize?: number | undefined;
     }>>;
     primaryMetric: z.ZodObject<{
         name: z.ZodString;
         type: z.ZodEnum<["conversion_rate", "revenue", "engagement", "custom"]>;
     }, "strip", z.ZodTypeAny, {
-        type: "custom" | "engagement" | "revenue" | "conversion_rate";
         name: string;
+        type: "custom" | "revenue" | "conversion_rate" | "engagement";
     }, {
-        type: "custom" | "engagement" | "revenue" | "conversion_rate";
         name: string;
+        type: "custom" | "revenue" | "conversion_rate" | "engagement";
     }>;
     secondaryMetrics: z.ZodOptional<z.ZodArray<z.ZodObject<{
         name: z.ZodString;
         type: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        type: string;
         name: string;
+        type: string;
     }, {
-        type: string;
         name: string;
+        type: string;
     }>, "many">>;
     results: z.ZodOptional<z.ZodObject<{
         winner: z.ZodOptional<z.ZodString>;
@@ -210,21 +210,21 @@ export declare const ExperimentSchema: z.ZodObject<{
             conversionRate: z.ZodNumber;
             revenue: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
+            conversions: number;
             revenue: number;
             total: number;
-            conversions: number;
             conversionRate: number;
         }, {
+            conversions: number;
             revenue: number;
             total: number;
-            conversions: number;
             conversionRate: number;
         }>>;
     }, "strip", z.ZodTypeAny, {
         variantStats: Record<string, {
+            conversions: number;
             revenue: number;
             total: number;
-            conversions: number;
             conversionRate: number;
         }>;
         confidence?: number | undefined;
@@ -232,9 +232,9 @@ export declare const ExperimentSchema: z.ZodObject<{
         pValue?: number | undefined;
     }, {
         variantStats: Record<string, {
+            conversions: number;
             revenue: number;
             total: number;
-            conversions: number;
             conversionRate: number;
         }>;
         confidence?: number | undefined;
@@ -246,89 +246,89 @@ export declare const ExperimentSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: ExperimentStatus;
     name: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    status: ExperimentStatus;
+    tenantId: string;
+    hypothesis: string;
     variants: {
-        id: string;
         name: string;
+        id: string;
         config: Record<string, any>;
         traffic: number;
         description?: string | undefined;
     }[];
-    hypothesis: string;
     primaryMetric: {
-        type: "custom" | "engagement" | "revenue" | "conversion_rate";
         name: string;
+        type: "custom" | "revenue" | "conversion_rate" | "engagement";
     };
     description?: string | undefined;
-    startDate?: Date | undefined;
-    endDate?: Date | undefined;
     targeting?: {
         minSampleSize: number;
-        channels?: string[] | undefined;
         userSegments?: string[] | undefined;
+        channels?: string[] | undefined;
     } | undefined;
     secondaryMetrics?: {
-        type: string;
         name: string;
+        type: string;
     }[] | undefined;
     results?: {
         variantStats: Record<string, {
+            conversions: number;
             revenue: number;
             total: number;
-            conversions: number;
             conversionRate: number;
         }>;
         confidence?: number | undefined;
         winner?: string | undefined;
         pValue?: number | undefined;
     } | undefined;
+    startDate?: Date | undefined;
+    endDate?: Date | undefined;
 }, {
-    id: string;
     name: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
+    hypothesis: string;
     variants: {
-        id: string;
         name: string;
+        id: string;
         config: Record<string, any>;
         traffic: number;
         description?: string | undefined;
     }[];
-    hypothesis: string;
     primaryMetric: {
-        type: "custom" | "engagement" | "revenue" | "conversion_rate";
         name: string;
+        type: "custom" | "revenue" | "conversion_rate" | "engagement";
     };
-    status?: ExperimentStatus | undefined;
     description?: string | undefined;
-    startDate?: Date | undefined;
-    endDate?: Date | undefined;
+    status?: ExperimentStatus | undefined;
     targeting?: {
-        channels?: string[] | undefined;
         userSegments?: string[] | undefined;
+        channels?: string[] | undefined;
         minSampleSize?: number | undefined;
     } | undefined;
     secondaryMetrics?: {
-        type: string;
         name: string;
+        type: string;
     }[] | undefined;
     results?: {
         variantStats: Record<string, {
+            conversions: number;
             revenue: number;
             total: number;
-            conversions: number;
             conversionRate: number;
         }>;
         confidence?: number | undefined;
         winner?: string | undefined;
         pValue?: number | undefined;
     } | undefined;
+    startDate?: Date | undefined;
+    endDate?: Date | undefined;
 }>;
 export type Experiment = z.infer<typeof ExperimentSchema>;
 export declare const ExperimentVariantSchema: z.ZodObject<{
@@ -341,17 +341,17 @@ export declare const ExperimentVariantSchema: z.ZodObject<{
     conversionValue: z.ZodOptional<z.ZodNumber>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     userId: string;
-    converted: boolean;
+    id: string;
     experimentId: string;
     variantId: string;
     assignedAt: Date;
+    converted: boolean;
     metadata?: Record<string, any> | undefined;
     conversionValue?: number | undefined;
 }, {
-    id: string;
     userId: string;
+    id: string;
     experimentId: string;
     variantId: string;
     assignedAt: Date;
@@ -371,11 +371,11 @@ export declare const AudienceSchema: z.ZodObject<{
         value: z.ZodAny;
     }, "strip", z.ZodTypeAny, {
         field: string;
-        operator: "contains" | "eq" | "gt" | "neq" | "gte" | "lt" | "lte" | "in" | "exists";
+        operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains" | "exists";
         value?: any;
     }, {
         field: string;
-        operator: "contains" | "eq" | "gt" | "neq" | "gte" | "lt" | "lte" | "in" | "exists";
+        operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains" | "exists";
         value?: any;
     }>, "many">;
     logic: z.ZodDefault<z.ZodEnum<["AND", "OR"]>>;
@@ -386,15 +386,15 @@ export declare const AudienceSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
     name: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    active: boolean;
+    tenantId: string;
     criteria: {
         field: string;
-        operator: "contains" | "eq" | "gt" | "neq" | "gte" | "lt" | "lte" | "in" | "exists";
+        operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains" | "exists";
         value?: any;
     }[];
     logic: "AND" | "OR";
@@ -403,19 +403,19 @@ export declare const AudienceSchema: z.ZodObject<{
     estimatedSize?: number | undefined;
     actualSize?: number | undefined;
 }, {
-    id: string;
     name: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     criteria: {
         field: string;
-        operator: "contains" | "eq" | "gt" | "neq" | "gte" | "lt" | "lte" | "in" | "exists";
+        operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains" | "exists";
         value?: any;
     }[];
-    active?: boolean | undefined;
     description?: string | undefined;
     tags?: string[] | undefined;
+    active?: boolean | undefined;
     logic?: "AND" | "OR" | undefined;
     estimatedSize?: number | undefined;
     actualSize?: number | undefined;
@@ -446,36 +446,36 @@ export declare const ReportSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: "custom" | "attribution" | "experiment" | "audience";
     name: string;
-    config: Record<string, any>;
-    tenantId: string;
+    type: "audience" | "attribution" | "custom" | "experiment";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
+    config: Record<string, any>;
     createdBy: string;
+    description?: string | undefined;
     schedule?: {
         enabled: boolean;
         frequency: "daily" | "weekly" | "monthly";
         recipients: string[];
     } | undefined;
-    description?: string | undefined;
     lastRunAt?: Date | undefined;
 }, {
-    id: string;
-    type: "custom" | "attribution" | "experiment" | "audience";
     name: string;
-    config: Record<string, any>;
-    tenantId: string;
+    type: "audience" | "attribution" | "custom" | "experiment";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
+    config: Record<string, any>;
     createdBy: string;
+    description?: string | undefined;
     schedule?: {
         frequency: "daily" | "weekly" | "monthly";
         recipients: string[];
         enabled?: boolean | undefined;
     } | undefined;
-    description?: string | undefined;
     lastRunAt?: Date | undefined;
 }>;
 export type Report = z.infer<typeof ReportSchema>;

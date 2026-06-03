@@ -30,12 +30,12 @@ export declare const PredictionSchema: z.ZodObject<{
         importance: z.ZodNumber;
         value: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         value: string | number;
+        name: string;
         importance: number;
     }, {
-        name: string;
         value: string | number;
+        name: string;
         importance: number;
     }>, "many">>;
     explanation: z.ZodOptional<z.ZodString>;
@@ -45,11 +45,11 @@ export declare const PredictionSchema: z.ZodObject<{
         priority: z.ZodEnum<["high", "medium", "low"]>;
     }, "strip", z.ZodTypeAny, {
         action: string;
-        priority: "low" | "high" | "medium";
+        priority: "low" | "medium" | "high";
         reason: string;
     }, {
         action: string;
-        priority: "low" | "high" | "medium";
+        priority: "low" | "medium" | "high";
         reason: string;
     }>, "many">>;
     features: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodNumber>>;
@@ -58,55 +58,55 @@ export declare const PredictionSchema: z.ZodObject<{
     validUntil: z.ZodDate;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: PredictionType;
-    tenantId: string;
-    userId: string;
-    confidence: number;
     value: number;
+    type: PredictionType;
+    userId: string;
+    id: string;
     createdAt: Date;
+    tenantId: string;
     model: string;
+    confidence: number;
     validUntil: Date;
     version?: string | undefined;
+    risk?: PredictionRisk | undefined;
+    features?: Record<string, number> | undefined;
+    entityType?: "user" | "product" | "merchant" | "order" | undefined;
+    entityId?: string | undefined;
     recommendations?: {
         action: string;
-        priority: "low" | "high" | "medium";
+        priority: "low" | "medium" | "high";
         reason: string;
     }[] | undefined;
-    features?: Record<string, number> | undefined;
-    risk?: PredictionRisk | undefined;
-    entityType?: "user" | "order" | "product" | "merchant" | undefined;
-    entityId?: string | undefined;
     factors?: {
-        name: string;
         value: string | number;
+        name: string;
         importance: number;
     }[] | undefined;
     explanation?: string | undefined;
     predictedFor?: Date | undefined;
 }, {
-    id: string;
-    type: PredictionType;
-    tenantId: string;
-    userId: string;
-    confidence: number;
     value: number;
+    type: PredictionType;
+    userId: string;
+    id: string;
     createdAt: Date;
+    tenantId: string;
     model: string;
+    confidence: number;
     validUntil: Date;
     version?: string | undefined;
+    risk?: PredictionRisk | undefined;
+    features?: Record<string, number> | undefined;
+    entityType?: "user" | "product" | "merchant" | "order" | undefined;
+    entityId?: string | undefined;
     recommendations?: {
         action: string;
-        priority: "low" | "high" | "medium";
+        priority: "low" | "medium" | "high";
         reason: string;
     }[] | undefined;
-    features?: Record<string, number> | undefined;
-    risk?: PredictionRisk | undefined;
-    entityType?: "user" | "order" | "product" | "merchant" | undefined;
-    entityId?: string | undefined;
     factors?: {
-        name: string;
         value: string | number;
+        name: string;
         importance: number;
     }[] | undefined;
     explanation?: string | undefined;
@@ -153,13 +153,13 @@ export declare const RecommendationSchema: z.ZodObject<{
         discount: z.ZodOptional<z.ZodNumber>;
         rating: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        discount?: number | undefined;
         price?: number | undefined;
+        discount?: number | undefined;
         imageUrl?: string | undefined;
         rating?: number | undefined;
     }, {
-        discount?: number | undefined;
         price?: number | undefined;
+        discount?: number | undefined;
         imageUrl?: string | undefined;
         rating?: number | undefined;
     }>>;
@@ -186,19 +186,19 @@ export declare const RecommendationSchema: z.ZodObject<{
     conversions: z.ZodDefault<z.ZodNumber>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     type: RecommendationType;
-    tenantId: string;
-    userId: string;
-    category: string;
-    confidence: number;
-    createdAt: Date;
-    reason: string;
-    score: number;
     title: string;
+    category: string;
+    userId: string;
+    id: string;
+    createdAt: Date;
+    tenantId: string;
+    confidence: number;
     conversions: number;
-    entityType: "action" | "content" | "product" | "offer";
+    reason: string;
+    entityType: "content" | "product" | "action" | "offer";
     entityId: string;
+    score: number;
     validUntil: Date;
     impressions: number;
     clicks: number;
@@ -216,25 +216,25 @@ export declare const RecommendationSchema: z.ZodObject<{
         contextual: boolean;
     } | undefined;
     display?: {
-        discount?: number | undefined;
         price?: number | undefined;
+        discount?: number | undefined;
         imageUrl?: string | undefined;
         rating?: number | undefined;
     } | undefined;
     validFrom?: Date | undefined;
 }, {
-    id: string;
     type: RecommendationType;
-    tenantId: string;
-    userId: string;
-    category: string;
-    confidence: number;
-    createdAt: Date;
-    reason: string;
-    score: number;
     title: string;
-    entityType: "action" | "content" | "product" | "offer";
+    category: string;
+    userId: string;
+    id: string;
+    createdAt: Date;
+    tenantId: string;
+    confidence: number;
+    reason: string;
+    entityType: "content" | "product" | "action" | "offer";
     entityId: string;
+    score: number;
     validUntil: Date;
     context?: {
         trigger?: string | undefined;
@@ -251,8 +251,8 @@ export declare const RecommendationSchema: z.ZodObject<{
     } | undefined;
     conversions?: number | undefined;
     display?: {
-        discount?: number | undefined;
         price?: number | undefined;
+        discount?: number | undefined;
         imageUrl?: string | undefined;
         rating?: number | undefined;
     } | undefined;
@@ -314,12 +314,12 @@ export declare const DecisionSchema: z.ZodObject<{
     reviewedAt: z.ZodOptional<z.ZodDate>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "pending" | "approved" | "rejected" | "manual_review";
     type: DecisionType;
-    tenantId: string;
-    action: string;
+    id: string;
     createdAt: Date;
+    status: "pending" | "approved" | "rejected" | "manual_review";
+    action: string;
+    tenantId: string;
     reason: string;
     factors: {
         name: string;
@@ -332,20 +332,20 @@ export declare const DecisionSchema: z.ZodObject<{
         amount?: number | undefined;
         requestId?: string | undefined;
     } | undefined;
-    userId?: string | undefined;
     value?: number | undefined;
+    userId?: string | undefined;
     model?: string | undefined;
     risk?: PredictionRisk | undefined;
     fraudScore?: number | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: Date | undefined;
 }, {
-    id: string;
-    status: "pending" | "approved" | "rejected" | "manual_review";
     type: DecisionType;
-    tenantId: string;
-    action: string;
+    id: string;
     createdAt: Date;
+    status: "pending" | "approved" | "rejected" | "manual_review";
+    action: string;
+    tenantId: string;
     reason: string;
     factors: {
         name: string;
@@ -358,8 +358,8 @@ export declare const DecisionSchema: z.ZodObject<{
         amount?: number | undefined;
         requestId?: string | undefined;
     } | undefined;
-    userId?: string | undefined;
     value?: number | undefined;
+    userId?: string | undefined;
     model?: string | undefined;
     risk?: PredictionRisk | undefined;
     fraudScore?: number | undefined;
@@ -386,11 +386,11 @@ export declare const SegmentSchema: z.ZodObject<{
         value: z.ZodAny;
     }, "strip", z.ZodTypeAny, {
         field: string;
-        operator: "contains" | "eq" | "gt" | "neq" | "gte" | "lt" | "lte" | "in";
+        operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains";
         value?: any;
     }, {
         field: string;
-        operator: "contains" | "eq" | "gt" | "neq" | "gte" | "lt" | "lte" | "in";
+        operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains";
         value?: any;
     }>, "many">;
     logic: z.ZodDefault<z.ZodEnum<["AND", "OR"]>>;
@@ -402,17 +402,17 @@ export declare const SegmentSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: SegmentType;
     name: string;
-    tenantId: string;
-    priority: number;
+    type: SegmentType;
     tags: string[];
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
+    priority: number;
     criteria: {
         field: string;
-        operator: "contains" | "eq" | "gt" | "neq" | "gte" | "lt" | "lte" | "in";
+        operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains";
         value?: any;
     }[];
     logic: "AND" | "OR";
@@ -421,20 +421,20 @@ export declare const SegmentSchema: z.ZodObject<{
     description?: string | undefined;
     memberSample?: string[] | undefined;
 }, {
-    id: string;
-    type: SegmentType;
     name: string;
-    tenantId: string;
+    type: SegmentType;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     criteria: {
         field: string;
-        operator: "contains" | "eq" | "gt" | "neq" | "gte" | "lt" | "lte" | "in";
+        operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains";
         value?: any;
     }[];
     description?: string | undefined;
-    priority?: number | undefined;
     tags?: string[] | undefined;
+    priority?: number | undefined;
     logic?: "AND" | "OR" | undefined;
     isDynamic?: boolean | undefined;
     memberCount?: number | undefined;
@@ -462,16 +462,16 @@ export declare const ModelMetadataSchema: z.ZodObject<{
         auc: z.ZodOptional<z.ZodNumber>;
         rmse: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
+        recall?: number | undefined;
         accuracy?: number | undefined;
         precision?: number | undefined;
-        recall?: number | undefined;
         f1?: number | undefined;
         auc?: number | undefined;
         rmse?: number | undefined;
     }, {
+        recall?: number | undefined;
         accuracy?: number | undefined;
         precision?: number | undefined;
-        recall?: number | undefined;
         f1?: number | undefined;
         auc?: number | undefined;
         rmse?: number | undefined;
@@ -487,51 +487,51 @@ export declare const ModelMetadataSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    version: string;
-    status: ModelStatus;
-    type: string;
     name: string;
-    tenantId: string;
+    type: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    status: ModelStatus;
+    version: string;
+    tenantId: string;
     features: string[];
     predictionCount: number;
-    description?: string | undefined;
-    config?: Record<string, any> | undefined;
     metrics?: {
+        recall?: number | undefined;
         accuracy?: number | undefined;
         precision?: number | undefined;
-        recall?: number | undefined;
         f1?: number | undefined;
         auc?: number | undefined;
         rmse?: number | undefined;
     } | undefined;
+    description?: string | undefined;
+    config?: Record<string, any> | undefined;
     trainedAt?: Date | undefined;
     trainingDataSize?: number | undefined;
     trainingDuration?: number | undefined;
     deployedAt?: Date | undefined;
     lastPredictionAt?: Date | undefined;
 }, {
-    id: string;
-    status: ModelStatus;
-    type: string;
     name: string;
-    tenantId: string;
+    type: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    status: ModelStatus;
+    tenantId: string;
     features: string[];
-    version?: string | undefined;
-    description?: string | undefined;
-    config?: Record<string, any> | undefined;
     metrics?: {
+        recall?: number | undefined;
         accuracy?: number | undefined;
         precision?: number | undefined;
-        recall?: number | undefined;
         f1?: number | undefined;
         auc?: number | undefined;
         rmse?: number | undefined;
     } | undefined;
+    description?: string | undefined;
+    version?: string | undefined;
+    config?: Record<string, any> | undefined;
     trainedAt?: Date | undefined;
     trainingDataSize?: number | undefined;
     trainingDuration?: number | undefined;
@@ -564,11 +564,10 @@ export declare const RFMSchema: z.ZodObject<{
     computedAt: z.ZodDate;
     validUntil: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    userId: string;
     id: string;
     tenantId: string;
-    userId: string;
     segment: string;
-    totalOrders: number;
     tier: RFMTier;
     validUntil: Date;
     recencyScore: number;
@@ -576,15 +575,15 @@ export declare const RFMSchema: z.ZodObject<{
     monetaryScore: number;
     rfmScore: number;
     lastOrderDate: Date;
+    totalOrders: number;
     totalSpent: number;
     averageOrderValue: number;
     computedAt: Date;
 }, {
+    userId: string;
     id: string;
     tenantId: string;
-    userId: string;
     segment: string;
-    totalOrders: number;
     tier: RFMTier;
     validUntil: Date;
     recencyScore: number;
@@ -592,6 +591,7 @@ export declare const RFMSchema: z.ZodObject<{
     monetaryScore: number;
     rfmScore: number;
     lastOrderDate: Date;
+    totalOrders: number;
     totalSpent: number;
     averageOrderValue: number;
     computedAt: Date;

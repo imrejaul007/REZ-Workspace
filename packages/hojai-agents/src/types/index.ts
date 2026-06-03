@@ -114,7 +114,7 @@ export const ToolSchema = z.object({
   tenantId: z.string().uuid(),
   name: z.string(),
   description: z.string(),
-  type: z.enum(['api', 'function', 'workflow', 'external']),
+  type: z.enum(['api', 'function', 'workflow', 'external', 'http', 'database']),
 
   // Schema
   inputSchema: z.record(z.any()),
@@ -125,7 +125,10 @@ export const ToolSchema = z.object({
   handler: z.string().optional(),
   code: z.string().optional(),
 
-  // Config
+  // Config (for http and database types)
+  config: z.record(z.any()).optional(),
+
+  // Rate limiting
   timeout: z.number().default(30000),
   retries: z.number().default(3),
   rateLimit: z.number().optional(),

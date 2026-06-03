@@ -1,31 +1,31 @@
 import mongoose from 'mongoose';
 import { CostCategory, CostEntry, Budget } from '../types/index.js';
 export declare const CostEntryModel: mongoose.Model<{
-    tenantId: string;
     category: CostCategory;
+    tenantId: string;
     currency: string;
+    quantity: number;
     service: string;
     totalCost: number;
-    quantity: number;
     operation: string;
     unitCost: number;
-    userId?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    userId?: string | null | undefined;
     tokensUsed?: number | null | undefined;
     unit?: string | null | undefined;
     modelId?: string | null | undefined;
     latencyMs?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    tenantId: string;
     category: CostCategory;
+    tenantId: string;
     currency: string;
+    quantity: number;
     service: string;
     totalCost: number;
-    quantity: number;
     operation: string;
     unitCost: number;
-    userId?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    userId?: string | null | undefined;
     tokensUsed?: number | null | undefined;
     unit?: string | null | undefined;
     modelId?: string | null | undefined;
@@ -33,16 +33,16 @@ export declare const CostEntryModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    tenantId: string;
     category: CostCategory;
+    tenantId: string;
     currency: string;
+    quantity: number;
     service: string;
     totalCost: number;
-    quantity: number;
     operation: string;
     unitCost: number;
-    userId?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    userId?: string | null | undefined;
     tokensUsed?: number | null | undefined;
     unit?: string | null | undefined;
     modelId?: string | null | undefined;
@@ -54,31 +54,31 @@ export declare const CostEntryModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    tenantId: string;
     category: CostCategory;
+    tenantId: string;
     currency: string;
+    quantity: number;
     service: string;
     totalCost: number;
-    quantity: number;
     operation: string;
     unitCost: number;
-    userId?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    userId?: string | null | undefined;
     tokensUsed?: number | null | undefined;
     unit?: string | null | undefined;
     modelId?: string | null | undefined;
     latencyMs?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    tenantId: string;
     category: CostCategory;
+    tenantId: string;
     currency: string;
+    quantity: number;
     service: string;
     totalCost: number;
-    quantity: number;
     operation: string;
     unitCost: number;
-    userId?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    userId?: string | null | undefined;
     tokensUsed?: number | null | undefined;
     unit?: string | null | undefined;
     modelId?: string | null | undefined;
@@ -86,16 +86,16 @@ export declare const CostEntryModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    tenantId: string;
     category: CostCategory;
+    tenantId: string;
     currency: string;
+    quantity: number;
     service: string;
     totalCost: number;
-    quantity: number;
     operation: string;
     unitCost: number;
-    userId?: string | null | undefined;
     metadata?: Map<string, any> | null | undefined;
+    userId?: string | null | undefined;
     tokensUsed?: number | null | undefined;
     unit?: string | null | undefined;
     modelId?: string | null | undefined;
@@ -106,10 +106,10 @@ export declare const CostEntryModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const BudgetModel: mongoose.Model<{
-    active: boolean;
     name: string;
-    tenantId: string;
     category: CostCategory;
+    active: boolean;
+    tenantId: string;
     monthlyLimit: number;
     alertThreshold: number;
     currentSpend: number;
@@ -117,10 +117,10 @@ export declare const BudgetModel: mongoose.Model<{
     alertEmails: string[];
     lastReset?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
-    tenantId: string;
     category: CostCategory;
+    active: boolean;
+    tenantId: string;
     monthlyLimit: number;
     alertThreshold: number;
     currentSpend: number;
@@ -130,10 +130,10 @@ export declare const BudgetModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
-    tenantId: string;
     category: CostCategory;
+    active: boolean;
+    tenantId: string;
     monthlyLimit: number;
     alertThreshold: number;
     currentSpend: number;
@@ -147,10 +147,10 @@ export declare const BudgetModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
-    tenantId: string;
     category: CostCategory;
+    active: boolean;
+    tenantId: string;
     monthlyLimit: number;
     alertThreshold: number;
     currentSpend: number;
@@ -158,10 +158,10 @@ export declare const BudgetModel: mongoose.Model<{
     alertEmails: string[];
     lastReset?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
-    tenantId: string;
     category: CostCategory;
+    active: boolean;
+    tenantId: string;
     monthlyLimit: number;
     alertThreshold: number;
     currentSpend: number;
@@ -171,10 +171,10 @@ export declare const BudgetModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
-    tenantId: string;
     category: CostCategory;
+    active: boolean;
+    tenantId: string;
     monthlyLimit: number;
     alertThreshold: number;
     currentSpend: number;

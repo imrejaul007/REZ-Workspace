@@ -39,11 +39,11 @@ export declare const ConsentSchema: z.ZodObject<{
         services: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         dataTypes: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services?: string[] | undefined;
         dataTypes?: string[] | undefined;
     }, {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services?: string[] | undefined;
         dataTypes?: string[] | undefined;
     }>;
@@ -60,21 +60,21 @@ export declare const ConsentSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    version: string;
-    status: ConsentStatus;
+    source: ConsentSource;
     type: ConsentType;
     description: string;
-    tenantId: string;
     userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    source: ConsentSource;
+    status: ConsentStatus;
+    version: string;
+    tenantId: string;
     purpose: string;
     validFrom: Date;
     dataCategories: string[];
     scope: {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services?: string[] | undefined;
         dataTypes?: string[] | undefined;
     };
@@ -87,20 +87,20 @@ export declare const ConsentSchema: z.ZodObject<{
     grantedUserAgent?: string | undefined;
     withdrawnAt?: Date | undefined;
 }, {
-    id: string;
-    version: string;
+    source: ConsentSource;
     type: ConsentType;
     description: string;
-    tenantId: string;
     userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    source: ConsentSource;
+    version: string;
+    tenantId: string;
     purpose: string;
     validFrom: Date;
     dataCategories: string[];
     scope: {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services?: string[] | undefined;
         dataTypes?: string[] | undefined;
     };
@@ -156,18 +156,18 @@ export declare const DataRightRequestSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: DataRightStatus;
     type: DataRightType;
     description: string;
-    tenantId: string;
     userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    status: DataRightStatus;
+    tenantId: string;
     cascadeDelete: boolean;
     retentionOverride: boolean;
-    reason?: string | undefined;
     dueDate?: Date | undefined;
+    reason?: string | undefined;
     assignedTo?: string | undefined;
     requestedData?: string[] | undefined;
     objectionTo?: string | undefined;
@@ -177,16 +177,16 @@ export declare const DataRightRequestSchema: z.ZodObject<{
     fulfilledAt?: Date | undefined;
     fulfillmentMethod?: "download" | "deletion" | "correction" | "restriction_applied" | undefined;
 }, {
-    id: string;
     type: DataRightType;
     description: string;
-    tenantId: string;
     userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     status?: DataRightStatus | undefined;
-    reason?: string | undefined;
     dueDate?: Date | undefined;
+    reason?: string | undefined;
     assignedTo?: string | undefined;
     requestedData?: string[] | undefined;
     cascadeDelete?: boolean | undefined;
@@ -223,30 +223,30 @@ export declare const RetentionPolicySchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
     name: string;
     description: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    active: boolean;
+    tenantId: string;
     policy: RetentionPolicy;
     dataCategory: string;
-    expiryAction: "delete" | "review" | "anonymize" | "restrict" | "archive";
+    expiryAction: "review" | "delete" | "anonymize" | "restrict" | "archive";
     trigger?: "manual" | "consent_valid" | "last_activity" | "account_closed" | "legal_requirement" | undefined;
     retentionDays?: number | undefined;
     legalBasis?: string | undefined;
     legalBasisArticle?: string | undefined;
 }, {
-    id: string;
     name: string;
     description: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     policy: RetentionPolicy;
     dataCategory: string;
-    expiryAction: "delete" | "review" | "anonymize" | "restrict" | "archive";
+    expiryAction: "review" | "delete" | "anonymize" | "restrict" | "archive";
     active?: boolean | undefined;
     trigger?: "manual" | "consent_valid" | "last_activity" | "account_closed" | "legal_requirement" | undefined;
     retentionDays?: number | undefined;
@@ -294,13 +294,13 @@ export declare const DataCategorySchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    tenantId: string;
     category: DataCategory;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     sensitivityLevel: number;
-    legalClassification: "personal" | "public" | "sensitive" | "special";
+    legalClassification: "public" | "personal" | "sensitive" | "special";
     requiredProtections: ("encryption_at_rest" | "encryption_in_transit" | "access_logging" | "audit_trail" | "consent_required" | "legal_basis_required" | "dpo_approval" | "breach_notification" | "impact_assessment")[];
     sharingRules: {
         canShareWithProcessors: boolean;
@@ -309,12 +309,12 @@ export declare const DataCategorySchema: z.ZodObject<{
         requiresLegalBasis: boolean;
     };
 }, {
-    id: string;
-    tenantId: string;
     category: DataCategory;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    legalClassification: "personal" | "public" | "sensitive" | "special";
+    tenantId: string;
+    legalClassification: "public" | "personal" | "sensitive" | "special";
     requiredProtections: ("encryption_at_rest" | "encryption_in_transit" | "access_logging" | "audit_trail" | "consent_required" | "legal_basis_required" | "dpo_approval" | "breach_notification" | "impact_assessment")[];
     sharingRules: {
         canShareWithProcessors?: boolean | undefined;
@@ -343,13 +343,13 @@ export declare const ComplianceAuditSchema: z.ZodObject<{
     processingPurpose: z.ZodOptional<z.ZodString>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    category: "security" | "retention" | "transfer" | "consent" | "data_right" | "breach";
     id: string;
-    event: string;
-    tenantId: string;
-    category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
-    result: "partial" | "success" | "failure";
-    action: string;
     createdAt: Date;
+    action: string;
+    result: "success" | "partial" | "failure";
+    tenantId: string;
+    event: string;
     dataCategories: string[];
     userId?: string | undefined;
     ip?: string | undefined;
@@ -360,13 +360,13 @@ export declare const ComplianceAuditSchema: z.ZodObject<{
     processedBy?: string | undefined;
     processingPurpose?: string | undefined;
 }, {
+    category: "security" | "retention" | "transfer" | "consent" | "data_right" | "breach";
     id: string;
-    event: string;
-    tenantId: string;
-    category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
-    result: "partial" | "success" | "failure";
-    action: string;
     createdAt: Date;
+    action: string;
+    result: "success" | "partial" | "failure";
+    tenantId: string;
+    event: string;
     dataCategories: string[];
     userId?: string | undefined;
     ip?: string | undefined;
@@ -390,13 +390,13 @@ export declare const PolicyRuleSchema: z.ZodObject<{
         userSegment: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         processingType: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        consentStatus?: ConsentStatus[] | undefined;
         dataCategory?: DataCategory[] | undefined;
+        consentStatus?: ConsentStatus[] | undefined;
         userSegment?: string[] | undefined;
         processingType?: string[] | undefined;
     }, {
-        consentStatus?: ConsentStatus[] | undefined;
         dataCategory?: DataCategory[] | undefined;
+        consentStatus?: ConsentStatus[] | undefined;
         userSegment?: string[] | undefined;
         processingType?: string[] | undefined;
     }>;
@@ -420,18 +420,18 @@ export declare const PolicyRuleSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
     name: string;
     description: string;
-    tenantId: string;
-    action: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask";
-    priority: number;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    action: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask";
+    active: boolean;
+    tenantId: string;
+    priority: number;
     conditions: {
-        consentStatus?: ConsentStatus[] | undefined;
         dataCategory?: DataCategory[] | undefined;
+        consentStatus?: ConsentStatus[] | undefined;
         userSegment?: string[] | undefined;
         processingType?: string[] | undefined;
     };
@@ -443,16 +443,16 @@ export declare const PolicyRuleSchema: z.ZodObject<{
     };
     overrideRoles?: string[] | undefined;
 }, {
-    id: string;
     name: string;
     description: string;
-    tenantId: string;
-    action: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    action: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask";
+    tenantId: string;
     conditions: {
-        consentStatus?: ConsentStatus[] | undefined;
         dataCategory?: DataCategory[] | undefined;
+        consentStatus?: ConsentStatus[] | undefined;
         userSegment?: string[] | undefined;
         processingType?: string[] | undefined;
     };

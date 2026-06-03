@@ -41,17 +41,17 @@ export declare const AgentSchema: z.ZodObject<{
         memoryEnabled: z.ZodDefault<z.ZodBoolean>;
         learningEnabled: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        model: string;
         temperature: number;
         maxTokens: number;
+        model: string;
         memoryEnabled: boolean;
         learningEnabled: boolean;
         tools?: string[] | undefined;
     }, {
-        model?: string | undefined;
+        tools?: string[] | undefined;
         temperature?: number | undefined;
         maxTokens?: number | undefined;
-        tools?: string[] | undefined;
+        model?: string | undefined;
         memoryEnabled?: boolean | undefined;
         learningEnabled?: boolean | undefined;
     }>;
@@ -94,8 +94,30 @@ export declare const AgentSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    name: string;
+    type: AgentType;
+    description: string;
     id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    status: AgentStatus;
     version: string;
+    tenantId: string;
+    capabilities: AgentCapability[];
+    config: {
+        temperature: number;
+        maxTokens: number;
+        model: string;
+        memoryEnabled: boolean;
+        learningEnabled: boolean;
+        tools?: string[] | undefined;
+    };
+    schedule: {
+        enabled: boolean;
+        runOnStartup: boolean;
+        cron?: string | undefined;
+        intervalMs?: number | undefined;
+    };
     stats: {
         totalRuns: number;
         successfulRuns: number;
@@ -103,31 +125,30 @@ export declare const AgentSchema: z.ZodObject<{
         avgExecutionTime: number;
         lastRunAt?: Date | undefined;
     };
-    status: AgentStatus;
-    type: AgentType;
-    schedule: {
-        enabled: boolean;
-        runOnStartup: boolean;
-        cron?: string | undefined;
-        intervalMs?: number | undefined;
-    };
-    name: string;
-    description: string;
-    capabilities: AgentCapability[];
-    config: {
-        model: string;
-        temperature: number;
-        maxTokens: number;
-        memoryEnabled: boolean;
-        learningEnabled: boolean;
-        tools?: string[] | undefined;
-    };
-    tenantId: string;
-    createdAt: Date;
-    updatedAt: Date;
     permissions: string[];
 }, {
+    name: string;
+    type: AgentType;
+    description: string;
     id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    tenantId: string;
+    capabilities: AgentCapability[];
+    config: {
+        tools?: string[] | undefined;
+        temperature?: number | undefined;
+        maxTokens?: number | undefined;
+        model?: string | undefined;
+        memoryEnabled?: boolean | undefined;
+        learningEnabled?: boolean | undefined;
+    };
+    schedule: {
+        enabled?: boolean | undefined;
+        cron?: string | undefined;
+        intervalMs?: number | undefined;
+        runOnStartup?: boolean | undefined;
+    };
     stats: {
         totalRuns?: number | undefined;
         successfulRuns?: number | undefined;
@@ -135,29 +156,8 @@ export declare const AgentSchema: z.ZodObject<{
         lastRunAt?: Date | undefined;
         avgExecutionTime?: number | undefined;
     };
-    type: AgentType;
-    schedule: {
-        enabled?: boolean | undefined;
-        cron?: string | undefined;
-        intervalMs?: number | undefined;
-        runOnStartup?: boolean | undefined;
-    };
-    name: string;
-    description: string;
-    capabilities: AgentCapability[];
-    config: {
-        model?: string | undefined;
-        temperature?: number | undefined;
-        maxTokens?: number | undefined;
-        tools?: string[] | undefined;
-        memoryEnabled?: boolean | undefined;
-        learningEnabled?: boolean | undefined;
-    };
-    tenantId: string;
-    createdAt: Date;
-    updatedAt: Date;
-    version?: string | undefined;
     status?: AgentStatus | undefined;
+    version?: string | undefined;
     permissions?: string[] | undefined;
 }>;
 export type Agent = z.infer<typeof AgentSchema>;
@@ -192,18 +192,16 @@ export declare const AgentRunSchema: z.ZodObject<{
     startedAt: z.ZodDate;
     completedAt: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "completed" | "running" | "pending" | "failed";
     input: Record<string, any>;
-    agentId: string;
+    id: string;
+    status: "pending" | "running" | "completed" | "failed";
     tenantId: string;
+    agentId: string;
+    trigger: "manual" | "scheduled" | "event" | "api";
     startedAt: Date;
-    trigger: "manual" | "event" | "scheduled" | "api";
+    output?: Record<string, any> | undefined;
     error?: string | undefined;
     duration?: number | undefined;
-    cost?: number | undefined;
-    completedAt?: Date | undefined;
-    output?: Record<string, any> | undefined;
     steps?: {
         duration: number;
         action: string;
@@ -211,19 +209,19 @@ export declare const AgentRunSchema: z.ZodObject<{
         result?: any;
     }[] | undefined;
     tokensUsed?: number | undefined;
+    cost?: number | undefined;
+    completedAt?: Date | undefined;
 }, {
-    id: string;
-    status: "completed" | "running" | "pending" | "failed";
     input: Record<string, any>;
-    agentId: string;
+    id: string;
+    status: "pending" | "running" | "completed" | "failed";
     tenantId: string;
+    agentId: string;
+    trigger: "manual" | "scheduled" | "event" | "api";
     startedAt: Date;
-    trigger: "manual" | "event" | "scheduled" | "api";
+    output?: Record<string, any> | undefined;
     error?: string | undefined;
     duration?: number | undefined;
-    cost?: number | undefined;
-    completedAt?: Date | undefined;
-    output?: Record<string, any> | undefined;
     steps?: {
         duration: number;
         action: string;
@@ -231,6 +229,8 @@ export declare const AgentRunSchema: z.ZodObject<{
         result?: any;
     }[] | undefined;
     tokensUsed?: number | undefined;
+    cost?: number | undefined;
+    completedAt?: Date | undefined;
 }>;
 export type AgentRun = z.infer<typeof AgentRunSchema>;
 export declare const ToolSchema: z.ZodObject<{
@@ -238,44 +238,47 @@ export declare const ToolSchema: z.ZodObject<{
     tenantId: z.ZodString;
     name: z.ZodString;
     description: z.ZodString;
-    type: z.ZodEnum<["api", "function", "workflow", "external"]>;
+    type: z.ZodEnum<["api", "function", "workflow", "external", "http", "database"]>;
     inputSchema: z.ZodRecord<z.ZodString, z.ZodAny>;
     outputSchema: z.ZodRecord<z.ZodString, z.ZodAny>;
     endpoint: z.ZodOptional<z.ZodString>;
     handler: z.ZodOptional<z.ZodString>;
     code: z.ZodOptional<z.ZodString>;
+    config: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     timeout: z.ZodDefault<z.ZodNumber>;
     retries: z.ZodDefault<z.ZodNumber>;
     rateLimit: z.ZodOptional<z.ZodNumber>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: "function" | "workflow" | "api" | "external";
     name: string;
+    type: "function" | "workflow" | "api" | "external" | "http" | "database";
     description: string;
-    tenantId: string;
-    timeout: number;
+    id: string;
     createdAt: Date;
+    tenantId: string;
     inputSchema: Record<string, any>;
     outputSchema: Record<string, any>;
+    timeout: number;
     retries: number;
-    handler?: string | undefined;
     code?: string | undefined;
+    config?: Record<string, any> | undefined;
     endpoint?: string | undefined;
+    handler?: string | undefined;
     rateLimit?: number | undefined;
 }, {
-    id: string;
-    type: "function" | "workflow" | "api" | "external";
     name: string;
+    type: "function" | "workflow" | "api" | "external" | "http" | "database";
     description: string;
-    tenantId: string;
+    id: string;
     createdAt: Date;
+    tenantId: string;
     inputSchema: Record<string, any>;
     outputSchema: Record<string, any>;
-    handler?: string | undefined;
     code?: string | undefined;
-    timeout?: number | undefined;
+    config?: Record<string, any> | undefined;
     endpoint?: string | undefined;
+    handler?: string | undefined;
+    timeout?: number | undefined;
     retries?: number | undefined;
     rateLimit?: number | undefined;
 }>;
@@ -290,21 +293,21 @@ export declare const KnowledgeBaseSchema: z.ZodObject<{
     embedding: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    agentId: string;
-    tenantId: string;
-    content: string;
-    createdAt: Date;
     source: string;
+    content: string;
+    id: string;
+    createdAt: Date;
+    tenantId: string;
+    agentId: string;
     metadata?: Record<string, any> | undefined;
     embedding?: number[] | undefined;
 }, {
-    id: string;
-    agentId: string;
-    tenantId: string;
-    content: string;
-    createdAt: Date;
     source: string;
+    content: string;
+    id: string;
+    createdAt: Date;
+    tenantId: string;
+    agentId: string;
     metadata?: Record<string, any> | undefined;
     embedding?: number[] | undefined;
 }>;
@@ -337,16 +340,16 @@ export declare const AgentInsightSchema: z.ZodObject<{
     acknowledgedAt: z.ZodOptional<z.ZodDate>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
-    description: string;
-    agentId: string;
-    tenantId: string;
-    runId: string;
-    createdAt: Date;
+    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     title: string;
-    severity: "info" | "critical" | "low" | "high" | "medium";
+    description: string;
+    id: string;
+    createdAt: Date;
+    status: "pending" | "acknowledged" | "actioned" | "dismissed";
+    tenantId: string;
+    agentId: string;
+    runId: string;
+    severity: "low" | "medium" | "high" | "info" | "critical";
     insight: Record<string, any>;
     action?: {
         type: string;
@@ -356,16 +359,16 @@ export declare const AgentInsightSchema: z.ZodObject<{
     acknowledgedBy?: string | undefined;
     acknowledgedAt?: Date | undefined;
 }, {
-    id: string;
-    status: "pending" | "acknowledged" | "actioned" | "dismissed";
-    type: "alert" | "recommendation" | "anomaly" | "opportunity" | "prediction";
-    description: string;
-    agentId: string;
-    tenantId: string;
-    runId: string;
-    createdAt: Date;
+    type: "prediction" | "recommendation" | "alert" | "anomaly" | "opportunity";
     title: string;
-    severity: "info" | "critical" | "low" | "high" | "medium";
+    description: string;
+    id: string;
+    createdAt: Date;
+    status: "pending" | "acknowledged" | "actioned" | "dismissed";
+    tenantId: string;
+    agentId: string;
+    runId: string;
+    severity: "low" | "medium" | "high" | "info" | "critical";
     insight: Record<string, any>;
     action?: {
         type: string;

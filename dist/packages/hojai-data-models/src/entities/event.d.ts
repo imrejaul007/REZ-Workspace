@@ -84,11 +84,11 @@ export declare const WorkflowCreateSchema: z.ZodObject<{
         event_type: z.ZodOptional<z.ZodString>;
         schedule_cron: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        type: "manual" | "event" | "schedule" | "api";
+        type: "schedule" | "manual" | "event" | "api";
         event_type?: string | undefined;
         schedule_cron?: string | undefined;
     }, {
-        type: "manual" | "event" | "schedule" | "api";
+        type: "schedule" | "manual" | "event" | "api";
         event_type?: string | undefined;
         schedule_cron?: string | undefined;
     }>;
@@ -96,35 +96,35 @@ export declare const WorkflowCreateSchema: z.ZodObject<{
         type: z.ZodEnum<["message", "delay", "condition", "action", "ai"]>;
         config: z.ZodRecord<z.ZodString, z.ZodUnknown>;
     }, "strip", z.ZodTypeAny, {
-        type: "message" | "action" | "condition" | "delay" | "ai";
+        type: "message" | "action" | "ai" | "delay" | "condition";
         config: Record<string, unknown>;
     }, {
-        type: "message" | "action" | "condition" | "delay" | "ai";
+        type: "message" | "action" | "ai" | "delay" | "condition";
         config: Record<string, unknown>;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    type: "automation" | "sequence" | "broadcast" | "reaction";
     name: string;
+    type: "automation" | "sequence" | "broadcast" | "reaction";
     trigger: {
-        type: "manual" | "event" | "schedule" | "api";
+        type: "schedule" | "manual" | "event" | "api";
         event_type?: string | undefined;
         schedule_cron?: string | undefined;
     };
     steps: {
-        type: "message" | "action" | "condition" | "delay" | "ai";
+        type: "message" | "action" | "ai" | "delay" | "condition";
         config: Record<string, unknown>;
     }[];
     description?: string | undefined;
 }, {
-    type: "automation" | "sequence" | "broadcast" | "reaction";
     name: string;
+    type: "automation" | "sequence" | "broadcast" | "reaction";
     trigger: {
-        type: "manual" | "event" | "schedule" | "api";
+        type: "schedule" | "manual" | "event" | "api";
         event_type?: string | undefined;
         schedule_cron?: string | undefined;
     };
     steps: {
-        type: "message" | "action" | "condition" | "delay" | "ai";
+        type: "message" | "action" | "ai" | "delay" | "condition";
         config: Record<string, unknown>;
     }[];
     description?: string | undefined;
@@ -246,28 +246,21 @@ export declare const AgentCreateSchema: z.ZodObject<{
         traits: z.ZodArray<z.ZodString, "many">;
         disallowed_topics: z.ZodArray<z.ZodString, "many">;
     }, "strip", z.ZodTypeAny, {
-        tone: "friendly" | "formal" | "casual";
+        tone: "formal" | "friendly" | "casual";
         use_emoji: boolean;
         max_response_length: number;
         traits: string[];
         disallowed_topics: string[];
     }, {
-        tone: "friendly" | "formal" | "casual";
+        tone: "formal" | "friendly" | "casual";
         use_emoji: boolean;
         max_response_length: number;
         traits: string[];
         disallowed_topics: string[];
     }>;
 }, "strip", z.ZodTypeAny, {
-    type: "support" | "sales" | "marketing" | "booking" | "retention" | "care";
-    behavior: {
-        tone: "friendly" | "formal" | "casual";
-        use_emoji: boolean;
-        max_response_length: number;
-        traits: string[];
-        disallowed_topics: string[];
-    };
     name: string;
+    type: "marketing" | "sales" | "support" | "booking" | "retention" | "care";
     config: {
         channels: string[];
         languages: string[];
@@ -280,18 +273,18 @@ export declare const AgentCreateSchema: z.ZodObject<{
             enabled: boolean;
         };
     };
-    description?: string | undefined;
+    behavior: {
+        tone: "formal" | "friendly" | "casual";
+        use_emoji: boolean;
+        max_response_length: number;
+        traits: string[];
+        disallowed_topics: string[];
+    };
     title?: string | undefined;
+    description?: string | undefined;
 }, {
-    type: "support" | "sales" | "marketing" | "booking" | "retention" | "care";
-    behavior: {
-        tone: "friendly" | "formal" | "casual";
-        use_emoji: boolean;
-        max_response_length: number;
-        traits: string[];
-        disallowed_topics: string[];
-    };
     name: string;
+    type: "marketing" | "sales" | "support" | "booking" | "retention" | "care";
     config: {
         channels: string[];
         languages: string[];
@@ -304,8 +297,15 @@ export declare const AgentCreateSchema: z.ZodObject<{
             enabled: boolean;
         };
     };
-    description?: string | undefined;
+    behavior: {
+        tone: "formal" | "friendly" | "casual";
+        use_emoji: boolean;
+        max_response_length: number;
+        traits: string[];
+        disallowed_topics: string[];
+    };
     title?: string | undefined;
+    description?: string | undefined;
 }>;
 export declare function createAgent(tenantId: string, createdBy: string, data: z.infer<typeof AgentCreateSchema>): Agent;
 export type CampaignType = 'broadcast' | 'triggered' | 'automated' | 'personalized';
@@ -371,24 +371,24 @@ export declare const CampaignCreateSchema: z.ZodObject<{
     }>;
     scheduled_at: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "triggered" | "broadcast" | "personalized" | "automated";
     name: string;
+    type: "broadcast" | "triggered" | "automated" | "personalized";
     content: {
         body: string;
         subject?: string | undefined;
     };
-    channel: "push" | "whatsapp" | "email" | "sms";
+    channel: "push" | "whatsapp" | "sms" | "email";
     segments: string[];
     description?: string | undefined;
     scheduled_at?: string | undefined;
 }, {
-    type: "triggered" | "broadcast" | "personalized" | "automated";
     name: string;
+    type: "broadcast" | "triggered" | "automated" | "personalized";
     content: {
         body: string;
         subject?: string | undefined;
     };
-    channel: "push" | "whatsapp" | "email" | "sms";
+    channel: "push" | "whatsapp" | "sms" | "email";
     segments: string[];
     description?: string | undefined;
     scheduled_at?: string | undefined;

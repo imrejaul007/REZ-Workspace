@@ -3,7 +3,7 @@
  */
 export async function emitHospitalitySignals(data: {
   userId: string;
-  stay: { hotel: string; dates: { checkin: string; checkout: string };
+  stay: { hotel: string; dates: { checkin: string; checkout: string } };
   spend: number;
 }): Promise<void> {
   await axios.post(`${process.env.HOJAi_API_URL}/signals/hospitality`, {

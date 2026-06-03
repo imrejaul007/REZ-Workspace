@@ -1,19 +1,19 @@
 import mongoose from 'mongoose';
 import { ReviewType, ReviewStatus, ReviewPriority, ReviewRequest } from '../types/index.js';
 export declare const ReviewRequestModel: mongoose.Model<{
-    status: ReviewStatus;
     type: ReviewType;
+    title: string;
+    status: ReviewStatus;
     tenantId: string;
     priority: ReviewPriority;
-    title: string;
     slaHours: number;
     context?: Map<string, any> | null | undefined;
-    description?: string | null | undefined;
     decision?: string | null | undefined;
+    description?: string | null | undefined;
     originalAction?: string | null | undefined;
     aiRecommendation?: {
-        confidence?: number | null | undefined;
         action?: string | null | undefined;
+        confidence?: number | null | undefined;
         reasoning?: string | null | undefined;
     } | null | undefined;
     assignedTo?: string | null | undefined;
@@ -26,19 +26,19 @@ export declare const ReviewRequestModel: mongoose.Model<{
     overriddenBy?: string | null | undefined;
     overrideReason?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: ReviewStatus;
     type: ReviewType;
+    title: string;
+    status: ReviewStatus;
     tenantId: string;
     priority: ReviewPriority;
-    title: string;
     slaHours: number;
     context?: Map<string, any> | null | undefined;
-    description?: string | null | undefined;
     decision?: string | null | undefined;
+    description?: string | null | undefined;
     originalAction?: string | null | undefined;
     aiRecommendation?: {
-        confidence?: number | null | undefined;
         action?: string | null | undefined;
+        confidence?: number | null | undefined;
         reasoning?: string | null | undefined;
     } | null | undefined;
     assignedTo?: string | null | undefined;
@@ -53,19 +53,19 @@ export declare const ReviewRequestModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: ReviewStatus;
     type: ReviewType;
+    title: string;
+    status: ReviewStatus;
     tenantId: string;
     priority: ReviewPriority;
-    title: string;
     slaHours: number;
     context?: Map<string, any> | null | undefined;
-    description?: string | null | undefined;
     decision?: string | null | undefined;
+    description?: string | null | undefined;
     originalAction?: string | null | undefined;
     aiRecommendation?: {
-        confidence?: number | null | undefined;
         action?: string | null | undefined;
+        confidence?: number | null | undefined;
         reasoning?: string | null | undefined;
     } | null | undefined;
     assignedTo?: string | null | undefined;
@@ -84,19 +84,19 @@ export declare const ReviewRequestModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: ReviewStatus;
     type: ReviewType;
+    title: string;
+    status: ReviewStatus;
     tenantId: string;
     priority: ReviewPriority;
-    title: string;
     slaHours: number;
     context?: Map<string, any> | null | undefined;
-    description?: string | null | undefined;
     decision?: string | null | undefined;
+    description?: string | null | undefined;
     originalAction?: string | null | undefined;
     aiRecommendation?: {
-        confidence?: number | null | undefined;
         action?: string | null | undefined;
+        confidence?: number | null | undefined;
         reasoning?: string | null | undefined;
     } | null | undefined;
     assignedTo?: string | null | undefined;
@@ -109,19 +109,19 @@ export declare const ReviewRequestModel: mongoose.Model<{
     overriddenBy?: string | null | undefined;
     overrideReason?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: ReviewStatus;
     type: ReviewType;
+    title: string;
+    status: ReviewStatus;
     tenantId: string;
     priority: ReviewPriority;
-    title: string;
     slaHours: number;
     context?: Map<string, any> | null | undefined;
-    description?: string | null | undefined;
     decision?: string | null | undefined;
+    description?: string | null | undefined;
     originalAction?: string | null | undefined;
     aiRecommendation?: {
-        confidence?: number | null | undefined;
         action?: string | null | undefined;
+        confidence?: number | null | undefined;
         reasoning?: string | null | undefined;
     } | null | undefined;
     assignedTo?: string | null | undefined;
@@ -136,19 +136,19 @@ export declare const ReviewRequestModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: ReviewStatus;
     type: ReviewType;
+    title: string;
+    status: ReviewStatus;
     tenantId: string;
     priority: ReviewPriority;
-    title: string;
     slaHours: number;
     context?: Map<string, any> | null | undefined;
-    description?: string | null | undefined;
     decision?: string | null | undefined;
+    description?: string | null | undefined;
     originalAction?: string | null | undefined;
     aiRecommendation?: {
-        confidence?: number | null | undefined;
         action?: string | null | undefined;
+        confidence?: number | null | undefined;
         reasoning?: string | null | undefined;
     } | null | undefined;
     assignedTo?: string | null | undefined;
@@ -166,10 +166,10 @@ export declare const ReviewRequestModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const EscalationRuleModel: mongoose.Model<{
-    active: boolean;
     name: string;
+    action: "escalate" | "block" | "require_review" | "notify";
+    active: boolean;
     tenantId: string;
-    action: "escalate" | "notify" | "block" | "require_review";
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -188,10 +188,10 @@ export declare const EscalationRuleModel: mongoose.Model<{
     escalateTo?: string | null | undefined;
     priorityBoost?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
+    action: "escalate" | "block" | "require_review" | "notify";
+    active: boolean;
     tenantId: string;
-    action: "escalate" | "notify" | "block" | "require_review";
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -212,10 +212,10 @@ export declare const EscalationRuleModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
+    action: "escalate" | "block" | "require_review" | "notify";
+    active: boolean;
     tenantId: string;
-    action: "escalate" | "notify" | "block" | "require_review";
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -240,10 +240,10 @@ export declare const EscalationRuleModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
+    action: "escalate" | "block" | "require_review" | "notify";
+    active: boolean;
     tenantId: string;
-    action: "escalate" | "notify" | "block" | "require_review";
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -262,10 +262,10 @@ export declare const EscalationRuleModel: mongoose.Model<{
     escalateTo?: string | null | undefined;
     priorityBoost?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    action: "escalate" | "block" | "require_review" | "notify";
+    active: boolean;
     tenantId: string;
-    action: "escalate" | "notify" | "block" | "require_review";
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -286,10 +286,10 @@ export declare const EscalationRuleModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    action: "escalate" | "block" | "require_review" | "notify";
+    active: boolean;
     tenantId: string;
-    action: "escalate" | "notify" | "block" | "require_review";
     conditions: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -313,45 +313,45 @@ export declare const EscalationRuleModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const ConfidenceThresholdModel: mongoose.Model<{
+    action: string;
     active: boolean;
     tenantId: string;
-    action: string;
     autoApproveBelow: number;
     autoApproveAbove: number;
     canOverride: boolean;
     overrideRoles: string[];
     category?: string | null | undefined;
     reviewRequired?: {
-        max: number;
         min: number;
+        max: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
+    action: string;
     active: boolean;
     tenantId: string;
-    action: string;
     autoApproveBelow: number;
     autoApproveAbove: number;
     canOverride: boolean;
     overrideRoles: string[];
     category?: string | null | undefined;
     reviewRequired?: {
-        max: number;
         min: number;
+        max: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
+    action: string;
     active: boolean;
     tenantId: string;
-    action: string;
     autoApproveBelow: number;
     autoApproveAbove: number;
     canOverride: boolean;
     overrideRoles: string[];
     category?: string | null | undefined;
     reviewRequired?: {
-        max: number;
         min: number;
+        max: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -360,45 +360,45 @@ export declare const ConfidenceThresholdModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
+    action: string;
     active: boolean;
     tenantId: string;
-    action: string;
     autoApproveBelow: number;
     autoApproveAbove: number;
     canOverride: boolean;
     overrideRoles: string[];
     category?: string | null | undefined;
     reviewRequired?: {
-        max: number;
         min: number;
+        max: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
+    action: string;
     active: boolean;
     tenantId: string;
-    action: string;
     autoApproveBelow: number;
     autoApproveAbove: number;
     canOverride: boolean;
     overrideRoles: string[];
     category?: string | null | undefined;
     reviewRequired?: {
-        max: number;
         min: number;
+        max: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
+    action: string;
     active: boolean;
     tenantId: string;
-    action: string;
     autoApproveBelow: number;
     autoApproveAbove: number;
     canOverride: boolean;
     overrideRoles: string[];
     category?: string | null | undefined;
     reviewRequired?: {
-        max: number;
         min: number;
+        max: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
@@ -406,28 +406,28 @@ export declare const ConfidenceThresholdModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const ReviewAuditModel: mongoose.Model<{
-    tenantId: string;
     action: string;
+    tenantId: string;
     reviewId: string;
     performedBy: string;
-    details?: Map<string, any> | null | undefined;
     role?: string | null | undefined;
+    details?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    tenantId: string;
     action: string;
+    tenantId: string;
     reviewId: string;
     performedBy: string;
-    details?: Map<string, any> | null | undefined;
     role?: string | null | undefined;
+    details?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    tenantId: string;
     action: string;
+    tenantId: string;
     reviewId: string;
     performedBy: string;
-    details?: Map<string, any> | null | undefined;
     role?: string | null | undefined;
+    details?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -435,28 +435,28 @@ export declare const ReviewAuditModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    tenantId: string;
     action: string;
+    tenantId: string;
     reviewId: string;
     performedBy: string;
-    details?: Map<string, any> | null | undefined;
     role?: string | null | undefined;
+    details?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    tenantId: string;
     action: string;
+    tenantId: string;
     reviewId: string;
     performedBy: string;
-    details?: Map<string, any> | null | undefined;
     role?: string | null | undefined;
+    details?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    tenantId: string;
     action: string;
+    tenantId: string;
     reviewId: string;
     performedBy: string;
-    details?: Map<string, any> | null | undefined;
     role?: string | null | undefined;
+    details?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
 } & {

@@ -85,19 +85,19 @@ export declare const ConversationCreateSchema: z.ZodObject<{
     priority: z.ZodDefault<z.ZodEnum<["low", "normal", "high", "urgent"]>>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    channel: "whatsapp" | "webchat" | "sms" | "voice" | "instagram" | "facebook" | "api";
-    priority: "low" | "normal" | "high" | "urgent";
+    channel: "api" | "whatsapp" | "sms" | "instagram" | "facebook" | "webchat" | "voice";
     tags: string[];
+    priority: "low" | "high" | "normal" | "urgent";
     customer_id: string;
     first_message: string;
     subject?: string | undefined;
 }, {
-    channel: "whatsapp" | "webchat" | "sms" | "voice" | "instagram" | "facebook" | "api";
+    channel: "api" | "whatsapp" | "sms" | "instagram" | "facebook" | "webchat" | "voice";
     customer_id: string;
     first_message: string;
-    priority?: "low" | "normal" | "high" | "urgent" | undefined;
     subject?: string | undefined;
     tags?: string[] | undefined;
+    priority?: "low" | "high" | "normal" | "urgent" | undefined;
 }>;
 export declare const ConversationUpdateSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["open", "pending", "closed", "archived"]>>;
@@ -109,21 +109,21 @@ export declare const ConversationUpdateSchema: z.ZodObject<{
     resolution_summary: z.ZodOptional<z.ZodString>;
     csat_score: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    status?: "pending" | "archived" | "open" | "closed" | undefined;
-    priority?: "low" | "normal" | "high" | "urgent" | undefined;
     tags?: string[] | undefined;
+    status?: "pending" | "archived" | "open" | "closed" | undefined;
+    priority?: "low" | "high" | "normal" | "urgent" | undefined;
     assigned_to_type?: "user" | "ai_employee" | "team" | undefined;
     assigned_to_id?: string | undefined;
-    resolution_type?: "escalated" | "resolved" | "closed_no_resolution" | "transferred" | undefined;
+    resolution_type?: "transferred" | "resolved" | "escalated" | "closed_no_resolution" | undefined;
     resolution_summary?: string | undefined;
     csat_score?: number | undefined;
 }, {
-    status?: "pending" | "archived" | "open" | "closed" | undefined;
-    priority?: "low" | "normal" | "high" | "urgent" | undefined;
     tags?: string[] | undefined;
+    status?: "pending" | "archived" | "open" | "closed" | undefined;
+    priority?: "low" | "high" | "normal" | "urgent" | undefined;
     assigned_to_type?: "user" | "ai_employee" | "team" | undefined;
     assigned_to_id?: string | undefined;
-    resolution_type?: "escalated" | "resolved" | "closed_no_resolution" | "transferred" | undefined;
+    resolution_type?: "transferred" | "resolved" | "escalated" | "closed_no_resolution" | undefined;
     resolution_summary?: string | undefined;
     csat_score?: number | undefined;
 }>;

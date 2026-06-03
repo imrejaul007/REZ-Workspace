@@ -132,13 +132,13 @@ export class AnalyticsService {
   async trackAttributionEvent(event: Omit<AttributionEvent, 'id'>): Promise<AttributionEvent> {
     const doc = new AttributionEventModel({ ...event, id: uuid() });
     await doc.save();
-    return doc.toObject() as AttributionEvent;
+    return doc.toObject() as unknown as AttributionEvent;
   }
 
   async trackConversion(conversion: Omit<Conversion, 'id'>): Promise<Conversion> {
     const doc = new ConversionModel({ ...conversion, id: uuid() });
     await doc.save();
-    return doc.toObject() as Conversion;
+    return doc.toObject() as unknown as Conversion;
   }
 
   async getAttribution(params: {
@@ -170,7 +170,7 @@ export class AnalyticsService {
       if (events.length === 0) continue;
 
       let channels: string[] = [];
-      const weights: number[] = [];
+      let weights: number[] = [];
 
       switch (model) {
         case AttributionModel.FIRST_TOUCH:
@@ -214,7 +214,7 @@ export class AnalyticsService {
   async createExperiment(experiment: Omit<Experiment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Experiment> {
     const doc = new ExperimentModel({ ...experiment, id: uuid() });
     await doc.save();
-    return doc.toObject() as Experiment;
+    return doc.toObject() as unknown as Experiment;
   }
 
   async assignVariant(experimentId: string, userId: string): Promise<{ variantId: string; config: Record<string, unknown> }> {
@@ -310,24 +310,24 @@ export class AnalyticsService {
   async createAudience(audience: Omit<Audience, 'id' | 'createdAt' | 'updatedAt'>): Promise<Audience> {
     const doc = new AudienceModel({ ...audience, id: uuid() });
     await doc.save();
-    return doc.toObject() as Audience;
+    return doc.toObject() as unknown as Audience;
   }
 
   async listAudiences(tenantId: string): Promise<Audience[]> {
     const audiences = await AudienceModel.find({ tenantId, active: true });
-    return audiences.map(a => a.toObject() as Audience);
+    return audiences.map(a => a.toObject() as unknown as Audience);
   }
 
   // Reports
   async createReport(report: Omit<Report, 'id' | 'createdAt' | 'updatedAt'>): Promise<Report> {
     const doc = new ReportModel({ ...report, id: uuid() });
     await doc.save();
-    return doc.toObject() as Report;
+    return doc.toObject() as unknown as Report;
   }
 
   async listReports(tenantId: string): Promise<Report[]> {
     const reports = await ReportModel.find({ tenantId }).sort({ createdAt: -1 });
-    return reports.map(r => r.toObject() as Report);
+    return reports.map(r => r.toObject() as unknown as Report);
   }
 }
 

@@ -1,73 +1,73 @@
 import mongoose from 'mongoose';
 import { Message, Template, Campaign, Channel, MessageStatus } from '../types/index.js';
 export declare const MessageModel: mongoose.Model<{
-    status: MessageStatus;
-    tenantId: string;
+    to: string;
     body: string;
     channel: Channel;
+    status: MessageStatus;
+    tenantId: string;
     direction: "inbound" | "outbound";
     from: string;
-    to: string;
     error?: string | null | undefined;
-    metadata?: Map<string, any> | null | undefined;
     subject?: string | null | undefined;
+    metadata?: Map<string, any> | null | undefined;
+    cost?: number | null | undefined;
+    externalId?: string | null | undefined;
     templateId?: string | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    externalStatus?: string | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
-    cost?: number | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    segments?: number | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
+    segments?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: MessageStatus;
-    tenantId: string;
+    to: string;
     body: string;
     channel: Channel;
+    status: MessageStatus;
+    tenantId: string;
     direction: "inbound" | "outbound";
     from: string;
-    to: string;
     error?: string | null | undefined;
-    metadata?: Map<string, any> | null | undefined;
     subject?: string | null | undefined;
+    metadata?: Map<string, any> | null | undefined;
+    cost?: number | null | undefined;
+    externalId?: string | null | undefined;
     templateId?: string | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    externalStatus?: string | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
-    cost?: number | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    segments?: number | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
+    segments?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: MessageStatus;
-    tenantId: string;
+    to: string;
     body: string;
     channel: Channel;
+    status: MessageStatus;
+    tenantId: string;
     direction: "inbound" | "outbound";
     from: string;
-    to: string;
     error?: string | null | undefined;
-    metadata?: Map<string, any> | null | undefined;
     subject?: string | null | undefined;
+    metadata?: Map<string, any> | null | undefined;
+    cost?: number | null | undefined;
+    externalId?: string | null | undefined;
     templateId?: string | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    externalStatus?: string | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
-    cost?: number | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    segments?: number | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
+    segments?: number | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -75,169 +75,169 @@ export declare const MessageModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: MessageStatus;
-    tenantId: string;
+    to: string;
     body: string;
     channel: Channel;
+    status: MessageStatus;
+    tenantId: string;
     direction: "inbound" | "outbound";
     from: string;
-    to: string;
     error?: string | null | undefined;
-    metadata?: Map<string, any> | null | undefined;
     subject?: string | null | undefined;
+    metadata?: Map<string, any> | null | undefined;
+    cost?: number | null | undefined;
+    externalId?: string | null | undefined;
     templateId?: string | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    externalStatus?: string | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
-    cost?: number | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    segments?: number | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
+    segments?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: MessageStatus;
-    tenantId: string;
+    to: string;
     body: string;
     channel: Channel;
+    status: MessageStatus;
+    tenantId: string;
     direction: "inbound" | "outbound";
     from: string;
-    to: string;
     error?: string | null | undefined;
-    metadata?: Map<string, any> | null | undefined;
     subject?: string | null | undefined;
+    metadata?: Map<string, any> | null | undefined;
+    cost?: number | null | undefined;
+    externalId?: string | null | undefined;
     templateId?: string | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    externalStatus?: string | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
-    cost?: number | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    segments?: number | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
+    segments?: number | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: MessageStatus;
-    tenantId: string;
+    to: string;
     body: string;
     channel: Channel;
+    status: MessageStatus;
+    tenantId: string;
     direction: "inbound" | "outbound";
     from: string;
-    to: string;
     error?: string | null | undefined;
-    metadata?: Map<string, any> | null | undefined;
     subject?: string | null | undefined;
+    metadata?: Map<string, any> | null | undefined;
+    cost?: number | null | undefined;
+    externalId?: string | null | undefined;
     templateId?: string | null | undefined;
+    variables?: Map<string, string> | null | undefined;
+    externalStatus?: string | null | undefined;
+    scheduledAt?: NativeDate | null | undefined;
     sentAt?: NativeDate | null | undefined;
     deliveredAt?: NativeDate | null | undefined;
     readAt?: NativeDate | null | undefined;
-    scheduledAt?: NativeDate | null | undefined;
-    cost?: number | null | undefined;
-    variables?: Map<string, string> | null | undefined;
-    segments?: number | null | undefined;
-    externalId?: string | null | undefined;
-    externalStatus?: string | null | undefined;
     errorCode?: string | null | undefined;
+    segments?: number | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }>>;
 export declare const TemplateModel: mongoose.Model<{
-    status: "active" | "draft" | "archived";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "active" | "draft" | "archived";
+    tenantId: string;
     variables: string[];
-    stats?: {
-        delivered: number;
-        sent: number;
-        read: number;
-        bounced: number;
-    } | null | undefined;
     content?: {
         body: string;
         buttons: mongoose.Types.DocumentArray<{
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }> & {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }>;
         subject?: string | null | undefined;
         imageUrl?: string | null | undefined;
+    } | null | undefined;
+    stats?: {
+        read: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: "active" | "draft" | "archived";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "active" | "draft" | "archived";
+    tenantId: string;
     variables: string[];
-    stats?: {
-        delivered: number;
-        sent: number;
-        read: number;
-        bounced: number;
-    } | null | undefined;
     content?: {
         body: string;
         buttons: mongoose.Types.DocumentArray<{
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }> & {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }>;
         subject?: string | null | undefined;
         imageUrl?: string | null | undefined;
+    } | null | undefined;
+    stats?: {
+        read: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: "active" | "draft" | "archived";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "active" | "draft" | "archived";
+    tenantId: string;
     variables: string[];
-    stats?: {
-        delivered: number;
-        sent: number;
-        read: number;
-        bounced: number;
-    } | null | undefined;
     content?: {
         body: string;
         buttons: mongoose.Types.DocumentArray<{
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }> & {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }>;
         subject?: string | null | undefined;
         imageUrl?: string | null | undefined;
+    } | null | undefined;
+    stats?: {
+        read: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -246,96 +246,96 @@ export declare const TemplateModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: "active" | "draft" | "archived";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "active" | "draft" | "archived";
+    tenantId: string;
     variables: string[];
-    stats?: {
-        delivered: number;
-        sent: number;
-        read: number;
-        bounced: number;
-    } | null | undefined;
     content?: {
         body: string;
         buttons: mongoose.Types.DocumentArray<{
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }> & {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }>;
         subject?: string | null | undefined;
         imageUrl?: string | null | undefined;
+    } | null | undefined;
+    stats?: {
+        read: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: "active" | "draft" | "archived";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "active" | "draft" | "archived";
+    tenantId: string;
     variables: string[];
-    stats?: {
-        delivered: number;
-        sent: number;
-        read: number;
-        bounced: number;
-    } | null | undefined;
     content?: {
         body: string;
         buttons: mongoose.Types.DocumentArray<{
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }> & {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }>;
         subject?: string | null | undefined;
         imageUrl?: string | null | undefined;
+    } | null | undefined;
+    stats?: {
+        read: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: "active" | "draft" | "archived";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "active" | "draft" | "archived";
+    tenantId: string;
     variables: string[];
-    stats?: {
-        delivered: number;
-        sent: number;
-        read: number;
-        bounced: number;
-    } | null | undefined;
     content?: {
         body: string;
         buttons: mongoose.Types.DocumentArray<{
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }> & {
-            id?: string | null | undefined;
             url?: string | null | undefined;
+            id?: string | null | undefined;
             text?: string | null | undefined;
         }>;
         subject?: string | null | undefined;
         imageUrl?: string | null | undefined;
+    } | null | undefined;
+    stats?: {
+        read: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
@@ -343,20 +343,17 @@ export declare const TemplateModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const CampaignModel: mongoose.Model<{
-    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "paused" | "running" | "completed" | "failed" | "scheduled" | "draft";
+    tenantId: string;
     templateId: string;
-    stats?: {
-        failed: number;
-        delivered: number;
-        sent: number;
-        read: number;
-        clicked: number;
-        total: number;
-        bounced: number;
+    audience?: {
+        type: "filter" | "segment" | "list";
+        id?: string | null | undefined;
+        criteria?: Map<string, any> | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -366,11 +363,14 @@ export declare const CampaignModel: mongoose.Model<{
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    audience?: {
-        type: "filter" | "segment" | "list";
-        id?: string | null | undefined;
-        criteria?: Map<string, any> | null | undefined;
+    stats?: {
+        failed: number;
+        read: number;
+        total: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
+        clicked: number;
     } | null | undefined;
     createdBy?: string | null | undefined;
     settings?: {
@@ -380,20 +380,17 @@ export declare const CampaignModel: mongoose.Model<{
         cap?: number | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "paused" | "running" | "completed" | "failed" | "scheduled" | "draft";
+    tenantId: string;
     templateId: string;
-    stats?: {
-        failed: number;
-        delivered: number;
-        sent: number;
-        read: number;
-        clicked: number;
-        total: number;
-        bounced: number;
+    audience?: {
+        type: "filter" | "segment" | "list";
+        id?: string | null | undefined;
+        criteria?: Map<string, any> | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -403,11 +400,14 @@ export declare const CampaignModel: mongoose.Model<{
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    audience?: {
-        type: "filter" | "segment" | "list";
-        id?: string | null | undefined;
-        criteria?: Map<string, any> | null | undefined;
+    stats?: {
+        failed: number;
+        read: number;
+        total: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
+        clicked: number;
     } | null | undefined;
     createdBy?: string | null | undefined;
     settings?: {
@@ -419,20 +419,17 @@ export declare const CampaignModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "paused" | "running" | "completed" | "failed" | "scheduled" | "draft";
+    tenantId: string;
     templateId: string;
-    stats?: {
-        failed: number;
-        delivered: number;
-        sent: number;
-        read: number;
-        clicked: number;
-        total: number;
-        bounced: number;
+    audience?: {
+        type: "filter" | "segment" | "list";
+        id?: string | null | undefined;
+        criteria?: Map<string, any> | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -442,11 +439,14 @@ export declare const CampaignModel: mongoose.Model<{
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    audience?: {
-        type: "filter" | "segment" | "list";
-        id?: string | null | undefined;
-        criteria?: Map<string, any> | null | undefined;
+    stats?: {
+        failed: number;
+        read: number;
+        total: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
+        clicked: number;
     } | null | undefined;
     createdBy?: string | null | undefined;
     settings?: {
@@ -462,20 +462,17 @@ export declare const CampaignModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "paused" | "running" | "completed" | "failed" | "scheduled" | "draft";
+    tenantId: string;
     templateId: string;
-    stats?: {
-        failed: number;
-        delivered: number;
-        sent: number;
-        read: number;
-        clicked: number;
-        total: number;
-        bounced: number;
+    audience?: {
+        type: "filter" | "segment" | "list";
+        id?: string | null | undefined;
+        criteria?: Map<string, any> | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -485,11 +482,14 @@ export declare const CampaignModel: mongoose.Model<{
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    audience?: {
-        type: "filter" | "segment" | "list";
-        id?: string | null | undefined;
-        criteria?: Map<string, any> | null | undefined;
+    stats?: {
+        failed: number;
+        read: number;
+        total: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
+        clicked: number;
     } | null | undefined;
     createdBy?: string | null | undefined;
     settings?: {
@@ -499,20 +499,17 @@ export declare const CampaignModel: mongoose.Model<{
         cap?: number | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "paused" | "running" | "completed" | "failed" | "scheduled" | "draft";
+    tenantId: string;
     templateId: string;
-    stats?: {
-        failed: number;
-        delivered: number;
-        sent: number;
-        read: number;
-        clicked: number;
-        total: number;
-        bounced: number;
+    audience?: {
+        type: "filter" | "segment" | "list";
+        id?: string | null | undefined;
+        criteria?: Map<string, any> | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -522,11 +519,14 @@ export declare const CampaignModel: mongoose.Model<{
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    audience?: {
-        type: "filter" | "segment" | "list";
-        id?: string | null | undefined;
-        criteria?: Map<string, any> | null | undefined;
+    stats?: {
+        failed: number;
+        read: number;
+        total: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
+        clicked: number;
     } | null | undefined;
     createdBy?: string | null | undefined;
     settings?: {
@@ -538,20 +538,17 @@ export declare const CampaignModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
     name: string;
-    tenantId: string;
     channel: Channel;
+    status: "paused" | "running" | "completed" | "failed" | "scheduled" | "draft";
+    tenantId: string;
     templateId: string;
-    stats?: {
-        failed: number;
-        delivered: number;
-        sent: number;
-        read: number;
-        clicked: number;
-        total: number;
-        bounced: number;
+    audience?: {
+        type: "filter" | "segment" | "list";
+        id?: string | null | undefined;
+        criteria?: Map<string, any> | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     schedule?: {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
@@ -561,11 +558,14 @@ export declare const CampaignModel: mongoose.Model<{
         } | null | undefined;
         sendAt?: NativeDate | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    audience?: {
-        type: "filter" | "segment" | "list";
-        id?: string | null | undefined;
-        criteria?: Map<string, any> | null | undefined;
+    stats?: {
+        failed: number;
+        read: number;
+        total: number;
+        sent: number;
+        delivered: number;
+        bounced: number;
+        clicked: number;
     } | null | undefined;
     createdBy?: string | null | undefined;
     settings?: {

@@ -9,7 +9,7 @@ export declare function emitHospitalitySignals(data: {
             checkin: string;
             checkout: string;
         };
-        spend: number;
     };
+    spend: number;
 }): Promise<void>;
 //# sourceMappingURL=hospitality.d.ts.map

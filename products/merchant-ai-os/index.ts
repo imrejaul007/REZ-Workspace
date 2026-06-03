@@ -565,7 +565,7 @@ class WorkflowsModule implements WorkflowModule {
       merchant_id: 'merchant_1',
       name: data.name,
       trigger: data.trigger,
-      steps: data.steps.map((s, i) => ({ ...s, id: `step_${i}` }),
+      steps: data.steps.map((s, i) => ({ ...s, id: `step_${i}` })),
       status: 'draft',
       runs_count: 0,
       created_at: new Date().toISOString()
@@ -665,7 +665,7 @@ class AnalyticsModule {
       date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
       revenue: Math.random() * 10000 + 5000,
       orders: Math.floor(Math.random() * 50) + 20
-    }).reverse();
+    }));
   }
 
   async getCustomers(merchantId: string): Promise<CustomerStats> {

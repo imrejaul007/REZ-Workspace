@@ -60,15 +60,15 @@ export declare const EmployeeSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: EmployeeStatus;
+    role: string;
     name: string;
-    capabilities: string[];
-    skills: string[];
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    role: string;
+    status: EmployeeStatus;
+    tenantId: string;
+    capabilities: string[];
+    skills: string[];
     languages: string[];
     description?: string | undefined;
     metadata?: Record<string, any> | undefined;
@@ -79,18 +79,18 @@ export declare const EmployeeSchema: z.ZodObject<{
         timezone: string;
     } | undefined;
 }, {
-    id: string;
+    role: string;
     name: string;
-    capabilities: string[];
-    tenantId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    role: string;
-    status?: EmployeeStatus | undefined;
+    tenantId: string;
+    capabilities: string[];
     description?: string | undefined;
-    skills?: string[] | undefined;
     metadata?: Record<string, any> | undefined;
+    status?: EmployeeStatus | undefined;
     avatar?: string | undefined;
+    skills?: string[] | undefined;
     languages?: string[] | undefined;
     workingHours?: {
         end: string;
@@ -168,12 +168,8 @@ export declare const MessageSchema: z.ZodObject<{
     timestamp: z.ZodDate;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "failed" | "delivered" | "sent" | "read";
+    source: Source;
     type: MessageType;
-    conversationId: string;
-    tenantId: string;
-    userId: string;
     content: {
         text?: string | undefined;
         location?: {
@@ -188,18 +184,19 @@ export declare const MessageSchema: z.ZodObject<{
             text: string;
         }[] | undefined;
     };
-    timestamp: Date;
+    userId: string;
+    id: string;
     createdAt: Date;
-    source: Source;
+    status: "failed" | "read" | "sent" | "delivered";
+    tenantId: string;
+    timestamp: Date;
     direction: MessageDirection;
+    conversationId: string;
     metadata?: Record<string, any> | undefined;
     employeeId?: string | undefined;
     externalId?: string | undefined;
 }, {
-    id: string;
-    conversationId: string;
-    tenantId: string;
-    userId: string;
+    source: Source;
     content: {
         text?: string | undefined;
         location?: {
@@ -214,13 +211,16 @@ export declare const MessageSchema: z.ZodObject<{
             text: string;
         }[] | undefined;
     };
-    timestamp: Date;
+    userId: string;
+    id: string;
     createdAt: Date;
-    source: Source;
+    tenantId: string;
+    timestamp: Date;
     direction: MessageDirection;
-    status?: "failed" | "delivered" | "sent" | "read" | undefined;
+    conversationId: string;
     type?: MessageType | undefined;
     metadata?: Record<string, any> | undefined;
+    status?: "failed" | "read" | "sent" | "delivered" | undefined;
     employeeId?: string | undefined;
     externalId?: string | undefined;
 }>;
@@ -240,11 +240,11 @@ export declare const ConversationSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         content: string;
         timestamp: Date;
-        sender: "system" | "user" | "employee";
+        sender: "user" | "system" | "employee";
     }, {
         content: string;
         timestamp: Date;
-        sender: "system" | "user" | "employee";
+        sender: "user" | "system" | "employee";
     }>>;
     context: z.ZodOptional<z.ZodObject<{
         intent: z.ZodOptional<z.ZodString>;
@@ -253,14 +253,14 @@ export declare const ConversationSchema: z.ZodObject<{
         language: z.ZodDefault<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         language: string;
-        sentiment?: "positive" | "neutral" | "negative" | undefined;
         intent?: string | undefined;
         entities?: Record<string, any> | undefined;
+        sentiment?: "positive" | "neutral" | "negative" | undefined;
     }, {
-        sentiment?: "positive" | "neutral" | "negative" | undefined;
-        intent?: string | undefined;
         language?: string | undefined;
+        intent?: string | undefined;
         entities?: Record<string, any> | undefined;
+        sentiment?: "positive" | "neutral" | "negative" | undefined;
     }>>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     unreadCount: z.ZodDefault<z.ZodNumber>;
@@ -269,19 +269,19 @@ export declare const ConversationSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: ConversationStatus;
-    tenantId: string;
+    source: Source;
     userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    source: Source;
+    status: ConversationStatus;
+    tenantId: string;
     unreadCount: number;
     context?: {
         language: string;
-        sentiment?: "positive" | "neutral" | "negative" | undefined;
         intent?: string | undefined;
         entities?: Record<string, any> | undefined;
+        sentiment?: "positive" | "neutral" | "negative" | undefined;
     } | undefined;
     metadata?: Record<string, any> | undefined;
     assignedAt?: Date | undefined;
@@ -290,31 +290,31 @@ export declare const ConversationSchema: z.ZodObject<{
     lastMessage?: {
         content: string;
         timestamp: Date;
-        sender: "system" | "user" | "employee";
+        sender: "user" | "system" | "employee";
     } | undefined;
     closedAt?: Date | undefined;
 }, {
-    id: string;
-    tenantId: string;
     userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    status?: ConversationStatus | undefined;
+    tenantId: string;
     context?: {
-        sentiment?: "positive" | "neutral" | "negative" | undefined;
-        intent?: string | undefined;
         language?: string | undefined;
+        intent?: string | undefined;
         entities?: Record<string, any> | undefined;
+        sentiment?: "positive" | "neutral" | "negative" | undefined;
     } | undefined;
-    metadata?: Record<string, any> | undefined;
     source?: Source | undefined;
+    metadata?: Record<string, any> | undefined;
+    status?: ConversationStatus | undefined;
     assignedAt?: Date | undefined;
     employeeId?: string | undefined;
     userName?: string | undefined;
     lastMessage?: {
         content: string;
         timestamp: Date;
-        sender: "system" | "user" | "employee";
+        sender: "user" | "system" | "employee";
     } | undefined;
     unreadCount?: number | undefined;
     closedAt?: Date | undefined;
@@ -333,24 +333,24 @@ export declare const TaskAssignmentSchema: z.ZodObject<{
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    status: "completed" | "rejected" | "assigned" | "accepted" | "transferred";
-    conversationId: string;
-    tenantId: string;
-    priority: "low" | "normal" | "high" | "urgent";
     createdAt: Date;
     updatedAt: Date;
+    status: "completed" | "rejected" | "assigned" | "accepted" | "transferred";
+    tenantId: string;
+    priority: "low" | "high" | "normal" | "urgent";
     employeeId: string;
+    conversationId: string;
     assignedBy?: string | undefined;
     notes?: string | undefined;
 }, {
     id: string;
-    conversationId: string;
-    tenantId: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     employeeId: string;
+    conversationId: string;
     status?: "completed" | "rejected" | "assigned" | "accepted" | "transferred" | undefined;
-    priority?: "low" | "normal" | "high" | "urgent" | undefined;
+    priority?: "low" | "high" | "normal" | "urgent" | undefined;
     assignedBy?: string | undefined;
     notes?: string | undefined;
 }>;

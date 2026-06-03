@@ -264,12 +264,12 @@ export declare const CompensationCalculateSchema: z.ZodObject<{
     period: z.ZodString;
     overrideBase: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    period: string;
     employeeId: string;
+    period: string;
     overrideBase?: number | undefined;
 }, {
-    period: string;
     employeeId: string;
+    period: string;
     overrideBase?: number | undefined;
 }>;
 export declare const LeaderboardQuerySchema: z.ZodObject<{
@@ -279,14 +279,14 @@ export declare const LeaderboardQuerySchema: z.ZodObject<{
     department: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     limit?: number | undefined;
-    period?: "daily" | "weekly" | "monthly" | undefined;
-    metric?: "revenue" | "efficiency" | "quality" | "overall" | "productivity" | undefined;
     department?: string | undefined;
+    period?: "daily" | "weekly" | "monthly" | undefined;
+    metric?: "quality" | "revenue" | "efficiency" | "overall" | "productivity" | undefined;
 }, {
     limit?: number | undefined;
-    period?: "daily" | "weekly" | "monthly" | undefined;
-    metric?: "revenue" | "efficiency" | "quality" | "overall" | "productivity" | undefined;
     department?: string | undefined;
+    period?: "daily" | "weekly" | "monthly" | undefined;
+    metric?: "quality" | "revenue" | "efficiency" | "overall" | "productivity" | undefined;
 }>;
 export declare const ReportGenerateSchema: z.ZodObject<{
     employeeId: z.ZodString;
@@ -298,13 +298,13 @@ export declare const ReportGenerateSchema: z.ZodObject<{
     employeeId: string;
     periodStart: string;
     periodEnd: string;
-    format?: "pdf" | "csv" | "json" | undefined;
+    format?: "json" | "pdf" | "csv" | undefined;
     reportType?: "department" | "organization" | "individual" | "team" | undefined;
 }, {
     employeeId: string;
     periodStart: string;
     periodEnd: string;
-    format?: "pdf" | "csv" | "json" | undefined;
+    format?: "json" | "pdf" | "csv" | undefined;
     reportType?: "department" | "organization" | "individual" | "team" | undefined;
 }>;
 export declare const DEFAULT_EVALUATION_WEIGHTS: EvaluationWeights;

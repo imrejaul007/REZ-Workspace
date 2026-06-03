@@ -1,5 +1,5 @@
 # HOJAI V2 PORT REGISTRY
-**Version:** 2.0 | **Date:** May 29, 2026 | **Status:** OFFICIAL
+**Version:** 2.1 | **Date:** June 2, 2026 | **Status:** OFFICIAL
 
 ---
 
@@ -16,7 +16,8 @@ This document is the **authoritative source** for all port allocations in the Ho
 | 4500-4599 | Hojai Core | Core infrastructure |
 | 4600-4699 | Hojai Clients | Commercial intelligence |
 | 4700-4799 | Hojai Industry | Industry brains |
-| 4800-4899 | Future | Future AI services |
+| 4800-4899 | Hojai Communications | Communications & agents |
+| 5000-5099 | REZ AI | REZ AI services |
 
 ---
 
@@ -321,6 +322,19 @@ Dependencies: hojai-event, hojai-memory
 
 ---
 
+## REZ DOMAIN (3000-3999)
+
+> **Note:** REZ Domain is the core REZ ecosystem.
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| 3000 | REZ Gateway | Core API gateway |
+| 3100 | REZ User Service | User management |
+| 3200 | REZ Session Service | Session handling |
+| 3300 | REZ Notification Hub | Unified notifications |
+
+---
+
 ## REZ INTELLIGENCE (4100-4299)
 
 > **Note:** REZ Intelligence is a privileged tenant on Hojai Core.
@@ -486,6 +500,126 @@ Dependencies: hojai-event, hojai-intelligence
 food, fitness, travel, shopping, entertainment
 health, education, hospitality, retail, lifestyle
 ```
+
+---
+
+## REZ AI SERVICES (5000-5099)
+
+> **Note:** REZ AI Services provide specialized ML/AI capabilities for the REZ ecosystem.
+
+### REZ AI Services Overview
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| 5000 | REZ-graphql-federation | Unified GraphQL API gateway |
+| 5001 | REZ-automl-pipeline | AutoML training & model selection |
+| 5002 | REZ-invoice-ocr | Invoice scanning & extraction |
+| 5003 | REZ-contract-management | Contract lifecycle & e-signatures |
+| 5004 | REZ-legal-document-ai | Legal document analysis |
+| 5005 | REZ-cosmic-twin | Digital twin for Company Brain |
+| 5006 | REZ-ranking-service | Real-time ML ranking |
+
+---
+
+### REZ AI Services Detail
+
+#### 5000 - REZ GraphQL Federation
+
+```yaml
+Service: rez-graphql-federation
+Port: 5000
+Platform: rez-ai
+Purpose: Unified GraphQL API gateway
+Protocol: GraphQL
+Database: MongoDB
+Dependencies: hojai-event, REZ Graph services
+```
+
+**Features:** Schema federation, query planning, data aggregation, auth middleware
+
+#### 5001 - REZ AutoML Pipeline
+
+```yaml
+Service: rez-automl-pipeline
+Port: 5001
+Platform: rez-ai
+Purpose: AutoML training & model selection
+Protocol: HTTP REST
+Database: MongoDB, Feature Store
+Dependencies: hojai-data, REZ Graph services
+```
+
+**Features:** Model training, hyperparameter tuning, AutoML, model registry
+
+#### 5002 - REZ Invoice OCR
+
+```yaml
+Service: rez-invoice-ocr
+Port: 5002
+Platform: rez-ai
+Purpose: Invoice scanning & extraction
+Protocol: HTTP REST
+Database: MongoDB
+Dependencies: Vision AI, hojai-event
+```
+
+**Features:** OCR, document parsing, field extraction, validation
+
+#### 5003 - REZ Contract Management
+
+```yaml
+Service: rez-contract-management
+Port: 5003
+Platform: rez-ai
+Purpose: Contract lifecycle & e-signatures
+Protocol: HTTP REST
+Database: MongoDB
+Dependencies: hojai-event, Digital Signature Service
+```
+
+**Features:** Contract creation, workflow, e-signatures, compliance tracking
+
+#### 5004 - REZ Legal Document AI
+
+```yaml
+Service: rez-legal-document-ai
+Port: 5004
+Platform: rez-ai
+Purpose: Legal document analysis
+Protocol: HTTP REST
+Database: MongoDB, Vector Store
+Dependencies: hojai-event, REZ Legal Graph
+```
+
+**Features:** Clause analysis, risk detection, compliance checking, summarization
+
+#### 5005 - REZ Cosmic Twin
+
+```yaml
+Service: rez-cosmic-twin
+Port: 5005
+Platform: rez-ai
+Purpose: Digital twin for Company Brain
+Protocol: HTTP REST + WebSocket
+Database: MongoDB, Redis
+Dependencies: REZ Graph services, hojai-memory
+```
+
+**Features:** Company representation, simulation, what-if analysis, entity sync
+
+#### 5006 - REZ Ranking Service
+
+```yaml
+Service: rez-ranking-service
+Port: 5006
+Platform: rez-ai
+Purpose: Real-time ML ranking
+Protocol: HTTP REST
+Database: Redis
+Dependencies: REZ Graph services, hojai-intelligence
+```
+
+**Features:** Personalization ranking, A/B test support, feature serving, low-latency inference
 
 ---
 
@@ -806,9 +940,27 @@ Dependencies: hojai-core (all platforms)
 - [ ] 4150 - Behavioral Graph
 - [ ] 4160 - Hyperlocal Graph
 - [ ] 4170 - Intent Graph
-- [ ] 4180 - Ecosystem Knowledge
+- [x] 4180 - Communication Compliance ✅
+- [x] 4181 - Policy Engine ✅
+- [x] 4182 - Enforcement Gateway ✅
+- [x] 4183 - LLM Compliance ✅
+- [x] 4184 - Agent Governance ✅
+- [x] 4185 - Audit Trail ✅
 - [ ] 4190 - Recommendations
 - [ ] 4200 - Predictions
+
+### Compliance Suite (Ports 4180-4185)
+
+| Port | Service | Platform | Purpose |
+|------|---------|----------|---------|
+| 4180 | Communication Compliance | hojai-compliance | Pre-send email/LinkedIn/document validation |
+| 4181 | Policy Engine | hojai-compliance | NLP policy parsing, rule extraction |
+| 4182 | Enforcement Gateway | hojali-compliance | Real-time blocking, quarantine, advisory |
+| 4183 | LLM Compliance | hojai-compliance | AI content validation, PII detection |
+| 4184 | Agent Governance | hojai-governance | Permission control, boundaries |
+| 4185 | Audit Trail | hojai-governance | Compliance logging, reporting |
+
+---
 
 ### Industry Intelligence (Phase 4)
 - [ ] 4700 - Jewellery Brain
@@ -825,7 +977,16 @@ Dependencies: hojai-core (all platforms)
 - [ ] 4620 - Hotel Client
 - [ ] 4630 - Clinic Client
 
+### REZ AI Services (Phase 3)
+- [ ] 5000 - REZ GraphQL Federation
+- [ ] 5001 - REZ AutoML Pipeline
+- [ ] 5002 - REZ Invoice OCR
+- [ ] 5003 - REZ Contract Management
+- [ ] 5004 - REZ Legal Document AI
+- [ ] 5005 - REZ Cosmic Twin
+- [ ] 5006 - REZ Ranking Service
+
 ---
 
-*Document Version: 2.0*
-*Last Updated: May 29, 2026*
+*Document Version: 2.1*
+*Last Updated: June 2, 2026*

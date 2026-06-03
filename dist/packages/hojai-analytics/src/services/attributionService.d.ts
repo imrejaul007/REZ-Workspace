@@ -1,55 +1,55 @@
 import mongoose from 'mongoose';
 import { AttributionEvent, Conversion, Experiment, Audience, Report, AttributionModel, ExperimentStatus } from '../types/index.js';
 export declare const AttributionEventModel: mongoose.Model<{
-    type: "conversion" | "click" | "impression";
-    tenantId: string;
-    userId: string;
-    timestamp: NativeDate;
+    type: "impression" | "click" | "conversion";
     channel: string;
-    keyword?: string | null | undefined;
-    value?: number | null | undefined;
-    content?: string | null | undefined;
+    userId: string;
+    tenantId: string;
+    timestamp: NativeDate;
     medium?: string | null | undefined;
-    location?: string | null | undefined;
+    value?: number | null | undefined;
     source?: string | null | undefined;
-    campaign?: string | null | undefined;
+    content?: string | null | undefined;
     sessionId?: string | null | undefined;
+    campaign?: string | null | undefined;
+    keyword?: string | null | undefined;
     conversionId?: string | null | undefined;
     device?: string | null | undefined;
+    location?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    type: "conversion" | "click" | "impression";
-    tenantId: string;
-    userId: string;
-    timestamp: NativeDate;
+    type: "impression" | "click" | "conversion";
     channel: string;
-    keyword?: string | null | undefined;
-    value?: number | null | undefined;
-    content?: string | null | undefined;
+    userId: string;
+    tenantId: string;
+    timestamp: NativeDate;
     medium?: string | null | undefined;
-    location?: string | null | undefined;
+    value?: number | null | undefined;
     source?: string | null | undefined;
-    campaign?: string | null | undefined;
+    content?: string | null | undefined;
     sessionId?: string | null | undefined;
+    campaign?: string | null | undefined;
+    keyword?: string | null | undefined;
     conversionId?: string | null | undefined;
     device?: string | null | undefined;
+    location?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    type: "conversion" | "click" | "impression";
-    tenantId: string;
-    userId: string;
-    timestamp: NativeDate;
+    type: "impression" | "click" | "conversion";
     channel: string;
-    keyword?: string | null | undefined;
-    value?: number | null | undefined;
-    content?: string | null | undefined;
+    userId: string;
+    tenantId: string;
+    timestamp: NativeDate;
     medium?: string | null | undefined;
-    location?: string | null | undefined;
+    value?: number | null | undefined;
     source?: string | null | undefined;
-    campaign?: string | null | undefined;
+    content?: string | null | undefined;
     sessionId?: string | null | undefined;
+    campaign?: string | null | undefined;
+    keyword?: string | null | undefined;
     conversionId?: string | null | undefined;
     device?: string | null | undefined;
+    location?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -57,85 +57,85 @@ export declare const AttributionEventModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    type: "conversion" | "click" | "impression";
-    tenantId: string;
-    userId: string;
-    timestamp: NativeDate;
+    type: "impression" | "click" | "conversion";
     channel: string;
-    keyword?: string | null | undefined;
-    value?: number | null | undefined;
-    content?: string | null | undefined;
+    userId: string;
+    tenantId: string;
+    timestamp: NativeDate;
     medium?: string | null | undefined;
-    location?: string | null | undefined;
+    value?: number | null | undefined;
     source?: string | null | undefined;
-    campaign?: string | null | undefined;
+    content?: string | null | undefined;
     sessionId?: string | null | undefined;
+    campaign?: string | null | undefined;
+    keyword?: string | null | undefined;
     conversionId?: string | null | undefined;
     device?: string | null | undefined;
+    location?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    type: "conversion" | "click" | "impression";
-    tenantId: string;
-    userId: string;
-    timestamp: NativeDate;
+    type: "impression" | "click" | "conversion";
     channel: string;
-    keyword?: string | null | undefined;
-    value?: number | null | undefined;
-    content?: string | null | undefined;
+    userId: string;
+    tenantId: string;
+    timestamp: NativeDate;
     medium?: string | null | undefined;
-    location?: string | null | undefined;
+    value?: number | null | undefined;
     source?: string | null | undefined;
-    campaign?: string | null | undefined;
+    content?: string | null | undefined;
     sessionId?: string | null | undefined;
+    campaign?: string | null | undefined;
+    keyword?: string | null | undefined;
     conversionId?: string | null | undefined;
     device?: string | null | undefined;
+    location?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    type: "conversion" | "click" | "impression";
-    tenantId: string;
-    userId: string;
-    timestamp: NativeDate;
+    type: "impression" | "click" | "conversion";
     channel: string;
-    keyword?: string | null | undefined;
-    value?: number | null | undefined;
-    content?: string | null | undefined;
+    userId: string;
+    tenantId: string;
+    timestamp: NativeDate;
     medium?: string | null | undefined;
-    location?: string | null | undefined;
+    value?: number | null | undefined;
     source?: string | null | undefined;
-    campaign?: string | null | undefined;
+    content?: string | null | undefined;
     sessionId?: string | null | undefined;
+    campaign?: string | null | undefined;
+    keyword?: string | null | undefined;
     conversionId?: string | null | undefined;
     device?: string | null | undefined;
+    location?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }>>;
 export declare const ConversionModel: mongoose.Model<{
-    tenantId: string;
-    userId: string;
-    currency: string;
     value: number;
+    userId: string;
+    tenantId: string;
     timestamp: NativeDate;
     conversionType: string;
+    currency: string;
     metadata?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    tenantId: string;
-    userId: string;
-    currency: string;
     value: number;
+    userId: string;
+    tenantId: string;
     timestamp: NativeDate;
     conversionType: string;
+    currency: string;
     metadata?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    tenantId: string;
-    userId: string;
-    currency: string;
     value: number;
+    userId: string;
+    tenantId: string;
     timestamp: NativeDate;
     conversionType: string;
+    currency: string;
     metadata?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
@@ -144,30 +144,30 @@ export declare const ConversionModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    tenantId: string;
-    userId: string;
-    currency: string;
     value: number;
+    userId: string;
+    tenantId: string;
     timestamp: NativeDate;
     conversionType: string;
+    currency: string;
     metadata?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    tenantId: string;
-    userId: string;
-    currency: string;
     value: number;
+    userId: string;
+    tenantId: string;
     timestamp: NativeDate;
     conversionType: string;
+    currency: string;
     metadata?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    tenantId: string;
-    userId: string;
-    currency: string;
     value: number;
+    userId: string;
+    tenantId: string;
     timestamp: NativeDate;
     conversionType: string;
+    currency: string;
     metadata?: Map<string, any> | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
@@ -175,36 +175,34 @@ export declare const ConversionModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const ExperimentModel: mongoose.Model<{
-    status: ExperimentStatus;
     name: string;
+    status: ExperimentStatus;
     tenantId: string;
+    hypothesis: string;
     variants: mongoose.Types.DocumentArray<{
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }> & {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }>;
-    hypothesis: string;
     secondaryMetrics: string[];
     description?: string | null | undefined;
-    startDate?: NativeDate | null | undefined;
-    endDate?: NativeDate | null | undefined;
     targeting?: {
-        channels: string[];
         userSegments: string[];
+        channels: string[];
         minSampleSize?: number | null | undefined;
     } | null | undefined;
     primaryMetric?: string | null | undefined;
@@ -214,37 +212,37 @@ export declare const ExperimentModel: mongoose.Model<{
         pValue?: number | null | undefined;
         variantStats?: Map<string, any> | null | undefined;
     } | null | undefined;
+    startDate?: NativeDate | null | undefined;
+    endDate?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: ExperimentStatus;
     name: string;
+    status: ExperimentStatus;
     tenantId: string;
+    hypothesis: string;
     variants: mongoose.Types.DocumentArray<{
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }> & {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }>;
-    hypothesis: string;
     secondaryMetrics: string[];
     description?: string | null | undefined;
-    startDate?: NativeDate | null | undefined;
-    endDate?: NativeDate | null | undefined;
     targeting?: {
-        channels: string[];
         userSegments: string[];
+        channels: string[];
         minSampleSize?: number | null | undefined;
     } | null | undefined;
     primaryMetric?: string | null | undefined;
@@ -254,39 +252,39 @@ export declare const ExperimentModel: mongoose.Model<{
         pValue?: number | null | undefined;
         variantStats?: Map<string, any> | null | undefined;
     } | null | undefined;
+    startDate?: NativeDate | null | undefined;
+    endDate?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: ExperimentStatus;
     name: string;
+    status: ExperimentStatus;
     tenantId: string;
+    hypothesis: string;
     variants: mongoose.Types.DocumentArray<{
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }> & {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }>;
-    hypothesis: string;
     secondaryMetrics: string[];
     description?: string | null | undefined;
-    startDate?: NativeDate | null | undefined;
-    endDate?: NativeDate | null | undefined;
     targeting?: {
-        channels: string[];
         userSegments: string[];
+        channels: string[];
         minSampleSize?: number | null | undefined;
     } | null | undefined;
     primaryMetric?: string | null | undefined;
@@ -296,6 +294,8 @@ export declare const ExperimentModel: mongoose.Model<{
         pValue?: number | null | undefined;
         variantStats?: Map<string, any> | null | undefined;
     } | null | undefined;
+    startDate?: NativeDate | null | undefined;
+    endDate?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -303,36 +303,34 @@ export declare const ExperimentModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: ExperimentStatus;
     name: string;
+    status: ExperimentStatus;
     tenantId: string;
+    hypothesis: string;
     variants: mongoose.Types.DocumentArray<{
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }> & {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }>;
-    hypothesis: string;
     secondaryMetrics: string[];
     description?: string | null | undefined;
-    startDate?: NativeDate | null | undefined;
-    endDate?: NativeDate | null | undefined;
     targeting?: {
-        channels: string[];
         userSegments: string[];
+        channels: string[];
         minSampleSize?: number | null | undefined;
     } | null | undefined;
     primaryMetric?: string | null | undefined;
@@ -342,37 +340,37 @@ export declare const ExperimentModel: mongoose.Model<{
         pValue?: number | null | undefined;
         variantStats?: Map<string, any> | null | undefined;
     } | null | undefined;
+    startDate?: NativeDate | null | undefined;
+    endDate?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: ExperimentStatus;
     name: string;
+    status: ExperimentStatus;
     tenantId: string;
+    hypothesis: string;
     variants: mongoose.Types.DocumentArray<{
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }> & {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }>;
-    hypothesis: string;
     secondaryMetrics: string[];
     description?: string | null | undefined;
-    startDate?: NativeDate | null | undefined;
-    endDate?: NativeDate | null | undefined;
     targeting?: {
-        channels: string[];
         userSegments: string[];
+        channels: string[];
         minSampleSize?: number | null | undefined;
     } | null | undefined;
     primaryMetric?: string | null | undefined;
@@ -382,39 +380,39 @@ export declare const ExperimentModel: mongoose.Model<{
         pValue?: number | null | undefined;
         variantStats?: Map<string, any> | null | undefined;
     } | null | undefined;
+    startDate?: NativeDate | null | undefined;
+    endDate?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: ExperimentStatus;
     name: string;
+    status: ExperimentStatus;
     tenantId: string;
+    hypothesis: string;
     variants: mongoose.Types.DocumentArray<{
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }> & {
-        id?: string | null | undefined;
         name?: string | null | undefined;
         description?: string | null | undefined;
+        id?: string | null | undefined;
         config?: Map<string, any> | null | undefined;
         traffic?: number | null | undefined;
     }>;
-    hypothesis: string;
     secondaryMetrics: string[];
     description?: string | null | undefined;
-    startDate?: NativeDate | null | undefined;
-    endDate?: NativeDate | null | undefined;
     targeting?: {
-        channels: string[];
         userSegments: string[];
+        channels: string[];
         minSampleSize?: number | null | undefined;
     } | null | undefined;
     primaryMetric?: string | null | undefined;
@@ -424,35 +422,37 @@ export declare const ExperimentModel: mongoose.Model<{
         pValue?: number | null | undefined;
         variantStats?: Map<string, any> | null | undefined;
     } | null | undefined;
+    startDate?: NativeDate | null | undefined;
+    endDate?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }>>;
 export declare const ExperimentVariantModel: mongoose.Model<{
-    tenantId: string;
     userId: string;
-    converted: boolean;
+    tenantId: string;
     experimentId: string;
     variantId: string;
+    converted: boolean;
     metadata?: Map<string, any> | null | undefined;
     conversionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    tenantId: string;
     userId: string;
-    converted: boolean;
+    tenantId: string;
     experimentId: string;
     variantId: string;
+    converted: boolean;
     metadata?: Map<string, any> | null | undefined;
     conversionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    tenantId: string;
     userId: string;
-    converted: boolean;
+    tenantId: string;
     experimentId: string;
     variantId: string;
+    converted: boolean;
     metadata?: Map<string, any> | null | undefined;
     conversionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps & {
@@ -462,29 +462,29 @@ export declare const ExperimentVariantModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    tenantId: string;
     userId: string;
-    converted: boolean;
+    tenantId: string;
     experimentId: string;
     variantId: string;
+    converted: boolean;
     metadata?: Map<string, any> | null | undefined;
     conversionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    tenantId: string;
     userId: string;
-    converted: boolean;
+    tenantId: string;
     experimentId: string;
     variantId: string;
+    converted: boolean;
     metadata?: Map<string, any> | null | undefined;
     conversionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    tenantId: string;
     userId: string;
-    converted: boolean;
+    tenantId: string;
     experimentId: string;
     variantId: string;
+    converted: boolean;
     metadata?: Map<string, any> | null | undefined;
     conversionValue?: number | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
@@ -493,10 +493,10 @@ export declare const ExperimentVariantModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const AudienceModel: mongoose.Model<{
-    active: boolean;
     name: string;
-    tenantId: string;
     tags: string[];
+    active: boolean;
+    tenantId: string;
     criteria: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -515,10 +515,10 @@ export declare const AudienceModel: mongoose.Model<{
     estimatedSize?: number | null | undefined;
     actualSize?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
-    tenantId: string;
     tags: string[];
+    active: boolean;
+    tenantId: string;
     criteria: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -539,10 +539,10 @@ export declare const AudienceModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
-    tenantId: string;
     tags: string[];
+    active: boolean;
+    tenantId: string;
     criteria: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -567,10 +567,10 @@ export declare const AudienceModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
-    tenantId: string;
     tags: string[];
+    active: boolean;
+    tenantId: string;
     criteria: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -589,10 +589,10 @@ export declare const AudienceModel: mongoose.Model<{
     estimatedSize?: number | null | undefined;
     actualSize?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
-    tenantId: string;
     tags: string[];
+    active: boolean;
+    tenantId: string;
     criteria: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -613,10 +613,10 @@ export declare const AudienceModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
-    tenantId: string;
     tags: string[];
+    active: boolean;
+    tenantId: string;
     criteria: mongoose.Types.DocumentArray<{
         value?: any;
         field?: string | null | undefined;
@@ -640,44 +640,44 @@ export declare const AudienceModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const ReportModel: mongoose.Model<{
-    type: "custom" | "attribution" | "experiment" | "audience";
     name: string;
+    type: "audience" | "attribution" | "custom" | "experiment";
     tenantId: string;
+    description?: string | null | undefined;
+    config?: Map<string, any> | null | undefined;
     schedule?: {
         enabled: boolean;
         recipients: string[];
         frequency?: string | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    config?: Map<string, any> | null | undefined;
     lastRunAt?: NativeDate | null | undefined;
     createdBy?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    type: "custom" | "attribution" | "experiment" | "audience";
     name: string;
+    type: "audience" | "attribution" | "custom" | "experiment";
     tenantId: string;
+    description?: string | null | undefined;
+    config?: Map<string, any> | null | undefined;
     schedule?: {
         enabled: boolean;
         recipients: string[];
         frequency?: string | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    config?: Map<string, any> | null | undefined;
     lastRunAt?: NativeDate | null | undefined;
     createdBy?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    type: "custom" | "attribution" | "experiment" | "audience";
     name: string;
+    type: "audience" | "attribution" | "custom" | "experiment";
     tenantId: string;
+    description?: string | null | undefined;
+    config?: Map<string, any> | null | undefined;
     schedule?: {
         enabled: boolean;
         recipients: string[];
         frequency?: string | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    config?: Map<string, any> | null | undefined;
     lastRunAt?: NativeDate | null | undefined;
     createdBy?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
@@ -687,44 +687,44 @@ export declare const ReportModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    type: "custom" | "attribution" | "experiment" | "audience";
     name: string;
+    type: "audience" | "attribution" | "custom" | "experiment";
     tenantId: string;
+    description?: string | null | undefined;
+    config?: Map<string, any> | null | undefined;
     schedule?: {
         enabled: boolean;
         recipients: string[];
         frequency?: string | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    config?: Map<string, any> | null | undefined;
     lastRunAt?: NativeDate | null | undefined;
     createdBy?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    type: "custom" | "attribution" | "experiment" | "audience";
     name: string;
+    type: "audience" | "attribution" | "custom" | "experiment";
     tenantId: string;
+    description?: string | null | undefined;
+    config?: Map<string, any> | null | undefined;
     schedule?: {
         enabled: boolean;
         recipients: string[];
         frequency?: string | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    config?: Map<string, any> | null | undefined;
     lastRunAt?: NativeDate | null | undefined;
     createdBy?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    type: "custom" | "attribution" | "experiment" | "audience";
     name: string;
+    type: "audience" | "attribution" | "custom" | "experiment";
     tenantId: string;
+    description?: string | null | undefined;
+    config?: Map<string, any> | null | undefined;
     schedule?: {
         enabled: boolean;
         recipients: string[];
         frequency?: string | null | undefined;
     } | null | undefined;
-    description?: string | null | undefined;
-    config?: Map<string, any> | null | undefined;
     lastRunAt?: NativeDate | null | undefined;
     createdBy?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {

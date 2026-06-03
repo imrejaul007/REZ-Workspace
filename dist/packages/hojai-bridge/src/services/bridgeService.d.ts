@@ -104,7 +104,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
+    linkMethod?: "exact" | "manual" | "fuzzy" | "probabilistic" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
@@ -112,7 +112,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
+    linkMethod?: "exact" | "manual" | "fuzzy" | "probabilistic" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
@@ -122,7 +122,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
+    linkMethod?: "exact" | "manual" | "fuzzy" | "probabilistic" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps & {
@@ -136,7 +136,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
+    linkMethod?: "exact" | "manual" | "fuzzy" | "probabilistic" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
@@ -144,7 +144,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
+    linkMethod?: "exact" | "manual" | "fuzzy" | "probabilistic" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
@@ -154,7 +154,7 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     rezUserId: string;
     rezUnifiedId?: string | null | undefined;
     appIds?: Map<string, string> | null | undefined;
-    linkMethod?: "manual" | "exact" | "probabilistic" | "fuzzy" | null | undefined;
+    linkMethod?: "exact" | "manual" | "fuzzy" | "probabilistic" | null | undefined;
     linkConfidence?: number | null | undefined;
     lastActivity?: Map<string, string> | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
@@ -163,8 +163,8 @@ export declare const CrossAppIdentityModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const BridgeEventModel: mongoose.Model<{
+    source: "hojai" | "rez_ecosystem" | "rez_intelligence";
     tenantId: string;
-    source: "rez_ecosystem" | "hojai" | "rez_intelligence";
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
@@ -176,8 +176,8 @@ export declare const BridgeEventModel: mongoose.Model<{
     sourceApp?: string | null | undefined;
     processedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
+    source: "hojai" | "rez_ecosystem" | "rez_intelligence";
     tenantId: string;
-    source: "rez_ecosystem" | "hojai" | "rez_intelligence";
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
@@ -191,8 +191,8 @@ export declare const BridgeEventModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
+    source: "hojai" | "rez_ecosystem" | "rez_intelligence";
     tenantId: string;
-    source: "rez_ecosystem" | "hojai" | "rez_intelligence";
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
@@ -210,8 +210,8 @@ export declare const BridgeEventModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
+    source: "hojai" | "rez_ecosystem" | "rez_intelligence";
     tenantId: string;
-    source: "rez_ecosystem" | "hojai" | "rez_intelligence";
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
@@ -223,8 +223,8 @@ export declare const BridgeEventModel: mongoose.Model<{
     sourceApp?: string | null | undefined;
     processedAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
+    source: "hojai" | "rez_ecosystem" | "rez_intelligence";
     tenantId: string;
-    source: "rez_ecosystem" | "hojai" | "rez_intelligence";
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
@@ -238,8 +238,8 @@ export declare const BridgeEventModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
+    source: "hojai" | "rez_ecosystem" | "rez_intelligence";
     tenantId: string;
-    source: "rez_ecosystem" | "hojai" | "rez_intelligence";
     tenantType: TenantType;
     sourceService: string;
     routeTo: string[];
@@ -256,37 +256,37 @@ export declare const BridgeEventModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const IntelligenceShareModel: mongoose.Model<{
+    source: string;
     type: string;
     tenantId: string;
-    source: string;
     direction: "hojai_to_rez" | "rez_to_hojai";
     entityType: string;
     entityId: string;
     data?: Map<string, any> | null | undefined;
-    confidence?: number | null | undefined;
     model?: string | null | undefined;
+    confidence?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
+    source: string;
     type: string;
     tenantId: string;
-    source: string;
     direction: "hojai_to_rez" | "rez_to_hojai";
     entityType: string;
     entityId: string;
     data?: Map<string, any> | null | undefined;
-    confidence?: number | null | undefined;
     model?: string | null | undefined;
+    confidence?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
+    source: string;
     type: string;
     tenantId: string;
-    source: string;
     direction: "hojai_to_rez" | "rez_to_hojai";
     entityType: string;
     entityId: string;
     data?: Map<string, any> | null | undefined;
-    confidence?: number | null | undefined;
     model?: string | null | undefined;
+    confidence?: number | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -294,37 +294,37 @@ export declare const IntelligenceShareModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
+    source: string;
     type: string;
     tenantId: string;
-    source: string;
     direction: "hojai_to_rez" | "rez_to_hojai";
     entityType: string;
     entityId: string;
     data?: Map<string, any> | null | undefined;
-    confidence?: number | null | undefined;
     model?: string | null | undefined;
+    confidence?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
+    source: string;
     type: string;
     tenantId: string;
-    source: string;
     direction: "hojai_to_rez" | "rez_to_hojai";
     entityType: string;
     entityId: string;
     data?: Map<string, any> | null | undefined;
-    confidence?: number | null | undefined;
     model?: string | null | undefined;
+    confidence?: number | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
+    source: string;
     type: string;
     tenantId: string;
-    source: string;
     direction: "hojai_to_rez" | "rez_to_hojai";
     entityType: string;
     entityId: string;
     data?: Map<string, any> | null | undefined;
-    confidence?: number | null | undefined;
     model?: string | null | undefined;
+    confidence?: number | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
 } & {

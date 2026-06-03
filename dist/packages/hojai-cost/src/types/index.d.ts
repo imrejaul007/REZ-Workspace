@@ -25,37 +25,37 @@ export declare const CostEntrySchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    tenantId: string;
     category: CostCategory;
-    currency: string;
-    service: string;
+    id: string;
     createdAt: Date;
-    totalCost: number;
+    tenantId: string;
+    currency: string;
     unit: string;
     quantity: number;
+    service: string;
+    totalCost: number;
     operation: string;
     unitCost: number;
-    userId?: string | undefined;
     metadata?: Record<string, any> | undefined;
+    userId?: string | undefined;
     tokensUsed?: number | undefined;
     modelId?: string | undefined;
     latencyMs?: number | undefined;
 }, {
-    id: string;
-    tenantId: string;
     category: CostCategory;
-    service: string;
+    id: string;
     createdAt: Date;
-    totalCost: number;
+    tenantId: string;
     unit: string;
     quantity: number;
+    service: string;
+    totalCost: number;
     operation: string;
     unitCost: number;
-    userId?: string | undefined;
-    currency?: string | undefined;
     metadata?: Record<string, any> | undefined;
+    userId?: string | undefined;
     tokensUsed?: number | undefined;
+    currency?: string | undefined;
     modelId?: string | undefined;
     latencyMs?: number | undefined;
 }>;
@@ -75,13 +75,13 @@ export declare const BudgetSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
     name: string;
-    tenantId: string;
     category: CostCategory;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    active: boolean;
+    tenantId: string;
     monthlyLimit: number;
     alertThreshold: number;
     currentSpend: number;
@@ -89,12 +89,12 @@ export declare const BudgetSchema: z.ZodObject<{
     alertsEnabled: boolean;
     alertEmails?: string[] | undefined;
 }, {
-    id: string;
     name: string;
-    tenantId: string;
     category: CostCategory;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     monthlyLimit: number;
     lastReset: Date;
     active?: boolean | undefined;
@@ -122,12 +122,12 @@ export declare const CostReportSchema: z.ZodObject<{
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    tenantId: string;
-    period: "daily" | "weekly" | "monthly";
     createdAt: Date;
-    totalCost: number;
+    tenantId: string;
     startDate: Date;
     endDate: Date;
+    period: "daily" | "weekly" | "monthly";
+    totalCost: number;
     totalQuantity: number;
     byCategory: Record<string, number>;
     byService: Record<string, number>;
@@ -138,12 +138,12 @@ export declare const CostReportSchema: z.ZodObject<{
     projectedMonthlyOverBudget?: number | undefined;
 }, {
     id: string;
-    tenantId: string;
-    period: "daily" | "weekly" | "monthly";
     createdAt: Date;
-    totalCost: number;
+    tenantId: string;
     startDate: Date;
     endDate: Date;
+    period: "daily" | "weekly" | "monthly";
+    totalCost: number;
     totalQuantity: number;
     byCategory: Record<string, number>;
     byService: Record<string, number>;

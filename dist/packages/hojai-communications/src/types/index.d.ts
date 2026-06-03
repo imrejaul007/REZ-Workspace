@@ -39,55 +39,55 @@ export declare const MessageSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    to: string;
+    body: string;
+    channel: Channel;
     id: string;
+    createdAt: Date;
+    updatedAt: Date;
     status: MessageStatus;
     tenantId: string;
-    body: string;
-    channel: Channel;
-    createdAt: Date;
-    updatedAt: Date;
     direction: "inbound" | "outbound";
     from: string;
-    to: string;
     error?: string | undefined;
-    metadata?: Record<string, any> | undefined;
     subject?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    cost?: number | undefined;
+    externalId?: string | undefined;
     templateId?: string | undefined;
+    variables?: Record<string, string> | undefined;
+    externalStatus?: string | undefined;
+    scheduledAt?: Date | undefined;
     sentAt?: Date | undefined;
     deliveredAt?: Date | undefined;
     readAt?: Date | undefined;
-    scheduledAt?: Date | undefined;
-    cost?: number | undefined;
-    variables?: Record<string, string> | undefined;
-    segments?: number | undefined;
-    externalId?: string | undefined;
-    externalStatus?: string | undefined;
     errorCode?: string | undefined;
+    segments?: number | undefined;
 }, {
-    id: string;
-    tenantId: string;
+    to: string;
     body: string;
     channel: Channel;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     direction: "inbound" | "outbound";
     from: string;
-    to: string;
-    status?: MessageStatus | undefined;
     error?: string | undefined;
-    metadata?: Record<string, any> | undefined;
     subject?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    status?: MessageStatus | undefined;
+    cost?: number | undefined;
+    externalId?: string | undefined;
     templateId?: string | undefined;
+    variables?: Record<string, string> | undefined;
+    externalStatus?: string | undefined;
+    scheduledAt?: Date | undefined;
     sentAt?: Date | undefined;
     deliveredAt?: Date | undefined;
     readAt?: Date | undefined;
-    scheduledAt?: Date | undefined;
-    cost?: number | undefined;
-    variables?: Record<string, string> | undefined;
-    segments?: number | undefined;
-    externalId?: string | undefined;
-    externalStatus?: string | undefined;
     errorCode?: string | undefined;
+    segments?: number | undefined;
 }>;
 export type Message = z.infer<typeof MessageSchema>;
 export declare const TemplateSchema: z.ZodObject<{
@@ -139,23 +139,20 @@ export declare const TemplateSchema: z.ZodObject<{
         read: z.ZodDefault<z.ZodNumber>;
         bounced: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        delivered: number;
-        sent: number;
         read: number;
+        sent: number;
+        delivered: number;
         bounced: number;
     }, {
-        delivered?: number | undefined;
-        sent?: number | undefined;
         read?: number | undefined;
+        sent?: number | undefined;
+        delivered?: number | undefined;
         bounced?: number | undefined;
     }>>;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "active" | "draft" | "archived";
     name: string;
-    tenantId: string;
     content: {
         body: string;
         subject?: string | undefined;
@@ -167,19 +164,20 @@ export declare const TemplateSchema: z.ZodObject<{
         imageUrl?: string | undefined;
     };
     channel: Channel;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    status: "active" | "draft" | "archived";
+    tenantId: string;
     variables: string[];
     stats?: {
-        delivered: number;
-        sent: number;
         read: number;
+        sent: number;
+        delivered: number;
         bounced: number;
     } | undefined;
 }, {
-    id: string;
     name: string;
-    tenantId: string;
     content: {
         body: string;
         subject?: string | undefined;
@@ -191,16 +189,18 @@ export declare const TemplateSchema: z.ZodObject<{
         imageUrl?: string | undefined;
     };
     channel: Channel;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    tenantId: string;
     variables: string[];
+    status?: "active" | "draft" | "archived" | undefined;
     stats?: {
-        delivered?: number | undefined;
-        sent?: number | undefined;
         read?: number | undefined;
+        sent?: number | undefined;
+        delivered?: number | undefined;
         bounced?: number | undefined;
     } | undefined;
-    status?: "active" | "draft" | "archived" | undefined;
 }>;
 export type Template = z.infer<typeof TemplateSchema>;
 export declare const CampaignSchema: z.ZodObject<{
@@ -232,27 +232,27 @@ export declare const CampaignSchema: z.ZodObject<{
             time: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             frequency: "daily" | "weekly" | "monthly" | "hourly";
-            days?: number[] | undefined;
             time?: string | undefined;
+            days?: number[] | undefined;
         }, {
             frequency: "daily" | "weekly" | "monthly" | "hourly";
-            days?: number[] | undefined;
             time?: string | undefined;
+            days?: number[] | undefined;
         }>>;
     }, "strip", z.ZodTypeAny, {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
             frequency: "daily" | "weekly" | "monthly" | "hourly";
-            days?: number[] | undefined;
             time?: string | undefined;
+            days?: number[] | undefined;
         } | undefined;
         sendAt?: Date | undefined;
     }, {
         type: "scheduled" | "immediate" | "recurring";
         recurring?: {
             frequency: "daily" | "weekly" | "monthly" | "hourly";
-            days?: number[] | undefined;
             time?: string | undefined;
+            days?: number[] | undefined;
         } | undefined;
         sendAt?: Date | undefined;
     }>;
@@ -283,104 +283,104 @@ export declare const CampaignSchema: z.ZodObject<{
         failed: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
         failed: number;
-        delivered: number;
-        sent: number;
         read: number;
-        clicked: number;
         total: number;
+        sent: number;
+        delivered: number;
         bounced: number;
+        clicked: number;
     }, {
         failed?: number | undefined;
-        delivered?: number | undefined;
-        sent?: number | undefined;
         read?: number | undefined;
-        clicked?: number | undefined;
         total?: number | undefined;
+        sent?: number | undefined;
+        delivered?: number | undefined;
         bounced?: number | undefined;
+        clicked?: number | undefined;
     }>>;
     createdBy: z.ZodString;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused";
-    schedule: {
-        type: "scheduled" | "immediate" | "recurring";
-        recurring?: {
-            frequency: "daily" | "weekly" | "monthly" | "hourly";
-            days?: number[] | undefined;
-            time?: string | undefined;
-        } | undefined;
-        sendAt?: Date | undefined;
-    };
     name: string;
-    tenantId: string;
-    channel: Channel;
-    templateId: string;
-    createdAt: Date;
-    updatedAt: Date;
     audience: {
         type: "filter" | "segment" | "list";
         id?: string | undefined;
         criteria?: Record<string, any> | undefined;
     };
+    channel: Channel;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    status: "paused" | "running" | "completed" | "failed" | "scheduled" | "draft";
+    tenantId: string;
+    schedule: {
+        type: "scheduled" | "immediate" | "recurring";
+        recurring?: {
+            frequency: "daily" | "weekly" | "monthly" | "hourly";
+            time?: string | undefined;
+            days?: number[] | undefined;
+        } | undefined;
+        sendAt?: Date | undefined;
+    };
     createdBy: string;
+    templateId: string;
     settings: {
         dedupe: boolean;
         allowDuplicates: boolean;
         randomize: boolean;
         cap?: number | undefined;
     };
+    description?: string | undefined;
     stats?: {
         failed: number;
-        delivered: number;
-        sent: number;
         read: number;
-        clicked: number;
         total: number;
+        sent: number;
+        delivered: number;
         bounced: number;
+        clicked: number;
     } | undefined;
-    description?: string | undefined;
 }, {
-    id: string;
-    schedule: {
-        type: "scheduled" | "immediate" | "recurring";
-        recurring?: {
-            frequency: "daily" | "weekly" | "monthly" | "hourly";
-            days?: number[] | undefined;
-            time?: string | undefined;
-        } | undefined;
-        sendAt?: Date | undefined;
-    };
     name: string;
-    tenantId: string;
-    channel: Channel;
-    templateId: string;
-    createdAt: Date;
-    updatedAt: Date;
     audience: {
         type: "filter" | "segment" | "list";
         id?: string | undefined;
         criteria?: Record<string, any> | undefined;
     };
+    channel: Channel;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    tenantId: string;
+    schedule: {
+        type: "scheduled" | "immediate" | "recurring";
+        recurring?: {
+            frequency: "daily" | "weekly" | "monthly" | "hourly";
+            time?: string | undefined;
+            days?: number[] | undefined;
+        } | undefined;
+        sendAt?: Date | undefined;
+    };
     createdBy: string;
+    templateId: string;
     settings: {
         dedupe?: boolean | undefined;
         allowDuplicates?: boolean | undefined;
         cap?: number | undefined;
         randomize?: boolean | undefined;
     };
+    description?: string | undefined;
+    status?: "paused" | "running" | "completed" | "failed" | "scheduled" | "draft" | undefined;
     stats?: {
         failed?: number | undefined;
-        delivered?: number | undefined;
-        sent?: number | undefined;
         read?: number | undefined;
-        clicked?: number | undefined;
         total?: number | undefined;
+        sent?: number | undefined;
+        delivered?: number | undefined;
         bounced?: number | undefined;
+        clicked?: number | undefined;
     } | undefined;
-    status?: "completed" | "draft" | "running" | "failed" | "scheduled" | "paused" | undefined;
-    description?: string | undefined;
 }>;
 export type Campaign = z.infer<typeof CampaignSchema>;
 export declare const WebhookPayloadSchema: z.ZodObject<{
@@ -390,13 +390,13 @@ export declare const WebhookPayloadSchema: z.ZodObject<{
     timestamp: z.ZodString;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    event: "failed" | "delivered" | "sent" | "read" | "clicked" | "bounced";
+    event: "failed" | "read" | "sent" | "delivered" | "bounced" | "clicked";
     timestamp: string;
     messageId: string;
     metadata?: Record<string, any> | undefined;
     externalId?: string | undefined;
 }, {
-    event: "failed" | "delivered" | "sent" | "read" | "clicked" | "bounced";
+    event: "failed" | "read" | "sent" | "delivered" | "bounced" | "clicked";
     timestamp: string;
     messageId: string;
     metadata?: Record<string, any> | undefined;

@@ -176,27 +176,27 @@ export declare const TenantCreateSchema: z.ZodObject<{
     }>;
     plan: z.ZodDefault<z.ZodEnum<["starter", "professional", "enterprise"]>>;
 }, "strip", z.ZodTypeAny, {
-    type: "enterprise" | "merchant" | "rez" | "rabtul";
     name: string;
-    plan: "starter" | "professional" | "enterprise";
+    type: "merchant" | "enterprise" | "rez" | "rabtul";
     contact: {
         email: string;
         phone?: string | undefined;
         website?: string | undefined;
     };
+    plan: "enterprise" | "starter" | "professional";
+    industry: "finance" | "jewellery" | "healthcare" | "hospitality" | "retail" | "restaurant" | "salon" | "fitness" | "education" | "real_estate" | "automotive" | "travel" | "ecommerce" | "other";
     slug: string;
-    industry: "retail" | "healthcare" | "hospitality" | "jewellery" | "education" | "finance" | "real_estate" | "other" | "restaurant" | "salon" | "fitness" | "automotive" | "travel" | "ecommerce";
 }, {
-    type: "enterprise" | "merchant" | "rez" | "rabtul";
     name: string;
+    type: "merchant" | "enterprise" | "rez" | "rabtul";
     contact: {
         email: string;
         phone?: string | undefined;
         website?: string | undefined;
     };
+    industry: "finance" | "jewellery" | "healthcare" | "hospitality" | "retail" | "restaurant" | "salon" | "fitness" | "education" | "real_estate" | "automotive" | "travel" | "ecommerce" | "other";
     slug: string;
-    industry: "retail" | "healthcare" | "hospitality" | "jewellery" | "education" | "finance" | "real_estate" | "other" | "restaurant" | "salon" | "fitness" | "automotive" | "travel" | "ecommerce";
-    plan?: "starter" | "professional" | "enterprise" | undefined;
+    plan?: "enterprise" | "starter" | "professional" | undefined;
 }>;
 /**
  * Tenant update schema

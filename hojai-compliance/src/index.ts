@@ -14,6 +14,9 @@ import { z } from 'zod';
 export * from './gdpr';
 export * from './hipaa';
 export * from './consent';
+export * from './soc2';
+export * from './ccpa';
+export * from './pipl';
 
 // ============================================================================
 // Core Types

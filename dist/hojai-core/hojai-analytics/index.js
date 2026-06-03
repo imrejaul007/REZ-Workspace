@@ -106,7 +106,7 @@ class DashboardEngine {
                     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                     datasets: [{
                             label: 'Revenue',
-                            data: Array.from({ length: 7 }, () => Math.floor(Math.random() * 50000))
+                            data: Array.from({ length: 7 }, () => Math.floor(Math.random() * 50000)),
                         }],
                 };
             case 'table':

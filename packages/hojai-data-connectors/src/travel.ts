@@ -4,7 +4,7 @@
  */
 export async function emitTravelSignals(data: {
   userId: string;
-  trip: { destination: string; dates: { from: string; to: string };
+  trip: { destination: string; dates: { from: string; to: string } };
   class: string;
   loyalty: number;
 }): Promise<void> {

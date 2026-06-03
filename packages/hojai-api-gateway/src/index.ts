@@ -27,9 +27,9 @@ const SERVICES = {
 
 // Request logging
 app.use((req, res, next) => {
-  req.requestId = uuid();
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} [${req.requestId}]`);
-  res.setHeader('X-Request-ID', req.requestId);
+  (req as any).requestId = uuid();
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} [${(req as any).requestId}]`);
+  res.setHeader('X-Request-ID', (req as any).requestId);
   next();
 });
 

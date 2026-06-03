@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
 import { Consent, ConsentType, ConsentStatus, ConsentSource, DataRightType, DataRightStatus, DataRightRequest, RetentionPolicy, DataCategory, ComplianceAudit } from '../types/index.js';
 export declare const ConsentModel: mongoose.Model<{
-    version: string;
-    status: ConsentStatus;
-    type: ConsentType;
-    tenantId: string;
-    userId: string;
     source: ConsentSource;
+    type: ConsentType;
+    userId: string;
+    status: ConsentStatus;
+    version: string;
+    tenantId: string;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -14,7 +14,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -25,12 +25,12 @@ export declare const ConsentModel: mongoose.Model<{
     grantedUserAgent?: string | null | undefined;
     withdrawnAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    version: string;
-    status: ConsentStatus;
-    type: ConsentType;
-    tenantId: string;
-    userId: string;
     source: ConsentSource;
+    type: ConsentType;
+    userId: string;
+    status: ConsentStatus;
+    version: string;
+    tenantId: string;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -38,7 +38,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -51,12 +51,12 @@ export declare const ConsentModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    version: string;
-    status: ConsentStatus;
-    type: ConsentType;
-    tenantId: string;
-    userId: string;
     source: ConsentSource;
+    type: ConsentType;
+    userId: string;
+    status: ConsentStatus;
+    version: string;
+    tenantId: string;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -64,7 +64,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -81,12 +81,12 @@ export declare const ConsentModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    version: string;
-    status: ConsentStatus;
-    type: ConsentType;
-    tenantId: string;
-    userId: string;
     source: ConsentSource;
+    type: ConsentType;
+    userId: string;
+    status: ConsentStatus;
+    version: string;
+    tenantId: string;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -94,7 +94,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -105,12 +105,12 @@ export declare const ConsentModel: mongoose.Model<{
     grantedUserAgent?: string | null | undefined;
     withdrawnAt?: NativeDate | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    version: string;
-    status: ConsentStatus;
-    type: ConsentType;
-    tenantId: string;
-    userId: string;
     source: ConsentSource;
+    type: ConsentType;
+    userId: string;
+    status: ConsentStatus;
+    version: string;
+    tenantId: string;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -118,7 +118,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -131,12 +131,12 @@ export declare const ConsentModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    version: string;
-    status: ConsentStatus;
-    type: ConsentType;
-    tenantId: string;
-    userId: string;
     source: ConsentSource;
+    type: ConsentType;
+    userId: string;
+    status: ConsentStatus;
+    version: string;
+    tenantId: string;
     dataCategories: string[];
     canWithdraw: boolean;
     description?: string | null | undefined;
@@ -144,7 +144,7 @@ export declare const ConsentModel: mongoose.Model<{
     validUntil?: NativeDate | null | undefined;
     validFrom?: NativeDate | null | undefined;
     scope?: {
-        scope: "service" | "global" | "tenant" | "specific";
+        scope: "global" | "service" | "tenant" | "specific";
         services: string[];
         dataTypes: string[];
     } | null | undefined;
@@ -160,16 +160,16 @@ export declare const ConsentModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const DataRightModel: mongoose.Model<{
-    status: DataRightStatus;
     type: DataRightType;
-    tenantId: string;
     userId: string;
+    status: DataRightStatus;
+    tenantId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
     description?: string | null | undefined;
-    reason?: string | null | undefined;
     dueDate?: NativeDate | null | undefined;
+    reason?: string | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
     responseData?: Map<string, any> | null | undefined;
@@ -178,16 +178,16 @@ export declare const DataRightModel: mongoose.Model<{
     fulfilledAt?: NativeDate | null | undefined;
     fulfillmentMethod?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    status: DataRightStatus;
     type: DataRightType;
-    tenantId: string;
     userId: string;
+    status: DataRightStatus;
+    tenantId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
     description?: string | null | undefined;
-    reason?: string | null | undefined;
     dueDate?: NativeDate | null | undefined;
+    reason?: string | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
     responseData?: Map<string, any> | null | undefined;
@@ -198,16 +198,16 @@ export declare const DataRightModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    status: DataRightStatus;
     type: DataRightType;
-    tenantId: string;
     userId: string;
+    status: DataRightStatus;
+    tenantId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
     description?: string | null | undefined;
-    reason?: string | null | undefined;
     dueDate?: NativeDate | null | undefined;
+    reason?: string | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
     responseData?: Map<string, any> | null | undefined;
@@ -222,16 +222,16 @@ export declare const DataRightModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    status: DataRightStatus;
     type: DataRightType;
-    tenantId: string;
     userId: string;
+    status: DataRightStatus;
+    tenantId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
     description?: string | null | undefined;
-    reason?: string | null | undefined;
     dueDate?: NativeDate | null | undefined;
+    reason?: string | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
     responseData?: Map<string, any> | null | undefined;
@@ -240,16 +240,16 @@ export declare const DataRightModel: mongoose.Model<{
     fulfilledAt?: NativeDate | null | undefined;
     fulfillmentMethod?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    status: DataRightStatus;
     type: DataRightType;
-    tenantId: string;
     userId: string;
+    status: DataRightStatus;
+    tenantId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
     description?: string | null | undefined;
-    reason?: string | null | undefined;
     dueDate?: NativeDate | null | undefined;
+    reason?: string | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
     responseData?: Map<string, any> | null | undefined;
@@ -260,16 +260,16 @@ export declare const DataRightModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    status: DataRightStatus;
     type: DataRightType;
-    tenantId: string;
     userId: string;
+    status: DataRightStatus;
+    tenantId: string;
     requestedData: string[];
     cascadeDelete: boolean;
     retentionOverride: boolean;
     description?: string | null | undefined;
-    reason?: string | null | undefined;
     dueDate?: NativeDate | null | undefined;
+    reason?: string | null | undefined;
     assignedTo?: string | null | undefined;
     objectionTo?: string | null | undefined;
     responseData?: Map<string, any> | null | undefined;
@@ -283,41 +283,41 @@ export declare const DataRightModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const RetentionPolicyModel: mongoose.Model<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     policy: RetentionPolicy;
     dataCategory: string;
     description?: string | null | undefined;
     trigger?: string | null | undefined;
     retentionDays?: number | null | undefined;
-    expiryAction?: "delete" | "review" | "anonymize" | "restrict" | "archive" | null | undefined;
+    expiryAction?: "review" | "delete" | "anonymize" | "restrict" | "archive" | null | undefined;
     legalBasis?: string | null | undefined;
     legalBasisArticle?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     policy: RetentionPolicy;
     dataCategory: string;
     description?: string | null | undefined;
     trigger?: string | null | undefined;
     retentionDays?: number | null | undefined;
-    expiryAction?: "delete" | "review" | "anonymize" | "restrict" | "archive" | null | undefined;
+    expiryAction?: "review" | "delete" | "anonymize" | "restrict" | "archive" | null | undefined;
     legalBasis?: string | null | undefined;
     legalBasisArticle?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     policy: RetentionPolicy;
     dataCategory: string;
     description?: string | null | undefined;
     trigger?: string | null | undefined;
     retentionDays?: number | null | undefined;
-    expiryAction?: "delete" | "review" | "anonymize" | "restrict" | "archive" | null | undefined;
+    expiryAction?: "review" | "delete" | "anonymize" | "restrict" | "archive" | null | undefined;
     legalBasis?: string | null | undefined;
     legalBasisArticle?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
@@ -327,41 +327,41 @@ export declare const RetentionPolicyModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     policy: RetentionPolicy;
     dataCategory: string;
     description?: string | null | undefined;
     trigger?: string | null | undefined;
     retentionDays?: number | null | undefined;
-    expiryAction?: "delete" | "review" | "anonymize" | "restrict" | "archive" | null | undefined;
+    expiryAction?: "review" | "delete" | "anonymize" | "restrict" | "archive" | null | undefined;
     legalBasis?: string | null | undefined;
     legalBasisArticle?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     policy: RetentionPolicy;
     dataCategory: string;
     description?: string | null | undefined;
     trigger?: string | null | undefined;
     retentionDays?: number | null | undefined;
-    expiryAction?: "delete" | "review" | "anonymize" | "restrict" | "archive" | null | undefined;
+    expiryAction?: "review" | "delete" | "anonymize" | "restrict" | "archive" | null | undefined;
     legalBasis?: string | null | undefined;
     legalBasisArticle?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     policy: RetentionPolicy;
     dataCategory: string;
     description?: string | null | undefined;
     trigger?: string | null | undefined;
     retentionDays?: number | null | undefined;
-    expiryAction?: "delete" | "review" | "anonymize" | "restrict" | "archive" | null | undefined;
+    expiryAction?: "review" | "delete" | "anonymize" | "restrict" | "archive" | null | undefined;
     legalBasis?: string | null | undefined;
     legalBasisArticle?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
@@ -370,11 +370,11 @@ export declare const RetentionPolicyModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const DataCategoryModel: mongoose.Model<{
-    tenantId: string;
     category: DataCategory;
+    tenantId: string;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -382,11 +382,11 @@ export declare const DataCategoryModel: mongoose.Model<{
         requiresLegalBasis: boolean;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    tenantId: string;
     category: DataCategory;
+    tenantId: string;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -396,11 +396,11 @@ export declare const DataCategoryModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    tenantId: string;
     category: DataCategory;
+    tenantId: string;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -414,11 +414,11 @@ export declare const DataCategoryModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    tenantId: string;
     category: DataCategory;
+    tenantId: string;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -426,11 +426,11 @@ export declare const DataCategoryModel: mongoose.Model<{
         requiresLegalBasis: boolean;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    tenantId: string;
     category: DataCategory;
+    tenantId: string;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -440,11 +440,11 @@ export declare const DataCategoryModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    tenantId: string;
     category: DataCategory;
+    tenantId: string;
     sensitivityLevel: number;
     requiredProtections: string[];
-    legalClassification?: "personal" | "public" | "sensitive" | "special" | null | undefined;
+    legalClassification?: "public" | "personal" | "sensitive" | "special" | null | undefined;
     sharingRules?: {
         canShareWithProcessors: boolean;
         canShareWithThirdParties: boolean;
@@ -457,8 +457,8 @@ export declare const DataCategoryModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const PolicyRuleModel: mongoose.Model<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     priority: number;
     canOverride: boolean;
@@ -466,8 +466,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     description?: string | null | undefined;
     action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
-        consentStatus: string[];
         dataCategory: string[];
+        consentStatus: string[];
         userSegment: string[];
         processingType: string[];
     } | null | undefined;
@@ -477,8 +477,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
         notificationRequired: boolean;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     priority: number;
     canOverride: boolean;
@@ -486,8 +486,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     description?: string | null | undefined;
     action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
-        consentStatus: string[];
         dataCategory: string[];
+        consentStatus: string[];
         userSegment: string[];
         processingType: string[];
     } | null | undefined;
@@ -499,8 +499,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     priority: number;
     canOverride: boolean;
@@ -508,8 +508,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     description?: string | null | undefined;
     action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
-        consentStatus: string[];
         dataCategory: string[];
+        consentStatus: string[];
         userSegment: string[];
         processingType: string[];
     } | null | undefined;
@@ -525,8 +525,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     priority: number;
     canOverride: boolean;
@@ -534,8 +534,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     description?: string | null | undefined;
     action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
-        consentStatus: string[];
         dataCategory: string[];
+        consentStatus: string[];
         userSegment: string[];
         processingType: string[];
     } | null | undefined;
@@ -545,8 +545,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
         notificationRequired: boolean;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     priority: number;
     canOverride: boolean;
@@ -554,8 +554,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     description?: string | null | undefined;
     action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
-        consentStatus: string[];
         dataCategory: string[];
+        consentStatus: string[];
         userSegment: string[];
         processingType: string[];
     } | null | undefined;
@@ -567,8 +567,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     tenantId: string;
     priority: number;
     canOverride: boolean;
@@ -576,8 +576,8 @@ export declare const PolicyRuleModel: mongoose.Model<{
     description?: string | null | undefined;
     action?: "allow" | "deny" | "require_review" | "anonymize" | "restrict" | "require_consent" | "mask" | null | undefined;
     conditions?: {
-        consentStatus: string[];
         dataCategory: string[];
+        consentStatus: string[];
         userSegment: string[];
         processingType: string[];
     } | null | undefined;
@@ -592,13 +592,13 @@ export declare const PolicyRuleModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const ComplianceAuditModel: mongoose.Model<{
-    event: string;
-    tenantId: string;
-    category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    category: "security" | "retention" | "transfer" | "consent" | "data_right" | "breach";
     action: string;
+    tenantId: string;
+    event: string;
     dataCategories: string[];
     userId?: string | null | undefined;
-    result?: "partial" | "success" | "failure" | null | undefined;
+    result?: "success" | "partial" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
     requestId?: string | null | undefined;
@@ -607,13 +607,13 @@ export declare const ComplianceAuditModel: mongoose.Model<{
     processedBy?: string | null | undefined;
     processingPurpose?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    event: string;
-    tenantId: string;
-    category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    category: "security" | "retention" | "transfer" | "consent" | "data_right" | "breach";
     action: string;
+    tenantId: string;
+    event: string;
     dataCategories: string[];
     userId?: string | null | undefined;
-    result?: "partial" | "success" | "failure" | null | undefined;
+    result?: "success" | "partial" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
     requestId?: string | null | undefined;
@@ -624,13 +624,13 @@ export declare const ComplianceAuditModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    event: string;
-    tenantId: string;
-    category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    category: "security" | "retention" | "transfer" | "consent" | "data_right" | "breach";
     action: string;
+    tenantId: string;
+    event: string;
     dataCategories: string[];
     userId?: string | null | undefined;
-    result?: "partial" | "success" | "failure" | null | undefined;
+    result?: "success" | "partial" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
     requestId?: string | null | undefined;
@@ -645,13 +645,13 @@ export declare const ComplianceAuditModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    event: string;
-    tenantId: string;
-    category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    category: "security" | "retention" | "transfer" | "consent" | "data_right" | "breach";
     action: string;
+    tenantId: string;
+    event: string;
     dataCategories: string[];
     userId?: string | null | undefined;
-    result?: "partial" | "success" | "failure" | null | undefined;
+    result?: "success" | "partial" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
     requestId?: string | null | undefined;
@@ -660,13 +660,13 @@ export declare const ComplianceAuditModel: mongoose.Model<{
     processedBy?: string | null | undefined;
     processingPurpose?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    event: string;
-    tenantId: string;
-    category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    category: "security" | "retention" | "transfer" | "consent" | "data_right" | "breach";
     action: string;
+    tenantId: string;
+    event: string;
     dataCategories: string[];
     userId?: string | null | undefined;
-    result?: "partial" | "success" | "failure" | null | undefined;
+    result?: "success" | "partial" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
     requestId?: string | null | undefined;
@@ -677,13 +677,13 @@ export declare const ComplianceAuditModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    event: string;
-    tenantId: string;
-    category: "retention" | "transfer" | "consent" | "data_right" | "breach" | "security";
+    category: "security" | "retention" | "transfer" | "consent" | "data_right" | "breach";
     action: string;
+    tenantId: string;
+    event: string;
     dataCategories: string[];
     userId?: string | null | undefined;
-    result?: "partial" | "success" | "failure" | null | undefined;
+    result?: "success" | "partial" | "failure" | null | undefined;
     ip?: string | null | undefined;
     userAgent?: string | null | undefined;
     requestId?: string | null | undefined;

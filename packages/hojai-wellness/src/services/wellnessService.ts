@@ -13,6 +13,7 @@ import type {
   WellnessInsights,
   CosmicReading,
   MindfulnessSession,
+  JournalEntry,
 } from '../types/index.js';
 
 // Service URLs

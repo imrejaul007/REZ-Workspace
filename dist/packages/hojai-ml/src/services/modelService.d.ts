@@ -1,21 +1,24 @@
 import mongoose from 'mongoose';
 import { Model as ModelType, ModelTier, ModelStatus, RoutingRule, PromptTemplate } from '../types/index.js';
 export declare const ModelModel: mongoose.Model<{
-    version: string;
-    status: ModelStatus;
-    type: any;
     name: string;
+    type: any;
+    status: ModelStatus;
+    version: string;
     capabilities: string[];
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     tier: ModelTier;
-    description?: string | null | undefined;
-    config?: {
-        temperature?: number | null | undefined;
-        maxTokens?: number | null | undefined;
-        topP?: number | null | undefined;
-        frequencyPenalty?: number | null | undefined;
-        presencePenalty?: number | null | undefined;
+    provider: "anthropic" | "openai" | "google" | "hojai" | "custom" | "meta";
+    metrics?: {
+        recall?: number | null | undefined;
+        accuracy?: number | null | undefined;
+        latencyMs?: number | null | undefined;
+        precision?: number | null | undefined;
+        f1?: number | null | undefined;
+        auc?: number | null | undefined;
+        rmse?: number | null | undefined;
+        costPerCall?: number | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     training?: {
         datasetSize?: number | null | undefined;
         fineTunedFrom?: string | null | undefined;
@@ -24,15 +27,12 @@ export declare const ModelModel: mongoose.Model<{
         learningRate?: number | null | undefined;
     } | null | undefined;
     tenantId?: string | null | undefined;
-    metrics?: {
-        accuracy?: number | null | undefined;
-        latencyMs?: number | null | undefined;
-        precision?: number | null | undefined;
-        recall?: number | null | undefined;
-        f1?: number | null | undefined;
-        auc?: number | null | undefined;
-        rmse?: number | null | undefined;
-        costPerCall?: number | null | undefined;
+    config?: {
+        temperature?: number | null | undefined;
+        maxTokens?: number | null | undefined;
+        topP?: number | null | undefined;
+        frequencyPenalty?: number | null | undefined;
+        presencePenalty?: number | null | undefined;
     } | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
@@ -53,21 +53,24 @@ export declare const ModelModel: mongoose.Model<{
         fallbackModel?: string | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    version: string;
-    status: ModelStatus;
-    type: any;
     name: string;
+    type: any;
+    status: ModelStatus;
+    version: string;
     capabilities: string[];
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     tier: ModelTier;
-    description?: string | null | undefined;
-    config?: {
-        temperature?: number | null | undefined;
-        maxTokens?: number | null | undefined;
-        topP?: number | null | undefined;
-        frequencyPenalty?: number | null | undefined;
-        presencePenalty?: number | null | undefined;
+    provider: "anthropic" | "openai" | "google" | "hojai" | "custom" | "meta";
+    metrics?: {
+        recall?: number | null | undefined;
+        accuracy?: number | null | undefined;
+        latencyMs?: number | null | undefined;
+        precision?: number | null | undefined;
+        f1?: number | null | undefined;
+        auc?: number | null | undefined;
+        rmse?: number | null | undefined;
+        costPerCall?: number | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     training?: {
         datasetSize?: number | null | undefined;
         fineTunedFrom?: string | null | undefined;
@@ -76,15 +79,12 @@ export declare const ModelModel: mongoose.Model<{
         learningRate?: number | null | undefined;
     } | null | undefined;
     tenantId?: string | null | undefined;
-    metrics?: {
-        accuracy?: number | null | undefined;
-        latencyMs?: number | null | undefined;
-        precision?: number | null | undefined;
-        recall?: number | null | undefined;
-        f1?: number | null | undefined;
-        auc?: number | null | undefined;
-        rmse?: number | null | undefined;
-        costPerCall?: number | null | undefined;
+    config?: {
+        temperature?: number | null | undefined;
+        maxTokens?: number | null | undefined;
+        topP?: number | null | undefined;
+        frequencyPenalty?: number | null | undefined;
+        presencePenalty?: number | null | undefined;
     } | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
@@ -107,21 +107,24 @@ export declare const ModelModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    version: string;
-    status: ModelStatus;
-    type: any;
     name: string;
+    type: any;
+    status: ModelStatus;
+    version: string;
     capabilities: string[];
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     tier: ModelTier;
-    description?: string | null | undefined;
-    config?: {
-        temperature?: number | null | undefined;
-        maxTokens?: number | null | undefined;
-        topP?: number | null | undefined;
-        frequencyPenalty?: number | null | undefined;
-        presencePenalty?: number | null | undefined;
+    provider: "anthropic" | "openai" | "google" | "hojai" | "custom" | "meta";
+    metrics?: {
+        recall?: number | null | undefined;
+        accuracy?: number | null | undefined;
+        latencyMs?: number | null | undefined;
+        precision?: number | null | undefined;
+        f1?: number | null | undefined;
+        auc?: number | null | undefined;
+        rmse?: number | null | undefined;
+        costPerCall?: number | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     training?: {
         datasetSize?: number | null | undefined;
         fineTunedFrom?: string | null | undefined;
@@ -130,15 +133,12 @@ export declare const ModelModel: mongoose.Model<{
         learningRate?: number | null | undefined;
     } | null | undefined;
     tenantId?: string | null | undefined;
-    metrics?: {
-        accuracy?: number | null | undefined;
-        latencyMs?: number | null | undefined;
-        precision?: number | null | undefined;
-        recall?: number | null | undefined;
-        f1?: number | null | undefined;
-        auc?: number | null | undefined;
-        rmse?: number | null | undefined;
-        costPerCall?: number | null | undefined;
+    config?: {
+        temperature?: number | null | undefined;
+        maxTokens?: number | null | undefined;
+        topP?: number | null | undefined;
+        frequencyPenalty?: number | null | undefined;
+        presencePenalty?: number | null | undefined;
     } | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
@@ -165,21 +165,24 @@ export declare const ModelModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    version: string;
-    status: ModelStatus;
-    type: any;
     name: string;
+    type: any;
+    status: ModelStatus;
+    version: string;
     capabilities: string[];
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     tier: ModelTier;
-    description?: string | null | undefined;
-    config?: {
-        temperature?: number | null | undefined;
-        maxTokens?: number | null | undefined;
-        topP?: number | null | undefined;
-        frequencyPenalty?: number | null | undefined;
-        presencePenalty?: number | null | undefined;
+    provider: "anthropic" | "openai" | "google" | "hojai" | "custom" | "meta";
+    metrics?: {
+        recall?: number | null | undefined;
+        accuracy?: number | null | undefined;
+        latencyMs?: number | null | undefined;
+        precision?: number | null | undefined;
+        f1?: number | null | undefined;
+        auc?: number | null | undefined;
+        rmse?: number | null | undefined;
+        costPerCall?: number | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     training?: {
         datasetSize?: number | null | undefined;
         fineTunedFrom?: string | null | undefined;
@@ -188,15 +191,12 @@ export declare const ModelModel: mongoose.Model<{
         learningRate?: number | null | undefined;
     } | null | undefined;
     tenantId?: string | null | undefined;
-    metrics?: {
-        accuracy?: number | null | undefined;
-        latencyMs?: number | null | undefined;
-        precision?: number | null | undefined;
-        recall?: number | null | undefined;
-        f1?: number | null | undefined;
-        auc?: number | null | undefined;
-        rmse?: number | null | undefined;
-        costPerCall?: number | null | undefined;
+    config?: {
+        temperature?: number | null | undefined;
+        maxTokens?: number | null | undefined;
+        topP?: number | null | undefined;
+        frequencyPenalty?: number | null | undefined;
+        presencePenalty?: number | null | undefined;
     } | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
@@ -217,21 +217,24 @@ export declare const ModelModel: mongoose.Model<{
         fallbackModel?: string | null | undefined;
     } | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    version: string;
-    status: ModelStatus;
-    type: any;
     name: string;
+    type: any;
+    status: ModelStatus;
+    version: string;
     capabilities: string[];
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     tier: ModelTier;
-    description?: string | null | undefined;
-    config?: {
-        temperature?: number | null | undefined;
-        maxTokens?: number | null | undefined;
-        topP?: number | null | undefined;
-        frequencyPenalty?: number | null | undefined;
-        presencePenalty?: number | null | undefined;
+    provider: "anthropic" | "openai" | "google" | "hojai" | "custom" | "meta";
+    metrics?: {
+        recall?: number | null | undefined;
+        accuracy?: number | null | undefined;
+        latencyMs?: number | null | undefined;
+        precision?: number | null | undefined;
+        f1?: number | null | undefined;
+        auc?: number | null | undefined;
+        rmse?: number | null | undefined;
+        costPerCall?: number | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     training?: {
         datasetSize?: number | null | undefined;
         fineTunedFrom?: string | null | undefined;
@@ -240,15 +243,12 @@ export declare const ModelModel: mongoose.Model<{
         learningRate?: number | null | undefined;
     } | null | undefined;
     tenantId?: string | null | undefined;
-    metrics?: {
-        accuracy?: number | null | undefined;
-        latencyMs?: number | null | undefined;
-        precision?: number | null | undefined;
-        recall?: number | null | undefined;
-        f1?: number | null | undefined;
-        auc?: number | null | undefined;
-        rmse?: number | null | undefined;
-        costPerCall?: number | null | undefined;
+    config?: {
+        temperature?: number | null | undefined;
+        maxTokens?: number | null | undefined;
+        topP?: number | null | undefined;
+        frequencyPenalty?: number | null | undefined;
+        presencePenalty?: number | null | undefined;
     } | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
@@ -271,21 +271,24 @@ export declare const ModelModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    version: string;
-    status: ModelStatus;
-    type: any;
     name: string;
+    type: any;
+    status: ModelStatus;
+    version: string;
     capabilities: string[];
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
     tier: ModelTier;
-    description?: string | null | undefined;
-    config?: {
-        temperature?: number | null | undefined;
-        maxTokens?: number | null | undefined;
-        topP?: number | null | undefined;
-        frequencyPenalty?: number | null | undefined;
-        presencePenalty?: number | null | undefined;
+    provider: "anthropic" | "openai" | "google" | "hojai" | "custom" | "meta";
+    metrics?: {
+        recall?: number | null | undefined;
+        accuracy?: number | null | undefined;
+        latencyMs?: number | null | undefined;
+        precision?: number | null | undefined;
+        f1?: number | null | undefined;
+        auc?: number | null | undefined;
+        rmse?: number | null | undefined;
+        costPerCall?: number | null | undefined;
     } | null | undefined;
+    description?: string | null | undefined;
     training?: {
         datasetSize?: number | null | undefined;
         fineTunedFrom?: string | null | undefined;
@@ -294,15 +297,12 @@ export declare const ModelModel: mongoose.Model<{
         learningRate?: number | null | undefined;
     } | null | undefined;
     tenantId?: string | null | undefined;
-    metrics?: {
-        accuracy?: number | null | undefined;
-        latencyMs?: number | null | undefined;
-        precision?: number | null | undefined;
-        recall?: number | null | undefined;
-        f1?: number | null | undefined;
-        auc?: number | null | undefined;
-        rmse?: number | null | undefined;
-        costPerCall?: number | null | undefined;
+    config?: {
+        temperature?: number | null | undefined;
+        maxTokens?: number | null | undefined;
+        topP?: number | null | undefined;
+        frequencyPenalty?: number | null | undefined;
+        presencePenalty?: number | null | undefined;
     } | null | undefined;
     inputSchema?: Map<string, any> | null | undefined;
     outputSchema?: Map<string, any> | null | undefined;
@@ -328,8 +328,8 @@ export declare const ModelModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const RoutingRuleModel: mongoose.Model<{
-    active: boolean;
     name: string;
+    active: boolean;
     priority: number;
     modelId: string;
     conditions: mongoose.Types.DocumentArray<{
@@ -349,8 +349,8 @@ export declare const RoutingRuleModel: mongoose.Model<{
     tenantId?: string | null | undefined;
     fallbackModelId?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
+    active: boolean;
     priority: number;
     modelId: string;
     conditions: mongoose.Types.DocumentArray<{
@@ -372,8 +372,8 @@ export declare const RoutingRuleModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
+    active: boolean;
     priority: number;
     modelId: string;
     conditions: mongoose.Types.DocumentArray<{
@@ -399,8 +399,8 @@ export declare const RoutingRuleModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
+    active: boolean;
     priority: number;
     modelId: string;
     conditions: mongoose.Types.DocumentArray<{
@@ -420,8 +420,8 @@ export declare const RoutingRuleModel: mongoose.Model<{
     tenantId?: string | null | undefined;
     fallbackModelId?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     priority: number;
     modelId: string;
     conditions: mongoose.Types.DocumentArray<{
@@ -443,8 +443,8 @@ export declare const RoutingRuleModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
+    active: boolean;
     priority: number;
     modelId: string;
     conditions: mongoose.Types.DocumentArray<{
@@ -469,49 +469,49 @@ export declare const RoutingRuleModel: mongoose.Model<{
     __v: number;
 }>>;
 export declare const PromptTemplateModel: mongoose.Model<{
-    active: boolean;
     name: string;
-    variables: string[];
     task: string;
+    active: boolean;
+    variables: string[];
     systemPrompt: string;
     modelType: any;
     userPromptTemplate: string;
     description?: string | null | undefined;
+    tenantId?: string | null | undefined;
     config?: {
         temperature?: number | null | undefined;
         maxTokens?: number | null | undefined;
     } | null | undefined;
-    tenantId?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    active: boolean;
     name: string;
-    variables: string[];
     task: string;
+    active: boolean;
+    variables: string[];
     systemPrompt: string;
     modelType: any;
     userPromptTemplate: string;
     description?: string | null | undefined;
+    tenantId?: string | null | undefined;
     config?: {
         temperature?: number | null | undefined;
         maxTokens?: number | null | undefined;
     } | null | undefined;
-    tenantId?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    active: boolean;
     name: string;
-    variables: string[];
     task: string;
+    active: boolean;
+    variables: string[];
     systemPrompt: string;
     modelType: any;
     userPromptTemplate: string;
     description?: string | null | undefined;
+    tenantId?: string | null | undefined;
     config?: {
         temperature?: number | null | undefined;
         maxTokens?: number | null | undefined;
     } | null | undefined;
-    tenantId?: string | null | undefined;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -519,49 +519,49 @@ export declare const PromptTemplateModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    active: boolean;
     name: string;
-    variables: string[];
     task: string;
+    active: boolean;
+    variables: string[];
     systemPrompt: string;
     modelType: any;
     userPromptTemplate: string;
     description?: string | null | undefined;
+    tenantId?: string | null | undefined;
     config?: {
         temperature?: number | null | undefined;
         maxTokens?: number | null | undefined;
     } | null | undefined;
-    tenantId?: string | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    active: boolean;
     name: string;
-    variables: string[];
     task: string;
+    active: boolean;
+    variables: string[];
     systemPrompt: string;
     modelType: any;
     userPromptTemplate: string;
     description?: string | null | undefined;
+    tenantId?: string | null | undefined;
     config?: {
         temperature?: number | null | undefined;
         maxTokens?: number | null | undefined;
     } | null | undefined;
-    tenantId?: string | null | undefined;
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    active: boolean;
     name: string;
-    variables: string[];
     task: string;
+    active: boolean;
+    variables: string[];
     systemPrompt: string;
     modelType: any;
     userPromptTemplate: string;
     description?: string | null | undefined;
+    tenantId?: string | null | undefined;
     config?: {
         temperature?: number | null | undefined;
         maxTokens?: number | null | undefined;
     } | null | undefined;
-    tenantId?: string | null | undefined;
 } & mongoose.DefaultTimestampProps> & {
     _id: mongoose.Types.ObjectId;
 } & {

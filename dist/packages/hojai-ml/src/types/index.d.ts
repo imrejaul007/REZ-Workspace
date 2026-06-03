@@ -89,19 +89,19 @@ export declare const ModelSchema: z.ZodObject<{
         latencyMs: z.ZodOptional<z.ZodNumber>;
         costPerCall: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
+        recall?: number | undefined;
         accuracy?: number | undefined;
         latencyMs?: number | undefined;
         precision?: number | undefined;
-        recall?: number | undefined;
         f1?: number | undefined;
         auc?: number | undefined;
         rmse?: number | undefined;
         costPerCall?: number | undefined;
     }, {
+        recall?: number | undefined;
         accuracy?: number | undefined;
         latencyMs?: number | undefined;
         precision?: number | undefined;
-        recall?: number | undefined;
         f1?: number | undefined;
         auc?: number | undefined;
         rmse?: number | undefined;
@@ -148,12 +148,14 @@ export declare const ModelSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    version: string;
-    status: ModelStatus;
-    type: ModelType;
     name: string;
+    type: ModelType;
     description: string;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    status: ModelStatus;
+    version: string;
     capabilities: string[];
     config: {
         temperature?: number | undefined;
@@ -162,10 +164,8 @@ export declare const ModelSchema: z.ZodObject<{
         frequencyPenalty?: number | undefined;
         presencePenalty?: number | undefined;
     };
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
-    createdAt: Date;
-    updatedAt: Date;
     tier: ModelTier;
+    provider: "anthropic" | "openai" | "google" | "hojai" | "custom" | "meta";
     accessControl: {
         requiresLicense: boolean;
         tenantIds?: string[] | undefined;
@@ -178,6 +178,16 @@ export declare const ModelSchema: z.ZodObject<{
         accuracySensitive: boolean;
         fallbackModel?: string | undefined;
     };
+    metrics?: {
+        recall?: number | undefined;
+        accuracy?: number | undefined;
+        latencyMs?: number | undefined;
+        precision?: number | undefined;
+        f1?: number | undefined;
+        auc?: number | undefined;
+        rmse?: number | undefined;
+        costPerCall?: number | undefined;
+    } | undefined;
     training?: {
         datasetSize?: number | undefined;
         fineTunedFrom?: string | undefined;
@@ -186,16 +196,6 @@ export declare const ModelSchema: z.ZodObject<{
         learningRate?: number | undefined;
     } | undefined;
     tenantId?: string | undefined;
-    metrics?: {
-        accuracy?: number | undefined;
-        latencyMs?: number | undefined;
-        precision?: number | undefined;
-        recall?: number | undefined;
-        f1?: number | undefined;
-        auc?: number | undefined;
-        rmse?: number | undefined;
-        costPerCall?: number | undefined;
-    } | undefined;
     inputSchema?: Record<string, any> | undefined;
     outputSchema?: Record<string, any> | undefined;
     domain?: string | undefined;
@@ -203,12 +203,14 @@ export declare const ModelSchema: z.ZodObject<{
     costPerCall?: number | undefined;
     costPerToken?: number | undefined;
 }, {
-    id: string;
-    version: string;
-    status: ModelStatus;
-    type: ModelType;
     name: string;
+    type: ModelType;
     description: string;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    status: ModelStatus;
+    version: string;
     capabilities: string[];
     config: {
         temperature?: number | undefined;
@@ -217,10 +219,8 @@ export declare const ModelSchema: z.ZodObject<{
         frequencyPenalty?: number | undefined;
         presencePenalty?: number | undefined;
     };
-    provider: "custom" | "hojai" | "openai" | "anthropic" | "meta" | "google";
-    createdAt: Date;
-    updatedAt: Date;
     tier: ModelTier;
+    provider: "anthropic" | "openai" | "google" | "hojai" | "custom" | "meta";
     accessControl: {
         tenantIds?: string[] | undefined;
         requiresLicense?: boolean | undefined;
@@ -233,6 +233,16 @@ export declare const ModelSchema: z.ZodObject<{
         accuracySensitive?: boolean | undefined;
         fallbackModel?: string | undefined;
     };
+    metrics?: {
+        recall?: number | undefined;
+        accuracy?: number | undefined;
+        latencyMs?: number | undefined;
+        precision?: number | undefined;
+        f1?: number | undefined;
+        auc?: number | undefined;
+        rmse?: number | undefined;
+        costPerCall?: number | undefined;
+    } | undefined;
     training?: {
         datasetSize?: number | undefined;
         fineTunedFrom?: string | undefined;
@@ -241,16 +251,6 @@ export declare const ModelSchema: z.ZodObject<{
         learningRate?: number | undefined;
     } | undefined;
     tenantId?: string | undefined;
-    metrics?: {
-        accuracy?: number | undefined;
-        latencyMs?: number | undefined;
-        precision?: number | undefined;
-        recall?: number | undefined;
-        f1?: number | undefined;
-        auc?: number | undefined;
-        rmse?: number | undefined;
-        costPerCall?: number | undefined;
-    } | undefined;
     inputSchema?: Record<string, any> | undefined;
     outputSchema?: Record<string, any> | undefined;
     domain?: string | undefined;
@@ -270,11 +270,11 @@ export declare const RoutingRuleSchema: z.ZodObject<{
         value: z.ZodAny;
     }, "strip", z.ZodTypeAny, {
         field: string;
-        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
+        operator: "equals" | "in" | "contains" | "greater_than" | "less_than";
         value?: any;
     }, {
         field: string;
-        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
+        operator: "equals" | "in" | "contains" | "greater_than" | "less_than";
         value?: any;
     }>, "many">;
     modelId: z.ZodString;
@@ -284,31 +284,31 @@ export declare const RoutingRuleSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
     name: string;
     description: string;
-    priority: number;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
+    active: boolean;
+    priority: number;
     modelId: string;
     conditions: {
         field: string;
-        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
+        operator: "equals" | "in" | "contains" | "greater_than" | "less_than";
         value?: any;
     }[];
     tenantId?: string | undefined;
     fallbackModelId?: string | undefined;
 }, {
-    id: string;
     name: string;
     description: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
     modelId: string;
     conditions: {
         field: string;
-        operator: "contains" | "equals" | "in" | "greater_than" | "less_than";
+        operator: "equals" | "in" | "contains" | "greater_than" | "less_than";
         value?: any;
     }[];
     active?: boolean | undefined;
@@ -358,6 +358,9 @@ export declare const InferenceLogSchema: z.ZodObject<{
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
     id: string;
+    createdAt: Date;
+    tenantId: string;
+    cost: number;
     response: {
         output: Record<string, any>;
         latencyMs: number;
@@ -367,9 +370,6 @@ export declare const InferenceLogSchema: z.ZodObject<{
         input: Record<string, any>;
         parameters?: Record<string, any> | undefined;
     };
-    tenantId: string;
-    cost: number;
-    createdAt: Date;
     modelId: string;
     quality?: {
         confidence?: number | undefined;
@@ -377,6 +377,9 @@ export declare const InferenceLogSchema: z.ZodObject<{
     } | undefined;
 }, {
     id: string;
+    createdAt: Date;
+    tenantId: string;
+    cost: number;
     response: {
         output: Record<string, any>;
         latencyMs: number;
@@ -386,9 +389,6 @@ export declare const InferenceLogSchema: z.ZodObject<{
         input: Record<string, any>;
         parameters?: Record<string, any> | undefined;
     };
-    tenantId: string;
-    cost: number;
-    createdAt: Date;
     modelId: string;
     quality?: {
         confidence?: number | undefined;
@@ -411,13 +411,13 @@ export declare const PromptTemplateSchema: z.ZodObject<{
         required: z.ZodDefault<z.ZodBoolean>;
         defaultValue: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        type: string;
         name: string;
+        type: string;
         required: boolean;
         defaultValue?: string | undefined;
     }, {
-        type: string;
         name: string;
+        type: string;
         required?: boolean | undefined;
         defaultValue?: string | undefined;
     }>, "many">;
@@ -435,44 +435,44 @@ export declare const PromptTemplateSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    active: boolean;
     name: string;
     description: string;
+    task: string;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    active: boolean;
     config: {
         temperature?: number | undefined;
         maxTokens?: number | undefined;
     };
-    createdAt: Date;
-    updatedAt: Date;
     variables: {
-        type: string;
         name: string;
+        type: string;
         required: boolean;
         defaultValue?: string | undefined;
     }[];
-    task: string;
     systemPrompt: string;
     modelType: ModelType;
     userPromptTemplate: string;
     tenantId?: string | undefined;
 }, {
-    id: string;
     name: string;
     description: string;
+    task: string;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
     config: {
         temperature?: number | undefined;
         maxTokens?: number | undefined;
     };
-    createdAt: Date;
-    updatedAt: Date;
     variables: {
-        type: string;
         name: string;
+        type: string;
         required?: boolean | undefined;
         defaultValue?: string | undefined;
     }[];
-    task: string;
     systemPrompt: string;
     modelType: ModelType;
     userPromptTemplate: string;

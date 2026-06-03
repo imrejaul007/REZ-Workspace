@@ -258,12 +258,12 @@ export declare const ChatMessageSchema: z.ZodObject<{
     content: z.ZodString;
     name: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    content: string;
     role: MessageRole;
+    content: string;
     name?: string | undefined;
 }, {
-    content: string;
     role: MessageRole;
+    content: string;
     name?: string | undefined;
 }>;
 export declare const LLMRequestOptionsSchema: z.ZodObject<{
@@ -272,12 +272,12 @@ export declare const LLMRequestOptionsSchema: z.ZodObject<{
         content: z.ZodString;
         name: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        content: string;
         role: MessageRole;
+        content: string;
         name?: string | undefined;
     }, {
-        content: string;
         role: MessageRole;
+        content: string;
         name?: string | undefined;
     }>, "many">;
     systemPrompt: z.ZodOptional<z.ZodString>;
@@ -289,26 +289,26 @@ export declare const LLMRequestOptionsSchema: z.ZodObject<{
     timeout: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     messages: {
-        content: string;
         role: MessageRole;
+        content: string;
         name?: string | undefined;
     }[];
-    timeout?: number | undefined;
     temperature?: number | undefined;
     maxTokens?: number | undefined;
+    timeout?: number | undefined;
     systemPrompt?: string | undefined;
     topP?: number | undefined;
     stopSequences?: string[] | undefined;
     stream?: boolean | undefined;
 }, {
     messages: {
-        content: string;
         role: MessageRole;
+        content: string;
         name?: string | undefined;
     }[];
-    timeout?: number | undefined;
     temperature?: number | undefined;
     maxTokens?: number | undefined;
+    timeout?: number | undefined;
     systemPrompt?: string | undefined;
     topP?: number | undefined;
     stopSequences?: string[] | undefined;
@@ -359,17 +359,17 @@ export declare const EmployeeContextSchema: z.ZodObject<{
         timestamp: z.ZodDate;
         metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        type: "preference" | "fact" | "interaction" | "decision";
+        type: "fact" | "preference" | "decision" | "interaction";
         content: string;
         importance: number;
+        id: string;
         timestamp: Date;
         metadata?: Record<string, unknown> | undefined;
     }, {
-        id: string;
-        type: "preference" | "fact" | "interaction" | "decision";
+        type: "fact" | "preference" | "decision" | "interaction";
         content: string;
         importance: number;
+        id: string;
         timestamp: Date;
         metadata?: Record<string, unknown> | undefined;
     }>, "many">>;
@@ -378,18 +378,18 @@ export declare const EmployeeContextSchema: z.ZodObject<{
     language: z.ZodOptional<z.ZodString>;
     timezone: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    name: string;
-    tenantId: string;
     role: EmployeeRole;
+    name: string;
+    id: string;
+    tenantId: string;
+    language?: string | undefined;
+    tone?: "professional" | "formal" | "friendly" | "casual" | undefined;
     capabilities?: {
         name: string;
         description: string;
         confidence: number;
         examples?: string[] | undefined;
     }[] | undefined;
-    preferences?: Record<string, unknown> | undefined;
-    language?: string | undefined;
     knowledge?: {
         domain: string;
         topics: string[];
@@ -397,28 +397,28 @@ export declare const EmployeeContextSchema: z.ZodObject<{
         sources?: string[] | undefined;
     }[] | undefined;
     timezone?: string | undefined;
-    tone?: "professional" | "friendly" | "formal" | "casual" | undefined;
+    preferences?: Record<string, unknown> | undefined;
     recentMemory?: {
-        id: string;
-        type: "preference" | "fact" | "interaction" | "decision";
+        type: "fact" | "preference" | "decision" | "interaction";
         content: string;
         importance: number;
+        id: string;
         timestamp: Date;
         metadata?: Record<string, unknown> | undefined;
     }[] | undefined;
 }, {
-    id: string;
-    name: string;
-    tenantId: string;
     role: EmployeeRole;
+    name: string;
+    id: string;
+    tenantId: string;
+    language?: string | undefined;
+    tone?: "professional" | "formal" | "friendly" | "casual" | undefined;
     capabilities?: {
         name: string;
         description: string;
         confidence: number;
         examples?: string[] | undefined;
     }[] | undefined;
-    preferences?: Record<string, unknown> | undefined;
-    language?: string | undefined;
     knowledge?: {
         domain: string;
         topics: string[];
@@ -426,12 +426,12 @@ export declare const EmployeeContextSchema: z.ZodObject<{
         sources?: string[] | undefined;
     }[] | undefined;
     timezone?: string | undefined;
-    tone?: "professional" | "friendly" | "formal" | "casual" | undefined;
+    preferences?: Record<string, unknown> | undefined;
     recentMemory?: {
-        id: string;
-        type: "preference" | "fact" | "interaction" | "decision";
+        type: "fact" | "preference" | "decision" | "interaction";
         content: string;
         importance: number;
+        id: string;
         timestamp: Date;
         metadata?: Record<string, unknown> | undefined;
     }[] | undefined;
@@ -447,21 +447,21 @@ export declare const ModelConfigSchema: z.ZodObject<{
     retryDelay: z.ZodDefault<z.ZodNumber>;
     timeout: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    timeout: number;
-    provider: LLMProvider;
-    model: string;
     temperature: number;
     maxTokens: number;
+    model: string;
+    timeout: number;
+    provider: LLMProvider;
     retryAttempts: number;
     retryDelay: number;
     systemPrompt?: string | undefined;
     topP?: number | undefined;
 }, {
-    provider: LLMProvider;
     model: string;
-    timeout?: number | undefined;
+    provider: LLMProvider;
     temperature?: number | undefined;
     maxTokens?: number | undefined;
+    timeout?: number | undefined;
     systemPrompt?: string | undefined;
     topP?: number | undefined;
     retryAttempts?: number | undefined;
@@ -473,47 +473,47 @@ export declare const ModelRoutingRuleSchema: z.ZodObject<{
         provider: z.ZodNativeEnum<typeof LLMProvider>;
         model: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        provider: LLMProvider;
         model: string;
+        provider: LLMProvider;
     }, {
-        provider: LLMProvider;
         model: string;
+        provider: LLMProvider;
     }>;
     fallback: z.ZodOptional<z.ZodObject<{
         provider: z.ZodNativeEnum<typeof LLMProvider>;
         model: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        provider: LLMProvider;
         model: string;
+        provider: LLMProvider;
     }, {
-        provider: LLMProvider;
         model: string;
+        provider: LLMProvider;
     }>>;
     maxTokens: z.ZodOptional<z.ZodNumber>;
     temperature: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     primary: {
-        provider: LLMProvider;
         model: string;
+        provider: LLMProvider;
     };
     taskType: TaskType;
     temperature?: number | undefined;
     maxTokens?: number | undefined;
     fallback?: {
-        provider: LLMProvider;
         model: string;
+        provider: LLMProvider;
     } | undefined;
 }, {
     primary: {
-        provider: LLMProvider;
         model: string;
+        provider: LLMProvider;
     };
     taskType: TaskType;
     temperature?: number | undefined;
     maxTokens?: number | undefined;
     fallback?: {
-        provider: LLMProvider;
         model: string;
+        provider: LLMProvider;
     } | undefined;
 }>;
 //# sourceMappingURL=index.d.ts.map

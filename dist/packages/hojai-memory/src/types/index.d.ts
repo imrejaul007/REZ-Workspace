@@ -68,21 +68,20 @@ export declare const MemorySchema: z.ZodObject<{
     lastAccessedAt: z.ZodOptional<z.ZodDate>;
     accessCount: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     type: MemoryType;
-    tenantId: string;
-    userId: string;
-    confidence: number;
     content: string;
     importance: number;
+    userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    entityType: "session" | "user" | "product" | "merchant";
+    tenantId: string;
+    confidence: number;
+    entityType: "user" | "product" | "session" | "merchant";
     entityId: string;
     tier: MemoryTier;
     isPrivate: boolean;
     accessCount: number;
-    data?: Record<string, any> | undefined;
     context?: {
         channel?: string | undefined;
         tags?: string[] | undefined;
@@ -90,31 +89,32 @@ export declare const MemorySchema: z.ZodObject<{
         time?: string | undefined;
     } | undefined;
     source?: string | undefined;
+    data?: Record<string, any> | undefined;
     eventId?: string | undefined;
     validUntil?: Date | undefined;
     validFrom?: Date | undefined;
     sharedWith?: string[] | undefined;
     lastAccessedAt?: Date | undefined;
 }, {
-    id: string;
     type: MemoryType;
-    tenantId: string;
-    userId: string;
     content: string;
+    userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    entityType: "session" | "user" | "product" | "merchant";
+    tenantId: string;
+    entityType: "user" | "product" | "session" | "merchant";
     entityId: string;
-    data?: Record<string, any> | undefined;
     context?: {
         channel?: string | undefined;
         tags?: string[] | undefined;
         location?: string | undefined;
         time?: string | undefined;
     } | undefined;
-    confidence?: number | undefined;
-    importance?: number | undefined;
     source?: string | undefined;
+    data?: Record<string, any> | undefined;
+    importance?: number | undefined;
+    confidence?: number | undefined;
     eventId?: string | undefined;
     tier?: MemoryTier | undefined;
     validUntil?: Date | undefined;
@@ -165,21 +165,20 @@ export declare const MemoryWithTierSchema: z.ZodObject<{
 } & {
     tier: z.ZodDefault<z.ZodNativeEnum<typeof MemoryTier>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     type: MemoryType;
-    tenantId: string;
-    userId: string;
-    confidence: number;
     content: string;
     importance: number;
+    userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    entityType: "session" | "user" | "product" | "merchant";
+    tenantId: string;
+    confidence: number;
+    entityType: "user" | "product" | "session" | "merchant";
     entityId: string;
     tier: MemoryTier;
     isPrivate: boolean;
     accessCount: number;
-    data?: Record<string, any> | undefined;
     context?: {
         channel?: string | undefined;
         tags?: string[] | undefined;
@@ -187,31 +186,32 @@ export declare const MemoryWithTierSchema: z.ZodObject<{
         time?: string | undefined;
     } | undefined;
     source?: string | undefined;
+    data?: Record<string, any> | undefined;
     eventId?: string | undefined;
     validUntil?: Date | undefined;
     validFrom?: Date | undefined;
     sharedWith?: string[] | undefined;
     lastAccessedAt?: Date | undefined;
 }, {
-    id: string;
     type: MemoryType;
-    tenantId: string;
-    userId: string;
     content: string;
+    userId: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    entityType: "session" | "user" | "product" | "merchant";
+    tenantId: string;
+    entityType: "user" | "product" | "session" | "merchant";
     entityId: string;
-    data?: Record<string, any> | undefined;
     context?: {
         channel?: string | undefined;
         tags?: string[] | undefined;
         location?: string | undefined;
         time?: string | undefined;
     } | undefined;
-    confidence?: number | undefined;
-    importance?: number | undefined;
     source?: string | undefined;
+    data?: Record<string, any> | undefined;
+    importance?: number | undefined;
+    confidence?: number | undefined;
     eventId?: string | undefined;
     tier?: MemoryTier | undefined;
     validUntil?: Date | undefined;
@@ -249,33 +249,33 @@ export declare const TimelineEventSchema: z.ZodObject<{
     memoryIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     type: string;
-    tenantId: string;
-    userId: string;
-    category: string;
-    timestamp: Date;
-    createdAt: Date;
     title: string;
+    category: string;
+    userId: string;
+    id: string;
+    createdAt: Date;
+    tenantId: string;
+    timestamp: Date;
+    value?: number | undefined;
     data?: Record<string, any> | undefined;
     description?: string | undefined;
-    value?: number | undefined;
     impact?: "positive" | "neutral" | "negative" | undefined;
     entityType?: string | undefined;
     entityId?: string | undefined;
     memoryIds?: string[] | undefined;
 }, {
-    id: string;
     type: string;
-    tenantId: string;
-    userId: string;
-    category: string;
-    timestamp: Date;
-    createdAt: Date;
     title: string;
+    category: string;
+    userId: string;
+    id: string;
+    createdAt: Date;
+    tenantId: string;
+    timestamp: Date;
+    value?: number | undefined;
     data?: Record<string, any> | undefined;
     description?: string | undefined;
-    value?: number | undefined;
     impact?: "positive" | "neutral" | "negative" | undefined;
     entityType?: string | undefined;
     entityId?: string | undefined;
@@ -296,17 +296,17 @@ export declare const ContextSchema: z.ZodObject<{
         country: z.ZodOptional<z.ZodString>;
         timezone: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        city?: string | undefined;
-        country?: string | undefined;
         timezone?: string | undefined;
         latitude?: number | undefined;
         longitude?: number | undefined;
+        city?: string | undefined;
+        country?: string | undefined;
     }, {
-        city?: string | undefined;
-        country?: string | undefined;
         timezone?: string | undefined;
         latitude?: number | undefined;
         longitude?: number | undefined;
+        city?: string | undefined;
+        country?: string | undefined;
     }>>;
     time: z.ZodObject<{
         hour: z.ZodNumber;
@@ -329,11 +329,11 @@ export declare const ContextSchema: z.ZodObject<{
         os: z.ZodOptional<z.ZodString>;
         browser: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        type: "voice" | "mobile" | "desktop" | "tablet";
+        type: "voice" | "mobile" | "tablet" | "desktop";
         browser?: string | undefined;
         os?: string | undefined;
     }, {
-        type: "voice" | "mobile" | "desktop" | "tablet";
+        type: "voice" | "mobile" | "tablet" | "desktop";
         browser?: string | undefined;
         os?: string | undefined;
     }>>;
@@ -355,12 +355,12 @@ export declare const ContextSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     expiresAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    tenantId: string;
+    channel: "api" | "whatsapp" | "app" | "web" | "voice";
     userId: string;
-    channel: "whatsapp" | "voice" | "api" | "app" | "web";
+    id: string;
     createdAt: Date;
     expiresAt: Date;
+    tenantId: string;
     time: {
         hour: number;
         dayOfWeek: number;
@@ -372,28 +372,28 @@ export declare const ContextSchema: z.ZodObject<{
         timestamp: Date;
         data?: Record<string, any> | undefined;
     }[];
+    sessionId?: string | undefined;
     custom?: Record<string, any> | undefined;
+    intent?: string | undefined;
+    device?: {
+        type: "voice" | "mobile" | "tablet" | "desktop";
+        browser?: string | undefined;
+        os?: string | undefined;
+    } | undefined;
     location?: {
-        city?: string | undefined;
-        country?: string | undefined;
         timezone?: string | undefined;
         latitude?: number | undefined;
         longitude?: number | undefined;
-    } | undefined;
-    intent?: string | undefined;
-    sessionId?: string | undefined;
-    device?: {
-        type: "voice" | "mobile" | "desktop" | "tablet";
-        browser?: string | undefined;
-        os?: string | undefined;
+        city?: string | undefined;
+        country?: string | undefined;
     } | undefined;
     activePreferences?: Record<string, any> | undefined;
 }, {
-    id: string;
-    tenantId: string;
     userId: string;
+    id: string;
     createdAt: Date;
     expiresAt: Date;
+    tenantId: string;
     time: {
         hour: number;
         dayOfWeek: number;
@@ -405,21 +405,21 @@ export declare const ContextSchema: z.ZodObject<{
         timestamp: Date;
         data?: Record<string, any> | undefined;
     }[];
+    channel?: "api" | "whatsapp" | "app" | "web" | "voice" | undefined;
+    sessionId?: string | undefined;
     custom?: Record<string, any> | undefined;
-    channel?: "whatsapp" | "voice" | "api" | "app" | "web" | undefined;
+    intent?: string | undefined;
+    device?: {
+        type: "voice" | "mobile" | "tablet" | "desktop";
+        browser?: string | undefined;
+        os?: string | undefined;
+    } | undefined;
     location?: {
-        city?: string | undefined;
-        country?: string | undefined;
         timezone?: string | undefined;
         latitude?: number | undefined;
         longitude?: number | undefined;
-    } | undefined;
-    intent?: string | undefined;
-    sessionId?: string | undefined;
-    device?: {
-        type: "voice" | "mobile" | "desktop" | "tablet";
-        browser?: string | undefined;
-        os?: string | undefined;
+        city?: string | undefined;
+        country?: string | undefined;
     } | undefined;
     activePreferences?: Record<string, any> | undefined;
 }>;
@@ -439,11 +439,11 @@ export declare const ProfileSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         language: string;
         locale: string;
-        gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
+        gender?: "other" | "male" | "female" | "prefer_not_to_say" | undefined;
         age?: number | undefined;
     }, {
-        gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
         language?: string | undefined;
+        gender?: "other" | "male" | "female" | "prefer_not_to_say" | undefined;
         locale?: string | undefined;
         age?: number | undefined;
     }>>;
@@ -458,8 +458,8 @@ export declare const ProfileSchema: z.ZodObject<{
         language?: string | undefined;
         timezone?: string | undefined;
     }, {
-        currency?: string | undefined;
         language?: string | undefined;
+        currency?: string | undefined;
         timezone?: string | undefined;
         notifications?: boolean | undefined;
     }>;
@@ -471,16 +471,16 @@ export declare const ProfileSchema: z.ZodObject<{
         lastActiveAt: z.ZodOptional<z.ZodDate>;
         firstSeenAt: z.ZodOptional<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
-        visitFrequency: "daily" | "weekly" | "monthly" | "rarely";
         lifetimeValue: number;
+        visitFrequency: "daily" | "weekly" | "monthly" | "rarely";
         loyaltyTier?: string | undefined;
         preferredChannel?: string | undefined;
         lastActiveAt?: Date | undefined;
         firstSeenAt?: Date | undefined;
     }, {
-        visitFrequency?: "daily" | "weekly" | "monthly" | "rarely" | undefined;
         loyaltyTier?: string | undefined;
         lifetimeValue?: number | undefined;
+        visitFrequency?: "daily" | "weekly" | "monthly" | "rarely" | undefined;
         preferredChannel?: string | undefined;
         lastActiveAt?: Date | undefined;
         firstSeenAt?: Date | undefined;
@@ -519,17 +519,17 @@ export declare const ProfileSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    tags: string[];
     id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    tenantId: string;
     stats: {
         totalOrders: number;
         totalSpent: number;
         averageOrderValue: number;
         ordersThisMonth: number;
     };
-    tenantId: string;
-    tags: string[];
-    createdAt: Date;
-    updatedAt: Date;
     segments: string[];
     preferences: {
         currency: string;
@@ -538,8 +538,8 @@ export declare const ProfileSchema: z.ZodObject<{
         timezone?: string | undefined;
     };
     computed: {
-        visitFrequency: "daily" | "weekly" | "monthly" | "rarely";
         lifetimeValue: number;
+        visitFrequency: "daily" | "weekly" | "monthly" | "rarely";
         loyaltyTier?: string | undefined;
         preferredChannel?: string | undefined;
         lastActiveAt?: Date | undefined;
@@ -557,30 +557,30 @@ export declare const ProfileSchema: z.ZodObject<{
     demographics?: {
         language: string;
         locale: string;
-        gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
+        gender?: "other" | "male" | "female" | "prefer_not_to_say" | undefined;
         age?: number | undefined;
     } | undefined;
 }, {
     id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    tenantId: string;
     stats: {
         totalOrders?: number | undefined;
         totalSpent?: number | undefined;
         averageOrderValue?: number | undefined;
         ordersThisMonth?: number | undefined;
     };
-    tenantId: string;
-    createdAt: Date;
-    updatedAt: Date;
     preferences: {
-        currency?: string | undefined;
         language?: string | undefined;
+        currency?: string | undefined;
         timezone?: string | undefined;
         notifications?: boolean | undefined;
     };
     computed: {
-        visitFrequency?: "daily" | "weekly" | "monthly" | "rarely" | undefined;
         loyaltyTier?: string | undefined;
         lifetimeValue?: number | undefined;
+        visitFrequency?: "daily" | "weekly" | "monthly" | "rarely" | undefined;
         preferredChannel?: string | undefined;
         lastActiveAt?: Date | undefined;
         firstSeenAt?: Date | undefined;
@@ -591,14 +591,14 @@ export declare const ProfileSchema: z.ZodObject<{
         dataProcessing?: boolean | undefined;
     };
     name?: string | undefined;
+    tags?: string[] | undefined;
     userId?: string | undefined;
     email?: string | undefined;
-    tags?: string[] | undefined;
     phone?: string | undefined;
     segments?: string[] | undefined;
     demographics?: {
-        gender?: "male" | "female" | "other" | "prefer_not_to_say" | undefined;
         language?: string | undefined;
+        gender?: "other" | "male" | "female" | "prefer_not_to_say" | undefined;
         locale?: string | undefined;
         age?: number | undefined;
     } | undefined;
@@ -617,29 +617,29 @@ export declare const VectorMemorySchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    tenantId: string;
     content: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    collection: string;
+    tenantId: string;
     model: string;
-    entityType: "user" | "product" | "knowledge" | "conversation" | "merchant";
+    collection: string;
+    entityType: "conversation" | "user" | "product" | "knowledge" | "merchant";
     entityId: string;
     vector: number[];
     metadata?: Record<string, any> | undefined;
 }, {
-    id: string;
-    tenantId: string;
     content: string;
+    id: string;
     createdAt: Date;
     updatedAt: Date;
-    entityType: "user" | "product" | "knowledge" | "conversation" | "merchant";
+    tenantId: string;
+    entityType: "conversation" | "user" | "product" | "knowledge" | "merchant";
     entityId: string;
     vector: number[];
     metadata?: Record<string, any> | undefined;
-    collection?: string | undefined;
     model?: string | undefined;
+    collection?: string | undefined;
 }>;
 export type VectorMemory = z.infer<typeof VectorMemorySchema>;
 export declare const ConversationMessageSchema: z.ZodObject<{
@@ -654,12 +654,12 @@ export declare const ConversationMessageSchema: z.ZodObject<{
         url: z.ZodString;
         metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     }, "strip", z.ZodTypeAny, {
-        type: "image" | "document" | "link";
         url: string;
+        type: "link" | "image" | "document";
         metadata?: Record<string, any> | undefined;
     }, {
-        type: "image" | "document" | "link";
         url: string;
+        type: "link" | "image" | "document";
         metadata?: Record<string, any> | undefined;
     }>, "many">>;
     aiMetadata: z.ZodOptional<z.ZodObject<{
@@ -668,14 +668,14 @@ export declare const ConversationMessageSchema: z.ZodObject<{
         confidence: z.ZodOptional<z.ZodNumber>;
         intent: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        confidence?: number | undefined;
         model?: string | undefined;
         intent?: string | undefined;
+        confidence?: number | undefined;
         tokens?: number | undefined;
     }, {
-        confidence?: number | undefined;
         model?: string | undefined;
         intent?: string | undefined;
+        confidence?: number | undefined;
         tokens?: number | undefined;
     }>>;
     feedback: z.ZodOptional<z.ZodObject<{
@@ -683,62 +683,62 @@ export declare const ConversationMessageSchema: z.ZodObject<{
         helpful: z.ZodOptional<z.ZodBoolean>;
         corrections: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        helpful?: boolean | undefined;
         corrections?: string | undefined;
         rating?: number | undefined;
+        helpful?: boolean | undefined;
     }, {
-        helpful?: boolean | undefined;
         corrections?: string | undefined;
         rating?: number | undefined;
+        helpful?: boolean | undefined;
     }>>;
     createdAt: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
+    role: "user" | "assistant" | "system";
     content: string;
-    role: "system" | "user" | "assistant";
-    id?: string | undefined;
-    conversationId?: string | undefined;
-    tenantId?: string | undefined;
     userId?: string | undefined;
+    id?: string | undefined;
     createdAt?: Date | undefined;
-    feedback?: {
-        helpful?: boolean | undefined;
-        corrections?: string | undefined;
-        rating?: number | undefined;
-    } | undefined;
+    tenantId?: string | undefined;
+    conversationId?: string | undefined;
     attachments?: {
-        type: "image" | "document" | "link";
         url: string;
+        type: "link" | "image" | "document";
         metadata?: Record<string, any> | undefined;
     }[] | undefined;
     aiMetadata?: {
-        confidence?: number | undefined;
         model?: string | undefined;
         intent?: string | undefined;
+        confidence?: number | undefined;
         tokens?: number | undefined;
+    } | undefined;
+    feedback?: {
+        corrections?: string | undefined;
+        rating?: number | undefined;
+        helpful?: boolean | undefined;
     } | undefined;
 }, {
+    role: "user" | "assistant" | "system";
     content: string;
-    role: "system" | "user" | "assistant";
-    id?: string | undefined;
-    conversationId?: string | undefined;
-    tenantId?: string | undefined;
     userId?: string | undefined;
+    id?: string | undefined;
     createdAt?: Date | undefined;
-    feedback?: {
-        helpful?: boolean | undefined;
-        corrections?: string | undefined;
-        rating?: number | undefined;
-    } | undefined;
+    tenantId?: string | undefined;
+    conversationId?: string | undefined;
     attachments?: {
-        type: "image" | "document" | "link";
         url: string;
+        type: "link" | "image" | "document";
         metadata?: Record<string, any> | undefined;
     }[] | undefined;
     aiMetadata?: {
-        confidence?: number | undefined;
         model?: string | undefined;
         intent?: string | undefined;
+        confidence?: number | undefined;
         tokens?: number | undefined;
+    } | undefined;
+    feedback?: {
+        corrections?: string | undefined;
+        rating?: number | undefined;
+        helpful?: boolean | undefined;
     } | undefined;
 }>;
 export type ConversationMessage = z.infer<typeof ConversationMessageSchema>;

@@ -120,5 +120,4 @@ export declare class HojaiSDK {
     private getInsight;
 }
 export declare function createSDK(config: SDKConfig): HojaiSDK;
-export { HojaiSDK };
 //# sourceMappingURL=index.d.ts.map

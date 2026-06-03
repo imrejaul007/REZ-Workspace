@@ -538,7 +538,7 @@ app.get('/api/invoices', authMiddleware, async (req, res) => {
     }
 });
 // Generate Invoice (Admin)
-app.post('/api/invoices/generate', async (req) => {
+app.post('/api/invoices/generate', async (req, res) => {
     try {
         const { tenantId, subscriptionId, period } = req.body;
         const subscription = await Subscription.findOne({ subscriptionId: subscriptionId || '' });

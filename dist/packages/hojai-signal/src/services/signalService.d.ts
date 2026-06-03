@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 import { Event, ValidatedSignal, Identity } from '../types/index.js';
 export declare const ValidatedSignalModel: mongoose.Model<{
-    tenantId: string;
     issues: string[];
+    tenantId: string;
     validationActions: string[];
-    confidence?: number | null | undefined;
     quality?: string | null | undefined;
+    confidence?: number | null | undefined;
     processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
@@ -20,11 +20,11 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     duplicateOf?: string | null | undefined;
     processingDurationMs?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, {}, {}, {}, mongoose.Document<unknown, {}, {
-    tenantId: string;
     issues: string[];
+    tenantId: string;
     validationActions: string[];
-    confidence?: number | null | undefined;
     quality?: string | null | undefined;
+    confidence?: number | null | undefined;
     processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
@@ -41,11 +41,11 @@ export declare const ValidatedSignalModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, {}, {
     timestamps: true;
 }> & {
-    tenantId: string;
     issues: string[];
+    tenantId: string;
     validationActions: string[];
-    confidence?: number | null | undefined;
     quality?: string | null | undefined;
+    confidence?: number | null | undefined;
     processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
@@ -66,11 +66,11 @@ export declare const ValidatedSignalModel: mongoose.Model<{
 }, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
-    tenantId: string;
     issues: string[];
+    tenantId: string;
     validationActions: string[];
-    confidence?: number | null | undefined;
     quality?: string | null | undefined;
+    confidence?: number | null | undefined;
     processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
@@ -85,11 +85,11 @@ export declare const ValidatedSignalModel: mongoose.Model<{
     duplicateOf?: string | null | undefined;
     processingDurationMs?: number | null | undefined;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
-    tenantId: string;
     issues: string[];
+    tenantId: string;
     validationActions: string[];
-    confidence?: number | null | undefined;
     quality?: string | null | undefined;
+    confidence?: number | null | undefined;
     processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
@@ -106,11 +106,11 @@ export declare const ValidatedSignalModel: mongoose.Model<{
 } & mongoose.DefaultTimestampProps>, {}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
     timestamps: true;
 }>> & mongoose.FlatRecord<{
-    tenantId: string;
     issues: string[];
+    tenantId: string;
     validationActions: string[];
-    confidence?: number | null | undefined;
     quality?: string | null | undefined;
+    confidence?: number | null | undefined;
     processedAt?: NativeDate | null | undefined;
     originalEventId?: string | null | undefined;
     normalizedEvent?: any;
@@ -134,30 +134,30 @@ export declare const IdentityModel: mongoose.Model<{
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }> & {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }>;
     identifiers?: {
+        sessionId: string[];
         email: string[];
         phone: string[];
-        sessionId: string[];
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        confidence?: number | null | undefined;
         method?: string | null | undefined;
+        confidence?: number | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -167,30 +167,30 @@ export declare const IdentityModel: mongoose.Model<{
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }> & {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }>;
     identifiers?: {
+        sessionId: string[];
         email: string[];
         phone: string[];
-        sessionId: string[];
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        confidence?: number | null | undefined;
         method?: string | null | undefined;
+        confidence?: number | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -202,30 +202,30 @@ export declare const IdentityModel: mongoose.Model<{
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }> & {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }>;
     identifiers?: {
+        sessionId: string[];
         email: string[];
         phone: string[];
-        sessionId: string[];
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        confidence?: number | null | undefined;
         method?: string | null | undefined;
+        confidence?: number | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -241,30 +241,30 @@ export declare const IdentityModel: mongoose.Model<{
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }> & {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }>;
     identifiers?: {
+        sessionId: string[];
         email: string[];
         phone: string[];
-        sessionId: string[];
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        confidence?: number | null | undefined;
         method?: string | null | undefined;
+        confidence?: number | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -274,30 +274,30 @@ export declare const IdentityModel: mongoose.Model<{
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }> & {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }>;
     identifiers?: {
+        sessionId: string[];
         email: string[];
         phone: string[];
-        sessionId: string[];
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        confidence?: number | null | undefined;
         method?: string | null | undefined;
+        confidence?: number | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -309,30 +309,30 @@ export declare const IdentityModel: mongoose.Model<{
     tenantId: string;
     primaryId: string;
     graphLinks: mongoose.Types.DocumentArray<{
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.mongo.BSON.ObjectId, any, {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }> & {
-        identityId?: string | null | undefined;
         verified?: boolean | null | undefined;
         relationship?: string | null | undefined;
+        identityId?: string | null | undefined;
         strength?: number | null | undefined;
     }>;
     identifiers?: {
+        sessionId: string[];
         email: string[];
         phone: string[];
-        sessionId: string[];
         deviceId: string[];
     } | null | undefined;
     resolution?: {
-        confidence?: number | null | undefined;
         method?: string | null | undefined;
+        confidence?: number | null | undefined;
         firstSeen?: NativeDate | null | undefined;
         lastSeen?: NativeDate | null | undefined;
         linkCount?: number | null | undefined;
@@ -347,11 +347,11 @@ export declare const AnomalyModel: mongoose.Model<{
     tenantId: string;
     affectedEvents: string[];
     type?: string | null | undefined;
-    details?: any;
     description?: string | null | undefined;
     userId?: string | null | undefined;
-    severity?: string | null | undefined;
     sessionId?: string | null | undefined;
+    severity?: string | null | undefined;
+    details?: any;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -363,11 +363,11 @@ export declare const AnomalyModel: mongoose.Model<{
     tenantId: string;
     affectedEvents: string[];
     type?: string | null | undefined;
-    details?: any;
     description?: string | null | undefined;
     userId?: string | null | undefined;
-    severity?: string | null | undefined;
     sessionId?: string | null | undefined;
+    severity?: string | null | undefined;
+    details?: any;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -381,11 +381,11 @@ export declare const AnomalyModel: mongoose.Model<{
     tenantId: string;
     affectedEvents: string[];
     type?: string | null | undefined;
-    details?: any;
     description?: string | null | undefined;
     userId?: string | null | undefined;
-    severity?: string | null | undefined;
     sessionId?: string | null | undefined;
+    severity?: string | null | undefined;
+    details?: any;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -403,11 +403,11 @@ export declare const AnomalyModel: mongoose.Model<{
     tenantId: string;
     affectedEvents: string[];
     type?: string | null | undefined;
-    details?: any;
     description?: string | null | undefined;
     userId?: string | null | undefined;
-    severity?: string | null | undefined;
     sessionId?: string | null | undefined;
+    severity?: string | null | undefined;
+    details?: any;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -419,11 +419,11 @@ export declare const AnomalyModel: mongoose.Model<{
     tenantId: string;
     affectedEvents: string[];
     type?: string | null | undefined;
-    details?: any;
     description?: string | null | undefined;
     userId?: string | null | undefined;
-    severity?: string | null | undefined;
     sessionId?: string | null | undefined;
+    severity?: string | null | undefined;
+    details?: any;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;
@@ -437,11 +437,11 @@ export declare const AnomalyModel: mongoose.Model<{
     tenantId: string;
     affectedEvents: string[];
     type?: string | null | undefined;
-    details?: any;
     description?: string | null | undefined;
     userId?: string | null | undefined;
-    severity?: string | null | undefined;
     sessionId?: string | null | undefined;
+    severity?: string | null | undefined;
+    details?: any;
     resolvedAt?: NativeDate | null | undefined;
     expectedValue?: any;
     resolution?: string | null | undefined;

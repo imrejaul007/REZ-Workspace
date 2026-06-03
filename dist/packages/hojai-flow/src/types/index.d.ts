@@ -38,16 +38,16 @@ export declare const WorkflowSchema: z.ZodObject<{
         next: z.ZodOptional<z.ZodString>;
         onError: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        type: StepType;
         name: string;
+        type: StepType;
+        id: string;
         config: Record<string, any>;
         next?: string | undefined;
         onError?: string | undefined;
     }, {
-        id: string;
-        type: StepType;
         name: string;
+        type: StepType;
+        id: string;
         config: Record<string, any>;
         next?: string | undefined;
         onError?: string | undefined;
@@ -73,60 +73,60 @@ export declare const WorkflowSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: WorkflowStatus;
     name: string;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    status: WorkflowStatus;
     tenantId: string;
     trigger: {
         type: string;
         config: Record<string, any>;
     };
-    createdAt: Date;
-    updatedAt: Date;
     steps: {
-        id: string;
-        type: StepType;
         name: string;
+        type: StepType;
+        id: string;
         config: Record<string, any>;
         next?: string | undefined;
         onError?: string | undefined;
     }[];
     createdBy: string;
+    description?: string | undefined;
     stats?: {
         totalRuns: number;
         successfulRuns: number;
         failedRuns: number;
         lastRunAt?: Date | undefined;
     } | undefined;
-    description?: string | undefined;
     variables?: Record<string, any> | undefined;
 }, {
-    id: string;
     name: string;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
     tenantId: string;
     trigger: {
         type: string;
         config: Record<string, any>;
     };
-    createdAt: Date;
-    updatedAt: Date;
     steps: {
-        id: string;
-        type: StepType;
         name: string;
+        type: StepType;
+        id: string;
         config: Record<string, any>;
         next?: string | undefined;
         onError?: string | undefined;
     }[];
     createdBy: string;
+    description?: string | undefined;
+    status?: WorkflowStatus | undefined;
     stats?: {
         totalRuns?: number | undefined;
         successfulRuns?: number | undefined;
         failedRuns?: number | undefined;
         lastRunAt?: Date | undefined;
     } | undefined;
-    status?: WorkflowStatus | undefined;
-    description?: string | undefined;
     variables?: Record<string, any> | undefined;
 }>;
 export type Workflow = z.infer<typeof WorkflowSchema>;
@@ -148,66 +148,66 @@ export declare const WorkflowRunSchema: z.ZodObject<{
         output: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
         error: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        status: "completed" | "running" | "pending" | "failed" | "skipped";
+        status: "pending" | "running" | "completed" | "failed" | "skipped";
         startedAt: Date;
         stepId: string;
         stepName: string;
+        output?: Record<string, any> | undefined;
         error?: string | undefined;
         completedAt?: Date | undefined;
-        output?: Record<string, any> | undefined;
     }, {
-        status: "completed" | "running" | "pending" | "failed" | "skipped";
+        status: "pending" | "running" | "completed" | "failed" | "skipped";
         startedAt: Date;
         stepId: string;
         stepName: string;
+        output?: Record<string, any> | undefined;
         error?: string | undefined;
         completedAt?: Date | undefined;
-        output?: Record<string, any> | undefined;
     }>, "many">>;
     startedAt: z.ZodDate;
     completedAt: z.ZodOptional<z.ZodDate>;
     duration: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "completed" | "running" | "failed" | "cancelled";
     input: Record<string, any>;
+    id: string;
+    status: "running" | "completed" | "failed" | "cancelled";
     tenantId: string;
     startedAt: Date;
     workflowId: string;
     triggeredBy: string;
+    output?: Record<string, any> | undefined;
     duration?: number | undefined;
     completedAt?: Date | undefined;
-    output?: Record<string, any> | undefined;
     currentStep?: string | undefined;
     stepResults?: {
-        status: "completed" | "running" | "pending" | "failed" | "skipped";
+        status: "pending" | "running" | "completed" | "failed" | "skipped";
         startedAt: Date;
         stepId: string;
         stepName: string;
+        output?: Record<string, any> | undefined;
         error?: string | undefined;
         completedAt?: Date | undefined;
-        output?: Record<string, any> | undefined;
     }[] | undefined;
 }, {
-    id: string;
-    status: "completed" | "running" | "failed" | "cancelled";
     input: Record<string, any>;
+    id: string;
+    status: "running" | "completed" | "failed" | "cancelled";
     tenantId: string;
     startedAt: Date;
     workflowId: string;
     triggeredBy: string;
+    output?: Record<string, any> | undefined;
     duration?: number | undefined;
     completedAt?: Date | undefined;
-    output?: Record<string, any> | undefined;
     currentStep?: string | undefined;
     stepResults?: {
-        status: "completed" | "running" | "pending" | "failed" | "skipped";
+        status: "pending" | "running" | "completed" | "failed" | "skipped";
         startedAt: Date;
         stepId: string;
         stepName: string;
+        output?: Record<string, any> | undefined;
         error?: string | undefined;
         completedAt?: Date | undefined;
-        output?: Record<string, any> | undefined;
     }[] | undefined;
 }>;
 export type WorkflowRun = z.infer<typeof WorkflowRunSchema>;
