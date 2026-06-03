@@ -1,15 +1,17 @@
 /**
- * GENIE Obsidian Service - Models
+ * GENIE Obsidian Service - Mongoose Models
  */
-
 import mongoose, { Schema, Document } from 'mongoose';
 
+// ============================================================================
+// Vault Model
+// ============================================================================
 export interface IObsidianVault extends Document {
-  name: string;
-  path: string;
+  tenant_id: string;
   linked_user_id?: string;
   linked_at?: Date;
-  last_sync?: Date;
+  name: string;
+  path: string;
   settings: {
     sync_daily_notes: boolean;
     sync_todos: boolean;
@@ -18,31 +20,39 @@ export interface IObsidianVault extends Document {
     exclude_folders: string[];
     sync_direction: 'bidirectional' | 'to_genie' | 'from_genie';
   };
-  tenant_id: string;
+  last_sync?: Date;
+  status: 'active' | 'inactive' | 'syncing';
 }
 
+const VaultSettingsSchema = new Schema({
+  sync_daily_notes: { type: Boolean, default: true },
+  sync_todos: { type: Boolean, default: true },
+  sync_calendar: { type: Boolean, default: false },
+  sync_tags: [{ type: String }],
+  exclude_folders: { type: [String], default: ['.obsidian', '.trash', '.git', 'node_modules'] },
+  sync_direction: { type: String, enum: ['bidirectional', 'to_genie', 'from_genie'], default: 'to_genie' },
+}, { _id: false });
+
 const ObsidianVaultSchema = new Schema<IObsidianVault>({
-  name: { type: String, required: true },
-  path: { type: String, required: true },
+  tenant_id: { type: String, required: true, index: true },
   linked_user_id: { type: String, index: true },
   linked_at: { type: Date },
-  last_sync: { type: Date },
-  settings: {
-    sync_daily_notes: { type: Boolean, default: true },
-    sync_todos: { type: Boolean, default: true },
-    sync_calendar: { type: Boolean, default: false },
-    sync_tags: [{ type: String }],
-    exclude_folders: { type: [String], default: ['.obsidian', '.trash'] },
-    sync_direction: { type: String, enum: ['bidirectional', 'to_genie', 'from_genie'], default: 'to_genie' },
-  },
-  tenant_id: { type: String, required: true, index: true },
+  name: { type: String, required: true },
+  path: { type: String, required: true },
+  settings: { type: VaultSettingsSchema, default: () => ({}) },
+  last_sync: Date,
+  status: { type: String, enum: ['active', 'inactive', 'syncing'], default: 'active' },
 }, { timestamps: true });
 
 ObsidianVaultSchema.index({ tenant_id: 1, linked_user_id: 1 });
-
+ObsidianVaultSchema.index({ tenant_id: 1, status: 1 });
 export const ObsidianVault = mongoose.model<IObsidianVault>('ObsidianVault', ObsidianVaultSchema);
 
+// ============================================================================
+// Note Model
+// ============================================================================
 export interface IObsidianNote extends Document {
+  tenant_id: string;
   vault_id: string;
   path: string;
   title: string;
@@ -51,12 +61,13 @@ export interface IObsidianNote extends Document {
   tags: string[];
   links: string[];
   backlinks: string[];
+  word_count: number;
   created: Date;
   modified: Date;
-  tenant_id: string;
 }
 
 const ObsidianNoteSchema = new Schema<IObsidianNote>({
+  tenant_id: { type: String, required: true, index: true },
   vault_id: { type: String, required: true, index: true },
   path: { type: String, required: true },
   title: { type: String, required: true },
@@ -65,12 +76,12 @@ const ObsidianNoteSchema = new Schema<IObsidianNote>({
   tags: [{ type: String }],
   links: [{ type: String }],
   backlinks: [{ type: String }],
+  word_count: { type: Number, default: 0 },
   created: { type: Date, required: true },
   modified: { type: Date, required: true },
-  tenant_id: { type: String, required: true, index: true },
 }, { timestamps: true });
 
 ObsidianNoteSchema.index({ tenant_id: 1, vault_id: 1, path: 1 }, { unique: true });
 ObsidianNoteSchema.index({ tenant_id: 1, tags: 1 });
-
+ObsidianNoteSchema.index({ tenant_id: 1, modified: -1 });
 export const ObsidianNote = mongoose.model<IObsidianNote>('ObsidianNote', ObsidianNoteSchema);

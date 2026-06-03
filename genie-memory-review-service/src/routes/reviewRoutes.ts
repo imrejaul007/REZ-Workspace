@@ -28,6 +28,12 @@ router.post('/generate/weekly', asyncHandler(async (req: Request, res: Response)
   res.status(201).json(resp(true, review));
 }));
 
+router.post('/generate/monthly', asyncHandler(async (req: Request, res: Response) => {
+  const { tenant_id, user_id } = req.tenantContext || {};
+  const review = await service.generateMonthlyReview(tenant_id!, user_id!);
+  res.status(201).json(resp(true, review));
+}));
+
 // Schedule reviews
 router.post('/schedule', asyncHandler(async (req: Request, res: Response) => {
   const { tenant_id, user_id } = req.tenantContext || {};

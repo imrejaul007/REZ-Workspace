@@ -41,6 +41,8 @@ export class ReviewScheduler {
             await service.generateDailyReview(schedule.tenant_id, schedule.user_id);
           } else if (schedule.review_type === 'weekly') {
             await service.generateWeeklyReview(schedule.tenant_id, schedule.user_id);
+          } else if (schedule.review_type === 'monthly') {
+            await service.generateMonthlyReview(schedule.tenant_id, schedule.user_id);
           }
 
           // Update next run time

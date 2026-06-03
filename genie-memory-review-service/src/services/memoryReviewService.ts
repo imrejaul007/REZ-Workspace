@@ -146,6 +146,49 @@ export class MemoryReviewService {
   }
 
   /**
+   * Generate monthly review
+   */
+  async generateMonthlyReview(tenantId: string, userId: string): Promise<IMemoryReview> {
+    const today = new Date();
+    const monthAgo = new Date(today);
+    monthAgo.setDate(1);
+    monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+    const reviews = await MemoryReview.find({
+      tenant_id: tenantId,
+      user_id: userId,
+      review_type: { $in: ['daily', 'weekly'] },
+      date: { $gte: monthAgo, $lte: today },
+    });
+
+    const totalMemories = reviews.reduce((sum, r) => sum + (r.memory_count_end - r.memory_count_start), 0);
+    const avgEngagement = reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.engagement_score, 0) / reviews.length
+      : 0;
+
+    const summary = `This month you created ${totalMemories} new memories across ${reviews.length} review sessions. ` +
+      `Your average engagement was ${avgEngagement.toFixed(0)}%. ` +
+      `You completed ${reviews.filter(r => r.status === 'completed').length} reviews. ` +
+      (avgEngagement > 60 ? "Excellent consistency!" : "Keep building your memory habits!");
+
+    return MemoryReview.create({
+      tenant_id: tenantId,
+      user_id: userId,
+      review_type: 'monthly',
+      date: today,
+      summary,
+      key_memories: reviews.slice(-14).flatMap(r => r.key_memories.slice(0, 2)).slice(0, 10),
+      insights: reviews.flatMap(r => r.insights).filter((v, i, a) => a.indexOf(v) === i).slice(0, 10),
+      engagement_score: avgEngagement,
+      memory_count_start: reviews[0]?.memory_count_start || 0,
+      memory_count_end: reviews[reviews.length - 1]?.memory_count_end || totalMemories,
+      duration_minutes: 30,
+      status: 'completed',
+      completed_at: new Date(),
+    });
+  }
+
+  /**
    * Generate weekly review
    */
   async generateWeeklyReview(tenantId: string, userId: string): Promise<IMemoryReview> {
