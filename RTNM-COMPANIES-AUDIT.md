@@ -1,8 +1,8 @@
 # RTNM Digital - Complete Companies & Products Audit
 
-**Version:** 2.5
+**Version:** 2.6
 **Date:** June 11, 2026
-**Status:** COMPLETE - All companies, products, and Genie ecosystem (**19/19 Voice Services + HOJAI**)
+**Status:** COMPLETE - All companies, products, and Genie ecosystem (**19/19 Voice Services + HOJAI + Invisible Hotel 28 services**)
 
 ---
 
@@ -688,6 +688,78 @@ MyRisa App (4900)
 | ai-front-desk | 3800 | AI virtual concierge (HOJAI Staybot) |
 | hotel-os-integration | 3899 | Unified integration layer |
 
+## THE INVISIBLE HOTEL - Complete Guest Ecosystem (NEW)
+
+**Status:** ✅ All 28 services running (100% coverage)
+**Purpose:** Autonomous AI-driven hotel - "Guest books → AI learns → Auto-services → Seamless checkout"
+
+### Invisible Hotel Core Services (19 services)
+
+| Service | Port | Purpose | Status |
+|---------|------|---------|--------|
+| ai-front-desk | 3800 | AI virtual receptionist, guest management | ✅ |
+| minibar-service | 3810 | Smart minibar, auto-billing, inventory | ✅ |
+| hotel-restaurant-booking | 3811 | Restaurant reservations, table management | ✅ |
+| hotel-spa-booking | 3812 | Spa bookings, therapist scheduling | ✅ |
+| room-controls | 3814 | IoT control (AC, lights, TV, curtains) | ✅ |
+| parking-service | 3815 | Valet, parking management | ✅ |
+| lost-found | 3816 | Lost & found tracking | ✅ |
+| upsell-engine | 3817 | AI-powered upselling | ✅ |
+| loyalty-system | 3818 | REZ Rewards, points, tiers | ✅ |
+| review-manager | 3819 | Review collection, responses | ✅ |
+| feedback-survey | 3820 | Post-stay surveys | ✅ |
+| concierge-desk | 3821 | Human concierge requests | ✅ |
+| smart-lock-service | 3825 | BLE/NFC smart locks, auto-revoke | ✅ |
+| predictive-housekeeping | 3826 | AI housekeeping scheduling | ✅ |
+| zero-checkout-automation | 3827 | Auto-checkout, billing settlement | ✅ |
+| pre-arrival-service | 3828 | Preference collection, room prep | ✅ |
+| hotel-os-integration | 3899 | REZ-Merchant & HOJAI integration | ✅ |
+| hojai-memory-hotel | 4720 | Hotel guest memory | ✅ |
+| voice-hotel-agent | 4870 | Voice AI for hotel | ✅ |
+
+### HOJAI AI Services (3 services)
+
+| Service | Port | Purpose | Status |
+|---------|------|---------|--------|
+| hojai-staybot | 4840 | AI concierge, intent detection | ✅ |
+| hojai-memory | 4520 | Guest preferences, history | ✅ |
+| hojai-genie | 4703 | Personal AI assistant, briefings | ✅ |
+
+### RABTUL Services (3 services)
+
+| Service | Port | Purpose | Status |
+|---------|------|---------|--------|
+| rez-payment | 4001 | Payments (Razorpay, UPI, Cards) | ✅ |
+| rez-auth | 4002 | JWT, OTP, MFA | ✅ |
+| rez-wallet | 4004 | REZ Coins, balance, cashback | ✅ |
+
+### REZ-Merchant Hotel OS (3 services)
+
+| Service | Port | Purpose | Status |
+|---------|------|---------|--------|
+| rez-pms | 4031 | Property Management System | ✅ |
+| rez-housekeeping | 4021 | Housekeeping tasks | ✅ |
+| rez-booking | 4042 | Booking engine | ✅ |
+
+### Dashboard & Tools
+
+| Tool | Port | Purpose |
+|------|------|---------|
+| hotel-dashboard | 3000 | Admin monitoring dashboard |
+| hotel-mobile | 3001+ | Guest mobile app |
+| integration-gateway | 3898 | Service registry, health monitoring |
+| test-api.sh | - | API tester script |
+
+### Guest Journey Flow
+
+```
+📋 Booking → 🔧 Pre-Arrival → 🛏️ Check-In → 🔐 Smart Lock
+     ↓
+💡 Room Control → 🍺 Minibar → 🍽️ Restaurant → 💆 Spa
+     ↓
+🤖 AI Concierge → 💰 Payment → 🚪 Auto Checkout
+```
+
 ## REZ-Merchant Hotel OS (Operations Backend)
 
 | Service | Port | Purpose |
@@ -715,13 +787,6 @@ MyRisa App (4900)
 |---------|------|---------|
 | rez-stayown-service | 4015 | Room QR, check-in, checkout, billing |
 
-## HOJAI AI Integration
-
-| Service | Port | Purpose |
-|---------|------|---------|
-| Staybot | 4840 | Hotel AI brain (concierge, recommendations) |
-| HOJAI Memory | 4520 | Guest preferences, history |
-
 ## Apps/Web/Portals
 
 | App | Type | Purpose |
@@ -732,6 +797,8 @@ MyRisa App (4900)
 | **hotel-ota-corporate** | Web | Corporate booking portal |
 | **REZ-hotel-app** | App | Hotel app (Expo SDK 53) |
 | **REZ-hotel-admin-web** | Web | Hotel admin panel |
+| **hotel-dashboard** | Web | Live ecosystem monitoring (port 3000) |
+| **hotel-mobile** | Web | Guest mobile companion (port 3001+) |
 
 ---
 
@@ -2261,3 +2328,38 @@ All services include:
 **Services Verified:** 70+
 **Stubs Fixed:** 9
 **Status:** PRODUCTION READY
+
+---
+
+## BrandPulse - Complete v2.0
+
+### New Features Added
+
+| Feature | Port | Status |
+|---------|------|--------|
+| **WebSocket Streaming** | ws://4770/ws | ✅ |
+| **PDF Reports** | 4779 | ✅ |
+| **Docker Deployment** | Docker Compose | ✅ |
+
+### WebSocket Streaming
+Connect to `ws://localhost:4770/ws` for real-time updates.
+
+```javascript
+const ws = new WebSocket('ws://localhost:4770/ws');
+ws.send(JSON.stringify({
+  action: 'subscribe',
+  events: ['alert.new', 'mention.new'],
+  companyIds: ['tesla', 'apple']
+}));
+```
+
+### PDF Report Generation
+```bash
+curl -o report.pdf http://localhost:4779/api/reports/tesla/pdf?period=week
+```
+
+### Docker Deployment
+```bash
+docker-compose up -d
+```
+

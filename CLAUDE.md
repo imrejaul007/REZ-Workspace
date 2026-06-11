@@ -853,6 +853,19 @@ npx tsx start-services.ts dev     # Development mode
 | [ECOSYSTEM-REGISTRY.md](ECOSYSTEM-REGISTRY.md) | Complete service registry |
 | [docs/SADA-SHAB-AUDIT.md](docs/SADA-SHAB-AUDIT.md) | SADA & Shab AI audit |
 | [CorpPerks/salar-os/docs/COMPLETE-SALAR-OS.md](CorpPerks/salar-os/docs/COMPLETE-SALAR-OS.md) | Salar OS documentation |
+| [RTNM-COMPANIES-AUDIT.md](RTNM-COMPANIES-AUDIT.md) | All 25+ companies, 660+ services |
+| [RTNM-PRODUCTS-FEATURES-AUDIT.md](RTNM-PRODUCTS-FEATURES-AUDIT.md) | 1500+ features across ecosystem |
+
+## ECOSYSTEM OVERVIEW
+
+| Category | Count |
+|----------|-------|
+| Sister Companies | 25+ |
+| REE Services | 12 (cross-cutting) |
+| Total Services | 660+ |
+| AI Agents | 235+ |
+| Apps/Web/Portals | 50+ |
+| Total Features | 1500+ |
 
 ---
 

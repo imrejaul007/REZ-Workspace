@@ -1115,6 +1115,85 @@ MyRisa App (4900)
 | **REZ Payment** | 4001 | Payments |
 | **REZ Wallet** | 4004 | REZ Coins, loyalty |
 
+## 6.8 THE INVISIBLE HOTEL - Complete Ecosystem (NEW)
+
+**Status:** ✅ 100% Operational - 28 services running
+**Purpose:** Autonomous AI-driven hotel experience - Zero friction, maximum delight
+
+### 6.8.1 Core Guest Services
+
+| Feature | Description |
+|---------|-------------|
+| **Zero-Contact Check-in** | Auto key activation on booking |
+| **AI Concierge** | 24/7 HOJAI Staybot concierge |
+| **Smart Room Control** | AC, lights, TV, curtains via IoT |
+| **Smart Minibar** | Auto-detect, auto-bill |
+| **Restaurant Booking** | Table reservations |
+| **Spa Booking** | Treatment scheduling |
+| **Loyalty Rewards** | REZ points, tiers |
+| **Zero-Checkout** | Auto-settle, lock revoke |
+
+### 6.8.2 Room Control Features
+
+| Feature | Description |
+|---------|-------------|
+| **AC Control** | Temperature, mode, fan speed |
+| **Light Control** | On/off, brightness, scenes |
+| **TV Control** | Power, channel, volume |
+| **Curtain Control** | Open/close/half |
+| **Scene Presets** | Movie, Morning, Evening, Sleep, Away |
+| **MQTT Integration** | IoT device communication |
+
+### 6.8.3 AI Services
+
+| Service | Port | Features |
+|---------|------|----------|
+| **HOJAI Staybot** | 4840 | Intent detection, natural language, routing |
+| **HOJAI Memory** | 4520 | Guest preferences, history, patterns |
+| **HOJAI Genie** | 4703 | Personal briefings, relationships |
+| **Voice Agent** | 4870 | Voice commands for hotel services |
+
+### 6.8.4 Payment& Loyalty
+
+| Feature | Description |
+|---------|-------------|
+| **REZ Payment** | Razorpay, UPI, Cards |
+| **REZ Wallet** | Coins, balance, cashback |
+| **Loyalty Points** | Earn on booking, spending |
+| **Auto-Settlement** | Zero-checkout billing |
+| **Multi-Currency** | INR support |
+
+### 6.8.5 Operations Services
+
+| Service | Port | Features |
+|---------|------|----------|
+| **Pre-Arrival** | 3828 | Preference collection, room prep |
+| **Housekeeping** | 3826 | AI scheduling, predictive tasks |
+| **Smart Lock** | 3825 | BLE/NFC, auto-revoke on checkout |
+| **Lost & Found** | 3816 | Item tracking, notifications |
+| **Upsell Engine** | 3817 | AI-powered offers |
+
+### 6.8.6 Dashboard & Monitoring
+
+| Tool | Port | Purpose |
+|------|------|---------|
+| **Ecosystem Dashboard** | 3000 | Admin monitoring, service health |
+| **Guest Mobile App** | 3001+ | Room control, minibar, AI chat |
+| **Integration Gateway** | 3898 | Service registry, health checks |
+| **API Tester** | - | test-api.sh script |
+
+### 6.8.7 Guest Journey Features
+
+| Stage | Features |
+|-------|----------|
+| **Pre-Booking** | OTA search, AI recommendations |
+| **Booking** | Room selection, payment, confirmation |
+| **Pre-Arrival** | Preference survey, room prep |
+| **Check-In** | Auto key, welcome message |
+| **Stay** | Room control, minibar, restaurant, spa |
+| **AI Concierge** | Chat, voice, recommendations |
+| **Checkout** | Auto-billing, loyalty points, lock revoke |
+
 ---
 
 # 7. RisnaEstate - Products & Features
@@ -1408,20 +1487,127 @@ MyRisa App (4900)
 | **BNPL** | Buy now pay later |
 | **EMI** | Easy installments |
 
-## 12.2 Agent Portal
+## 12.2 Finance Agents (11 Core AI Agents)
+| Agent | Port | Purpose | Lines |
+|-------|------|---------|-------|
+| **Treasury Agent** | 4926 | Cash, FX, debt, liquidity, bank connectors | 2,881 |
+| **FP&A Agent** | 4927 | Budget, forecast, variance, KPI | ~1,000 |
+| **Risk Agent** | 4928 | Risk assessment, exposure evaluation | ~1,800 |
+| **Investment Agent** | 4929 | Investment tracking, portfolio | ~1,650 |
+| **Collection Agent** | 4930 | Receivables, dunning, payment chase | ~750 |
+| **Financial Twin** | 4940 | Unified entity representation | 996 |
+| **CFO Agent** | 4950 | Executive P&L, orchestration | 819 |
+| **Crisis Agent** | 4960 | Early warning, automated alerts | 616 |
+| **Problem Detector** | 4970 | Proactive problem detection | 647 |
+| **Accounting Ledger** | 4980 | Double-entry bookkeeping | ~324 |
+| **Finance Copilot** | 5090 | CFO Dashboard UI | 1,534 |
+
+## 12.3 Treasury Agent Features (2,881 lines)
+| Feature | Description |
+|---------|-------------|
+| **Cash Management** | Real-time cash position tracking |
+| **Bank Connectors** | 10+ bank integrations (HDFC, ICICI, SBI, etc.) |
+| **FX Management** | Multi-currency, exchange rates |
+| **Debt Tracking** | Loans, credit facilities |
+| **Liquidity Forecasting** | Cash runway calculations |
+| **Transfer Management** | Internal/external transfers |
+
+## 12.4 FP&A Agent Features
+| Feature | Description |
+|---------|-------------|
+| **Budget Management** | Create, track, variance |
+| **Forecasting** | Revenue, expense, cash flow |
+| **KPI Dashboard** | Key performance indicators |
+| **Scenario Analysis** | What-if modeling |
+| **Variance Analysis** | Budget vs actual |
+
+## 12.5 Collection Agent Features
+| Feature | Description |
+|---------|-------------|
+| **AI Scoring** | Weighted ML model for payment probability |
+| **Intelligent Queue** | Priority-based collection |
+| **Multi-Channel** | SMS, Email, WhatsApp reminders |
+| **Promise Tracking** | PTP management |
+| **Collection Scripts** | AI-generated conversation scripts |
+| **Agent Metrics** | Performance tracking |
+| **Aging Analysis** | AR aging buckets |
+
+## 12.6 Financial Twin Features
+| Feature | Description |
+|---------|-------------|
+| **Balance Sheet** | Real-time assets/liabilities |
+| **Income Statement** | P&L generation |
+| **Cash Flow** | Cash position tracking |
+| **Financial Ratios** | Liquidity, profitability, leverage |
+| **Snapshots** | Historical comparisons |
+| **State Comparison** | Period-over-period analysis |
+
+## 12.7 CFO Agent Features
+| Feature | Description |
+|---------|-------------|
+| **Task Orchestration** | Cross-agent coordination |
+| **Daily Briefings** | AI-generated summaries |
+| **NL Queries** | Natural language finance queries |
+| **Workflow Execution** | Predefined workflows |
+| **Recommendations** | AI-powered suggestions |
+
+## 12.8 Crisis Agent Features
+| Feature | Description |
+|---------|-------------|
+| **Metric Monitoring** | Continuous health checks |
+| **Liquidity Alerts** | Cash runway warnings |
+| **Fraud Alerts** | Anomaly detection |
+| **Risk Alerts** | Exposure thresholds |
+| **Severity Levels** | EMERGENCY → LOW |
+| **Auto Notifications** | Alert escalation |
+
+## 12.9 Problem Detector Features
+| Feature | Description |
+|---------|-------------|
+| **Revenue Analysis** | Trend detection |
+| **Budget Tracking** | Overrun detection |
+| **Cash Monitoring** | Burn acceleration |
+| **Receivables Analysis** | Aging trends |
+| **Fraud Patterns** | Anomaly detection |
+| **Margin Analysis** | Compression alerts |
+
+## 12.10 Agent Portal
 | Feature | Description |
 |---------|-------------|
 | **Lead Management** | Capture, follow-up |
 | **Quote Generation** | Product comparison |
 | **Commission Tracking** | Earnings, payouts |
 | **Training** | Product knowledge |
+| **Collection Queue** | Prioritized accounts |
+| **Performance Dashboard** | Agent metrics |
 
-## 12.3 Partner APIs
-| Feature | Description |
-|---------|-------------|
-| **Bank Integration** | Credit assessment |
-| **Insurance Partners** | Multiple insurers |
-| **Loan Partners** | Lenders |
+## 12.11 Ecosystem Wiring (24 Integration Files)
+| Integration | Services Connected |
+|-------------|-------------------|
+| **RABTUL** | 13 services (Auth, Payment, Wallet, Notify) |
+| **REZ Intelligence** | 5 services (Intent, Signals, Predictive) |
+| **HOJAI Core** | 2 services (Memory, Intelligence) |
+| **SUTAR OS** | 2 services (Decision, Simulation) |
+| **AdBazaar** | 4 services (Intent, Attribution) |
+| **New Wires** | 5 services (Simulation, Twin, Board, Investor, Reconciliation) |
+
+## 12.12 Priya's Story - "The CFO Who Finally Saw Everything"
+
+All capabilities implemented:
+
+| Story Capability | RIDZA Implementation | Status |
+|-----------------|---------------------|--------|
+| Financial Memory | HOJAI Memory (4520) + all services | ✅ |
+| Financial Twin | ridza-financial-twin (994 lines) | ✅ |
+| Problem Detection | ridza-problem-detector (647 lines) | ✅ |
+| Intelligence Layer | Collection + FP&A agents | ✅ |
+| Finance Copilot | ridza-finance-copilot (1,534 lines) | ✅ |
+| Collection Agent | ridza-collection-agent (~750 lines) | ✅ |
+| Crisis Detection | ridza-crisis-agent (616 lines) | ✅ |
+| Monte Carlo | simulationService.ts | ✅ |
+| CFO Agent | ridza-cfo-agent (819 lines) | ✅ |
+| Board Reporting | investorRelationsService.ts | ✅ |
+| Bank Reconciliation | bankReconciliationService.ts | ✅ |
 
 ---
 
