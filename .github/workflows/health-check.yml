@@ -1,0 +1,301 @@
+# RTNM Ecosystem - Health Check Pipeline
+# Monitors all service health endpoints every 5 minutes
+
+name: Health Check
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to check'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - staging
+          - production
+      services:
+        description: 'Comma-separated service ports to check (leave empty for all)'
+        required: false
+        type: string
+
+# Cancel in-progress runs
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.environment || 'all' }}
+  cancel-in-progress: true
+
+env:
+  # Staging hosts
+  STAGING_API_GATEWAY: 'http://staging.hojai.ai:4500/health'
+  STAGING_EVENT_BUS: 'http://staging.hojai.ai:4510/health'
+  STAGING_MEMORY: 'http://staging.hojai.ai:4520/health'
+  STAGING_INTELLIGENCE: 'http://staging.hojai.ai:4750/health'
+  STAGING_GENIE_MEMORY: 'http://staging.hojai.ai:4703/health'
+  STAGING_GENIE_RELATIONSHIP: 'http://staging.hojai.ai:4704/health'
+  STAGING_GENIE_BRIEFING: 'http://staging.hojai.ai:4706/health'
+  STAGING_REZ_PREDICTOR: 'http://staging.hojai.ai:4018/health'
+  STAGING_REZ_PREDICTIVE: 'http://staging.hojai.ai:4123/health'
+  STAGING_REZ_MEMORY: 'http://staging.hojai.ai:4201/health'
+
+  # Production hosts
+  PROD_API_GATEWAY: 'http://api.hojai.ai:4500/health'
+  PROD_EVENT_BUS: 'http://api.hojai.ai:4510/health'
+  PROD_MEMORY: 'http://api.hojai.ai:4520/health'
+  PROD_INTELLIGENCE: 'http://api.hojai.ai:4750/health'
+  PROD_GENIE_MEMORY: 'http://api.hojai.ai:4703/health'
+  PROD_GENIE_RELATIONSHIP: 'http://api.hojai.ai:4704/health'
+  PROD_GENIE_BRIEFING: 'http://api.hojai.ai:4706/health'
+  PROD_REZ_PREDICTOR: 'http://api.hojai.ai:4018/health'
+  PROD_REZ_PREDICTIVE: 'http://api.hojai.ai:4123/health'
+  PROD_REZ_MEMORY: 'http://api.hojai.ai:4201/health'
+
+jobs:
+  # ============================================
+  # CHECK STAGING SERVICES
+  # ============================================
+  check-staging:
+    name: Check Staging Services
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: inputs.environment == 'all' || inputs.environment == 'staging' || github.event_name == 'schedule'
+    concurrency:
+      group: staging-health
+      cancel-in-progress: true
+
+    outputs:
+      failed_count: ${{ steps.health.outputs.failed_count }}
+      failed_services: ${{ steps.health.outputs.failed_services }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Staging Health
+        id: health
+        run: |
+          echo "Checking staging services..."
+
+          # Define staging services
+          declare -A services=(
+            ["api-gateway"]="${STAGING_API_GATEWAY}"
+            ["event-bus"]="${STAGING_EVENT_BUS}"
+            ["memory"]="${STAGING_MEMORY}"
+            ["intelligence"]="${STAGING_INTELLIGENCE}"
+            ["genie-memory"]="${STAGING_GENIE_MEMORY}"
+            ["genie-relationship"]="${STAGING_GENIE_RELATIONSHIP}"
+            ["genie-briefing"]="${STAGING_GENIE_BRIEFING}"
+            ["rez-predictor"]="${STAGING_REZ_PREDICTOR}"
+            ["rez-predictive"]="${STAGING_REZ_PREDICTIVE}"
+            ["rez-memory"]="${STAGING_REZ_MEMORY}"
+          )
+
+          failed=0
+          failed_services=""
+          passed=0
+
+          for service in "${!services[@]}"; do
+            url="${services[$service]}"
+            echo "Checking $service ($url)..."
+
+            response=$(curl -sf -w "\n%{http_code}" "$url" 2>&1 || echo -e "\n000")
+            http_code=$(echo "$response" | tail -n1)
+            body=$(echo "$response" | sed '$d')
+
+            if [ "$http_code" = "200" ]; then
+              echo "✓ $service is healthy (HTTP $http_code)"
+              passed=$((passed + 1))
+            else
+              echo "✗ $service is DOWN (HTTP $http_code)"
+              failed=$((failed + 1))
+              failed_services="$failed_services,$service"
+            fi
+          done
+
+          echo "failed_count=$failed" >> $GITHUB_OUTPUT
+          echo "failed_services=$failed_services" >> $GITHUB_OUTPUT
+
+          echo "---"
+          echo "Staging Health Summary: $passed passed, $failed failed"
+
+          # Fail if any services are down
+          if [ $failed -gt 0 ]; then
+            echo "ALERT: $failed staging services are down!"
+            exit 1
+          fi
+
+  # ============================================
+  # CHECK PRODUCTION SERVICES
+  # ============================================
+  check-production:
+    name: Check Production Services
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: inputs.environment == 'all' || inputs.environment == 'production' || github.event_name == 'schedule'
+    concurrency:
+      group: production-health
+      cancel-in-progress: true
+
+    outputs:
+      failed_count: ${{ steps.health.outputs.failed_count }}
+      failed_services: ${{ steps.health.outputs.failed_services }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Production Health
+        id: health
+        run: |
+          echo "Checking production services..."
+
+          # Define production services
+          declare -A services=(
+            ["api-gateway"]="${PROD_API_GATEWAY}"
+            ["event-bus"]="${PROD_EVENT_BUS}"
+            ["memory"]="${PROD_MEMORY}"
+            ["intelligence"]="${PROD_INTELLIGENCE}"
+            ["genie-memory"]="${PROD_GENIE_MEMORY}"
+            ["genie-relationship"]="${PROD_GENIE_RELATIONSHIP}"
+            ["genie-briefing"]="${PROD_GENIE_BRIEFING}"
+            ["rez-predictor"]="${PROD_REZ_PREDICTOR}"
+            ["rez-predictive"]="${PROD_REZ_PREDICTIVE}"
+            ["rez-memory"]="${PROD_REZ_MEMORY}"
+          )
+
+          failed=0
+          failed_services=""
+          passed=0
+
+          for service in "${!services[@]}"; do
+            url="${services[$service]}"
+            echo "Checking $service ($url)..."
+
+            response=$(curl -sf -w "\n%{http_code}" "$url" 2>&1 || echo -e "\n000")
+            http_code=$(echo "$response" | tail -n1)
+            body=$(echo "$response" | sed '$d')
+
+            if [ "$http_code" = "200" ]; then
+              echo "✓ $service is healthy (HTTP $http_code)"
+              passed=$((passed + 1))
+            else
+              echo "✗ $service is DOWN (HTTP $http_code)"
+              failed=$((failed + 1))
+              failed_services="$failed_services,$service"
+            fi
+          done
+
+          echo "failed_count=$failed" >> $GITHUB_OUTPUT
+          echo "failed_services=$failed_services" >> $GITHUB_OUTPUT
+
+          echo "---"
+          echo "Production Health Summary: $passed passed, $failed failed"
+
+          # Fail if any services are down
+          if [ $failed -gt 0 ]; then
+            echo "ALERT: $failed production services are down!"
+            exit 1
+          fi
+
+  # ============================================
+  # SEND ALERTS
+  # ============================================
+  alert:
+    name: Send Alerts
+    runs-on: ubuntu-latest
+    needs: [check-staging, check-production]
+    if: always() && (needs.check-staging.result == 'failure' || needs.check-production.result == 'failure')
+
+    steps:
+      - name: Slack Alert - Staging
+        if: needs.check-staging.result == 'failure'
+        run: |
+          echo "Sending staging alert..."
+          echo "Failed services: ${{ needs.check-staging.outputs.failed_services }}"
+        continue-on-error: true
+
+      - name: Slack Alert - Production
+        if: needs.check-production.result == 'failure'
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_ALERT_CHANNEL || 'C0XXXXXXX' }}
+          payload: |
+            {
+              "text": ":rotating_light: RTNM Ecosystem Health Alert",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": ":rotating_light: RTNM Ecosystem Health Alert",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production Services DOWN*\nFailed: ${{ needs.check-production.outputs.failed_count }} service(s)\n\n<!date^{{unix_timestamp}}|Failed at ${{ github.event.head_commit.timestamp }}>
+"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Logs",
+                        "emoji": true
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        continue-on-error: true
+
+      - name: Create GitHub Issue
+        if: needs.check-production.outputs.failed_count >= 3
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Health Alert: ${{ needs.check-production.outputs.failed_count }} Production Services Down`,
+              body: `## Health Alert\n\n**Time:** ${new Date().toISOString()}\n**Run:** [View logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n### Failed Services\n${{ needs.check-production.outputs.failed_services }}\n\n### Action Required\nPlease investigate and restore services.`,
+              labels: ['bug', 'health-alert', 'urgent']
+            })
+        continue-on-error: true
+
+  # ============================================
+  # SUMMARY
+  # ============================================
+  summary:
+    name: Summary
+    runs-on: ubuntu-latest
+    needs: [check-staging, check-production]
+    if: always()
+
+    steps:
+      - name: Summary
+        run: |
+          echo "## Health Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Staging" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ needs.check-staging.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Failed Services: ${{ needs.check-staging.outputs.failed_count || 0 }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Production" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ needs.check-production.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Failed Services: ${{ needs.check-production.outputs.failed_count || 0 }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY

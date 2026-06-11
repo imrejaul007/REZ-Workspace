@@ -1,0 +1,212 @@
+name: HOJAI Industry OS CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'hojai-industry/**'
+      - 'industry/healthcare-intelligence/**'
+      - 'industry/jewelry-intelligence/**'
+      - 'packages/hojai-common/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'hojai-industry/**'
+      - 'industry/healthcare-intelligence/**'
+      - 'industry/jewelry-intelligence/**'
+      - 'packages/hojai-common/**'
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  # ==================== LINT & TYPE CHECK ====================
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            hojai-industry/package.json
+            industry/healthcare-intelligence/package.json
+            industry/jewelry-intelligence/package.json
+            packages/hojai-common/package.json
+
+      - name: Install dependencies
+        run: |
+          npm install --workspaces --include-workspace-root
+
+      - name: Type check - hojai-industry
+        run: npm run build --workspace=hojai-industry
+
+      - name: Type check - healthcare-intelligence
+        run: npm run build --workspace=industry/healthcare-intelligence
+
+      - name: Type check - jewelry-intelligence
+        run: npm run build --workspace=industry/jewelry-intelligence
+
+      - name: Type check - hojai-common
+        run: npm run build --workspace=packages/hojai-common
+
+  # ==================== UNIT TESTS ====================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --workspaces --include-workspace-root
+
+      - name: Run tests - hojai-common
+        run: npm test --workspace=packages/hojai-common
+
+      - name: Run tests - healthcare-intelligence
+        run: npm test --workspace=industry/healthcare-intelligence
+
+      - name: Run tests - jewelry-intelligence
+        run: npm test --workspace=industry/jewelry-intelligence
+
+      - name: Run tests - hojai-industry
+        run: npm test --workspace=hojai-industry
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  # ==================== SECURITY SCAN ====================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --workspaces --include-workspace-root
+
+      - name: Run npm audit
+        run: npm audit --workspaces --audit-level=high
+        continue-on-error: true
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  # ==================== BUILD DOCKER ====================
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: github.event_name == 'push'
+    strategy:
+      matrix:
+        service:
+          - name: hojai-industry
+            path: hojai-industry
+            port: 4700
+          - name: healthcare-intelligence
+            path: industry/healthcare-intelligence
+            port: 4751
+          - name: jewelry-intelligence
+            path: industry/jewelry-intelligence
+            port: 4750
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push - ${{ matrix.service.name }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.path }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==================== DEPLOY STAGING ====================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+      - name: Deploy to staging
+        run: |
+          echo "Deploying ${{ needs.build.outputs.services }} to staging..."
+          # Add your deployment logic here
+          # kubectl apply -f k8s/staging/
+
+  # ==================== DEPLOY PRODUCTION ====================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production..."
+          # Add your deployment logic here
+          # kubectl apply -f k8s/production/
+
+      - name: Notify deployment
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "Production deployment ${{ job.status }} for HOJAI Industry OS"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

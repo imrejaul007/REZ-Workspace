@@ -1,0 +1,396 @@
+# RTNM Ecosystem - Security Scanning Pipeline
+# Runs security scans on push and weekly schedule
+
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  schedule:
+    # Run weekly on Sunday at 3 AM
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of scan to run'
+        required: false
+        type: choice
+        options:
+          - all
+          - npm
+          - container
+          - sast
+        default: 'all'
+
+# Cancel in-progress runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ============================================
+  # NPM AUDIT
+  # ============================================
+  npm-audit:
+    name: NPM Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: inputs.scan_type == 'all' || inputs.scan_type == 'npm' || github.event_name != 'workflow_dispatch'
+
+    outputs:
+      vulnerabilities: ${{ steps.audit.outputs.vulnerabilities }}
+      severity: ${{ steps.audit.outputs.severity }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run NPM Audit
+        id: audit
+        run: |
+          echo "Running npm audit..."
+          npm audit --audit-level=moderate --json > npm-audit-results.json || true
+
+          # Parse results
+          vulnerabilities=$(cat npm-audit-results.json | jq -r '.metadata.vulnerabilities | to_entries | map("\(.key): \(.value)") | join(", ")' 2>/dev/null || echo "unknown")
+          critical=$(cat npm-audit-results.json | jq -r '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+          high=$(cat npm-audit-results.json | jq -r '.metadata.vulnerabilities.high // 0' 2>/dev/null || echo "0")
+          medium=$(cat npm-audit-results.json | jq -r '.metadata.vulnerabilities.medium // 0' 2>/dev/null || echo "0")
+          low=$(cat npm-audit-results.json | jq -r '.metadata.vulnerabilities.low // 0' 2>/dev/null || echo "0")
+
+          echo "vulnerabilities=$vulnerabilities" >> $GITHUB_OUTPUT
+          echo "severity=critical:$critical high:$high medium:$medium low:$low" >> $GITHUB_OUTPUT
+
+          echo "---"
+          echo "NPM Audit Results:"
+          echo "Critical: $critical"
+          echo "High: $high"
+          echo "Medium: $medium"
+          echo "Low: $low"
+
+      - name: Check for critical vulnerabilities
+        run: |
+          critical=$(cat npm-audit-results.json | jq -r '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+          if [ "$critical" -gt 0 ]; then
+            echo "ERROR: Found $critical critical vulnerabilities!"
+            cat npm-audit-results.json | jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "critical") | "\(.key): \(.value.title)"' | head -10
+            exit 1
+          fi
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-results
+          path: npm-audit-results.json
+          retention-days: 30
+
+  # ============================================
+  # TRIVY CONTAINER SCAN
+  # ============================================
+  trivy-scan:
+    name: Trivy Container Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: inputs.scan_type == 'all' || inputs.scan_type == 'container' || github.event_name != 'workflow_dispatch'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image for scanning
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:scan-test
+            ghcr.io/${{ env.IMAGE_NAME }}:scan-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:scan-test'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+        continue-on-error: true
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-fs-results.json'
+          severity: 'CRITICAL,HIGH'
+        continue-on-error: true
+
+      - name: Upload Trivy results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results
+          path: |
+            trivy-results.sarif
+            trivy-fs-results.json
+          retention-days: 30
+
+      - name: Upload to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+        continue-on-error: true
+
+  # ============================================
+  # SAST (Static Application Security Testing)
+  # ============================================
+  sast-scan:
+    name: SAST Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: inputs.scan_type == 'all' || inputs.scan_type == 'sast' || github.event_name != 'workflow_dispatch'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint security plugin
+        run: |
+          echo "Running ESLint security checks..."
+          npm install -D eslint-plugin-security eslint-plugin-n || true
+
+          npx eslint . --ext .ts,.js,.tsx,.jsx \
+            --plugin security \
+            --rule 'security/*: warn' \
+            --format json \
+            --output-file eslint-security-results.json || true
+
+          echo "ESLint security scan complete"
+
+      - name: Run node security check
+        run: |
+          echo "Running Node Security Platform checks..."
+          npx nsp check --output json > nsp-results.json || true
+          echo "NSP check complete"
+
+      - name: Upload SAST results
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-results
+          path: |
+            eslint-security-results.json
+            nsp-results.json
+          retention-days: 30
+
+  # ============================================
+  # DEPENDABOT ALERTS CHECK
+  # ============================================
+  dependabot-check:
+    name: Dependabot Alerts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Dependabot alerts
+        uses: actions/github-script@v7
+        id: check-alerts
+        with:
+          script: |
+            const { data: alerts } = await github.rest.dependency-graph.alertsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              severity: 'high,critical',
+            });
+
+            if (alerts.length > 0) {
+              console.log(`Found ${alerts.length} open Dependabot alerts:`);
+              alerts.forEach(alert => {
+                console.log(`- ${alert.dependency.package.name}: ${alert.security_vulnerability.severity} severity`);
+              });
+              core.setOutput('alert_count', alerts.length);
+              core.setOutput('has_critical', alerts.some(a => a.security_vulnerability.severity === 'critical'));
+            } else {
+              console.log('No open Dependabot alerts found');
+              core.setOutput('alert_count', '0');
+              core.setOutput('has_critical', 'false');
+            }
+
+      - name: Display alert count
+        run: |
+          alert_count="${{ steps.check-alerts.outputs.alert_count }}"
+          has_critical="${{ steps.check-alerts.outputs.has_critical }}"
+
+          echo "Open Dependabot alerts: $alert_count"
+          echo "Has critical: $has_critical"
+
+          if [ "$has_critical" = "true" ]; then
+            echo "WARNING: Critical Dependabot alerts found!"
+          fi
+
+  # ============================================
+  # SECRET SCANNING
+  # ============================================
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+        continue-on-error: true
+
+      - name: Check for exposed secrets
+        run: |
+          echo "Checking for potential secrets in code..."
+
+          # Common patterns
+          patterns=(
+            "AKIA[0-9A-Z]{16}"  # AWS Access Key
+            "sk-[0-9a-zA-Z]{48}"  # OpenAI API Key
+            "ghp_[0-9a-zA-Z]{36}"  # GitHub Personal Access Token
+            "xox[baprs]-[0-9a-zA-Z]{10,}"  # Slack Token
+          )
+
+          for pattern in "${patterns[@]}"; do
+            matches=$(grep -r -l -E "$pattern" . --include="*.ts" --include="*.js" --include="*.json" --include="*.yaml" --include="*.yml" 2>/dev/null || true)
+            if [ -n "$matches" ]; then
+              echo "WARNING: Potential secret found in: $matches"
+            fi
+          done
+
+  # ============================================
+  # GENERATE SECURITY REPORT
+  # ============================================
+  report:
+    name: Security Report
+    runs-on: ubuntu-latest
+    needs: [npm-audit, trivy-scan, sast-scan, dependabot-check, secret-scan]
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate security report
+        run: |
+          echo "## Security Scan Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| NPM Audit | ${{ needs.npm-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy Container | ${{ needs.trivy-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SAST | ${{ needs.sast-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependabot | ${{ needs.dependabot-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Scan | ${{ needs.secret-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### NPM Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ needs.npm-audit.outputs.vulnerabilities || 'No data' }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Slack Security Alert
+        if: needs.npm-audit.result == 'failure' || needs.trivy-scan.result == 'failure' || needs.dependabot-check.outputs.has_critical == 'true'
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_SECURITY_CHANNEL || 'C0XXXXXXX' }}
+          payload: |
+            {
+              "text": ":lock: Security Scan Alert",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": ":lock: Security Scan Alert",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Security vulnerabilities detected*\n\n| Scan | Status |\n|------|--------|\n| NPM Audit | ${{ needs.npm-audit.result }} |\n| Trivy | ${{ needs.trivy-scan.result }} |\n| Dependabot | ${{ needs.dependabot-check.outputs.alert_count }} alerts |"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Details",
+                        "emoji": true
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/security"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        continue-on-error: true
+
+      - name: Set commit status
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ needs.npm-audit.result }}' === 'success' &&
+                          '${{ needs.trivy-scan.result }}' !== 'failure'
+                          ? 'success' : 'failure';
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: status,
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
+              description: 'Security scan ' + status,
+              context: 'security/scan'
+            });
