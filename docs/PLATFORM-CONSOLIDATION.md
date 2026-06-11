@@ -43,7 +43,7 @@
 │  6. HOJAI AGENTS            →  Autonomous agents, orchestration            │
 │     (REZ: autonomous-agents, ai-orchestrator, ai-router)                   │
 │                                                                             │
-│  7. HOJAI FLOW              →  Workflow runtime, automation                 │
+│  7. HOJAI VOICE STUDIO     →  Workflow runtime, automation                 │
 │     (REZ: flow-runtime, workflow-builder, action-engine)                    │
 │                                                                             │
 │  8. HOJAI COMMUNICATIONS    →  WhatsApp, SMS, Email, Push                  │
@@ -217,7 +217,7 @@
 
 ---
 
-## Platform 7: HOJAI FLOW
+## Platform 7: HOJAI VOICE STUDIO
 
 **Source Services:**
 - REZ-flow-runtime

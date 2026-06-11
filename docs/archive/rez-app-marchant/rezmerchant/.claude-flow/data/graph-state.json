@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "updatedAt": 1776753802958,
+  "nodeCount": 9,
+  "nodes": {
+    "mem-MEMORY-memory-index": {
+      "id": "mem-MEMORY-memory-index",
+      "category": "core",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775137406851
+    },
+    "mem-project_overview----": {
+      "id": "mem-project_overview----",
+      "category": "project_overview",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775137406842
+    },
+    "mem-project_overview-tech-stack": {
+      "id": "mem-project_overview-tech-stack",
+      "category": "project_overview",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775137406842
+    },
+    "mem-project_overview-current-state--phase-1-built-": {
+      "id": "mem-project_overview-current-state--phase-1-built-",
+      "category": "project_overview",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775137406842
+    },
+    "mem-project_rez_strategy----": {
+      "id": "mem-project_rez_strategy----",
+      "category": "project_rez_strategy",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775137406848
+    },
+    "mem-user_founder----": {
+      "id": "mem-user_founder----",
+      "category": "user_founder",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775137406848
+    },
+    "mem-project_rezapp----": {
+      "id": "mem-project_rezapp----",
+      "category": "project_rezapp",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775137406851
+    },
+    "mem-project_rezapp-rez-consumer-app--nuqta-master": {
+      "id": "mem-project_rezapp-rez-consumer-app--nuqta-master",
+      "category": "project_rezapp",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775137406851
+    },
+    "insight-1775755492053-wls0": {
+      "id": "insight-1775755492053-wls0",
+      "category": "insights",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1775755492053
+    }
+  },
+  "edges": [
+    {
+      "sourceId": "mem-project_overview----",
+      "targetId": "mem-project_overview-tech-stack",
+      "type": "temporal",
+      "weight": 0.5
+    },
+    {
+      "sourceId": "mem-project_overview-tech-stack",
+      "targetId": "mem-project_overview-current-state--phase-1-built-",
+      "type": "temporal",
+      "weight": 0.5
+    },
+    {
+      "sourceId": "mem-project_rezapp----",
+      "targetId": "mem-project_rezapp-rez-consumer-app--nuqta-master",
+      "type": "temporal",
+      "weight": 0.5
+    }
+  ],
+  "pageRanks": {
+    "mem-MEMORY-memory-index": 0.08148299835580283,
+    "mem-project_overview----": 0.08148299835580283,
+    "mem-project_overview-tech-stack": 0.15074352167990007,
+    "mem-project_overview-current-state--phase-1-built-": 0.2096149665053827,
+    "mem-project_rez_strategy----": 0.08148299835580283,
+    "mem-user_founder----": 0.08148299835580283,
+    "mem-project_rezapp----": 0.08148299835580283,
+    "mem-project_rezapp-rez-consumer-app--nuqta-master": 0.15074352167990007,
+    "insight-1775755492053-wls0": 0.08148299835580283
+  }
+}

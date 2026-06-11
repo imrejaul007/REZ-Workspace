@@ -832,7 +832,7 @@ Custom (based on employees, modules)
 |----------|---------|
 | GENIE-PRODUCT-SPEC.md | Genie product spec |
 | GENIE-GAP-ANALYSIS.md | Genie gaps |
-| HOJAI-FLOW.md | Hojai Flow spec |
+| HOJAI-VOICE-STUDIO.md | Hojai Voice Studio spec |
 
 ## Audit Documentation
 

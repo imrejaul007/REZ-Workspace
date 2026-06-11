@@ -1,0 +1,14 @@
+{
+  "id": "session-1776753261433",
+  "startedAt": "2026-04-21T06:34:21.433Z",
+  "cwd": "/Users/rejaulkarim/Documents/ReZ Full App/rezmerchant",
+  "context": {},
+  "metrics": {
+    "edits": 8,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-04-21T06:36:11.977Z",
+  "duration": 110546
+}

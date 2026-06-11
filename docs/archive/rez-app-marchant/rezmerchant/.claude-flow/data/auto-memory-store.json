@@ -1,0 +1,146 @@
+[
+  {
+    "id": "mem-MEMORY-memory-index",
+    "key": "memory-index",
+    "content": "- [project_overview.md](project_overview.md) — Hotel OTA platform overview, tech stack, current build state",
+    "summary": "Memory Index",
+    "namespace": "core",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-Hotel-OTA/memory/MEMORY.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406842
+  },
+  {
+    "id": "mem-project_overview----",
+    "key": "-",
+    "content": "name: Hotel OTA Platform - Project Overview\ndescription: Decentralised hotel-owned OTA with dual coin rewards, ReZ integration, ownership mining. Phase 1 MVP built.\ntype: project\n---\n\nHotel OTA platform - decentralised hotel-owned Online Travel Agency.\n\n**Why:** Building a hotel booking platform where hotels earn equity over time via performance. Dual coin system (OTA Coin + ReZ Coin). Bangalore launch with 30 hotels.\n\n**How to apply:** All specs are in 6 MD files (01-06) at project root. Follow",
+    "summary": "---",
+    "namespace": "project_overview",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-Hotel-OTA/memory/project_overview.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406842
+  },
+  {
+    "id": "mem-project_overview-tech-stack",
+    "key": "tech-stack",
+    "content": "- Backend: Node.js + Express + PostgreSQL + Prisma + Redis + BullMQ\n- Hotel Panel: Next.js (port 3001)\n- Admin Panel: Next.js (port 3002)\n- Mobile: React Native (Expo)\n- Payments: Razorpay (lazy-init, dev mode returns mocks)",
+    "summary": "Tech Stack",
+    "namespace": "project_overview",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-Hotel-OTA/memory/project_overview.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406842
+  },
+  {
+    "id": "mem-project_overview-current-state--phase-1-built-",
+    "key": "current-state-phase-1-built-",
+    "content": "- API: 30+ endpoints, all Phase 1 services, zero TS errors\n- Database: 16 Prisma models, seeded with 4 hotels + earn/burn rules + admin user\n- PostgreSQL via Postgres.app, Redis via Homebrew\n- Admin login: admin@ota.com / admin123\n- Hotel staff OTP: check console in dev mode",
+    "summary": "Current State (Phase 1 built)",
+    "namespace": "project_overview",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-Hotel-OTA/memory/project_overview.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406842
+  },
+  {
+    "id": "mem-MEMORY-memory-index",
+    "key": "memory-index",
+    "content": "- [user_founder.md](user_founder.md) — User is REZ founder, strategic thinker, values brutal honesty\n- [project_rez_strategy.md](project_rez_strategy.md) — REZ must become habit layer, not feature app. Key gaps and execution plan reference.",
+    "summary": "Memory Index",
+    "namespace": "core",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-ReZ-Full-App/memory/MEMORY.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406847
+  },
+  {
+    "id": "mem-project_rez_strategy----",
+    "key": "-",
+    "content": "name: REZ Product Strategy Direction\ndescription: REZ must become a \"habit layer for local spending\" not a feature super-app. Core loop = visit → save → see reward → level up. Key gaps identified March 2026.\ntype: project\n---\n\nREZ strategic direction is to become \"the default smart savings and loyalty layer for everyday local spending\" — a behavior platform, not a feature app.\n\n**Why:** Business analysis (PDF, March 2026) identified that REZ competes across 8 layers (discovery, cashback, dining,",
+    "summary": "---",
+    "namespace": "project_rez_strategy",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-ReZ-Full-App/memory/project_rez_strategy.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406848
+  },
+  {
+    "id": "mem-user_founder----",
+    "key": "-",
+    "content": "name: User is REZ founder/product owner\ndescription: User is founder of REZ, a multi-layer hyperlocal commerce platform (India-first). Thinks deeply about product strategy, competitive positioning, and user psychology.\ntype: user\n---\n\nThe user is the founder/product owner of REZ, a hyperlocal commerce platform. They think at the strategic product level — asking questions like \"what problem are we really solving?\" and \"why will users switch?\" They value brutal honesty over motivation, and want ac",
+    "summary": "---",
+    "namespace": "user_founder",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-ReZ-Full-App/memory/user_founder.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406848
+  },
+  {
+    "id": "mem-MEMORY-memory-index",
+    "key": "memory-index",
+    "content": "- [ReZ Consumer App (nuqta-master)](project_rezapp.md) — Core project context: super-app, Expo Router + Zustand + React Context dual-layer, known bugs, 150+ services, 30+ stores",
+    "summary": "Memory Index",
+    "namespace": "core",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-ReZ-Full-App-rezapp/memory/MEMORY.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406851
+  },
+  {
+    "id": "mem-project_rezapp----",
+    "key": "-",
+    "content": "name: ReZ Consumer App (nuqta-master)\ndescription: Core project context — purpose, stack, architecture, known bugs\ntype: project\n---",
+    "summary": "---",
+    "namespace": "project_rezapp",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-ReZ-Full-App-rezapp/memory/project_rezapp.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406851
+  },
+  {
+    "id": "mem-project_rezapp-rez-consumer-app--nuqta-master",
+    "key": "rez-consumer-app-nuqta-master-",
+    "content": "**What it is:** REZ Consumer super-app (codename \"Nuqta\") — React Native/Expo lifestyle & commerce platform targeting India/Middle East. Features: shopping, dining, travel (flight/hotel/train/bus/cab), financial tools (wallet, bill payment, recharge, gold savings, insurance, khata), gamification (coin system, scratch cards, minigames), social/UGC content, loyalty/subscription programs, booking/appointments.\n\n**Location:** `/Users/rejaulkarim/Documents/ReZ Full App/rezapp/nuqta-master`\n\n**Tech st",
+    "summary": "ReZ Consumer App (nuqta-master)",
+    "namespace": "project_rezapp",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/Users/rejaulkarim/.claude/projects/-Users-rejaulkarim-Documents-ReZ-Full-App-rezapp/memory/project_rezapp.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1775137406851
+  },
+  {
+    "id": "insight-1775755492053-wls0",
+    "key": "frequent-edit-unknown",
+    "content": "File unknown was edited 165 times this session — likely a hot path worth monitoring.",
+    "summary": "Frequently edited: unknown (165x)",
+    "namespace": "insights",
+    "type": "procedural",
+    "metadata": {
+      "sourceFile": "unknown",
+      "editCount": 165,
+      "autoGenerated": true
+    },
+    "createdAt": 1775755492053
+  }
+]

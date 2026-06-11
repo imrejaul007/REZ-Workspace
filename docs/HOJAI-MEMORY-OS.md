@@ -1,6 +1,60 @@
-# Hojai Flow - Memory OS + Voice Intelligence
+# # 🧠 5-Tier Memory Architecture - Voice Integration
 
-## Technical Architecture Blueprint v1
+**Technical Architecture Blueprint v2.0**
+**Integrates with all voice services**
+
+---
+
+## Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    5-TIER MEMORY INTEGRATION                                │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   USER SPEAKS                                                           │
+│       │                                                                │
+│       ▼                                                                │
+│   L1 HOT (1-10ms) ──► Genie Voice ──► Response                                 │
+│       │                                                                 │
+│       └── Not found ──► L2 WARM (10-50ms)                                 │
+│                              │                                            │
+│                              └── Not found ──► L3 PERSONAL (100-300ms)             │
+│                                                │                       │
+│                                                └── Not found ──► L4 ORG (300-500ms)           │
+│                                                              │              │
+│                                                              └── Not found ──► L5 GLOBAL (500ms+)    │
+│                                                                     │           │
+│                                                                     ▼           │
+│                                                              LLM + MODEL          │
+│                                                                     │           │
+│                                                                     ▼           │
+│                                                              Response           │
+│                                                                     │           │
+│                                                                     ▼           │
+│                                                              Store in L3         │
+│                                                                     │           │
+│                                                                     ▼           │
+│                                                              Train models        │
+│                                                                     │           │
+│                                                                     ▼           │
+│                                                              All services        │
+│                                                                    improve       │
+│                                                                     │           │
+│       Genie Voice (4760) ◄─────────────────────────────────┐ │
+│       VoiceOS (4850) ◄────────────────────────────────┤ │
+│       hojai-staybot (4840) ◄───────────────────────────────┤ │
+│       Voice QR (4096) ◄──────────────────────────┤ │
+│       Support Hub (4057) ◄─────────────────────┤ │
+│       REZ Chat (4103) ◄──────────────────────┤ │
+│       All connected services ◄─────────────────────┘ │
+│                                                                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Voice Integration
 
 ---
 
@@ -604,7 +658,7 @@ Across the entire REZ ecosystem through a unified **Memory Operating System**.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      HOJAI FLOW ARCHITECTURE                     │
+│                  HOJAI MEMORY OS ARCHITECTURE                    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────────┐  │

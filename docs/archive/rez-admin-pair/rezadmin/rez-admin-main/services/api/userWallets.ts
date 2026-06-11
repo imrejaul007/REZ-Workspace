@@ -1,0 +1,233 @@
+import { apiClient } from './apiClient';
+
+export interface UserWalletItem {
+  user: {
+    _id: string;
+    phoneNumber: string;
+    fullName: string;
+    email?: string;
+    profile?: { avatar?: string };
+  };
+  wallet: {
+    _id: string;
+    balance: {
+      total: number;
+      available: number;
+      pending: number;
+      cashback: number;
+    };
+    coins?: Array<{
+      type: 'rez' | 'prive' | 'branded' | 'promo';
+      amount: number;
+      isActive: boolean;
+      expiryDate?: string;
+    }>;
+    brandedCoins?: Array<{
+      merchantId: string;
+      merchantName: string;
+      amount: number;
+      isActive: boolean;
+    }>;
+    currency?: string;
+    isFrozen: boolean;
+    frozenReason?: string;
+    lastTransactionAt?: string;
+  } | null;
+}
+
+export interface AuditLogItem {
+  _id: string;
+  userId: string;
+  walletId: string;
+  operation: string;
+  amount: number;
+  balanceBefore: {
+    total: number;
+    available: number;
+    pending: number;
+    cashback: number;
+  };
+  balanceAfter: {
+    total: number;
+    available: number;
+    pending: number;
+    cashback: number;
+  };
+  reference: {
+    type: string;
+    description?: string;
+  };
+  metadata?: {
+    source?: string;
+    adminUserId?: string;
+  };
+  createdAt: string;
+}
+
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+interface SearchUsersResponse {
+  users: UserWalletItem[];
+  pagination: Pagination;
+}
+
+interface AuditTrailResponse {
+  auditLogs: AuditLogItem[];
+  pagination: Pagination;
+}
+
+class UserWalletsService {
+  async searchUsers(
+    search?: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<SearchUsersResponse> {
+    try {
+      let url = `admin/user-wallets?page=${page}&limit=${limit}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+
+      if (__DEV__) console.log('[UserWallets] Searching users...');
+      const response = await apiClient.get<SearchUsersResponse>(url);
+
+      if (response.success && response.data) {
+        // MED-11 FIX: Validate response shape before returning
+        if (!response.data?.users || !Array.isArray(response.data.users)) {
+          throw new Error('Invalid response: expected users array');
+        }
+        if (__DEV__) console.log('[UserWallets] Users fetched successfully');
+        return response.data;
+      }
+
+      throw new Error(response.message || 'Failed to search users');
+    } catch (error: any) {
+      if (__DEV__) console.error('[UserWallets] Search users error:', error.message);
+      throw new Error(error.message || 'Failed to search users');
+    }
+  }
+
+  async freezeWallet(userId: string, reason: string): Promise<void> {
+    try {
+      if (__DEV__) console.log('[UserWallets] Freezing wallet for user:', userId);
+      const response = await apiClient.post(`admin/user-wallets/${userId}/freeze`, { reason });
+
+      if (response.success) {
+        if (__DEV__) console.log('[UserWallets] Wallet frozen successfully');
+        return;
+      }
+
+      throw new Error(response.message || 'Failed to freeze wallet');
+    } catch (error: any) {
+      if (__DEV__) console.error('[UserWallets] Freeze wallet error:', error.message);
+      throw new Error(error.message || 'Failed to freeze wallet');
+    }
+  }
+
+  async unfreezeWallet(userId: string): Promise<void> {
+    try {
+      if (__DEV__) console.log('[UserWallets] Unfreezing wallet for user:', userId);
+      const response = await apiClient.post(`admin/user-wallets/${userId}/unfreeze`);
+
+      if (response.success) {
+        if (__DEV__) console.log('[UserWallets] Wallet unfrozen successfully');
+        return;
+      }
+
+      throw new Error(response.message || 'Failed to unfreeze wallet');
+    } catch (error: any) {
+      if (__DEV__) console.error('[UserWallets] Unfreeze wallet error:', error.message);
+      throw new Error(error.message || 'Failed to unfreeze wallet');
+    }
+  }
+
+  async adjustBalance(
+    userId: string,
+    data: { amount: number; type: 'credit' | 'debit'; reason: string }
+  ): Promise<{ status?: number }> {
+    try {
+      if (__DEV__) console.log('[UserWallets] Adjusting balance for user:', userId);
+      const response = await apiClient.post<{ status?: number }>(`admin/user-wallets/${userId}/adjust`, data);
+
+      // MED-9 FIX: Check for 202 Accepted (pending approval) response status
+      if (response.success) {
+        if (__DEV__) console.log('[UserWallets] Balance adjusted successfully');
+        return { status: 200 };
+      }
+
+      // If status is 202, the request is pending approval
+      if ((response as any).status === 202) {
+        if (__DEV__) console.log('[UserWallets] Balance adjustment pending approval');
+        const error: any = new Error(response.message || 'Pending approval');
+        error.status = 202;
+        throw error;
+      }
+
+      throw new Error(response.message || 'Failed to adjust balance');
+    } catch (error: any) {
+      if (__DEV__) console.error('[UserWallets] Adjust balance error:', error.message);
+      throw error;
+    }
+  }
+
+  async reverseCashback(
+    userId: string,
+    data: { amount: number; originalTransactionId?: string; reason: string }
+  ): Promise<{ amount: number; newBalance: any; reversalTransactionId?: string }> {
+    try {
+      if (__DEV__) console.log('[UserWallets] Reversing cashback for user:', userId);
+      const response = await apiClient.post<{
+        amount: number;
+        newBalance: any;
+        reversalTransactionId?: string;
+      }>(`admin/user-wallets/${userId}/reverse-cashback`, data);
+
+      if (response.success && response.data) {
+        if (__DEV__) console.log('[UserWallets] Cashback reversed successfully');
+        return response.data;
+      }
+
+      // MED-9 FIX: Check for 202 Accepted (pending approval) response status
+      if ((response as any).status === 202) {
+        if (__DEV__) console.log('[UserWallets] Cashback reversal pending approval');
+        const error: any = new Error(response.message || 'Pending approval');
+        error.status = 202;
+        throw error;
+      }
+
+      throw new Error(response.message || 'Failed to reverse cashback');
+    } catch (error: any) {
+      if (__DEV__) console.error('[UserWallets] Reverse cashback error:', error.message);
+      throw error;
+    }
+  }
+
+  async getAuditTrail(
+    userId: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<AuditTrailResponse> {
+    try {
+      if (__DEV__) console.log('[UserWallets] Fetching audit trail for user:', userId);
+      const response = await apiClient.get<AuditTrailResponse>(
+        `admin/user-wallets/${userId}/audit-trail?page=${page}&limit=${limit}`
+      );
+
+      if (response.success && response.data) {
+        if (__DEV__) console.log('[UserWallets] Audit trail fetched successfully');
+        return response.data;
+      }
+
+      throw new Error(response.message || 'Failed to get audit trail');
+    } catch (error: any) {
+      if (__DEV__) console.error('[UserWallets] Get audit trail error:', error.message);
+      throw new Error(error.message || 'Failed to get audit trail');
+    }
+  }
+}
+
+export const userWalletsService = new UserWalletsService();
+export default userWalletsService;
