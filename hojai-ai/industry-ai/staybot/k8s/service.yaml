@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: staybot
+  namespace: hojai
+  labels:
+    app: staybot
+    company: hojai-ai
+    industry: hotel
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 4840
+      protocol: TCP
+      name: http
+  selector:
+    app: staybot

@@ -1,0 +1,18 @@
+{
+  "name": "@hojai/fleetiq-driver-assistant-ai",
+  "version": "1.0.0",
+  "description": "Driver Assistant AI Agent for FLEETIQ Fleet AI",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}

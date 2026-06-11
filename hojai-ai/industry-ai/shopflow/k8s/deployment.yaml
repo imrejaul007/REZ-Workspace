@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopflow
+  namespace: hojai
+  labels:
+    app: shopflow
+    version: v1
+    company: hojai-ai
+    industry: retail
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: shopflow
+  template:
+    metadata:
+      labels:
+        app: shopflow
+        version: v1
+        company: hojai-ai
+        industry: retail
+    spec:
+      containers:
+        - name: shopflow
+          image: hojai/shopflow:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4830
+              name: http
+          env:
+            - name: PORT
+              value: "4830"
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: mongodb-uri
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: jwt-secret
+            - name: AUTH_SERVICE_URL
+              value: "http://rabtul-auth.hojai:4002"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://hojai-notification.hojai:4095"
+            - name: WEBHOOK_SERVICE_URL
+              value: "http://hojai-webhook.hojai:4090"
+            - name: HOJAI_URL
+              value: "http://hojai-enterprise-brain.hojai:4600"
+            - name: INTERNAL_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: internal-service-token
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: sentry-dsn
+                  optional: true
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4830
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4830
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - shopflow
+                topologyKey: kubernetes.io/hostname

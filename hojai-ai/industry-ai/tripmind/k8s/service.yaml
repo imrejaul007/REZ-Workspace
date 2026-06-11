@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripmind
+  namespace: hojai
+  labels:
+    app: tripmind
+    company: hojai-ai
+    industry: travel
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 4809
+      protocol: TCP
+      name: http
+  selector:
+    app: tripmind

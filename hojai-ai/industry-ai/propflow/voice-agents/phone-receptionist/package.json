@@ -1,0 +1,9 @@
+{
+  "name": "@hojai/phone-receptionist",
+  "version": "1.0.0",
+  "description": "AI phone receptionist for real estate inquiries",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@hojai/shared": "workspace:*"
+  }
+}

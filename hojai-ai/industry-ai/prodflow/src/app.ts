@@ -17,6 +17,9 @@ import { logger } from './utils/logger';
 import { Product, Order, Inventory, QCReport } from './models';
 import mongoose from 'mongoose';
 
+// ExpertOS Integration - Clone your profession for online services
+import { registerExpertOS } from '../../../hojai-expert-os/src/expertOS-integration';
+
 export const createApp = (): Express => {
   const app = express();
 
@@ -179,7 +182,8 @@ export const createApp = (): Express => {
         aiEmployees: [
           { name: 'Production Agent', status: 'active', role: 'Order management' },
           { name: 'Inventory Agent', status: 'active', role: 'Stock control' },
-          { name: 'Quality Agent', status: 'active', role: 'QC checks' }
+          { name: 'Quality Agent', status: 'active', role: 'QC checks' },
+          { name: 'ExpertOS', status: 'active', description: 'Professional AI Twin for manufacturers' }
         ],
         stats: {
           products: productCount,
@@ -236,6 +240,13 @@ export const createApp = (): Express => {
   // ============================================
 
   app.use('/api', apiRoutes);
+
+  // ============================================
+  // EXPERTOS - Professional AI Twin for Manufacturers
+  // ============================================
+
+  const expertOSRouter = registerExpertOS('prodflow');
+  app.use('/api/expert-os', expertOSRouter);
 
   // ============================================
   // ERROR HANDLING

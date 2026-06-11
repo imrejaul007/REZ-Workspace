@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staybot
+  namespace: hojai
+  labels:
+    app: staybot
+    version: v1
+    company: hojai-ai
+    industry: hotel
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: staybot
+  template:
+    metadata:
+      labels:
+        app: staybot
+        version: v1
+        company: hojai-ai
+        industry: hotel
+    spec:
+      containers:
+        - name: staybot
+          image: hojai/staybot:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4840
+              name: http
+          env:
+            - name: PORT
+              value: "4840"
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: mongodb-uri
+            - name: AUTH_SERVICE_URL
+              value: "http://rabtul-auth.hojai:4002"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://hojai-notification.hojai:4095"
+            - name: WEBHOOK_SERVICE_URL
+              value: "http://hojai-webhook.hojai:4090"
+            - name: HOJAI_URL
+              value: "http://hojai-enterprise-brain.hojai:4600"
+            - name: INTERNAL_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: internal-service-token
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4840
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 4840
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - staybot
+                topologyKey: kubernetes.io/hostname

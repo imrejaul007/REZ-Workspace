@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  sutar-contract-os:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sutar-contract-os
+    restart: unless-stopped
+    ports:
+      - "4190:4190"
+    environment:
+      - NODE_ENV=production
+      - 4190=4190
+      - LOG_LEVEL=info
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4190/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - sutar-network
+
+networks:
+  sutar-network:
+    driver: bridge

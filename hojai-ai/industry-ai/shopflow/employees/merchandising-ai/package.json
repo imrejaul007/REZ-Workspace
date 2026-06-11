@@ -1,0 +1,7 @@
+{
+  "name": "@hojai/shopflow-merchandising-ai",
+  "version": "1.0.0",
+  "description": "Merchandising AI Agent for SHOPFLOW",
+  "main": "src/index.ts",
+  "devDependencies": { "typescript": "^5.0.0", "ts-node": "^10.9.0" }
+}

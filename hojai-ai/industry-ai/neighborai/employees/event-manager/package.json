@@ -1,0 +1,18 @@
+{
+  "name": "@hojai/neighborai-event-manager",
+  "version": "1.0.0",
+  "description": "Event Manager AI Agent for NEIGHBORAI Society AI",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}
