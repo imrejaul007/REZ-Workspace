@@ -61,7 +61,7 @@ RTNM Digital (Parent Company / REZ Ecosystem)
 | **RABTUL Technologies** | Tech/Infrastructure | Payments, Auth, Wallet, Cards, BNPL |
 | **AdBazaar** | Marketing/Advertising | Campaign Manager, Attribution, Retail Media |
 | **Nexha** | Commerce Network | Distribution, Franchise, Procurement |
-| **CorpPerks** | Workforce/HR | HRMS, Payroll, TalentAI, CorpID |
+| **CorpPerks** | Workforce/HR | HRMS, Payroll, TalentAI, CorpID, Salar OS |
 | **RisaCare** | Healthcare | Patient Platform, Clinic, Hospital, Telemedicine |
 | **StayOwn** | Hospitality | Hotels, Vacation Rentals, Habixo |
 | **RisnaEstate** | Real Estate | Marketplace, Property CRM, Management |
@@ -460,10 +460,81 @@ The Unified Hub connects all companies to RABTUL services and HOJAI AI through a
 - SUTAR Goal (4242) - Goal tracking
 - Voice OS (4760) - Voice commands
 - Voice Agents (4780) - AI voice assistant
+- Shab AI (4970) - Family Intelligence
 
 **Files:**
 - [services/hub-client.ts](REZ-Consumer/services/hub-client.ts) - Hub client
 - [services/index.ts](REZ-Consumer/services/index.ts) - API entry point
+
+### SALAR OS (Port 4710)
+
+**Role:** Workforce Intelligence Network - Human + Agent + Hybrid Twins
+
+**Key Products:**
+- Human Twin (Employee digital twin)
+- Agent Twin (AI employee digital twin)
+- Hybrid Twin (Human + Agent teams)
+- Organization Twin (Company workforce)
+- Capability Registry (Skills & capabilities)
+- AI Employee LLM (LLM integration)
+- Vector Store (Semantic search)
+- ML Pipeline (Workforce predictions)
+- Sutar Bridge (Workforce decisions)
+
+**Integrations:**
+- CorpID (4702) - Identity assertions
+- Salar OS (4710) - Workforce intelligence
+- SUTAR OS (4240) - Autonomous execution
+- HOJAI Memory (4520) - Knowledge storage
+- HOJAI Agents (4550) - AI agents
+- SADA (4190) - Trust verification
+
+**Files:**
+- [CorpPerks/salar-os/src/index.ts](CorpPerks/salar-os/src/index.ts) - Main service
+- [CorpPerks/salar-os/src/modules/](CorpPerks/salar-os/src/modules/) - All modules
+
+### SADA (Port 4190)
+
+**Role:** Trust, Governance & Risk Platform
+
+**Key Products:**
+- Trust Service (Entity trust scores)
+- Governance (Policy management, compliance)
+- Risk Assessment (Fraud detection, risk scoring)
+- Verification (KYC, KYB, Agent verification)
+- Audit Ledger (Immutable audit trail)
+
+**Integrations:**
+- CorpID (4702) - Identity assertions
+- Salar OS (4710) - Workforce trust
+- Nexha (5001) - Commerce trust
+- SUTAR OS (4240) - Execution trust
+
+**Files:**
+- [Sada-os/src/index.ts](Sada-os/src/index.ts) - Main service
+- [Sada-os/src/models/](Sada-os/src/models/) - All models
+- [docs/SADA-SHAB-AUDIT.md](docs/SADA-SHAB-AUDIT.md) - Full audit
+
+### Shab AI (Port 4970)
+
+**Role:** Family Intelligence Platform
+
+**Key Products:**
+- Family Management (Family graph & relationships)
+- Memory Storage (Family memories & stories)
+- Elder Care (Health monitoring & alerts)
+- Child Learning (Adaptive learning with XP)
+- Tasks (Household task management)
+- AI Companion (Family AI assistant with Genie)
+
+**Integrations:**
+- Genie (4703) - Personal AI
+- MemoryOS (4520) - Family memories
+- RABTUL - Household payments
+
+**Files:**
+- [Shab-os/src/index.ts](Shab-os/src/index.ts) - Main service
+- [docs/SADA-SHAB-AUDIT.md](docs/SADA-SHAB-AUDIT.md) - Full audit
 
 ### CorpPerks (Port 4720)
 
@@ -474,6 +545,7 @@ The Unified Hub connects all companies to RABTUL services and HOJAI AI through a
 - TalentAI
 - CorpID
 - HRMS
+- **Salar OS** (Port 4710) - Workforce Intelligence Network
 
 **Integrations:**
 - Unified Hub (4600) - All RABTUL services
@@ -485,10 +557,12 @@ The Unified Hub connects all companies to RABTUL services and HOJAI AI through a
 - Genie Memory (4703) - Personal work memories
 - Genie Relation (4704) - Colleague relationships
 - Genie Briefing (4706) - Daily briefings
+- SADA (4190) - Trust verification
 
 **Files:**
 - [services/hub-client.ts](CorpPerks/services/hub-client.ts) - Hub client
 - [services/index.ts](CorpPerks/services/index.ts) - API entry point
+- [CorpPerks/salar-os/src/index.ts](CorpPerks/salar-os/src/index.ts) - Salar OS
 
 ### RisaCare (Port 4800)
 
@@ -679,6 +753,9 @@ npx tsx start-services.ts dev     # Development mode
 | 4901 | RisnaEstate |
 | 5001 | Nexha |
 | 5100 | LawGens |
+| 4190 | SADA |
+| 4710 | Salar OS |
+| 4970 | Shab AI |
 | 5200 | RIDZA |
 
 ---
@@ -690,6 +767,8 @@ npx tsx start-services.ts dev     # Development mode
 | [README.md](README.md) | Master index |
 | [RTNM-COMPLETE-AUDIT.md](RTNM-COMPLETE-AUDIT.md) | Full ecosystem audit |
 | [ECOSYSTEM-REGISTRY.md](ECOSYSTEM-REGISTRY.md) | Complete service registry |
+| [docs/SADA-SHAB-AUDIT.md](docs/SADA-SHAB-AUDIT.md) | SADA & Shab AI audit |
+| [CorpPerks/salar-os/docs/COMPLETE-SALAR-OS.md](CorpPerks/salar-os/docs/COMPLETE-SALAR-OS.md) | Salar OS documentation |
 
 ---
 
