@@ -938,41 +938,124 @@ MyRisa App (4900)
 
 # 13. RIDZA
 
-**Role:** "Digital Financial Marketplace" - Credit, insurance, lending
+**Role:** "The CFO Who Finally Saw Everything" - AI-Powered Finance OS
 **GitHub:** github.com/imrejaul007/RTNM-Group
+**Tagline:** "Digital Financial Marketplace" - Credit, insurance, lending
 
 ## Products
 
 | Product | Type | Purpose |
 |---------|------|---------|
+| **RIDZA FinanceOS** | Platform | Core finance - 29 microservices |
 | **Digital Services Platform** | Platform | Financial services |
 | **Marketplace Services** | Platform | Product marketplace |
 | **Consumer Services** | Platform | Consumer finance |
-| **RIDZA FinanceOS** | Platform | Core finance |
-| **REZ-Financial** | Product | Financial services (part of RIDZA) |
+| **REZ-Financial** | Product | Financial services |
 | **Insurance** | Product | Policy management |
 | **Credit** | Product | Loans, credit |
 | **Lending** | Product | BNPL, EMI |
-| **Islamic Finance** | Product | Sharia-compliant BNPL, Zakat, Islamic Lending (4530) |
-| **Remittance** | Product | P2P transfers, cross-border payments (4540) |
+| **Islamic Finance** | Product | Sharia-compliant BNPL, Zakat, Islamic Lending |
+| **Remittance** | Product | P2P transfers, cross-border payments |
 
-## Key Services
+## Finance Agents (11 Core AI Agents)
 
+| Agent | Port | Purpose | Lines |
+|-------|------|---------|-------|
+| **Treasury Agent** | 4926 | Cash, FX, debt, liquidity, bank connectors | 2,881 |
+| **FP&A Agent** | 4927 | Budget, forecast, variance, KPI | ~1,000 |
+| **Risk Agent** | 4928 | Risk assessment, exposure evaluation | ~1,800 |
+| **Investment Agent** | 4929 | Investment tracking, portfolio | ~1,650 |
+| **Collection Agent** | 4930 | Receivables, dunning, payment chase | ~750 |
+| **Financial Twin** | 4940 | Unified entity representation | 996 |
+| **CFO Agent** | 4950 | Executive P&L, orchestration | 819 |
+| **Crisis Agent** | 4960 | Early warning, automated alerts | 616 |
+| **Problem Detector** | 4970 | Proactive problem detection | 647 |
+| **Accounting Ledger** | 4980 | Double-entry bookkeeping | ~324 |
+| **Finance Copilot** | 5090 | CFO Dashboard UI | 1,534 |
+
+## Complete Services (29 Total)
+
+### Core Services (Ports 4500-4530)
 | Service | Port | Purpose |
 |---------|------|---------|
-| ridza-core | 4500 | Lead distribution |
-| ridza-partner-api | 4501 | Partner API |
-| ridza-agent-portal | 4502 | Agent CRM |
-| ridza-compliance | 4507 | Consent, RBAC |
+| ridza-core | 4500 | Lead distribution, customer management |
+| ridza-partner-api | 4501 | Bank & partner integrations (10 adapters) |
+| ridza-agent-portal | 4502 | Agent CRM dashboard |
+| ridza-corpperks-hub | 4503 | CorpPerks integration |
+| ridza-ai-search | 4505 | Natural language search |
+| ridza-provider-api | 4506 | Provider API |
+| ridza-compliance | 4507 | Audit, consent, RBAC, PII vault |
+| ridza-events | 4508 | Event handling |
+| ridza-workflow | 4509 | Workflow automation |
 | ridza-fraud | 4510 | Fraud detection |
-| ridza-insurance | 4520 | Insurance |
+| ridza-merchant-finance | 4511 | Merchant working capital |
+| ridza-finance-intelligence | 4512 | Credit scoring, consumer twin |
+| ridza-insurance | 4520 | Insurance products |
+| ridza-partner-onboarding | 4530 | Partner onboarding |
+
+### Finance Agents (Ports 4926-4980)
+| Service | Port | Purpose |
+|---------|------|---------|
+| ridza-treasury-agent | 4926 | Cash, FX, debt, liquidity |
+| ridza-fpa-agent | 4927 | Budget, forecast, variance |
+| ridza-risk-agent | 4928 | Risk assessment |
+| ridza-investment-agent | 4929 | Investment tracking |
+| ridza-collection-agent | 4930 | Receivables collection |
+| ridza-financial-twin | 4940 | Unified financial view |
+| ridza-cfo-agent | 4950 | Executive orchestration |
+| ridza-crisis-agent | 4960 | Early warning |
+| ridza-problem-detector | 4970 | Problem detection |
+| ridza-accounting-ledger | 4980 | Double-entry accounting |
+
+### Frontend (Port 5090)
+| Service | Port | Purpose |
+|---------|------|---------|
+| ridza-finance-copilot | 5090 | CFO Dashboard (Next.js) |
+
+## Ecosystem Wire Services (5 New)
+
+| Wire Service | Connects To | Purpose |
+|--------------|-------------|---------|
+| simulationService.ts | REZ Simulation (4308) | What-if, Monte Carlo |
+| cosmicTwinService.ts | REZ-Cosmic-Twin (5005) | Entity digital twins |
+| boardService.ts | HOJAI Board AI (4870) | AI C-Suite advisory |
+| investorRelationsService.ts | HOJAI Investor Relations (4815) | Quarterly reports |
+| bankReconciliationService.ts | HOJAI Accounting (4800) | Auto-matching |
+
+## Priya's Story - "The CFO Who Finally Saw Everything"
+
+All capabilities from the story are now implemented:
+
+| Capability | Service | Status |
+|------------|---------|--------|
+| Financial Memory | All services + HOJAI Memory | ✅ |
+| Financial Twin | ridza-financial-twin (994 lines) | ✅ |
+| Problem Detection | ridza-problem-detector (647 lines) | ✅ |
+| Intelligence Layer | Collection + FP&A agents | ✅ |
+| Finance Copilot | ridza-finance-copilot (1,534 lines) | ✅ |
+| Collection Agent | ridza-collection-agent (~750 lines) | ✅ |
+| Crisis Detection | ridza-crisis-agent (616 lines) | ✅ |
+| Simulation | simulationService.ts | ✅ |
+| CFO Agent | ridza-cfo-agent (819 lines) | ✅ |
+| Ecosystem Wiring | 24 integration files | ✅ |
 
 ## Apps/Web/Portals
 
 | App | Type | Purpose |
 |-----|------|---------|
 | **ridza-agent-portal** | Portal | Agent CRM |
+| **ridza-finance-copilot** | Web | CFO Dashboard |
 | **bi-dashboards** | Web | Analytics dashboards |
+
+## Deployment Files
+
+| File | Purpose |
+|------|---------|
+| docker-compose.ridza.yml | Docker deployment |
+| health-check-all.sh | Service health check |
+| seed-test-data.js | Test data seeder |
+| ridza-integration-tests.ts | Integration tests |
+| API-SPEC.md | OpenAPI specification |
 
 ---
 
