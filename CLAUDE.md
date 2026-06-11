@@ -1,6 +1,6 @@
 # RTNM Digital - Complete Ecosystem Documentation
 
-**Version:** 8.1 | **Date:** June 11, 2026
+**Version:** 8.2 | **Date:** June 11, 2026
 
 ---
 
@@ -33,6 +33,7 @@ RTNM Digital (Parent Company / REZ Ecosystem)
 ├── AssetMind ───────────────→ provides financial intelligence to all companies
 ├── Axom ───────────────────→ provides future tech to all companies
 ├── Karma Foundation ────────→ provides social impact to all companies
+├── ExpertOS ────────────────→ provides professional AI twins to all companies
 └── ... other companies
 ```
 
@@ -75,6 +76,7 @@ RTNM Digital (Parent Company / REZ Ecosystem)
 | **AssetMind** | Financial Intelligence | Bloomberg-like platform, Twins |
 | **Axom** | Future Tech | Cosmic OS, Research Systems |
 | **Karma Foundation** | Social Impact | Education, Healthcare, Community |
+| **ExpertOS** | Professional AI | AI twins for doctors, CAs, coaches, consultants |
 | **REE** | Ecosystem Engine | Fraud, Growth, Trust, Attribution (External) |
 
 ---
@@ -174,18 +176,91 @@ Every company both **provides** and **consumes** services:
 |---------|---------|
 | Genie AI | Personal memory, relationships, briefings |
 | Razo | Voice AI, Voice agents |
+| **ExpertOS** | Professional AI twins (Doctors, CAs, Coaches, Consultants) |
 
 ### HOJAI Services by Port Range
 
 | Port Range | Category |
 |------------|----------|
 | 4500-4610 | HOJAI Core (12 platforms) |
+| **4550** | **ExpertOS (Professional AI Marketplace)** |
 | 4595 | Web Intelligence (Scraping, News, Extraction) |
 | 4596 | Web Monitoring (Scheduled, Change Detection) |
 | 4597 | Web Intelligence MCP (AI Agent Tools) |
 | 4750-4754 | HOJAI Intelligence (Commercial) |
 | 4702-4707 | Genie (Personal AI) |
 | 4850-4899 | VoiceOS |
+
+### BrandPulse (4770-4778)
+
+**Real-time Brand Intelligence** - "Know what the world thinks about your brand"
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| 4770 | Brand Intelligence | Brand health, sentiment, mentions across news/social |
+| 4771 | Narrative Intelligence | Track belief shifts and narrative evolution |
+| 4772 | Competitive Intelligence | Share of voice, competitor comparison |
+| 4773 | Crisis Intelligence | Early warning system with anomaly detection |
+| 4774 | Brand Agent | AI-powered natural language queries |
+| 4775 | Brand Webhook | Real-time notifications for alerts |
+| 4776 | Reputation Management | Review monitoring, NPS, brand guardian, crisis shield |
+| 4777 | PR Intelligence | Press tracking, journalist map, media analytics |
+| 4778 | Notifications | Slack, Teams, Email, SMS alerts |
+
+**Location:** `hojai-ai/services/hojai-company-intelligence/`
+
+**Key Features:**
+- Multi-source sentiment analysis (news, social, reviews)
+- Emotion detection (trust, joy, anger, fear, etc.)
+- Narrative tracking - how company stories change over time
+- Crisis prediction - early warning before issues become crises
+- AI-powered insights with natural language queries
+- Review response generation with AI
+- Journalist database with influence scoring
+- NPS tracking and brand guardian
+
+**Infrastructure:**
+- SQLite database (persistent storage)
+- Background scheduler (automated data refresh)
+- API key authentication with rate limiting
+- Data connectors (GDELT, NewsAPI, Reddit, Google, Trustpilot, Yelp)
+
+### Voice Ecosystem (Voice Keyboard)
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| 4620 | voice-memory-bridge | Cross-channel memory |
+| 4621 | communication-style-analyzer | Style analysis |
+| 4622 | voice-twin-service | Voice + Communication Twins |
+| 4623 | code-switching-detector | 50+ languages, code-switching |
+| 4624 | voice-learning-orchestrator | Pipeline orchestration |
+| 4625 | voice-cloning-service | Voice cloning |
+| 4629 | emotional-voice-service | Emotion detection/synthesis |
+| 4631 | voice-translation | Voice-to-voice translation |
+| **4635** | **text-cleanup-service** | **Filler removal, auto-format** |
+| **4636** | **voice-snippets-service** | **Reusable voice templates** |
+| 4650 | voice-memory-os-integration | MemoryOS bridge |
+| 4660 | razo-voice-agent | Unified voice AI with all features |
+| 4670 | rtnm-ecosystem-adapters | RTNM ecosystem integration |
+| 4521 | sutar-twin-os | Digital twins (TwinOS) |
+| 4701 | skillnet-bridge | Professional learning events |
+
+### Razo Keyboard Web App (razo-keyboard)
+
+**Purpose:** Downloadable keyboard alternative for normal users
+
+**Location:** `voice-ecosystem/razo-keyboard/`
+**Port:** 3001 (dev)
+
+| Feature | Description |
+|---------|-------------|
+| Voice Recording | Web Speech API for real-time voice input |
+| Text Cleanup | Integrates with text-cleanup-service (4635) |
+| Voice Snippets | Integrates with voice-snippets-service (4636) |
+| Copy to Clipboard | One-tap copy for any app |
+| Text-to-Speech | Read cleaned text aloud |
+
+**Tech Stack:** React 18 + TypeScript + Vite
 
 ---
 
@@ -721,6 +796,15 @@ docker compose -f REZ-Ecosystem-docker-compose.yml up -d
 ./start-rez-ecosystem.sh rabtul    # RABTUL only
 ./start-rez-ecosystem.sh status    # Check status
 ./start-rez-ecosystem.sh ports     # Show all ports
+```
+
+### SADA & Shab AI Startup
+```bash
+./start-shab-sada.sh start   # Start SADA (4190) & Shab AI (4970)
+./start-shab-sada.sh stop    # Stop services
+./start-shab-sada.sh restart # Restart services
+./start-shab-sada.sh status  # Check status
+./start-shab-sada.sh health  # Health check
 ```
 
 ### Service Launcher (TypeScript)
