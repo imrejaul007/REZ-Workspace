@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # RIDZA - Finance OS
+  ridza:
+    build: ./ridza
+    container_name: ridza
+    ports:
+      - "5000:5000"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - SERVICE_NAME=ridza
+    volumes:
+      - ridza-data:/app/data
+
+  # RisaCare - Healthcare OS
+  risacare:
+    build: ./risacare
+    container_name: risacare
+    ports:
+      - "4800:4800"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4800/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4800
+      - SERVICE_NAME=risacare
+    volumes:
+      - risacare-data:/app/data
+
+  # Nexha - Commerce Network OS
+  nexha:
+    build: ./nexha
+    container_name: nexha
+    ports:
+      - "5300:5300"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5300/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=5300
+      - SERVICE_NAME=nexha
+    volumes:
+      - nexha-data:/app/data
+
+  # AdBazaar - Advertising& Marketing Intelligence
+  adbazaar:
+    build: ./adbazaar
+    container_name: adbazaar
+    ports:
+      - "5400:5400"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5400/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=5400
+      - SERVICE_NAME=adbazaar
+    volumes:
+      - adbazaar-data:/app/data
+
+  # StayOwn - Hospitality OS
+  stayown:
+    build: ./stayown
+    container_name: stayown
+    ports:
+      - "5100:5100"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=5100
+      - SERVICE_NAME=stayown
+    volumes:
+      - stayown-data:/app/data
+
+  # RisnaEstate - Real Estate OS
+  risnaestate:
+    build: ./risnaestate
+    container_name: risnaestate
+    ports:
+      - "4900:4900"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4900/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4900
+      - SERVICE_NAME=risnaestate
+    volumes:
+      - risnaestate-data:/app/data
+
+networks:
+  rtnm-network:
+    driver: bridge
+
+volumes:
+  ridza-data:
+  risacare-data:
+  nexha-data:
+  adbazaar-data:
+  stayown-data:
+  risnaestate-data:

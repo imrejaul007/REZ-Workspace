@@ -1,0 +1,200 @@
+version: '3.8'
+
+services:
+  # REZ Intelligence Services
+  intent-predictor:
+    build: ./rez-intent-predictor
+    container_name: rez-intent-predictor
+    ports:
+      - "4018:4018"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4018/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4018
+      - SERVICE_NAME=intent-predictor
+    volumes:
+      - rez-intent-predictor-data:/app/data
+
+  predictive-engine:
+    build: ./rez-predictive-engine
+    container_name: rez-predictive-engine
+    ports:
+      - "4123:4123"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4123/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4123
+      - SERVICE_NAME=predictive-engine
+    volumes:
+      - rez-predictive-engine-data:/app/data
+
+  memory-layer:
+    build: ./rez-memory-layer
+    container_name: rez-memory-layer
+    ports:
+      - "4201:4201"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4201/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4201
+      - SERVICE_NAME=memory-layer
+    volumes:
+      - rez-memory-layer-data:/app/data
+
+  signal-aggregator:
+    build: ./rez-signal-aggregator
+    container_name: rez-signal-aggregator
+    ports:
+      - "4142:4142"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4142/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4142
+      - SERVICE_NAME=signal-aggregator
+    volumes:
+      - rez-signal-aggregator-data:/app/data
+
+  # VoiceOS Services
+  voiceos-unified:
+    build: ./voiceos-unified
+    container_name: voiceos-unified
+    ports:
+      - "4850:4850"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4850/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4850
+      - SERVICE_NAME=voiceos-unified
+    volumes:
+      - voiceos-unified-data:/app/data
+
+  rez-ai-voice:
+    build: ./rez-ai-voice
+    container_name: rez-ai-voice
+    ports:
+      - "4112:4112"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4112/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4112
+      - SERVICE_NAME=rez-ai-voice
+    volumes:
+      - rez-ai-voice-data:/app/data
+
+  # GENIE Services
+  genie-memory:
+    build: ./genie-memory
+    container_name: genie-memory
+    ports:
+      - "4703:4703"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4703/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4703
+      - SERVICE_NAME=genie-memory
+    volumes:
+      - genie-memory-data:/app/data
+
+  genie-relationship:
+    build: ./genie-relationship
+    container_name: genie-relationship
+    ports:
+      - "4704:4704"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4704/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4704
+      - SERVICE_NAME=genie-relationship
+    volumes:
+      - genie-relationship-data:/app/data
+
+  genie-briefing:
+    build: ./genie-briefing
+    container_name: genie-briefing
+    ports:
+      - "4706:4706"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4706/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4706
+      - SERVICE_NAME=genie-briefing
+    volumes:
+      - genie-briefing-data:/app/data
+
+networks:
+  rtnm-network:
+    driver: bridge
+
+volumes:
+  rez-intent-predictor-data:
+  rez-predictive-engine-data:
+  rez-memory-layer-data:
+  rez-signal-aggregator-data:
+  voiceos-unified-data:
+  rez-ai-voice-data:
+  genie-memory-data:
+  genie-relationship-data:
+  genie-briefing-data:

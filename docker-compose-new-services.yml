@@ -1,0 +1,94 @@
+# RTNM Digital - New Services Docker Compose
+# Date: June 10, 2026
+# Services: 8 new microservices
+
+version: '3.8'
+
+services:
+  # ============================================
+  # TIER 1 - AGENT INFRASTRUCTURE
+  # ============================================
+
+  trust-network-gateway:
+    build:
+      context: ./rtnm-trust-network/trust-network-gateway
+    container_name: rtnm-trust-network
+    ports:
+      - "4190:4190"
+    environment:
+      - PORT=4190
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4190/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  agent-wallet:
+    build:
+      context: ./hojai-agent-wallet/agent-wallet-api
+    container_name: hojai-agent-wallet
+    ports:
+      - "4150:4150"
+    environment:
+      - PORT=4150
+      - NODE_ENV=production
+
+  agent-identity:
+    build:
+      context: ./hojai-agent-identity/agent-identity-api
+    container_name: hojai-agent-identity
+    ports:
+      - "4160:4160"
+    environment:
+      - PORT=4160
+
+  agent-marketplace:
+    build:
+      context: ./hojai-agent-marketplace-2/marketplace-api
+    container_name: hojai-agent-marketplace
+    ports:
+      - "4180:4180"
+    environment:
+      - PORT=4180
+
+  developer-platform:
+    build:
+      context: ./hojai-developer-platform/devportal-api
+    container_name: hojai-developer-platform
+    ports:
+      - "4100:4100"
+    environment:
+      - PORT=4100
+
+  arabic-ai:
+    build:
+      context: ./hojai-arabic-ai/arabic-ai-api
+    container_name: hojai-arabic-ai
+    ports:
+      - "4170:4170"
+    environment:
+      - PORT=4170
+
+  islamic-finance:
+    build:
+      context: ./ridza-islamic-finance/islamic-finance-api
+    container_name: ridza-islamic-finance
+    ports:
+      - "4530:4530"
+    environment:
+      - PORT=4530
+
+  remittance:
+    build:
+      context: ./ridza-remittance/remittance-api
+    container_name: ridza-remittance
+    ports:
+      - "4540:4540"
+    environment:
+      - PORT=4540
+
+networks:
+  default:
+    name: rtnm-network
+    driver: bridge

@@ -1,0 +1,179 @@
+version: '3.8'
+
+services:
+  # GENIE Personal AI Core Services
+  genie-memory:
+    build: ./genie-memory
+    container_name: genie-memory
+    ports:
+      - "4703:4703"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4703/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4703
+      - SERVICE_NAME=genie-memory
+    volumes:
+      - genie-memory-data:/app/data
+
+  genie-relationship:
+    build: ./genie-relationship
+    container_name: genie-relationship
+    ports:
+      - "4704:4704"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4704/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4704
+      - SERVICE_NAME=genie-relationship
+    volumes:
+      - genie-relationship-data:/app/data
+
+  genie-briefing:
+    build: ./genie-briefing
+    container_name: genie-briefing
+    ports:
+      - "4706:4706"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4706/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4706
+      - SERVICE_NAME=genie-briefing
+    volumes:
+      - genie-briefing-data:/app/data
+
+  # GENIE Sync Service
+  genie-sync-service:
+    build: ./genie-sync-service
+    container_name: genie-sync-service
+    ports:
+      - "4707:4707"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4707/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4707
+      - SERVICE_NAME=genie-sync-service
+    volumes:
+      - genie-sync-data:/app/data
+
+  # GENIE Integration Services
+  obsidian-service:
+    build: ./obsidian-service
+    container_name: obsidian-service
+    ports:
+      - "4708:4708"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4708/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4708
+      - SERVICE_NAME=obsidian-service
+    volumes:
+      - obsidian-data:/app/data
+
+  notion-service:
+    build: ./notion-service
+    container_name: notion-service
+    ports:
+      - "4709:4709"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4709/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4709
+      - SERVICE_NAME=notion-service
+    volumes:
+      - notion-data:/app/data
+
+  slack-service:
+    build: ./slack-service
+    container_name: slack-service
+    ports:
+      - "4710:4710"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4710/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4710
+      - SERVICE_NAME=slack-service
+    volumes:
+      - slack-data:/app/data
+
+  telegram-service:
+    build: ./telegram-service
+    container_name: telegram-service
+    ports:
+      - "4711:4711"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4711/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4711
+      - SERVICE_NAME=telegram-service
+    volumes:
+      - telegram-data:/app/data
+
+networks:
+  rtnm-network:
+    driver: bridge
+
+volumes:
+  genie-memory-data:
+  genie-relationship-data:
+  genie-briefing-data:
+  genie-sync-data:
+  obsidian-data:
+  notion-data:
+  slack-data:
+  telegram-data:

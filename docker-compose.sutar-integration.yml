@@ -1,0 +1,159 @@
+version: '3.8'
+
+# =============================================================================
+# RTNM SUTAR Integration Stack
+# Coordinates order flow from SUTAR OS to REZ services
+#
+# IMPORTANT: For full integration, also run:
+#   - docker-compose.hojai.yml (HOJAI Core services)
+#   - docker-compose.rez.yml (REZ Intelligence)
+#   - docker-compose.products.yml (REZ Products)
+#
+# All services should use the same network: rtnm-network
+# External services should use Docker DNS names:
+#   - sutar-negotiation-engine:4191
+#   - sutar-decision-engine:4240
+#   - rez-order-service:4006
+#   - rez-delivery-service:4009
+#   - rez-merchant-service:4005
+#   - rez-kds-service:4014
+# =============================================================================
+
+services:
+  # Redis (required for all services)
+  redis:
+    image: redis:7-alpine
+    container_name: rtnm-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # SUTAR Intent Bus
+  sutar-intent-bus:
+    build:
+      context: ./hojai-ai/sutar-intent-bus
+      dockerfile: Dockerfile
+    container_name: sutar-intent-bus
+    ports:
+      - "4154:4154"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - PORT=4154
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - INTENT_TTL=3600
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4154/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # SUTAR-REZ Bridge
+  sutar-rez-bridge:
+    build:
+      context: ./hojai-ai/sutar-rez-bridge
+      dockerfile: Dockerfile
+    container_name: sutar-rez-bridge
+    ports:
+      - "4155:4155"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - PORT=4155
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - SUTAR_NEGOTIATION_URL=http://sutar-negotiation-engine:4191
+      - SUTAR_DECISION_URL=http://sutar-decision-engine:4240
+      - REZ_ORDER_URL=http://rez-order-service:4006
+      - REZ_DELIVERY_URL=http://rez-delivery-service:4009
+      - REZ_MERCHANT_URL=http://rez-merchant-service:4005
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4155/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # REZ Event Bus
+  rez-event-bus:
+    build:
+      context: ./RTNM-Digital/shared/rez-event-bus
+      dockerfile: Dockerfile
+    container_name: rez-event-bus
+    ports:
+      - "4075:4075"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - PORT=4075
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - EVENT_STREAM=rez:events
+      - DLQ_STREAM=rez:events:dlq
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4075/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Order Flow Orchestrator
+  order-flow-orchestrator:
+    build:
+      context: ./hojai-ai/order-flow-orchestrator
+      dockerfile: Dockerfile
+    container_name: order-flow-orchestrator
+    ports:
+      - "4260:4260"
+    depends_on:
+      redis:
+        condition: service_healthy
+      sutar-intent-bus:
+        condition: service_healthy
+      sutar-rez-bridge:
+        condition: service_healthy
+    environment:
+      - PORT=4260
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - SUTAR_INTENT_BUS_URL=http://sutar-intent-bus:4154
+      - SUTAR_NEGOTIATION_URL=http://sutar-negotiation-engine:4191
+      - SUTAR_DECISION_URL=http://sutar-decision-engine:4240
+      - REZ_ORDER_URL=http://rez-order-service:4006
+      - REZ_DELIVERY_URL=http://rez-delivery-service:4009
+      - REZ_MERCHANT_URL=http://rez-merchant-service:4005
+      - REZ_KDS_URL=http://rez-kds-service:4014
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4260/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  rtnm-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

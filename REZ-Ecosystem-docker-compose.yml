@@ -1,0 +1,1140 @@
+# REZ Ecosystem - Complete Docker Compose
+# RTNM Digital - Full Stack Deployment
+#
+# Usage:
+#   docker-compose -f REZ-Ecosystem-docker-compose.yml up -d          # Start all
+#   docker-compose -f REZ-Ecosystem-docker-compose.yml up -d hojai    # HOJAI only
+#   docker-compose -f REZ-Ecosystem-docker-compose.yml up -d rabtul   # RABTUL only
+#
+# Networks:
+#   - rez-ecosystem: Common network for all services
+
+version: '3.8'
+
+networks:
+  rez-ecosystem:
+    name: rez-ecosystem
+    driver: bridge
+
+services:
+  # ============================================
+  # INFRASTRUCTURE
+  # ============================================
+
+  mongodb:
+    image: mongo:7.0
+    container_name: rez-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
+    ports:
+      - "27017:27017"
+    volumes:
+      - rez-mongodb-data:/data/db
+    networks:
+      - rez-ecosystem
+
+  redis:
+    image: redis:7-alpine
+    container_name: rez-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - rez-redis-data:/data
+    networks:
+      - rez-ecosystem
+
+  # ============================================
+  # RABTUL TECHNOLOGIES (4001-4025)
+  # ============================================
+
+  rez-auth-service:
+    container_name: rez-auth-service
+    image: rabtul/auth-service:latest
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/rabtul?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - mongodb
+
+  rez-payment-service:
+    container_name: rez-payment-service
+    image: rabtul/payment-service:latest
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - RAZORPAY_KEY=${RAZORPAY_KEY}
+      - RAZORPAY_SECRET=${RAZORPAY_SECRET}
+    networks:
+      - rez-ecosystem
+
+  rez-wallet-service:
+    container_name: rez-wallet-service
+    image: rabtul/wallet-service:latest
+    ports:
+      - "4004:4004"
+    environment:
+      - PORT=4004
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/rabtul?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - mongodb
+
+  rez-order-service:
+    container_name: rez-order-service
+    image: rabtul/order-service:latest
+    ports:
+      - "4006:4006"
+    environment:
+      - PORT=4006
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/rabtul?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - mongodb
+
+  rez-catalog-service:
+    container_name: rez-catalog-service
+    image: rabtul/catalog-service:latest
+    ports:
+      - "4007:4007"
+    environment:
+      - PORT=4007
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/rabtul?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - mongodb
+
+  rez-booking-service:
+    container_name: rez-booking-service
+    image: rabtul/booking-service:latest
+    ports:
+      - "4020:4020"
+    environment:
+      - PORT=4020
+    networks:
+      - rez-ecosystem
+
+  rez-notifications-service:
+    container_name: rez-notifications-service
+    image: rabtul/notifications-service:latest
+    ports:
+      - "4011:4011"
+    environment:
+      - PORT=4011
+    networks:
+      - rez-ecosystem
+
+  # RABTUL Event Bus
+  rez-event-bus:
+    container_name: rez-event-bus
+    image: rabtul/event-bus:latest
+    ports:
+      - "4025:4025"
+    environment:
+      - PORT=4025
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/rabtul?authSource=admin
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - mongodb
+      - redis
+
+  # ============================================
+  # REZ INTELLIGENCE (4018, 4123, 4201)
+  # ============================================
+
+  rez-intent-predictor:
+    container_name: rez-intent-predictor
+    image: rez/intent-predictor:latest
+    ports:
+      - "4018:4018"
+    environment:
+      - PORT=4018
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/rez-intelligence?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - mongodb
+
+  rez-predictive-engine:
+    container_name: rez-predictive-engine
+    image: rez/predictive-engine:latest
+    ports:
+      - "4123:4123"
+    environment:
+      - PORT=4123
+    networks:
+      - rez-ecosystem
+
+  rez-memory-layer:
+    container_name: rez-memory-layer
+    image: rez/memory-layer:latest
+    ports:
+      - "4201:4201"
+    environment:
+      - PORT=4201
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - redis
+
+  rez-signal-aggregator:
+    container_name: rez-signal-aggregator
+    image: rez/signal-aggregator:latest
+    ports:
+      - "4142:4142"
+    environment:
+      - PORT=4142
+    networks:
+      - rez-ecosystem
+
+  rez-fraud-agent:
+    container_name: rez-fraud-agent
+    image: rez/fraud-agent:latest
+    ports:
+      - "3007:3007"
+    environment:
+      - PORT=3007
+    networks:
+      - rez-ecosystem
+
+  rez-recommendation-engine:
+    container_name: rez-recommendation-engine
+    image: rez/recommendation-engine:latest
+    ports:
+      - "4050:4050"
+    environment:
+      - PORT=4050
+    networks:
+      - rez-ecosystem
+
+  # ============================================
+  # UNIFIED HUB (4600)
+  # ============================================
+
+  rez-unified-hub:
+    container_name: rez-unified-hub
+    build:
+      context: ./RABTUL-Technologies/REZ-unified-hub
+      dockerfile: Dockerfile
+    ports:
+      - "4600:4600"
+    environment:
+      - PORT=4600
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-your-internal-token}
+      # RABTUL Services
+      - AUTH_SERVICE_URL=http://rez-auth-service:4002
+      - PAYMENT_SERVICE_URL=http://rez-payment-service:4001
+      - WALLET_SERVICE_URL=http://rez-wallet-service:4004
+      - ORDER_SERVICE_URL=http://rez-order-service:4006
+      - CATALOG_SERVICE_URL=http://rez-catalog-service:4007
+      - BOOKING_SERVICE_URL=http://rez-booking-service:4020
+      - NOTIFICATIONS_SERVICE_URL=http://rez-notifications-service:4011
+      # REZ Intelligence
+      - INTENT_URL=http://rez-intent-predictor:4018
+      - FRAUD_URL=http://rez-fraud-agent:3007
+      - RECOMMEND_URL=http://rez-recommendation-engine:4050
+      - PREDICT_URL=http://rez-predictive-engine:4123
+      - SIGNAL_URL=http://rez-signal-aggregator:4142
+      - MEMORY_LAYER_URL=http://rez-memory-layer:4201
+      # HOJAI AI
+      - HOJAI_GATEWAY=http://hojai-gateway:4500
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - HOJAI_AGENTS=http://hojai-agents:4550
+      - GENIE_MEMORY=http://genie-memory:4703
+      - GENIE_RELATION=http://genie-relation:4704
+      - GENIE_BRIEFING=http://genie-briefing:4706
+      - COMMERCE_AI=http://commerce-ai:4750
+      - CUSTOMER_AI=http://customer-ai:4752
+      - MARKETING_AI=http://marketing-ai:4753
+      - FINANCIAL_AI=http://financial-ai:4754
+      # SUTAR OS
+      - SUTAR_GATEWAY=http://sutar-gateway:4140
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4142
+      - SUTAR_INTENT=http://sutar-intent:4154
+      - SUTAR_DECISION=http://sutar-decision:4240
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-auth-service
+      - rez-wallet-service
+      - hojai-gateway
+
+  # ============================================
+  # EVENT BUS BRIDGE (4090)
+  # ============================================
+
+  rez-event-bus-bridge:
+    container_name: rez-event-bus-bridge
+    build:
+      context: ./RABTUL-Technologies/REZ-event-bus-bridge
+      dockerfile: Dockerfile
+    ports:
+      - "4090:4090"
+    environment:
+      - PORT=4090
+      - RABTUL_EVENT_BUS=http://rez-event-bus:4025
+      - HOJAI_EVENT_BUS=http://hojai-event-bus:4510
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-your-internal-token}
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-event-bus
+      - hojai-event-bus
+
+  # ============================================
+  # HOJAI AI CORE (4500-4590)
+  # ============================================
+
+  hojai-gateway:
+    container_name: hojai-gateway
+    build:
+      context: ./hojai-core/hojai-api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "4500:4500"
+    environment:
+      - PORT=4500
+      - HOJAI_EVENT_BUS=http://hojai-event-bus:4510
+      - HOJAI_MEMORY=http://hojai-memory:4520
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-event-bus
+      - hojai-memory
+
+  hojai-governance:
+    container_name: hojai-governance
+    build:
+      context: ./hojai-core/hojai-governance
+      dockerfile: Dockerfile
+    ports:
+      - "4501:4501"
+    environment:
+      - PORT=4501
+    networks:
+      - rez-ecosystem
+
+  hojai-event-bus:
+    container_name: hojai-event-bus
+    build:
+      context: ./hojai-core/hojai-event
+      dockerfile: Dockerfile
+    ports:
+      - "4510:4510"
+    environment:
+      - PORT=4510
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - redis
+
+  hojai-memory:
+    container_name: hojai-memory
+    build:
+      context: ./hojai-core/hojai-memory
+      dockerfile: Dockerfile
+    ports:
+      - "4520:4520"
+    environment:
+      - PORT=4520
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/hojai?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - mongodb
+
+  hojai-intelligence:
+    container_name: hojai-intelligence
+    build:
+      context: ./hojai-core/hojai-intelligence
+      dockerfile: Dockerfile
+    ports:
+      - "4530:4530"
+    environment:
+      - PORT=4530
+      - HOJAI_MEMORY=http://hojai-memory:4520
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-memory
+
+  hojai-agents:
+    container_name: hojai-agents
+    build:
+      context: ./hojai-core/hojai-agents
+      dockerfile: Dockerfile
+    ports:
+      - "4550:4550"
+    environment:
+      - PORT=4550
+      - HOJAI_MEMORY=http://hojai-memory:4520
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-memory
+
+  hojai-workflows:
+    container_name: hojai-workflows
+    build:
+      context: ./hojai-core/hojai-workflow
+      dockerfile: Dockerfile
+    ports:
+      - "4560:4560"
+    environment:
+      - PORT=4560
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - redis
+
+  hojai-comms:
+    container_name: hojai-comms
+    build:
+      context: ./hojai-core/hojai-communications
+      dockerfile: Dockerfile
+    ports:
+      - "4570:4570"
+    environment:
+      - PORT=4570
+    networks:
+      - rez-ecosystem
+
+  hojai-hyperlocal:
+    container_name: hojai-hyperlocal
+    build:
+      context: ./hojai-core/hojai-hyperlocal
+      dockerfile: Dockerfile
+    ports:
+      - "4580:4580"
+    environment:
+      - PORT=4580
+    networks:
+      - rez-ecosystem
+
+  hojai-data:
+    container_name: hojai-data
+    build:
+      context: ./hojai-core/hojai-data
+      dockerfile: Dockerfile
+    ports:
+      - "4590:4590"
+    environment:
+      - PORT=4590
+    networks:
+      - rez-ecosystem
+
+  # ============================================
+  # HOJAI GENIE (4703-4707)
+  # ============================================
+
+  genie-memory:
+    container_name: genie-memory
+    build:
+      context: ./genie-memory-service
+      dockerfile: Dockerfile
+    ports:
+      - "4703:4703"
+    environment:
+      - PORT=4703
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/genie?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-memory
+      - mongodb
+
+  genie-relation:
+    container_name: genie-relation
+    build:
+      context: ./genie-relationship-service
+      dockerfile: Dockerfile
+    ports:
+      - "4704:4704"
+    environment:
+      - PORT=4704
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/genie?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-memory
+      - mongodb
+
+  genie-briefing:
+    container_name: genie-briefing
+    build:
+      context: ./genie-briefing-service
+      dockerfile: Dockerfile
+    ports:
+      - "4706:4706"
+    environment:
+      - PORT=4706
+      - GENIE_MEMORY=http://genie-memory:4703
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/genie?authSource=admin
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - genie-memory
+      - mongodb
+
+  # ============================================
+  # HOJAI INTELLIGENCE SUITE (4750-4754)
+  # ============================================
+
+  commerce-ai:
+    container_name: commerce-ai
+    build:
+      context: ./hojai-commerce-intelligence
+      dockerfile: Dockerfile
+    ports:
+      - "4750:4750"
+    environment:
+      - PORT=4750
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-intelligence
+
+  merchant-ai:
+    container_name: merchant-ai
+    build:
+      context: ./hojai-merchant-intelligence
+      dockerfile: Dockerfile
+    ports:
+      - "4751:4751"
+    environment:
+      - PORT=4751
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-intelligence
+
+  customer-ai:
+    container_name: customer-ai
+    build:
+      context: ./hojai-customer-intelligence
+      dockerfile: Dockerfile
+    ports:
+      - "4752:4752"
+    environment:
+      - PORT=4752
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-intelligence
+
+  marketing-ai:
+    container_name: marketing-ai
+    build:
+      context: ./hojai-marketing-intelligence
+      dockerfile: Dockerfile
+    ports:
+      - "4753:4753"
+    environment:
+      - PORT=4753
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-intelligence
+
+  financial-ai:
+    container_name: financial-ai
+    build:
+      context: ./hojai-financial-intelligence
+      dockerfile: Dockerfile
+    ports:
+      - "4754:4754"
+    environment:
+      - PORT=4754
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-intelligence
+
+  # ============================================
+  # SUTAR OS (4140-4254)
+  # ============================================
+
+  sutar-gateway:
+    container_name: sutar-gateway
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "4140:4140"
+    environment:
+      - PORT=4140
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4521
+      - SUTAR_INTENT=http://sutar-intent:4154
+    networks:
+      - rez-ecosystem
+
+  sutar-twin-os:
+    container_name: sutar-twin-os
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-twin-os
+      dockerfile: Dockerfile
+    ports:
+      - "4521:4521"
+    environment:
+      - PORT=4521
+      - HOJAI_MEMORY=http://hojai-memory:4520
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-memory
+
+  sutar-memory:
+    container_name: sutar-memory
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-memory-bridge
+      dockerfile: Dockerfile
+    ports:
+      - "4143:4143"
+    environment:
+      - PORT=4143
+      - HOJAI_MEMORY=http://hojai-memory:4520
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - hojai-memory
+
+  sutar-agent-id:
+    container_name: sutar-agent-id
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-agent-id
+      dockerfile: Dockerfile
+    ports:
+      - "4146:4146"
+    environment:
+      - PORT=4146
+    networks:
+      - rez-ecosystem
+
+  sutar-supplier:
+    container_name: sutar-supplier
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-supplier-registry
+      dockerfile: Dockerfile
+    ports:
+      - "4147:4147"
+    environment:
+      - PORT=4147
+    networks:
+      - rez-ecosystem
+
+  sutar-trust:
+    container_name: sutar-trust
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-trust-engine
+      dockerfile: Dockerfile
+    ports:
+      - "4148:4148"
+    environment:
+      - PORT=4148
+    networks:
+      - rez-ecosystem
+
+  sutar-discovery:
+    container_name: sutar-discovery
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-discovery-engine
+      dockerfile: Dockerfile
+    ports:
+      - "4149:4149"
+    environment:
+      - PORT=4149
+    networks:
+      - rez-ecosystem
+
+  sutar-intent:
+    container_name: sutar-intent
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-intent-bus
+      dockerfile: Dockerfile
+    ports:
+      - "4154:4154"
+    environment:
+      - PORT=4154
+    networks:
+      - rez-ecosystem
+
+  sutar-decision:
+    container_name: sutar-decision
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-decision-engine
+      dockerfile: Dockerfile
+    ports:
+      - "4240:4240"
+    environment:
+      - PORT=4240
+    networks:
+      - rez-ecosystem
+
+  sutar-simulation:
+    container_name: sutar-simulation
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-simulation-os
+      dockerfile: Dockerfile
+    ports:
+      - "4241:4241"
+    environment:
+      - PORT=4241
+    networks:
+      - rez-ecosystem
+
+  sutar-goal:
+    container_name: sutar-goal
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-goal-os
+      dockerfile: Dockerfile
+    ports:
+      - "4242:4242"
+    environment:
+      - PORT=4242
+    networks:
+      - rez-ecosystem
+
+  sutar-network:
+    container_name: sutar-network
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-agent-network
+      dockerfile: Dockerfile
+    ports:
+      - "4243:4243"
+    environment:
+      - PORT=4243
+    networks:
+      - rez-ecosystem
+
+  sutar-marketplace:
+    container_name: sutar-marketplace
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-marketplace
+      dockerfile: Dockerfile
+    ports:
+      - "4250:4250"
+    environment:
+      - PORT=4250
+    networks:
+      - rez-ecosystem
+
+  sutar-economy:
+    container_name: sutar-economy
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-economy-os
+      dockerfile: Dockerfile
+    ports:
+      - "4251:4251"
+    environment:
+      - PORT=4251
+    networks:
+      - rez-ecosystem
+
+  sutar-contract:
+    container_name: sutar-contract
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-contract-os
+      dockerfile: Dockerfile
+    ports:
+      - "4190:4190"
+    environment:
+      - PORT=4190
+    networks:
+      - rez-ecosystem
+
+  sutar-negotiation:
+    container_name: sutar-negotiation
+    build:
+      context: ./hojai-ai/hojai-sutar-os/services/sutar-negotiation-engine
+      dockerfile: Dockerfile
+    ports:
+      - "4191:4191"
+    environment:
+      - PORT=4191
+    networks:
+      - rez-ecosystem
+
+  # ============================================
+  # VOICE AI (4760-4799)
+  # ============================================
+
+  voice-os:
+    container_name: voice-os
+    build:
+      context: ./hojai-voice-os
+      dockerfile: Dockerfile
+    ports:
+      - "4760:4760"
+    environment:
+      - PORT=4760
+    networks:
+      - rez-ecosystem
+
+  voice-agents:
+    container_name: voice-agents
+    build:
+      context: ./genie-voice-service
+      dockerfile: Dockerfile
+    ports:
+      - "4780:4780"
+    environment:
+      - PORT=4780
+      - VOICE_OS=http://voice-os:4760
+    networks:
+      - rez-ecosystem
+ depends_on:
+      - voice-os
+
+  cosmic-twin:
+    container_name: cosmic-twin
+    build:
+      context: ./hojai-ai/REZ-cosmic-twin
+      dockerfile: Dockerfile
+    ports:
+      - "4782:4782"
+    environment:
+      - PORT=4782
+    networks:
+      - rez-ecosystem
+
+  # ============================================
+  # COMPANY SERVICES
+  # ============================================
+
+  # StayOwn Hospitality (4801-4805)
+  stayown-api:
+    container_name: stayown-api
+    build:
+      context: ./StayOwn-Hospitality
+      dockerfile: Dockerfile
+    ports:
+      - "4801:4801"
+    environment:
+      - PORT=4801
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_AGENTS=http://hojai-agents:4550
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-memory
+
+  # RisnaEstate (4901-4905)
+  risnaestate-api:
+    container_name: risnaestate-api
+    build:
+      context: ./RisnaEstate
+      dockerfile: Dockerfile
+    ports:
+      - "4901:4901"
+    environment:
+      - PORT=4901
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4142
+      - SUTAR_SIMULATION=http://sutar-simulation:4241
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+      - RABTUL_PAYMENT_URL=http://rez-payment-service:4001
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-intelligence
+
+  # Nexha Commerce Network (5001-5005)
+  nexha-api:
+    container_name: nexha-api
+    build:
+      context: ./Nexha/nexha-commerce-network
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_GATEWAY=http://hojai-gateway:4500
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - HOJAI_WORKFLOWS=http://hojai-workflows:4560
+      - SUTAR_GATEWAY=http://sutar-gateway:4140
+      - SUTAR_INTENT=http://sutar-intent:4154
+      - SUTAR_DISCOVERY=http://sutar-discovery:4149
+      - SUTAR_MARKETPLACE=http://sutar-marketplace:4250
+      - SUTAR_CONTRACT=http://sutar-contract:4190
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+      - RABTUL_PAYMENT_URL=http://rez-payment-service:4001
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-gateway
+
+  # REZ Consumer
+  rez-consumer-api:
+    container_name: rez-consumer-api
+    build:
+      context: ./REZ-Consumer
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    environment:
+      - PORT=4200
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - GENIE_MEMORY=http://genie-memory:4703
+      - GENIE_RELATION=http://genie-relation:4704
+      - GENIE_BRIEFING=http://genie-briefing:4706
+      - COMMERCE_AI=http://commerce-ai:4750
+      - CUSTOMER_AI=http://customer-ai:4752
+      - MARKETING_AI=http://marketing-ai:4753
+      - FINANCIAL_AI=http://financial-ai:4754
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4142
+      - SUTAR_GOAL=http://sutar-goal:4242
+      - VOICE_OS=http://voice-os:4760
+      - VOICE_AGENTS=http://voice-agents:4780
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - genie-memory
+
+  # ============================================
+  # CORPPERKS (4720)
+  # ============================================
+
+  corpperks-api:
+    container_name: corpperks-api
+    build:
+      context: ./CorpPerks
+      dockerfile: Dockerfile
+    ports:
+      - "4720:4720"
+    environment:
+      - PORT=4720
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_GATEWAY=http://hojai-gateway:4500
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_AGENTS=http://hojai-agents:4550
+      - GENIE_MEMORY=http://genie-memory:4703
+      - GENIE_RELATION=http://genie-relation:4704
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4142
+      - SUTAR_GOAL=http://sutar-goal:4242
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-memory
+
+  # ============================================
+  # RISACARE (4800)
+  # ============================================
+
+  risacare-api:
+    container_name: risacare-api
+    build:
+      context: ./RisaCare
+      dockerfile: Dockerfile
+    ports:
+      - "4800:4800"
+    environment:
+      - PORT=4800
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_GATEWAY=http://hojai-gateway:4500
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - GENIE_MEMORY=http://genie-memory:4703
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-gateway
+
+  # ============================================
+  # KHAIRMOVE (4600-4606)
+  # ============================================
+
+  khaimove-api:
+    container_name: khaimove-api
+    build:
+      context: ./KHAIRMOVE
+      dockerfile: Dockerfile
+    ports:
+      - "4600:4600"
+    environment:
+      - PORT=4600
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - INTENT_URL=http://rez-intent-predictor:4018
+      - SIGNAL_URL=http://rez-signal-aggregator:4142
+      - FRAUD_URL=http://rez-fraud-agent:3007
+      - PREDICT_URL=http://rez-predictive-engine:4123
+      - MEMORY_URL=http://rez-memory-layer:4201
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+      - RABTUL_NOTIFY_URL=http://rez-notifications-service:4011
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+
+  # ============================================
+  # REZ MERCHANT (4100)
+  # ============================================
+
+  rez-merchant-api:
+    container_name: rez-merchant-api
+    build:
+      context: ./REZ-Merchant
+      dockerfile: Dockerfile
+    ports:
+      - "4100:4100"
+    environment:
+      - PORT=4100
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_GATEWAY=http://hojai-gateway:4500
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - COMMERCE_AI=http://commerce-ai:4750
+      - MERCHANT_AI=http://merchant-ai:4751
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4142
+      - SUTAR_DECISION=http://sutar-decision:4240
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+      - RABTUL_PAYMENT_URL=http://rez-payment-service:4001
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+      - RABTUL_ORDER_URL=http://rez-order-service:4006
+      - RABTUL_CATALOG_URL=http://rez-catalog-service:4007
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-gateway
+
+  # ============================================
+  # ADBAZAAR (4300)
+  # ============================================
+
+  adbazaar-api:
+    container_name: adbazaar-api
+    build:
+      context: ./REZ-Media
+      dockerfile: Dockerfile
+    ports:
+      - "4300:4300"
+    environment:
+      - PORT=4300
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_GATEWAY=http://hojai-gateway:4500
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - MARKETING_AI=http://marketing-ai:4753
+      - CUSTOMER_AI=http://customer-ai:4752
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4142
+      - SUTAR_DECISION=http://sutar-decision:4240
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-gateway
+
+  # ============================================
+  # LAWGENS (5100)
+  # ============================================
+
+  lawgens-api:
+    container_name: lawgens-api
+    build:
+      context: ./LawGens
+      dockerfile: Dockerfile
+    ports:
+      - "5100:5100"
+    environment:
+      - PORT=5100
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_GATEWAY=http://hojai-gateway:4500
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - HOJAI_AGENTS=http://hojai-agents:4550
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4142
+      - SUTAR_DECISION=http://sutar-decision:4240
+      - SUTAR_CONTRACT=http://sutar-contract:4190
+      - SUTAR_NEGOTIATION=http://sutar-negotiation:4191
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-gateway
+
+  # ============================================
+  # RIDZA (5200)
+  # ============================================
+
+  ridza-api:
+    container_name: ridza-api
+    build:
+      context: ./RidZa
+      dockerfile: Dockerfile
+    ports:
+      - "5200:5200"
+    environment:
+      - PORT=5200
+      - UNIFIED_HUB_URL=http://rez-unified-hub:4600
+      - HOJAI_GATEWAY=http://hojai-gateway:4500
+      - HOJAI_MEMORY=http://hojai-memory:4520
+      - HOJAI_INTELLIGENCE=http://hojai-intelligence:4530
+      - FINANCIAL_AI=http://financial-ai:4754
+      - SUTAR_TWIN_OS=http://sutar-twin-os:4142
+      - SUTAR_DECISION=http://sutar-decision:4240
+      - SUTAR_ECONOMY=http://sutar-economy:4251
+      - RABTUL_AUTH_URL=http://rez-auth-service:4002
+      - RABTUL_PAYMENT_URL=http://rez-payment-service:4001
+      - RABTUL_WALLET_URL=http://rez-wallet-service:4004
+      - FRAUD_URL=http://rez-fraud-agent:3007
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - rez-unified-hub
+      - hojai-gateway
+
+# ============================================
+# VOLUMES
+# ============================================
+
+volumes:
+  rez-mongodb-data:
+  rez-redis-data:

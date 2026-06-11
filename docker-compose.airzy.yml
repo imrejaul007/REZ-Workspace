@@ -1,0 +1,220 @@
+version: '3.8'
+
+services:
+  # Airzy Travel Core Services
+  airzy-api:
+    build: ./airzy-api
+    container_name: airzy-api
+    ports:
+      - "4500:4500"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4500/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4500
+      - SERVICE_NAME=airzy-api
+    volumes:
+      - airzy-api-data:/app/data
+
+  airzy-booking:
+    build: ./airzy-booking
+    container_name: airzy-booking
+    ports:
+      - "4501:4501"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4501/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4501
+      - SERVICE_NAME=airzy-booking
+    volumes:
+      - airzy-booking-data:/app/data
+
+  airzy-inventory:
+    build: ./airzy-inventory
+    container_name: airzy-inventory
+    ports:
+      - "4502:4502"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4502/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4502
+      - SERVICE_NAME=airzy-inventory
+    volumes:
+      - airzy-inventory-data:/app/data
+
+  airzy-payment:
+    build: ./airzy-payment
+    container_name: airzy-payment
+    ports:
+      - "4503:4503"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4503/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4503
+      - SERVICE_NAME=airzy-payment
+    volumes:
+      - airzy-payment-data:/app/data
+
+  # Airzy Extensions
+  airzy-navigation:
+    build: ./airzy-navigation
+    container_name: airzy-navigation
+    ports:
+      - "4510:4510"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4510/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4510
+      - SERVICE_NAME=airzy-navigation
+    volumes:
+      - airzy-navigation-data:/app/data
+
+  airzy-dining:
+    build: ./airzy-dining
+    container_name: airzy-dining
+    ports:
+      - "4511:4511"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4511/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4511
+      - SERVICE_NAME=airzy-dining
+    volumes:
+      - airzy-dining-data:/app/data
+
+  airzy-visa:
+    build: ./airzy-visa
+    container_name: airzy-visa
+    ports:
+      - "4512:4512"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4512/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4512
+      - SERVICE_NAME=airzy-visa
+    volumes:
+      - airzy-visa-data:/app/data
+
+  airzy-document:
+    build: ./airzy-document
+    container_name: airzy-document
+    ports:
+      - "4513:4513"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4513/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4513
+      - SERVICE_NAME=airzy-document
+    volumes:
+      - airzy-document-data:/app/data
+
+  airzy-social:
+    build: ./airzy-social
+    container_name: airzy-social
+    ports:
+      - "4514:4514"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4514/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4514
+      - SERVICE_NAME=airzy-social
+    volumes:
+      - airzy-social-data:/app/data
+
+  airzy-finance:
+    build: ./airzy-finance
+    container_name: airzy-finance
+    ports:
+      - "4515:4515"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4515/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4515
+      - SERVICE_NAME=airzy-finance
+    volumes:
+      - airzy-finance-data:/app/data
+
+networks:
+  rtnm-network:
+    driver: bridge
+
+volumes:
+  airzy-api-data:
+  airzy-booking-data:
+  airzy-inventory-data:
+  airzy-payment-data:
+  airzy-navigation-data:
+  airzy-dining-data:
+  airzy-visa-data:
+  airzy-document-data:
+  airzy-social-data:
+  airzy-finance-data:
