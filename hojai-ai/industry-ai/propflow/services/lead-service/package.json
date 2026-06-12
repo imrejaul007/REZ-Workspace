@@ -1,9 +1,0 @@
-{
-  "name": "@hojai/lead-service",
-  "version": "1.0.0",
-  "description": "Lead management service for real estate",
-  "main": "src/index.ts",
-  "dependencies": {
-    "@hojai/shared": "workspace:*"
-  }
-}

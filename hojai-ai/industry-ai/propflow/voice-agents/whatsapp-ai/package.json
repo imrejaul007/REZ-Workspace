@@ -1,9 +1,0 @@
-{
-  "name": "@hojai/whatsapp-ai",
-  "version": "1.0.0",
-  "description": "WhatsApp AI agent for real estate listings and inquiries",
-  "main": "src/index.ts",
-  "dependencies": {
-    "@hojai/shared": "workspace:*"
-  }
-}

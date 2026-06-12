@@ -1,9 +1,0 @@
-{
-  "name": "@hojai/report-service",
-  "version": "1.0.0",
-  "description": "Analytics and reporting service for real estate",
-  "main": "src/index.ts",
-  "dependencies": {
-    "@hojai/shared": "workspace:*"
-  }
-}

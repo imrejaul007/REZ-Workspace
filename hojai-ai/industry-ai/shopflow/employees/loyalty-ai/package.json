@@ -1,7 +1,0 @@
-{
-  "name": "@hojai/shopflow-loyalty-ai",
-  "version": "1.0.0",
-  "description": "Loyalty AI Agent for SHOPFLOW",
-  "main": "src/index.ts",
-  "devDependencies": { "typescript": "^5.0.0", "ts-node": "^10.9.0" }
-}

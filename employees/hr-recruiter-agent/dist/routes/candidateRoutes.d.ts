@@ -1,7 +1,0 @@
-/**
- * HR Recruiter Agent - Candidate Routes
- * Candidate management endpoints
- */
-declare const router: import("express-serve-static-core").Router;
-export default router;
-//# sourceMappingURL=candidateRoutes.d.ts.map
