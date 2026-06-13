@@ -1,0 +1,17 @@
+.dockerignore
+.git
+.gitignore
+README.md
+*.md
+coverage
+node_modules
+dist
+.env*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+*.test.ts
+*.spec.ts
+jest.config.ts
+tsconfig.json

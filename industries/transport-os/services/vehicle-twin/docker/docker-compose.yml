@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  vehicle-twin:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: vehicle-twin
+    restart: unless-stopped
+    ports:
+      - "9041:9041"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_PORT=9041
+      - MONGODB_URI=mongodb://mongodb:27017/vehicle_twin
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - LOG_LEVEL=info
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX_REQUESTS=100
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - transport-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9041/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - vehicle-twin-logs:/app/logs
+
+  mongodb:
+    image: mongo:7.0
+    container_name: vehicle-twin-mongodb
+    restart: unless-stopped
+    ports:
+      - "27027:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - transport-os-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: vehicle-twin-redis
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - transport-os-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: vehicle-twin-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - transport-os-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  transport-os-network:
+    driver: bridge
+
+volumes:
+  vehicle-twin-logs:
+  mongodb-data:
+  redis-data:
+  rabbitmq-data:

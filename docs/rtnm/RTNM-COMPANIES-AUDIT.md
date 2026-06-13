@@ -331,6 +331,68 @@ RTNM Digital (Parent Company / REZ Ecosystem)
 
 **Total: 19 services running**
 
+
+## SUTAR OS - Autonomous Economic Infrastructure (HOJAI AI)
+
+**Company:** HOJAI AI
+**Total Services:** 25
+**Status:** Production Ready
+
+### SUTAR OS 12-Layer Architecture
+
+| Layer | Service | Port | Status | Features |
+|-------|---------|------|--------|----------|
+| Layer 3 | GoalOS | 4242 | Complete | Goal decomposition, OKR system |
+| Layer 4 | Decision Engine | 4240 | Complete | Policy evaluation, Risk assessment |
+| Layer 5 | SimulationOS | 4241 | Complete | Monte Carlo, What-if analysis |
+| Layer 6 | Agent Network | 4155 | Complete | Registry, Capability matching |
+| Layer 7 | Negotiation Engine | 4191 | Complete | RFQ, Quotes, Counter-offers |
+| Layer 8 | Trust Engine | 4180 | Complete | Trust scoring, KYC |
+| Layer 9 | Contract OS | 4190 | Complete | Contracts, Digital signatures |
+| Layer 10 | Economy OS | 4251 | Complete | Karma points, Transactions |
+| Layer 11 | Marketplace | 4250 | Complete | Service listing, Ratings |
+| Layer 12 | Network Learning | 4243 | Complete | Pattern learning |
+| - | Intent Bus | 4154 | Complete | Intent capture |
+| - | Memory Bridge | 4143 | Complete | Context storage |
+| - | Gateway | 4140 | Complete | API routing |
+
+### SimulationOS Features (Port 4241)
+
+| Category | Feature | Type | Status |
+|----------|---------|------|--------|
+| Scenario Planning | Pricing | PRICING | Complete |
+| Scenario Planning | Offer | OFFER | Complete |
+| Scenario Planning | Cashback | CASHBACK | Complete |
+| Scenario Planning | Bundle | BUNDLE | Complete |
+| Forecasting | Demand | DEMAND | Complete |
+| Forecasting | Cash Flow | CASHFLOW | Complete |
+| Forecasting | Revenue | REVENUE | Complete |
+| Forecasting | Cost | COST | Complete |
+| Risk Modeling | Financial Risk | RISK | Complete |
+| Risk Modeling | Operational Risk | RISK | Complete |
+| Risk Modeling | Market Risk | RISK | Complete |
+| Risk Modeling | Compliance | COMPLIANCE | Complete |
+| Operations | Staffing | STAFFING | Complete |
+| Operations | Inventory | INVENTORY | Complete |
+| Operations | Procurement | PROCUREMENT | Complete |
+| Operations | Custom | CUSTOM | Complete |
+
+### Decision Engine Features (Port 4240)
+
+| Feature | Status |
+|---------|--------|
+| OFFER decision | Complete |
+| CASHBACK decision | Complete |
+| PERSONALIZATION decision | Complete |
+| ROUTING decision | Complete |
+| FRAUD decision | Complete |
+| PRICING decision | Complete |
+| NEXT_ACTION decision | Complete |
+| RETENTION decision | Complete |
+| APPROVAL decision | Complete |
+| RISK decision | Complete |
+
+---
 ## HOJAI SkillNet (Ports 5100-5140) - NEW
 
 **Purpose:** "Runtime + Intelligence + Learning Network for AI Skills"
@@ -960,7 +1022,69 @@ MyRisa App (4900)
 | hojai-memory-hotel | 4720 | Hotel guest memory | ✅ |
 | voice-hotel-agent | 4870 | Voice AI for hotel | ✅ |
 
-### HOJAI AI Services (3 services)
+#
+## SUTAR OS - Autonomous Economic Infrastructure (HOJAI AI)
+
+**Company:** HOJAI AI
+**Total Services:** 25
+**Status:** Production Ready
+
+### SUTAR OS 12-Layer Architecture
+
+| Layer | Service | Port | Status | Features |
+|-------|---------|------|--------|----------|
+| Layer 3 | GoalOS | 4242 | Complete | Goal decomposition, OKR system |
+| Layer 4 | Decision Engine | 4240 | Complete | Policy evaluation, Risk assessment |
+| Layer 5 | SimulationOS | 4241 | Complete | Monte Carlo, What-if analysis |
+| Layer 6 | Agent Network | 4155 | Complete | Registry, Capability matching |
+| Layer 7 | Negotiation Engine | 4191 | Complete | RFQ, Quotes, Counter-offers |
+| Layer 8 | Trust Engine | 4180 | Complete | Trust scoring, KYC |
+| Layer 9 | Contract OS | 4190 | Complete | Contracts, Digital signatures |
+| Layer 10 | Economy OS | 4251 | Complete | Karma points, Transactions |
+| Layer 11 | Marketplace | 4250 | Complete | Service listing, Ratings |
+| Layer 12 | Network Learning | 4243 | Complete | Pattern learning |
+| - | Intent Bus | 4154 | Complete | Intent capture |
+| - | Memory Bridge | 4143 | Complete | Context storage |
+| - | Gateway | 4140 | Complete | API routing |
+
+### SimulationOS Features (Port 4241)
+
+| Category | Feature | Type | Status |
+|----------|---------|------|--------|
+| Scenario Planning | Pricing | PRICING | Complete |
+| Scenario Planning | Offer | OFFER | Complete |
+| Scenario Planning | Cashback | CASHBACK | Complete |
+| Scenario Planning | Bundle | BUNDLE | Complete |
+| Forecasting | Demand | DEMAND | Complete |
+| Forecasting | Cash Flow | CASHFLOW | Complete |
+| Forecasting | Revenue | REVENUE | Complete |
+| Forecasting | Cost | COST | Complete |
+| Risk Modeling | Financial Risk | RISK | Complete |
+| Risk Modeling | Operational Risk | RISK | Complete |
+| Risk Modeling | Market Risk | RISK | Complete |
+| Risk Modeling | Compliance | COMPLIANCE | Complete |
+| Operations | Staffing | STAFFING | Complete |
+| Operations | Inventory | INVENTORY | Complete |
+| Operations | Procurement | PROCUREMENT | Complete |
+| Operations | Custom | CUSTOM | Complete |
+
+### Decision Engine Features (Port 4240)
+
+| Feature | Status |
+|---------|--------|
+| OFFER decision | Complete |
+| CASHBACK decision | Complete |
+| PERSONALIZATION decision | Complete |
+| ROUTING decision | Complete |
+| FRAUD decision | Complete |
+| PRICING decision | Complete |
+| NEXT_ACTION decision | Complete |
+| RETENTION decision | Complete |
+| APPROVAL decision | Complete |
+| RISK decision | Complete |
+
+---
+## HOJAI AI Services (3 services)
 
 | Service | Port | Purpose | Status |
 |---------|------|---------|--------|
@@ -2663,7 +2787,69 @@ app.use('/api/expert-os', expertOSRouter);
 
 ## ECOSYSTEM KEY NOTES
 
-### HOJAI AI Products (All under HOJAI AI)
+#
+## SUTAR OS - Autonomous Economic Infrastructure (HOJAI AI)
+
+**Company:** HOJAI AI
+**Total Services:** 25
+**Status:** Production Ready
+
+### SUTAR OS 12-Layer Architecture
+
+| Layer | Service | Port | Status | Features |
+|-------|---------|------|--------|----------|
+| Layer 3 | GoalOS | 4242 | Complete | Goal decomposition, OKR system |
+| Layer 4 | Decision Engine | 4240 | Complete | Policy evaluation, Risk assessment |
+| Layer 5 | SimulationOS | 4241 | Complete | Monte Carlo, What-if analysis |
+| Layer 6 | Agent Network | 4155 | Complete | Registry, Capability matching |
+| Layer 7 | Negotiation Engine | 4191 | Complete | RFQ, Quotes, Counter-offers |
+| Layer 8 | Trust Engine | 4180 | Complete | Trust scoring, KYC |
+| Layer 9 | Contract OS | 4190 | Complete | Contracts, Digital signatures |
+| Layer 10 | Economy OS | 4251 | Complete | Karma points, Transactions |
+| Layer 11 | Marketplace | 4250 | Complete | Service listing, Ratings |
+| Layer 12 | Network Learning | 4243 | Complete | Pattern learning |
+| - | Intent Bus | 4154 | Complete | Intent capture |
+| - | Memory Bridge | 4143 | Complete | Context storage |
+| - | Gateway | 4140 | Complete | API routing |
+
+### SimulationOS Features (Port 4241)
+
+| Category | Feature | Type | Status |
+|----------|---------|------|--------|
+| Scenario Planning | Pricing | PRICING | Complete |
+| Scenario Planning | Offer | OFFER | Complete |
+| Scenario Planning | Cashback | CASHBACK | Complete |
+| Scenario Planning | Bundle | BUNDLE | Complete |
+| Forecasting | Demand | DEMAND | Complete |
+| Forecasting | Cash Flow | CASHFLOW | Complete |
+| Forecasting | Revenue | REVENUE | Complete |
+| Forecasting | Cost | COST | Complete |
+| Risk Modeling | Financial Risk | RISK | Complete |
+| Risk Modeling | Operational Risk | RISK | Complete |
+| Risk Modeling | Market Risk | RISK | Complete |
+| Risk Modeling | Compliance | COMPLIANCE | Complete |
+| Operations | Staffing | STAFFING | Complete |
+| Operations | Inventory | INVENTORY | Complete |
+| Operations | Procurement | PROCUREMENT | Complete |
+| Operations | Custom | CUSTOM | Complete |
+
+### Decision Engine Features (Port 4240)
+
+| Feature | Status |
+|---------|--------|
+| OFFER decision | Complete |
+| CASHBACK decision | Complete |
+| PERSONALIZATION decision | Complete |
+| ROUTING decision | Complete |
+| FRAUD decision | Complete |
+| PRICING decision | Complete |
+| NEXT_ACTION decision | Complete |
+| RETENTION decision | Complete |
+| APPROVAL decision | Complete |
+| RISK decision | Complete |
+
+---
+## HOJAI AI Products (All under HOJAI AI)
 - Genie Voice (Personal AI - merged from Razo)
 - Shab AI (Family Intelligence)
 - REZ Intelligence (Central AI/ML)

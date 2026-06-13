@@ -1,0 +1,99 @@
+# Rider Twin Service Docker Compose
+# Full stack for development and testing
+
+version: '3.8'
+
+services:
+  # Rider Twin Service
+  rider-twin:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: rider-twin
+    ports:
+      - "9050:9050"
+    environment:
+      - NODE_ENV=development
+      - PORT=9050
+      - LOG_LEVEL=debug
+      - CORS_ORIGINS=*
+      - EVENT_BUS_URL=http://rez-event-bus:4025
+      - TWINOS_URL=http://sutar-twin-os:4142
+    depends_on:
+      - rez-event-bus
+      - sutar-twin-os
+    networks:
+      - transport-os-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Development version with hot reload
+  rider-twin-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: rider-twin-dev
+    ports:
+      - "9050:9050"
+      - "9051:9051"  # Debug port
+    environment:
+      - NODE_ENV=development
+      - PORT=9050
+      - LOG_LEVEL=debug
+      - CORS_ORIGINS=*
+    volumes:
+      - ../src:/app/src
+    networks:
+      - transport-os-network
+    profiles:
+      - dev
+
+  # REZ Event Bus (for integration)
+  rez-event-bus:
+    image: node:20-alpine
+    container_name: rez-event-bus
+    working_dir: /app
+    command: >
+      sh -c "npm init -y && npm install express cors &&
+             echo 'import express from \"express\"; import cors from \"cors\";
+             const app = express(); app.use(cors()); app.use(express.json());
+             app.get(\"/health\", (req, res) => res.json({status:\"healthy\"}));
+             app.listen(4025, () => console.log(\"Event Bus running on 4025\"));' > index.js
+             && node index.js"
+    ports:
+      - "4025:4025"
+    networks:
+      - transport-os-network
+    profiles:
+      - with-dependencies
+
+  # SUTAR Twin OS (for integration)
+  sutar-twin-os:
+    image: node:20-alpine
+    container_name: sutar-twin-os
+    working_dir: /app
+    command: >
+      sh -c "npm init -y && npm install express cors &&
+             echo 'import express from \"express\"; import cors from \"cors\";
+             const app = express(); app.use(cors()); app.use(express.json());
+             app.get(\"/health\", (req, res) => res.json({status:\"healthy\"}));
+             app.listen(4142, () => console.log(\"Twin OS running on 4142\"));' > index.js
+             && node index.js"
+    ports:
+      - "4142:4142"
+    networks:
+      - transport-os-network
+    profiles:
+      - with-dependencies
+
+networks:
+  transport-os-network:
+    driver: bridge
+
+volumes:
+  rider-twin-data:

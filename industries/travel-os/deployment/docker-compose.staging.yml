@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: travel-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: traveladmin
+      MONGO_INITDB_ROOT_PASSWORD: travelpass123
+      MONGO_INITDB_DATABASE: travel_os
+    ports:
+      - "27038:27017"
+  traveler-twin-service:
+    build: ./services/traveler-twin-service
+    container_name: travel-traveler-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3130
+      MONGODB_URI: mongodb://traveladmin:travelpass123@mongodb:27017/travel_os?authSource=admin
+    ports:
+      - "3130:3130"
+  nginx:
+    image: nginx:alpine
+    container_name: travel-os-nginx
+    ports:
+      - "3131:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: travel-rez-crm
+    environment:
+      PORT: 3100
+      CRM_PROVIDER: amadeus
+    ports:
+      - "3100:3100"

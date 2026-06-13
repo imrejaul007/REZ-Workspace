@@ -1,0 +1,686 @@
+# Government OS - Kubernetes Deployment
+# Production-ready Kubernetes manifests for staging/production
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: citizen-twin-service
+  namespace: government-os
+  labels:
+    app: citizen-twin-service
+    tier: service
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: citizen-twin-service
+  template:
+    metadata:
+      labels:
+        app: citizen-twin-service
+        tier: service
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: government-os-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: citizen-twin-service
+          image: government-os/citizen-twin-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3001
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3001"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: COSMOS_DB_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: cosmos-db-endpoint
+            - name: COSMOS_DB_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: cosmos-db-key
+            - name: SERVICE_BUS_CONNECTION
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: service-bus-connection
+            - name: SF_INSTANCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: sf-instance-url
+            - name: SF_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: sf-client-id
+            - name: SF_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: sf-client-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+      volumes:
+        - name: logs
+          emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - citizen-twin-service
+                topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-twin-service
+  namespace: government-os
+  labels:
+    app: service-twin-service
+    tier: service
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: service-twin-service
+  template:
+    metadata:
+      labels:
+        app: service-twin-service
+        tier: service
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3002"
+    spec:
+      serviceAccountName: government-os-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: service-twin-service
+          image: government-os/service-twin-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3002
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3002"
+            - name: COSMOS_DB_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: cosmos-db-endpoint
+            - name: COSMOS_DB_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: cosmos-db-key
+            - name: SERVICE_BUS_CONNECTION
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: service-bus-connection
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: permit-twin-service
+  namespace: government-os
+  labels:
+    app: permit-twin-service
+    tier: service
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: permit-twin-service
+  template:
+    metadata:
+      labels:
+        app: permit-twin-service
+        tier: service
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3003"
+    spec:
+      serviceAccountName: government-os-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: permit-twin-service
+          image: government-os/permit-twin-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3003
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3003"
+            - name: COSMOS_DB_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: cosmos-db-endpoint
+            - name: COSMOS_DB_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: cosmos-db-key
+            - name: SERVICE_BUS_CONNECTION
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: service-bus-connection
+          resources:
+            requests:
+              cpu: 150m
+              memory: 256Mi
+            limits:
+              cpu: 750m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compliance-twin-service
+  namespace: government-os
+  labels:
+    app: compliance-twin-service
+    tier: service
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: compliance-twin-service
+  template:
+    metadata:
+      labels:
+        app: compliance-twin-service
+        tier: service
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3004"
+    spec:
+      serviceAccountName: government-os-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: compliance-twin-service
+          image: government-os/compliance-twin-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3004
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3004"
+            - name: COSMOS_DB_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: cosmos-db-endpoint
+            - name: COSMOS_DB_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: cosmos-db-key
+            - name: SERVICE_BUS_CONNECTION
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: service-bus-connection
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+# Agent Deployments
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-navigator
+  namespace: government-os
+  labels:
+    app: service-navigator
+    tier: agent
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: service-navigator
+  template:
+    metadata:
+      labels:
+        app: service-navigator
+        tier: agent
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4001"
+    spec:
+      serviceAccountName: government-os-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: service-navigator
+          image: government-os/service-navigator:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4001
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4001"
+            - name: CITIZEN_TWIN_SERVICE_URL
+              value: "http://citizen-twin-service:3001"
+            - name: SERVICE_TWIN_SERVICE_URL
+              value: "http://service-twin-service:3002"
+            - name: PERMIT_TWIN_SERVICE_URL
+              value: "http://permit-twin-service:3003"
+            - name: COMPLIANCE_TWIN_SERVICE_URL
+              value: "http://compliance-twin-service:3004"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application-processor
+  namespace: government-os
+  labels:
+    app: application-processor
+    tier: agent
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: application-processor
+  template:
+    metadata:
+      labels:
+        app: application-processor
+        tier: agent
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4002"
+    spec:
+      serviceAccountName: government-os-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: application-processor
+          image: government-os/application-processor:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4002
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4002"
+            - name: PERMIT_TWIN_SERVICE_URL
+              value: "http://permit-twin-service:3003"
+            - name: CITIZEN_TWIN_SERVICE_URL
+              value: "http://citizen-twin-service:3001"
+            - name: COMPLIANCE_TWIN_SERVICE_URL
+              value: "http://compliance-twin-service:3004"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-agent:4004"
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+            limits:
+              cpu: 1500m
+              memory: 2Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compliance-checker
+  namespace: government-os
+  labels:
+    app: compliance-checker
+    tier: agent
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: compliance-checker
+  template:
+    metadata:
+      labels:
+        app: compliance-checker
+        tier: agent
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4003"
+    spec:
+      serviceAccountName: government-os-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: compliance-checker
+          image: government-os/compliance-checker:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4003
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4003"
+            - name: COMPLIANCE_TWIN_SERVICE_URL
+              value: "http://compliance-twin-service:3004"
+            - name: PERMIT_TWIN_SERVICE_URL
+              value: "http://permit-twin-service:3003"
+            - name: CITIZEN_TWIN_SERVICE_URL
+              value: "http://citizen-twin-service:3001"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-agent
+  namespace: government-os
+  labels:
+    app: notification-agent
+    tier: agent
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: notification-agent
+  template:
+    metadata:
+      labels:
+        app: notification-agent
+        tier: agent
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4004"
+    spec:
+      serviceAccountName: government-os-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: notification-agent
+          image: government-os/notification-agent:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4004
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4004"
+            - name: CITIZEN_TWIN_SERVICE_URL
+              value: "http://citizen-twin-service:3001"
+            - name: EMAIL_PROVIDER
+              value: "ses"
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: government-os-config
+                  key: aws-region
+            - name: EMAIL_FROM_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: government-os-config
+                  key: email-from-address
+            - name: TWILIO_ACCOUNT_SID
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: twilio-account-sid
+            - name: TWILIO_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: government-os-secrets
+                  key: twilio-auth-token
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5

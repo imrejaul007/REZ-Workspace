@@ -1,0 +1,1 @@
+export { getEventEmitter, resetEventEmitter, type TwinEventEmitter } from './twin-event-emitter.js';

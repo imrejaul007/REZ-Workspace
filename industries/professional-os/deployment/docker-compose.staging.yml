@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: professional-os-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: proadmin
+      MONGO_INITDB_ROOT_PASSWORD: propass123
+      MONGO_INITDB_DATABASE: professional_os
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27033:27017"
+    networks:
+      - professional-os-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: professional-os-redis
+    restart: unless-stopped
+    ports:
+      - "6388:6379"
+    networks:
+      - professional-os-network
+
+  client-twin-service:
+    build:
+      context: ./services/client-twin-service
+      dockerfile: Dockerfile
+    container_name: pro-client-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3110
+      MONGODB_URI: mongodb://proadmin:propass123@mongodb:27017/professional_os?authSource=admin
+    ports:
+      - "3110:3110"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - professional-os-network
+
+  project-manager-agent:
+    build:
+      context: ./agents/project-manager
+      dockerfile: Dockerfile
+    container_name: pro-project-manager
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3115
+    ports:
+      - "3115:3115"
+    networks:
+      - professional-os-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: professional-os-nginx
+    restart: unless-stopped
+    ports:
+      - "3111:80"
+    depends_on:
+      - client-twin-service
+    networks:
+      - professional-os-network
+
+  rez-crm-connector:
+    build:
+      context: ../core/rez-crm-connector
+      dockerfile: Dockerfile
+    container_name: professional-rez-crm
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3095
+      MONGODB_URI: mongodb://proadmin:propass123@mongodb:27017/professional_os?authSource=admin
+      CRM_PROVIDER: hubspot
+    ports:
+      - "3095:3095"
+    depends_on:
+      - mongodb
+    networks:
+      - professional-os-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  professional-os-network:
+    driver: bridge

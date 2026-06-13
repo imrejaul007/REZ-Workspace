@@ -1,0 +1,277 @@
+# RTMN Industry OS - Docker Compose
+# Unified platform for 24 industries with Digital Twins, AI Agents, and Business Copilot
+
+version: '3.8'
+
+services:
+  # ============================================
+  # CORE INFRASTRUCTURE
+  # ============================================
+  
+  redis:
+    image: redis:7-alpine
+    container_name: rtmn-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: rtmn-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: rtmn_password
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # API GATEWAY
+  # ============================================
+  
+  api-gateway:
+    build:
+      context: ./core/api-gateway
+      dockerfile: Dockerfile
+    container_name: rtmn-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-rtmn-secret-change-in-production}
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rtmn-network
+
+  # ============================================
+  # CORE SERVICES
+  # ============================================
+  
+  twinos-hub:
+    build:
+      context: ./core/twinos-hub
+      dockerfile: Dockerfile
+    container_name: rtmn-twinos-hub
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rtmn-network
+
+  agentos-hub:
+    build:
+      context: ./core/agentos-hub
+      dockerfile: Dockerfile
+    container_name: rtmn-agentos-hub
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rtmn-network
+
+  business-copilot:
+    build:
+      context: ./core/business-copilot
+      dockerfile: Dockerfile
+    container_name: rtmn-business-copilot
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - REDIS_URL=redis:6379
+      - NODE_ENV=production
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rtmn-network
+
+  rez-crm-connector:
+    build:
+      context: ./core/rez-crm-connector
+      dockerfile: Dockerfile
+    container_name: rtmn-rez-crm
+    ports:
+      - "4003:4003"
+    environment:
+      - PORT=4003
+      - REDIS_URL=redis://redis:6379
+      - MONGODB_URI=mongodb://admin:rtmn_password@mongodb:27017
+      - NODE_ENV=production
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rtmn-network
+
+  # ============================================
+  # INDUSTRY OS SERVICES (Sample - Enable as needed)
+  # ============================================
+  
+  legal-os:
+    build:
+      context: ./industries/legal-os
+      dockerfile: Dockerfile
+    container_name: rtmn-legal-os
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - REDIS_URL=redis://redis:6379
+      - MONGODB_URI=mongodb://admin:rtmn_password@mongodb:27017
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - rtmn-network
+
+  healthcare-os:
+    build:
+      context: ./industries/healthcare-os
+      dockerfile: Dockerfile
+    container_name: rtmn-healthcare-os
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - REDIS_URL=redis://redis:6379
+      - MONGODB_URI=mongodb://admin:rtmn_password@mongodb:27017
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - rtmn-network
+
+  finance-os:
+    build:
+      context: ./industries/finance-os
+      dockerfile: Dockerfile
+    container_name: rtmn-finance-os
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - REDIS_URL=redis://redis:6379
+      - MONGODB_URI=mongodb://admin:rtmn_password@mongodb:27017
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - rtmn-network
+
+  retail-os:
+    build:
+      context: ./industries/retail-os
+      dockerfile: Dockerfile
+    container_name: rtmn-retail-os
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - REDIS_URL=redis://redis:6379
+      - MONGODB_URI=mongodb://admin:rtmn_password@mongodb:27017
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - rtmn-network
+
+  # ============================================
+  # NGINX REVERSE PROXY (Optional)
+  # ============================================
+  
+  nginx:
+    image: nginx:alpine
+    container_name: rtmn-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deployment/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api-gateway
+    networks:
+      - rtmn-network
+    profiles:
+      - production
+
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  redis_data:
+    driver: local
+  mongo_data:
+    driver: local
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  rtmn-network:
+    driver: bridge

@@ -1,0 +1,759 @@
+# Home Services OS - Kubernetes Deployment
+# Production Kubernetes manifests for staging/production deployment
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homeservices
+  labels:
+    name: homeservices
+    environment: staging
+
+---
+# ConfigMap for shared configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homeservices-config
+  namespace: homeservices
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  CRM_PROVIDER: "housecallpro"
+  DEFAULT_SLOT_DURATION: "120"
+  BUFFER_TIME_BETWEEN_JOBS: "30"
+  FOLLOW_UP_DELAY_HOURS: "24"
+  TAX_RATE: "0.08"
+  MINIMUM_CHARGE: "75"
+  LABOR_RATE_PER_HOUR: "85"
+
+---
+# Secret for sensitive data (should be managed via external secrets in production)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: homeservices-secrets
+  namespace: homeservices
+type: Opaque
+stringData:
+  # These should be populated from external secrets (e.g., Vault, AWS Secrets Manager)
+  HOUSECALLPRO_API_KEY: "your-api-key-here"
+  JOBBER_API_KEY: "your-api-key-here"
+  REDIS_PASSWORD: "redis-secure-password"
+  MONGO_PASSWORD: "mongo-secure-password"
+  RABBITMQ_PASSWORD: "rabbitmq-secure-password"
+  JWT_SECRET: "your-jwt-secret-here"
+
+---
+# ===========================================
+# Customer Twin Service
+# ===========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-twin-service
+  namespace: homeservices
+  labels:
+    app: customer-twin-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer-twin-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: customer-twin-service
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: customer-twin-service
+          image: homeservices/customer-twin-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3001
+              name: http
+          env:
+            - name: PORT
+              value: "3001"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: NODE_ENV
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: LOG_LEVEL
+            - name: HOUSECALLPRO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homeservices-secrets
+                  key: HOUSECALLPRO_API_KEY
+            - name: JOBBER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homeservices-secrets
+                  key: JOBBER_API_KEY
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - customer-twin-service
+                topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-twin-service
+  namespace: homeservices
+  labels:
+    app: customer-twin-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3001
+      targetPort: 3001
+      protocol: TCP
+      name: http
+  selector:
+    app: customer-twin-service
+
+---
+# ===========================================
+# Job Twin Service
+# ===========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-twin-service
+  namespace: homeservices
+  labels:
+    app: job-twin-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: job-twin-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: job-twin-service
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3002"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: job-twin-service
+          image: homeservices/job-twin-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3002
+              name: http
+          env:
+            - name: PORT
+              value: "3002"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: NODE_ENV
+            - name: HOUSECALLPRO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homeservices-secrets
+                  key: HOUSECALLPRO_API_KEY
+            - name: JOBBER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homeservices-secrets
+                  key: JOBBER_API_KEY
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - job-twin-service
+                topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-twin-service
+  namespace: homeservices
+  labels:
+    app: job-twin-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3002
+      targetPort: 3002
+      protocol: TCP
+      name: http
+  selector:
+    app: job-twin-service
+
+---
+# ===========================================
+# Technician Twin Service
+# ===========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: technician-twin-service
+  namespace: homeservices
+  labels:
+    app: technician-twin-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: technician-twin-service
+  template:
+    metadata:
+      labels:
+        app: technician-twin-service
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3003"
+    spec:
+      containers:
+        - name: technician-twin-service
+          image: homeservices/technician-twin-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3003
+          env:
+            - name: PORT
+              value: "3003"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: NODE_ENV
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: technician-twin-service
+  namespace: homeservices
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3003
+      targetPort: 3003
+      protocol: TCP
+  selector:
+    app: technician-twin-service
+
+---
+# ===========================================
+# Inventory Twin Service
+# ===========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-twin-service
+  namespace: homeservices
+  labels:
+    app: inventory-twin-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: inventory-twin-service
+  template:
+    metadata:
+      labels:
+        app: inventory-twin-service
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3004"
+    spec:
+      containers:
+        - name: inventory-twin-service
+          image: homeservices/inventory-twin-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3004
+          env:
+            - name: PORT
+              value: "3004"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: NODE_ENV
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-twin-service
+  namespace: homeservices
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3004
+      targetPort: 3004
+      protocol: TCP
+  selector:
+    app: inventory-twin-service
+
+---
+# ===========================================
+# Dispatcher Agent
+# ===========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dispatcher-agent
+  namespace: homeservices
+  labels:
+    app: dispatcher-agent
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dispatcher-agent
+  template:
+    metadata:
+      labels:
+        app: dispatcher-agent
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: dispatcher-agent
+          image: homeservices/dispatcher-agent:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: NODE_ENV
+            - name: JOB_SERVICE_URL
+              value: "http://job-twin-service:3002"
+            - name: TECHNICIAN_SERVICE_URL
+              value: "http://technician-twin-service:3003"
+            - name: CUSTOMER_SERVICE_URL
+              value: "http://customer-twin-service:3001"
+            - name: AUTO_ASSIGN_ENABLED
+              value: "true"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 750m
+              memory: 768Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dispatcher-agent
+  namespace: homeservices
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: dispatcher-agent
+
+---
+# ===========================================
+# Quote Generator Agent
+# ===========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quote-generator-agent
+  namespace: homeservices
+  labels:
+    app: quote-generator-agent
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quote-generator-agent
+  template:
+    metadata:
+      labels:
+        app: quote-generator-agent
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: quote-generator-agent
+          image: homeservices/quote-generator-agent:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: NODE_ENV
+            - name: JOB_SERVICE_URL
+              value: "http://job-twin-service:3002"
+            - name: CUSTOMER_SERVICE_URL
+              value: "http://customer-twin-service:3001"
+            - name: LABOR_RATE_PER_HOUR
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: LABOR_RATE_PER_HOUR
+            - name: TAX_RATE
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: TAX_RATE
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quote-generator-agent
+  namespace: homeservices
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: quote-generator-agent
+
+---
+# ===========================================
+# Scheduling Agent
+# ===========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduling-agent
+  namespace: homeservices
+  labels:
+    app: scheduling-agent
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scheduling-agent
+  template:
+    metadata:
+      labels:
+        app: scheduling-agent
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: scheduling-agent
+          image: homeservices/scheduling-agent:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: NODE_ENV
+            - name: JOB_SERVICE_URL
+              value: "http://job-twin-service:3002"
+            - name: TECHNICIAN_SERVICE_URL
+              value: "http://technician-twin-service:3003"
+            - name: DEFAULT_SLOT_DURATION
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: DEFAULT_SLOT_DURATION
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scheduling-agent
+  namespace: homeservices
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: scheduling-agent
+
+---
+# ===========================================
+# Customer Retention Agent
+# ===========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-retention-agent
+  namespace: homeservices
+  labels:
+    app: customer-retention-agent
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer-retention-agent
+  template:
+    metadata:
+      labels:
+        app: customer-retention-agent
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: customer-retention-agent
+          image: homeservices/customer-retention-agent:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: NODE_ENV
+            - name: CUSTOMER_SERVICE_URL
+              value: "http://customer-twin-service:3001"
+            - name: JOB_SERVICE_URL
+              value: "http://job-twin-service:3002"
+            - name: FOLLOW_UP_DELAY_HOURS
+              valueFrom:
+                configMapKeyRef:
+                  name: homeservices-config
+                  key: FOLLOW_UP_DELAY_HOURS
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-retention-agent
+  namespace: homeservices
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: customer-retention-agent

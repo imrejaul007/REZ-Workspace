@@ -1,0 +1,61 @@
+# AgentOS Hub - Kubernetes ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agentos-config
+  namespace: agentos-hub
+data:
+  kafka-brokers: "kafka:9092"
+  redis-host: "redis"
+  redis-port: "6379"
+  log-level: "INFO"
+  max-concurrent-agents: "1000"
+  heartbeat-timeout: "60"
+  workflow-timeout: "3600"
+---
+# AgentOS Hub - Kubernetes Secrets
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agentos-secrets
+  namespace: agentos-hub
+type: Opaque
+stringData:
+  redis-url: "redis://:password@redis:6379/0"
+  postgres-url: "postgresql://agentos:password@postgres:5432/agentos"
+  jwt-secret: "your-super-secret-jwt-key-change-in-production"
+---
+# AgentOS Hub - Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agentos-hub
+  namespace: agentos-hub
+---
+# AgentOS Hub - Role and RoleBinding for RBAC
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: agentos-hub-role
+  namespace: agentos-hub
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: agentos-hub-rolebinding
+  namespace: agentos-hub
+subjects:
+  - kind: ServiceAccount
+    name: agentos-hub
+    namespace: agentos-hub
+roleRef:
+  kind: Role
+  name: agentos-hub-role
+  apiGroup: rbac.authorization.k8s.io

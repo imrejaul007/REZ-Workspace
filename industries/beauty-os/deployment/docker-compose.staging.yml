@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: beauty-os-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: beautyadmin
+      MONGO_INITDB_ROOT_PASSWORD: beautypass123
+      MONGO_INITDB_DATABASE: beauty_os
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27032:27017"
+    networks:
+      - beauty-os-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: beauty-os-redis
+    restart: unless-stopped
+    ports:
+      - "6387:6379"
+    networks:
+      - beauty-os-network
+
+  client-twin-service:
+    build:
+      context: ./services/client-twin-service
+      dockerfile: Dockerfile
+    container_name: beauty-client-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3100
+      MONGODB_URI: mongodb://beautyadmin:beautypass123@mongodb:27017/beauty_os?authSource=admin
+    ports:
+      - "3100:3100"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - beauty-os-network
+
+  booking-agent:
+    build:
+      context: ./agents/booking-agent
+      dockerfile: Dockerfile
+    container_name: beauty-booking-agent
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3105
+    ports:
+      - "3105:3105"
+    networks:
+      - beauty-os-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: beauty-os-nginx
+    restart: unless-stopped
+    ports:
+      - "3101:80"
+    depends_on:
+      - client-twin-service
+    networks:
+      - beauty-os-network
+
+  rez-crm-connector:
+    build:
+      context: ../core/rez-crm-connector
+      dockerfile: Dockerfile
+    container_name: beauty-rez-crm
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3094
+      MONGODB_URI: mongodb://beautyadmin:beautypass123@mongodb:27017/beauty_os?authSource=admin
+      CRM_PROVIDER: square
+    ports:
+      - "3094:3094"
+    depends_on:
+      - mongodb
+    networks:
+      - beauty-os-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  beauty-os-network:
+    driver: bridge

@@ -1,0 +1,88 @@
+# Driver Twin Service Docker Compose
+# Part of Transport OS Digital Twin Services
+
+version: '3.8'
+
+services:
+  driver-twin-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: driver-twin-service
+    ports:
+      - "9047:9047"
+    environment:
+      - PORT=9047
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/driver_twin
+      - REDIS_URL=redis://redis:6379
+      - API_KEY=${DRIVER_TWIN_API_KEY:-driver-twin-api-key}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-internal-token}
+      - RTNM_GATEWAY_URL=${RTNM_GATEWAY_URL:-http://rez-unified-hub:4600}
+      - KHAIRMOVE_FLEET_URL=${KHAIRMOVE_FLEET_URL:-http://khairmove-fleet:9044}
+      - KHAIRMOVE_DRIVER_URL=${KHAIRMOVE_DRIVER_URL:-http://khairmove-driver:9047}
+      - DISPATCH_SERVICE_URL=${DISPATCH_SERVICE_URL:-http://dispatch:9046}
+      - VEHICLE_TWIN_URL=${VEHICLE_TWIN_URL:-http://vehicle-twin:9044}
+      - FLEET_TWIN_URL=${FLEET_TWIN_URL:-http://fleet-twin:9045}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:8080}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - transport-os-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9047/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - driver-twin-data:/app/data
+
+  # Local dependencies (for standalone development)
+  mongodb:
+    image: mongo:6
+    container_name: driver-twin-mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=driver_twin
+    volumes:
+      - driver-twin-mongo-data:/data/db
+    networks:
+      - transport-os-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: driver-twin-redis
+    command: redis-server --appendonly yes --requirepass password
+    volumes:
+      - driver-twin-redis-data:/data
+    networks:
+      - transport-os-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "password", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  transport-os-network:
+    driver: bridge
+
+volumes:
+  driver-twin-data:
+  driver-twin-mongo-data:
+  driver-twin-redis-data:

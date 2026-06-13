@@ -1,0 +1,314 @@
+# Kubernetes Services for Home Services OS
+# Service definitions for internal and external access
+
+---
+# Customer Twin Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-twin-service
+  namespace: homeservices
+  labels:
+    app: customer-twin-service
+    tier: backend
+  annotations:
+    description: "Customer Twin Service - Homeowner profiles and properties"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001
+      protocol: TCP
+  selector:
+    app: customer-twin-service
+
+---
+# Job Twin Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-twin-service
+  namespace: homeservices
+  labels:
+    app: job-twin-service
+    tier: backend
+  annotations:
+    description: "Job Twin Service - Service requests and quotes"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+      protocol: TCP
+  selector:
+    app: job-twin-service
+
+---
+# Technician Twin Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: technician-twin-service
+  namespace: homeservices
+  labels:
+    app: technician-twin-service
+    tier: backend
+  annotations:
+    description: "Technician Twin Service - Tech profiles and availability"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3003
+      targetPort: 3003
+      protocol: TCP
+  selector:
+    app: technician-twin-service
+
+---
+# Inventory Twin Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-twin-service
+  namespace: homeservices
+  labels:
+    app: inventory-twin-service
+    tier: backend
+  annotations:
+    description: "Inventory Twin Service - Parts and equipment"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3004
+      targetPort: 3004
+      protocol: TCP
+  selector:
+    app: inventory-twin-service
+
+---
+# Dispatcher Agent
+apiVersion: v1
+kind: Service
+metadata:
+  name: dispatcher-agent
+  namespace: homeservices
+  labels:
+    app: dispatcher-agent
+    tier: backend
+  annotations:
+    description: "Dispatcher Agent - Job assignment and routing"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: dispatcher-agent
+
+---
+# Quote Generator Agent
+apiVersion: v1
+kind: Service
+metadata:
+  name: quote-generator-agent
+  namespace: homeservices
+  labels:
+    app: quote-generator-agent
+    tier: backend
+  annotations:
+    description: "Quote Generator Agent - Pricing estimates"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: quote-generator-agent
+
+---
+# Scheduling Agent
+apiVersion: v1
+kind: Service
+metadata:
+  name: scheduling-agent
+  namespace: homeservices
+  labels:
+    app: scheduling-agent
+    tier: backend
+  annotations:
+    description: "Scheduling Agent - Appointment booking"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: scheduling-agent
+
+---
+# Customer Retention Agent
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-retention-agent
+  namespace: homeservices
+  labels:
+    app: customer-retention-agent
+    tier: backend
+  annotations:
+    description: "Customer Retention Agent - Follow-up and loyalty"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: customer-retention-agent
+
+---
+# API Gateway Service (nginx)
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: homeservices
+  labels:
+    app: api-gateway
+    tier: frontend
+  annotations:
+    description: "API Gateway - Nginx reverse proxy"
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+  selector:
+    app: api-gateway
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: homeservices
+  labels:
+    app: redis
+    tier: cache
+  annotations:
+    description: "Redis Cache"
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      protocol: TCP
+  selector:
+    app: redis
+
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: homeservices
+  labels:
+    app: mongodb
+    tier: database
+  annotations:
+    description: "MongoDB Database"
+spec:
+  type: ClusterIP
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: 27017
+      protocol: TCP
+  selector:
+    app: mongodb
+
+---
+# RabbitMQ Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: homeservices
+  labels:
+    app: rabbitmq
+    tier: messaging
+  annotations:
+    description: "RabbitMQ Message Queue"
+spec:
+  type: ClusterIP
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: 5672
+      protocol: TCP
+    - name: management
+      port: 15672
+      targetPort: 15672
+      protocol: TCP
+  selector:
+    app: rabbitmq
+
+---
+# Prometheus Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: homeservices
+  labels:
+    app: prometheus
+    tier: monitoring
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  selector:
+    app: prometheus
+
+---
+# Grafana Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: homeservices
+  labels:
+    app: grafana
+    tier: monitoring
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: grafana

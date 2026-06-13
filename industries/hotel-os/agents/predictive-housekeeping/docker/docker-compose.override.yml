@@ -1,0 +1,43 @@
+version: '3.8'
+
+# Override file for development - includes all supporting services
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+services:
+  predictive-housekeeping:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: predictive-housekeeping-dev
+    ports:
+      - "8446:8446"
+    environment:
+      - NODE_ENV=development
+      - PORT=8446
+      - MONGODB_URI=mongodb://mongodb:27017/predictive_housekeeping_dev
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - SERVICE_NAME=predictive-housekeeping
+      - SERVICE_VERSION=1.0.0-dev
+      - LOG_LEVEL=debug
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+    volumes:
+      - ../src:/app/src:ro
+      - ../tests:/app/tests:ro
+    command: npm run dev
+
+  mongodb:
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=predictive_housekeeping_dev
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    ports:
+      - "5672:5672"
+      - "15672:15672"

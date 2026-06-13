@@ -1,0 +1,274 @@
+version: '3.8'
+
+services:
+  # MongoDB for Legal OS
+  mongodb:
+    image: mongo:7.0
+    container_name: legal-os-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-legaladmin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-legalpass123}
+      MONGO_INITDB_DATABASE: legal_os
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - "27027:27017"
+    networks:
+      - legal-os-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: legal-os-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6383:6379"
+    networks:
+      - legal-os-network
+
+  # Client Twin Service
+  client-twin-service:
+    build:
+      context: ./services/client-twin-service
+      dockerfile: Dockerfile
+    container_name: legal-client-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3000
+      MONGODB_URI: mongodb://legaladmin:legalpass123@mongodb:27017/legal_os?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_NAME: client-twin-service
+    ports:
+      - "3010:3000"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - legal-os-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Case Twin Service
+  case-twin-service:
+    build:
+      context: ./services/case-twin-service
+      dockerfile: Dockerfile
+    container_name: legal-case-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3001
+      MONGODB_URI: mongodb://legaladmin:legalpass123@mongodb:27017/legal_os?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_NAME: case-twin-service
+    ports:
+      - "3011:3001"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - legal-os-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Document Twin Service
+  document-twin-service:
+    build:
+      context: ./services/document-twin-service
+      dockerfile: Dockerfile
+    container_name: legal-document-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3002
+      MONGODB_URI: mongodb://legaladmin:legalpass123@mongodb:27017/legal_os?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_NAME: document-twin-service
+      DOCUMENT_UPLOAD_DIR: /data/legal-documents
+    volumes:
+      - document_storage:/data/legal-documents
+    ports:
+      - "3012:3002"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - legal-os-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Calendar Twin Service
+  calendar-twin-service:
+    build:
+      context: ./services/calendar-twin-service
+      dockerfile: Dockerfile
+    container_name: legal-calendar-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3003
+      MONGODB_URI: mongodb://legaladmin:legalpass123@mongodb:27017/legal_os?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_NAME: calendar-twin-service
+    ports:
+      - "3013:3003"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - legal-os-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Case Research Agent
+  case-research-agent:
+    build:
+      context: ./agents/case-research-agent
+      dockerfile: Dockerfile
+    container_name: legal-case-research-agent
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3015
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_NAME: case-research-agent
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    ports:
+      - "3015:3015"
+    depends_on:
+      - redis
+    networks:
+      - legal-os-network
+
+  # Document Draft Agent
+  document-draft-agent:
+    build:
+      context: ./agents/document-draft-agent
+      dockerfile: Dockerfile
+    container_name: legal-document-draft-agent
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3016
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_NAME: document-draft-agent
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    ports:
+      - "3016:3016"
+    depends_on:
+      - redis
+    networks:
+      - legal-os-network
+
+  # Billing Agent
+  billing-agent:
+    build:
+      context: ./agents/billing-agent
+      dockerfile: Dockerfile
+    container_name: legal-billing-agent
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3017
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_NAME: billing-agent
+    ports:
+      - "3017:3017"
+    depends_on:
+      - redis
+      - mongodb
+    networks:
+      - legal-os-network
+
+  # Compliance Agent
+  compliance-agent:
+    build:
+      context: ./agents/compliance-agent
+      dockerfile: Dockerfile
+    container_name: legal-compliance-agent
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3018
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_NAME: compliance-agent
+    ports:
+      - "3018:3018"
+    depends_on:
+      - redis
+    networks:
+      - legal-os-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: legal-os-nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs:/var/log/nginx
+    ports:
+      - "3014:80"
+    depends_on:
+      - client-twin-service
+      - case-twin-service
+      - document-twin-service
+      - calendar-twin-service
+    networks:
+      - legal-os-network
+
+  # REZ CRM Connector (HubSpot/Zoho)
+  rez-crm-connector:
+    build:
+      context: ../core/rez-crm-connector
+      dockerfile: Dockerfile
+    container_name: legal-rez-crm
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3090
+      MONGODB_URI: mongodb://legaladmin:legalpass123@mongodb:27017/legal_os?authSource=admin
+      HUBSPOT_API_KEY: ${HUBSPOT_API_KEY}
+      ZOHO_API_KEY: ${ZOHO_API_KEY}
+      CRM_PROVIDER: ${CRM_PROVIDER:-hubspot}
+    ports:
+      - "3090:3090"
+    depends_on:
+      - mongodb
+    networks:
+      - legal-os-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+  document_storage:
+
+networks:
+  legal-os-network:
+    driver: bridge

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  loyalty-twin-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: loyalty-twin-service
+    restart: unless-stopped
+    ports:
+      - "4019:4019"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=loyalty-twin-service
+      - SERVICE_PORT=4019
+      - MONGODB_URI=mongodb://mongodb:27017/loyalty_twin_service
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - LOG_LEVEL=info
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4019/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  restaurant-os-network:
+    external: true

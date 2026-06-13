@@ -1,0 +1,16 @@
+{
+  "name": "healthcare-os-patient-twin-service",
+  "version": "1.0.0",
+  "description": "Patient Twin Service for Healthcare OS",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "winston": "^3.11.0",
+    "dotenv": "^16.3.1"
+  }
+}

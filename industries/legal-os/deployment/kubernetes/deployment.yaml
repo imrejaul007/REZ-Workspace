@@ -1,0 +1,227 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legal-os-deployment
+  namespace: legal-os
+  labels:
+    app: legal-os
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: legal-os
+  template:
+    metadata:
+      labels:
+        app: legal-os
+        tier: backend
+    spec:
+      containers:
+        - name: client-twin
+          image: legal-os/client-twin-service:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: mongodb-uri
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: jwt-secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+        - name: case-twin
+          image: legal-os/case-twin-service:latest
+          ports:
+            - containerPort: 3001
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: mongodb-uri
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: jwt-secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+        - name: document-twin
+          image: legal-os/document-twin-service:latest
+          ports:
+            - containerPort: 3002
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: mongodb-uri
+            - name: DOCUMENT_UPLOAD_DIR
+              value: "/data/legal-documents"
+          volumeMounts:
+            - name: document-storage
+              mountPath: /data/legal-documents
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+
+        - name: calendar-twin
+          image: legal-os/calendar-twin-service:latest
+          ports:
+            - containerPort: 3003
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: mongodb-uri
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+      volumes:
+        - name: document-storage
+          persistentVolumeClaim:
+            claimName: legal-documents-pvc
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legal-os-agents
+  namespace: legal-os
+  labels:
+    app: legal-os-agents
+    tier: ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: legal-os-agents
+  template:
+    metadata:
+      labels:
+        app: legal-os-agents
+        tier: ai
+    spec:
+      containers:
+        - name: case-research-agent
+          image: legal-os/case-research-agent:latest
+          ports:
+            - containerPort: 3015
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: openai-api-key
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+
+        - name: document-draft-agent
+          image: legal-os/document-draft-agent:latest
+          ports:
+            - containerPort: 3016
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: openai-api-key
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+
+        - name: billing-agent
+          image: legal-os/billing-agent:latest
+          ports:
+            - containerPort: 3017
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: legal-os-secrets
+                  key: mongodb-uri
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+        - name: compliance-agent
+          image: legal-os/compliance-agent:latest
+          ports:
+            - containerPort: 3018
+          env:
+            - name: NODE_ENV
+              value: "production"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

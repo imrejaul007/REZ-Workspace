@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: manufacturing-os-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mfgadmin
+      MONGO_INITDB_ROOT_PASSWORD: mfgpass123
+      MONGO_INITDB_DATABASE: manufacturing_os
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27034:27017"
+    networks:
+      - manufacturing-os-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: manufacturing-os-redis
+    restart: unless-stopped
+    ports:
+      - "6389:6379"
+    networks:
+      - manufacturing-os-network
+
+  product-twin-service:
+    build:
+      context: ./services/product-twin-service
+      dockerfile: Dockerfile
+    container_name: mfg-product-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3120
+      MONGODB_URI: mongodb://mfgadmin:mfgpass123@mongodb:27017/manufacturing_os?authSource=admin
+    ports:
+      - "3120:3120"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - manufacturing-os-network
+
+  production-scheduler-agent:
+    build:
+      context: ./agents/production-scheduler
+      dockerfile: Dockerfile
+    container_name: mfg-production-scheduler
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3125
+    ports:
+      - "3125:3125"
+    networks:
+      - manufacturing-os-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: manufacturing-os-nginx
+    restart: unless-stopped
+    ports:
+      - "3121:80"
+    depends_on:
+      - product-twin-service
+    networks:
+      - manufacturing-os-network
+
+  rez-crm-connector:
+    build:
+      context: ../core/rez-crm-connector
+      dockerfile: Dockerfile
+    container_name: manufacturing-rez-crm
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3096
+      MONGODB_URI: mongodb://mfgadmin:mfgpass123@mongodb:27017/manufacturing_os?authSource=admin
+      CRM_PROVIDER: sap
+    ports:
+      - "3096:3096"
+    depends_on:
+      - mongodb
+    networks:
+      - manufacturing-os-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  manufacturing-os-network:
+    driver: bridge

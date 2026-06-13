@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: automotive-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: autoadmin
+      MONGO_INITDB_ROOT_PASSWORD: autopass123
+      MONGO_INITDB_DATABASE: automotive_os
+    ports:
+      - "27043:27017"
+  vehicle-twin-service:
+    build: ./services/vehicle-twin-service
+    container_name: auto-vehicle-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3220
+      MONGODB_URI: mongodb://autoadmin:autopass123@mongodb:27017/automotive_os?authSource=admin
+    ports:
+      - "3220:3220"
+  nginx:
+    image: nginx:alpine
+    container_name: automotive-os-nginx
+    ports:
+      - "3221:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: automotive-rez-crm
+    environment:
+      PORT: 3105
+      CRM_PROVIDER: cdk
+    ports:
+      - "3105:3105"

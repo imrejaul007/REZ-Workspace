@@ -1,0 +1,653 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "RTMN Buyer Twin API",
+    "description": "Real estate buyer profiles and matching service for TwinOS",
+    "version": "1.0.0",
+    "contact": {
+      "name": "RTMN Architecture Team"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8844",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "tags": ["Health"],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "service": { "type": "string" },
+                    "version": { "type": "string" },
+                    "timestamp": { "type": "string" },
+                    "mongodb": { "type": "string" },
+                    "uptime": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buyers": {
+      "get": {
+        "summary": "List buyers for tenant",
+        "tags": ["Buyers"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "x-tenant-id",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["active", "paused", "inactive", "closed"] }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["searching", "viewing", "negotiating", "under_contract", "closed"] }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of buyers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new buyer",
+        "tags": ["Buyers"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBuyer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Buyer created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "409": {
+            "description": "Buyer already exists"
+          }
+        }
+      }
+    },
+    "/api/v1/buyers/{buyerId}": {
+      "get": {
+        "summary": "Get buyer by ID",
+        "tags": ["Buyers"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "buyerId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Buyer found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Buyer not found"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update buyer",
+        "tags": ["Buyers"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "buyerId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBuyer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Buyer updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Buyer not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete buyer (soft delete)",
+        "tags": ["Buyers"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "buyerId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Buyer deactivated"
+          },
+          "404": {
+            "description": "Buyer not found"
+          }
+        }
+      }
+    },
+    "/api/v1/buyers/{buyerId}/status": {
+      "patch": {
+        "summary": "Update buyer status",
+        "tags": ["Buyers"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "buyerId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "current": { "type": "string", "enum": ["active", "paused", "inactive", "closed"] },
+                  "stage": { "type": "string", "enum": ["searching", "viewing", "negotiating", "under_contract", "closed"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buyers/{buyerId}/agent": {
+      "post": {
+        "summary": "Assign agent to buyer",
+        "tags": ["Buyers"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "buyerId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["agentId"],
+                "properties": {
+                  "agentId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent assigned"
+          }
+        }
+      }
+    },
+    "/api/v1/buyers/{buyerId}/property": {
+      "post": {
+        "summary": "Record property interaction",
+        "tags": ["Buyers"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "buyerId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropertyInteraction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interaction recorded"
+          }
+        }
+      }
+    },
+    "/api/v1/buyers/stats/by-stage": {
+      "get": {
+        "summary": "Get buyer statistics",
+        "tags": ["Analytics"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "x-tenant-id",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Buyer statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buyers/search": {
+      "post": {
+        "summary": "Search buyers",
+        "tags": ["Search"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          {
+            "name": "x-tenant-id",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": { "type": "string" },
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "minBudget": { "type": "number" },
+                  "maxBudget": { "type": "number" },
+                  "propertyTypes": { "type": "array", "items": { "type": "string" } },
+                  "areas": { "type": "array", "items": { "type": "string" } },
+                  "urgency": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results"
+          }
+        }
+      }
+    },
+    "/api/v1/match/buyers": {
+      "post": {
+        "summary": "Find matching buyers for property",
+        "tags": ["Matching"],
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchingCriteria"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Matching buyers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Buyer" }
+                    },
+                    "total": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    },
+    "schemas": {
+      "Buyer": {
+        "type": "object",
+        "properties": {
+          "buyerId": { "type": "string" },
+          "tenantId": { "type": "string" },
+          "profile": { "$ref": "#/components/schemas/Profile" },
+          "searchCriteria": { "$ref": "#/components/schemas/SearchCriteria" },
+          "financing": { "$ref": "#/components/schemas/Financing" },
+          "timeline": { "$ref": "#/components/schemas/Timeline" },
+          "preferences": { "$ref": "#/components/schemas/Preferences" },
+          "goldenVisa": { "$ref": "#/components/schemas/GoldenVisa" },
+          "status": { "$ref": "#/components/schemas/BuyerStatus" },
+          "history": { "$ref": "#/components/schemas/BuyerHistory" },
+          "assignedAgentId": { "type": "string" },
+          "source": { "type": "string", "enum": ["organic", "referral", "advertising", "partner"] }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "first": { "type": "string" },
+              "last": { "type": "string" }
+            }
+          },
+          "email": { "type": "string" },
+          "phone": { "type": "string" },
+          "preferredContact": { "type": "string", "enum": ["email", "phone", "text"] },
+          "preferredLanguage": { "type": "string" }
+        }
+      },
+      "SearchCriteria": {
+        "type": "object",
+        "properties": {
+          "propertyType": { "type": "array", "items": { "type": "string" } },
+          "minBedrooms": { "type": "integer" },
+          "maxBedrooms": { "type": "integer" },
+          "minBathrooms": { "type": "integer" },
+          "maxBathrooms": { "type": "integer" },
+          "minPrice": { "type": "number" },
+          "maxPrice": { "type": "number" },
+          "minSqft": { "type": "number" },
+          "maxSqft": { "type": "number" },
+          "areas": { "type": "array", "items": { "type": "string" } },
+          "features": { "type": "array", "items": { "type": "string" } },
+          "amenities": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "Financing": {
+        "type": "object",
+        "properties": {
+          "preApproved": { "type": "boolean" },
+          "preApprovalAmount": { "type": "number" },
+          "preApprovalExpiration": { "type": "string", "format": "date-time" },
+          "downPaymentAmount": { "type": "number" },
+          "downPaymentPercentage": { "type": "number" },
+          "financingType": { "type": "string", "enum": ["conventional", "fha", "va", "cash", "other"] },
+          "lenderName": { "type": "string" }
+        }
+      },
+      "Timeline": {
+        "type": "object",
+        "properties": {
+          "urgency": { "type": "string", "enum": ["immediate", "1_3_months", "3_6_months", "6_12_months", "exploring"] },
+          "targetMoveDate": { "type": "string", "format": "date-time" },
+          "leaseEndDate": { "type": "string", "format": "date-time" },
+          "mustSellFirst": { "type": "boolean" }
+        }
+      },
+      "Preferences": {
+        "type": "object",
+        "properties": {
+          "schoolDistricts": { "type": "array", "items": { "type": "string" } },
+          "commuteRadiusMiles": { "type": "number" },
+          "lifestyle": { "type": "array", "items": { "type": "string" } },
+          "neighborhoodPreferences": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "GoldenVisa": {
+        "type": "object",
+        "properties": {
+          "interested": { "type": "boolean" },
+          "country": { "type": "string" },
+          "investmentRange": {
+            "type": "object",
+            "properties": {
+              "min": { "type": "number" },
+              "max": { "type": "number" }
+            }
+          },
+          "status": { "type": "string", "enum": ["not_started", "documenting", "applying", "approved", "rejected"] }
+        }
+      },
+      "BuyerStatus": {
+        "type": "object",
+        "properties": {
+          "current": { "type": "string", "enum": ["active", "paused", "inactive", "closed"] },
+          "stage": { "type": "string", "enum": ["searching", "viewing", "negotiating", "under_contract", "closed"] },
+          "lastActivity": { "type": "string", "format": "date-time" },
+          "viewingCount": { "type": "integer" }
+        }
+      },
+      "BuyerHistory": {
+        "type": "object",
+        "properties": {
+          "propertiesViewed": { "type": "array", "items": { "type": "string" } },
+          "propertiesSaved": { "type": "array", "items": { "type": "string" } },
+          "offersMade": { "type": "integer" },
+          "offersAccepted": { "type": "integer" },
+          "transactionsCompleted": { "type": "integer" }
+        }
+      },
+      "CreateBuyer": {
+        "type": "object",
+        "required": ["buyerId", "tenantId", "profile"],
+        "properties": {
+          "buyerId": { "type": "string" },
+          "tenantId": { "type": "string" },
+          "profile": { "$ref": "#/components/schemas/Profile" },
+          "searchCriteria": { "$ref": "#/components/schemas/SearchCriteria" },
+          "financing": { "$ref": "#/components/schemas/Financing" },
+          "timeline": { "$ref": "#/components/schemas/Timeline" },
+          "preferences": { "$ref": "#/components/schemas/Preferences" },
+          "goldenVisa": { "$ref": "#/components/schemas/GoldenVisa" },
+          "assignedAgentId": { "type": "string" },
+          "source": { "type": "string", "enum": ["organic", "referral", "advertising", "partner"] }
+        }
+      },
+      "UpdateBuyer": {
+        "type": "object",
+        "properties": {
+          "profile": { "$ref": "#/components/schemas/Profile" },
+          "searchCriteria": { "$ref": "#/components/schemas/SearchCriteria" },
+          "financing": { "$ref": "#/components/schemas/Financing" },
+          "timeline": { "$ref": "#/components/schemas/Timeline" },
+          "preferences": { "$ref": "#/components/schemas/Preferences" },
+          "goldenVisa": { "$ref": "#/components/schemas/GoldenVisa" },
+          "status": { "$ref": "#/components/schemas/BuyerStatus" },
+          "history": { "$ref": "#/components/schemas/BuyerHistory" },
+          "assignedAgentId": { "type": "string" }
+        }
+      },
+      "PropertyInteraction": {
+        "type": "object",
+        "required": ["propertyId", "action"],
+        "properties": {
+          "propertyId": { "type": "string" },
+          "action": { "type": "string", "enum": ["view", "save", "unfavorite", "offer", "inquiry"] }
+        }
+      },
+      "MatchingCriteria": {
+        "type": "object",
+        "properties": {
+          "areas": { "type": "array", "items": { "type": "string" } },
+          "minPrice": { "type": "number" },
+          "maxPrice": { "type": "number" },
+          "propertyTypes": { "type": "array", "items": { "type": "string" } },
+          "minBedrooms": { "type": "integer" },
+          "maxBedrooms": { "type": "integer" },
+          "features": { "type": "array", "items": { "type": "string" } },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 100 }
+        }
+      },
+      "BuyerStats": {
+        "type": "object",
+        "properties": {
+          "totalBuyers": { "type": "integer" },
+          "activeBuyers": { "type": "integer" },
+          "pausedBuyers": { "type": "integer" },
+          "byStage": {
+            "type": "object",
+            "properties": {
+              "searching": { "type": "integer" },
+              "viewing": { "type": "integer" },
+              "negotiating": { "type": "integer" },
+              "under_contract": { "type": "integer" },
+              "closed": { "type": "integer" }
+            }
+          },
+          "preApproved": { "type": "integer" },
+          "goldenVisaInterested": { "type": "integer" },
+          "avgViewingCount": { "type": "number" }
+        }
+      },
+      "BuyerResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/Buyer" },
+          "error": { "type": "string" }
+        }
+      },
+      "BuyerListResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Buyer" }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": { "type": "integer" },
+              "limit": { "type": "integer" },
+              "total": { "type": "integer" },
+              "pages": { "type": "integer" }
+            }
+          },
+          "error": { "type": "string" }
+        }
+      }
+    }
+  }
+}

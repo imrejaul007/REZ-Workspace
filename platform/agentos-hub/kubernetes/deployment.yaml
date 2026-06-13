@@ -1,0 +1,146 @@
+# AgentOS Hub - Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentos-hub
+  namespace: agentos-hub
+  labels:
+    app: agentos-hub
+    component: api-gateway
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: agentos-hub
+  template:
+    metadata:
+      labels:
+        app: agentos-hub
+        component: api-gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: agentos-hub
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: agentos-hub
+          image: agentos-hub:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          env:
+            - name: LOG_LEVEL
+              value: "INFO"
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agentos-secrets
+                  key: redis-url
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agentos-secrets
+                  key: postgres-url
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: agentos-config
+                  key: kafka-brokers
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: agentos-config
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: agentos-hub
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: agentos-hub
+---
+# AgentOS Hub - Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: agentos-hub-hpa
+  namespace: agentos-hub
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: agentos-hub
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
+      selectPolicy: Max

@@ -1,0 +1,41 @@
+# Guest Memory TwinOS Integration Service
+# Part of Hotel OS
+
+guest-memory-twinos:
+  container_name: guest-memory-twinos
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+  ports:
+    - "8447:8447"
+  environment:
+    - PORT=8447
+    - NODE_ENV=production
+    - LOG_LEVEL=${LOG_LEVEL:-info}
+    # TwinOS Hub connection
+    - TWINOS_HUB_URL=${TWINOS_HUB_URL:-http://twinos-hub:4143}
+    - TWINOS_API_KEY=${TWINOS_API_KEY:-}
+    # Security
+    - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-}
+    - API_KEY=${GUEST_MEMORY_API_KEY:-dev-api-key}
+    # CORS
+    - CORS_ORIGIN=${CORS_ORIGIN:-*}
+  volumes:
+    - guest-memory-twinos-logs:/app/logs
+  networks:
+    - rez-ecosystem
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "wget", "-q", "--spider", "http://localhost:8447/health"]
+    interval: 30s
+    timeout: 3s
+    retries: 3
+    start_period: 10s
+
+volumes:
+  guest-memory-twinos-logs:
+    driver: local
+
+networks:
+  rez-ecosystem:
+    external: true

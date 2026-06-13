@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotel-twinos-gateway
+  namespace: hotel-os
+  labels:
+    app: hotel-twinos
+    component: gateway
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hotel-twinos
+      component: gateway
+  template:
+    metadata:
+      labels:
+        app: hotel-twinos
+        component: gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4200"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: gateway
+          image: hotel-twinos-gateway:staging
+          ports:
+            - containerPort: 4200
+          env:
+            - name: NODE_ENV
+              value: "staging"
+            - name: PORT
+              value: "4200"
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: hotel-twinos-secrets
+                  key: mongo-uri
+            - name: REDIS_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: hotel-twinos-config
+                  key: redis-uri
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4200
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4200
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotel-guest-twin
+  namespace: hotel-os
+  labels:
+    app: hotel-twinos
+    component: guest-twin
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hotel-twinos
+      component: guest-twin
+  template:
+    metadata:
+      labels:
+        app: hotel-twinos
+        component: guest-twin
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4201"
+    spec:
+      containers:
+        - name: guest-twin
+          image: hotel-guest-twin:staging
+          ports:
+            - containerPort: 4201
+          env:
+            - name: NODE_ENV
+              value: "staging"
+            - name: PORT
+              value: "4201"
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: hotel-twinos-secrets
+                  key: mongo-uri
+            - name: TWINOS_GATEWAY_URL
+              value: "http://hotel-twinos-gateway:4200"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4201
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4201
+            initialDelaySeconds: 5
+            periodSeconds: 5

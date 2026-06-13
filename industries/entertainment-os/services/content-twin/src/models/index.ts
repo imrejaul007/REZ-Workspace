@@ -1,0 +1,1 @@
+export { ContentTwinModel, type IContentTwin } from './content-twin.model.js';

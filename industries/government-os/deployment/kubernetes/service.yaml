@@ -1,0 +1,231 @@
+# Government OS - Kubernetes Services
+# Service definitions for all microservices
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: citizen-twin-service
+  namespace: government-os
+  labels:
+    app: citizen-twin-service
+    tier: service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001
+      protocol: TCP
+  selector:
+    app: citizen-twin-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-twin-service
+  namespace: government-os
+  labels:
+    app: service-twin-service
+    tier: service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+      protocol: TCP
+  selector:
+    app: service-twin-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: permit-twin-service
+  namespace: government-os
+  labels:
+    app: permit-twin-service
+    tier: service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3003
+      targetPort: 3003
+      protocol: TCP
+  selector:
+    app: permit-twin-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compliance-twin-service
+  namespace: government-os
+  labels:
+    app: compliance-twin-service
+    tier: service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3004
+      targetPort: 3004
+      protocol: TCP
+  selector:
+    app: compliance-twin-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-navigator
+  namespace: government-os
+  labels:
+    app: service-navigator
+    tier: agent
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4001
+      targetPort: 4001
+      protocol: TCP
+  selector:
+    app: service-navigator
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: application-processor
+  namespace: government-os
+  labels:
+    app: application-processor
+    tier: agent
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4002
+      targetPort: 4002
+      protocol: TCP
+  selector:
+    app: application-processor
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compliance-checker
+  namespace: government-os
+  labels:
+    app: compliance-checker
+    tier: agent
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4003
+      targetPort: 4003
+      protocol: TCP
+  selector:
+    app: compliance-checker
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-agent
+  namespace: government-os
+  labels:
+    app: notification-agent
+    tier: agent
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4004
+      targetPort: 4004
+      protocol: TCP
+  selector:
+    app: notification-agent
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: government-os-api
+  namespace: government-os
+  labels:
+    app: government-os-api
+    tier: gateway
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+      nodePort: 30080
+  selector:
+    app: nginx-ingress
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: government-os
+  labels:
+    app: prometheus
+    tier: monitoring
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  selector:
+    app: prometheus
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: government-os
+  labels:
+    app: grafana
+    tier: monitoring
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: grafana
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: government-os
+  labels:
+    app: redis
+    tier: cache
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      protocol: TCP
+  selector:
+    app: redis

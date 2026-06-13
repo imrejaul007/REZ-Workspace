@@ -1,0 +1,273 @@
+# Kubernetes Ingress for Home Services OS
+# External access configuration with TLS and routing rules
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homeservices-ingress
+  namespace: homeservices
+  labels:
+    app: homeservices
+    tier: infrastructure
+  annotations:
+    # NGINX Ingress Controller annotations
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+
+    # CORS configuration
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # WebSocket support
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$remote_addr"
+
+    # Connection upgrade for WebSocket
+    nginx.ingress.kubernetes.io/use-regex: "true"
+
+spec:
+  ingressClassName: nginx
+
+  # TLS Configuration
+  tls:
+    - hosts:
+        - api.homeservices.example.com
+        - staging.homeservices.example.com
+      secretName: homeservices-tls-secret
+
+  # Routing Rules
+  rules:
+    - host: api.homeservices.example.com
+      http:
+        paths:
+          # Customer Twin Service
+          - path: /api/customers
+            pathType: Prefix
+            backend:
+              service:
+                name: customer-twin-service
+                port:
+                  number: 3001
+
+          # Job Twin Service
+          - path: /api/jobs
+            pathType: Prefix
+            backend:
+              service:
+                name: job-twin-service
+                port:
+                  number: 3002
+
+          - path: /api/quotes
+            pathType: Prefix
+            backend:
+              service:
+                name: job-twin-service
+                port:
+                  number: 3002
+
+          # Technician Twin Service
+          - path: /api/technicians
+            pathType: Prefix
+            backend:
+              service:
+                name: technician-twin-service
+                port:
+                  number: 3003
+
+          - path: /api/availability
+            pathType: Prefix
+            backend:
+              service:
+                name: technician-twin-service
+                port:
+                  number: 3003
+
+          # Inventory Twin Service
+          - path: /api/inventory
+            pathType: Prefix
+            backend:
+              service:
+                name: inventory-twin-service
+                port:
+                  number: 3004
+
+          # Dispatcher Agent
+          - path: /api/dispatch
+            pathType: Prefix
+            backend:
+              service:
+                name: dispatcher-agent
+                port:
+                  number: 8080
+
+          # Quote Generator Agent
+          - path: /api/quotes/generate
+            pathType: Prefix
+            backend:
+              service:
+                name: quote-generator-agent
+                port:
+                  number: 8080
+
+          # Scheduling Agent
+          - path: /api/schedule
+            pathType: Prefix
+            backend:
+              service:
+                name: scheduling-agent
+                port:
+                  number: 8080
+
+          - path: /api/slots
+            pathType: Prefix
+            backend:
+              service:
+                name: scheduling-agent
+                port:
+                  number: 8080
+
+          # Customer Retention Agent
+          - path: /api/retention
+            pathType: Prefix
+            backend:
+              service:
+                name: customer-retention-agent
+                port:
+                  number: 8080
+
+          - path: /api/loyalty
+            pathType: Prefix
+            backend:
+              service:
+                name: customer-retention-agent
+                port:
+                  number: 8080
+
+          # Analytics
+          - path: /api/analytics
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80
+
+          # Health check endpoint
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80
+
+          # WebSocket endpoint
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: dispatcher-agent
+                port:
+                  number: 8080
+
+---
+# Staging environment ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homeservices-ingress-staging
+  namespace: homeservices
+  labels:
+    app: homeservices
+    environment: staging
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+spec:
+  ingressClassName: nginx
+
+  tls:
+    - hosts:
+        - staging.homeservices.example.com
+      secretName: homeservices-staging-tls-secret
+
+  rules:
+    - host: staging.homeservices.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80
+
+---
+# Internal API ingress (for service-to-service communication)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homeservices-internal-ingress
+  namespace: homeservices
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: "nginx-internal"
+
+spec:
+  ingressClassName: nginx-internal
+
+  rules:
+    - host: internal.homeservices.svc.cluster.local
+      http:
+        paths:
+          - path: /customers
+            pathType: Prefix
+            backend:
+              service:
+                name: customer-twin-service
+                port:
+                  number: 3001
+
+          - path: /jobs
+            pathType: Prefix
+            backend:
+              service:
+                name: job-twin-service
+                port:
+                  number: 3002
+
+          - path: /technicians
+            pathType: Prefix
+            backend:
+              service:
+                name: technician-twin-service
+                port:
+                  number: 3003
+
+          - path: /inventory
+            pathType: Prefix
+            backend:
+              service:
+                name: inventory-twin-service
+                port:
+                  number: 3004

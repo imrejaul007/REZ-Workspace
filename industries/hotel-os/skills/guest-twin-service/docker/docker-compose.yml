@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  guest-twin-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: guest-twin-service
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=guest-twin-service
+      - SERVICE_PORT=8443
+      - MONGODB_URI=mongodb://mongodb:27017/guest_twin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - GUEST_MEMORY_URL=http://guest-memory:8447
+      - REZ_LOYALTY_URL=http://rez-loyalty:8450
+      - BRANDPULSE_URL=http://brandpulse:8451
+      - LOG_LEVEL=info
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  hotel-os-network:
+    external: true

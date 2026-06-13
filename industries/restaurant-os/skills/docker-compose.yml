@@ -1,0 +1,305 @@
+version: '3.8'
+
+services:
+  # Infrastructure
+  mongodb:
+    image: mongo:7.0
+    container_name: restaurant-os-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: restaurant-os-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: restaurant-os-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Restaurant Twin Services
+  restaurant-twin-service:
+    build:
+      context: ./restaurant-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: restaurant-twin-service
+    restart: unless-stopped
+    ports:
+      - "4011:4011"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=restaurant-twin-service
+      - SERVICE_PORT=4011
+      - MONGODB_URI=mongodb://mongodb:27017/restaurant_twin
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - REZ_POS_SERVICE_URL=http://rez-pos:4013
+      - REZ_DASHBOARD_SERVICE_URL=http://rez-dashboard:4060
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  table-twin-service:
+    build:
+      context: ./table-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: table-twin-service
+    restart: unless-stopped
+    ports:
+      - "4012:4012"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=table-twin-service
+      - SERVICE_PORT=4012
+      - MONGODB_URI=mongodb://mongodb:27017/table_twin
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - REZ_POS_SERVICE_URL=http://rez-pos:4013
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  order-twin-service:
+    build:
+      context: ./order-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: order-twin-service
+    restart: unless-stopped
+    ports:
+      - "4020:4020"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=order-twin-service
+      - SERVICE_PORT=4020
+      - MONGODB_URI=mongodb://mongodb:27017/order_twin
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - REZ_POS_SERVICE_URL=http://rez-pos:4013
+      - REZ_KDS_SERVICE_URL=http://rez-kds:4014
+      - REZ_INVENTORY_SERVICE_URL=http://inventory-twin-service:4016
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4020/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  kitchen-twin-service:
+    build:
+      context: ./kitchen-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: kitchen-twin-service
+    restart: unless-stopped
+    ports:
+      - "4015:4015"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=kitchen-twin-service
+      - SERVICE_PORT=4015
+      - MONGODB_URI=mongodb://mongodb:27017/kitchen_twin
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - KITCHEN_AI_SERVICE_URL=http://kitchen-ai:4082
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4015/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  inventory-twin-service:
+    build:
+      context: ./inventory-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: inventory-twin-service
+    restart: unless-stopped
+    ports:
+      - "4016:4016"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=inventory-twin-service
+      - SERVICE_PORT=4016
+      - MONGODB_URI=mongodb://mongodb:27017/inventory_twin
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4016/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  customer-twin-service:
+    build:
+      context: ./customer-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: customer-twin-service
+    restart: unless-stopped
+    ports:
+      - "4017:4017"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=customer-twin-service
+      - SERVICE_PORT=4017
+      - MONGODB_URI=mongodb://mongodb:27017/customer_twin
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4017/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  staff-twin-service:
+    build:
+      context: ./staff-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: staff-twin-service
+    restart: unless-stopped
+    ports:
+      - "4018:4018"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=staff-twin-service
+      - SERVICE_PORT=4018
+      - MONGODB_URI=mongodb://mongodb:27017/staff_twin
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4018/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  loyalty-twin-service:
+    build:
+      context: ./loyalty-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: loyalty-twin-service
+    restart: unless-stopped
+    ports:
+      - "4019:4019"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=loyalty-twin-service
+      - SERVICE_PORT=4019
+      - MONGODB_URI=mongodb://mongodb:27017/loyalty_twin
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4019/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mongodb_data:
+  rabbitmq_data:
+  redis_data:
+
+networks:
+  restaurant-os-network:
+    name: restaurant-os-network
+    driver: bridge

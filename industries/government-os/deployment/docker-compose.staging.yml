@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: government-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: govadmin
+      MONGO_INITDB_ROOT_PASSWORD: govpass123
+      MONGO_INITDB_DATABASE: government_os
+    ports:
+      - "27039:27017"
+  citizen-twin-service:
+    build: ./services/citizen-twin-service
+    container_name: gov-citizen-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3140
+      MONGODB_URI: mongodb://govadmin:govpass123@mongodb:27017/government_os?authSource=admin
+    ports:
+      - "3140:3140"
+  nginx:
+    image: nginx:alpine
+    container_name: government-os-nginx
+    ports:
+      - "3141:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: government-rez-crm
+    environment:
+      PORT: 3101
+      CRM_PROVIDER: salesforce_gov
+    ports:
+      - "3101:3101"

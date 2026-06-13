@@ -1,0 +1,59 @@
+{
+  "name": "@transport-os/vehicle-twin",
+  "version": "1.0.0",
+  "description": "Vehicle Twin Service for Transport OS - Real-time digital twin for vehicles, tracking status, telemetry, and maintenance",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "docker:build": "docker build -t vehicle-twin -f docker/Dockerfile .",
+    "docker:run": "docker-compose -f docker/docker-compose.yml up -d"
+  },
+  "keywords": [
+    "vehicle",
+    "digital-twin",
+    "transport",
+    "fleet-management",
+    "telemetry",
+    "iot"
+  ],
+  "author": "RTMN",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "zod": "^3.22.4",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.3.1",
+    "express-rate-limit": "^7.1.5",
+    "ioredis": "^5.3.2",
+    "winston": "^3.11.0",
+    "amqplib": "^0.10.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.5",
+    "@types/cors": "^2.8.17",
+    "@types/uuid": "^9.0.7",
+    "@types/jest": "^29.5.11",
+    "@types/amqplib": "^0.10.4",
+    "typescript": "^5.3.3",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "supertest": "^6.3.3",
+    "@types/supertest": "^6.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  property-twin-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: property-twin-service
+    restart: unless-stopped
+    ports:
+      - "8445:8445"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=property-twin-service
+      - SERVICE_PORT=8445
+      - MONGODB_URI=mongodb://mongodb:27017/property_twin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - REZ_POS_URL=http://rez-pos:8449
+      - UPSELL_ENGINE_URL=http://upsell-engine:8448
+      - AI_CONCIERGE_URL=http://ai-concierge:8444
+      - LOG_LEVEL=info
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8445/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  hotel-os-network:
+    external: true

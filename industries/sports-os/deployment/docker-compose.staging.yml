@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: sports-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: sportsadmin
+      MONGO_INITDB_ROOT_PASSWORD: sportspass123
+      MONGO_INITDB_DATABASE: sports_os
+    ports:
+      - "27036:27017"
+  athlete-twin-service:
+    build: ./services/athlete-twin-service
+    container_name: sports-athlete-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3170
+      MONGODB_URI: mongodb://sportsadmin:sportspass123@mongodb:27017/sports_os?authSource=admin
+    ports:
+      - "3170:3170"
+  nginx:
+    image: nginx:alpine
+    container_name: sports-os-nginx
+    ports:
+      - "3171:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: sports-rez-crm
+    environment:
+      PORT: 3098
+      CRM_PROVIDER: ticketmaster
+    ports:
+      - "3098:3098"

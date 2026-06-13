@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  buyer-twin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: buyer-twin
+    ports:
+      - "8844:8844"
+    environment:
+      - PORT=8844
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/buyer-twin
+      - REDIS_URL=redis://redis:6379
+      - API_KEY=${BUYER_TWIN_API_KEY}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - TWINOS_GATEWAY_URL=${TWINOS_GATEWAY_URL:-http://twinos-gateway:4142}
+      - PROPERTY_TWIN_URL=${PROPERTY_TWIN_URL:-http://property-twin:8843}
+      - AGENT_TWIN_URL=${AGENT_TWIN_URL:-http://agent-twin:8848}
+      - LEAD_MANAGEMENT_URL=${LEAD_MANAGEMENT_URL:-http://lead-management:8845}
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-ecosystem
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8844/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mongodb:
+    image: mongo:6
+    container_name: buyer-twin-mongodb
+    volumes:
+      - buyer-twin-mongo-data:/data/db
+    networks:
+      - rez-ecosystem
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: buyer-twin-redis
+    volumes:
+      - buyer-twin-redis-data:/data
+    networks:
+      - rez-ecosystem
+    restart: unless-stopped
+
+networks:
+  rez-ecosystem:
+    external: true
+
+volumes:
+  buyer-twin-mongo-data:
+  buyer-twin-redis-data:

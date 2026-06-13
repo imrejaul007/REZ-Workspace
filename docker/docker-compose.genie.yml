@@ -1,0 +1,205 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # GENIE CORE SERVICES (All Built)
+  # ============================================================
+
+  genie-gateway:
+    build: ../companies/hojai-ai/genie-personal-os-gateway
+    container_name: genie-gateway
+    ports: ["4702:4702"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4702/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-memory:
+    build: ../companies/hojai-ai/genie-memory-service
+    container_name: genie-memory
+    ports: ["4703:4703"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4703/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-relationship:
+    build: ../companies/hojai-ai/genie-relationship-service
+    container_name: genie-relationship
+    ports: ["4704:4704"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4704/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-briefing:
+    build: ../companies/hojai-ai/genie-briefing-service
+    container_name: genie-briefing
+    ports: ["4706:4706"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4706/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-meeting:
+    build: ../companies/hojai-ai/services/genie-meeting-service
+    container_name: genie-meeting
+    ports: ["4713:4713"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4713/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-sync:
+    build: ../companies/hojai-ai/genie-sync-service
+    container_name: genie-sync
+    ports: ["4707:4707"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4707/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  # ============================================================
+  # GENIE COMMUNICATION SERVICES
+  # ============================================================
+
+  genie-calendar:
+    build: ../companies/hojai-ai/genie-calendar-service
+    container_name: genie-calendar
+    ports: ["4709:4709"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4709/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-email:
+    build: ../companies/hojai-ai/genie-email-service
+    container_name: genie-email
+    ports: ["4710:4710"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4710/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  # Note: genie-voice uses HOJAI-VOICE-PLATFORM (4033)
+  # genie-voice: (use HOJAI-VOICE-PLATFORM)
+
+  # ============================================================
+  # GENIE MESSAGING SERVICES
+  # ============================================================
+
+  genie-slack:
+    build: ../companies/hojai-ai/genie-slack-service
+    container_name: genie-slack
+    ports: ["4711:4711"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4711/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-telegram:
+    build: ../companies/hojai-ai/genie-telegram-service
+    container_name: genie-telegram
+    ports: ["4712:4712"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4712/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-discord:
+    build: ../companies/hojai-ai/genie-discord-service
+    container_name: genie-discord
+    ports: ["4716:4716"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4716/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-whatsapp:
+    build: ../companies/hojai-ai/genie-whatsapp-service
+    container_name: genie-whatsapp
+    ports: ["4717:4717"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4717/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  # ============================================================
+  # GENIE NOTETAKING SERVICES
+  # ============================================================
+
+  genie-obsidian:
+    build: ../companies/hojai-ai/genie-obsidian-service
+    container_name: genie-obsidian
+    ports: ["4708:4708"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4708/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-notion:
+    build: ../companies/hojai-ai/genie-notion-service
+    container_name: genie-notion
+    ports: ["4719:4719"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4719/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  # ============================================================
+  # GENIE INTELLIGENCE SERVICES
+  # ============================================================
+
+  genie-privacy:
+    build: ../companies/hojai-ai/genie-privacy-service
+    container_name: genie-privacy
+    ports: ["4720:4720"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4720/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-project:
+    build: ../companies/hojai-ai/genie-project-service
+    container_name: genie-project
+    ports: ["4721:4721"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4721/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-household:
+    build: ../companies/hojai-ai/genie-household-service
+    container_name: genie-household
+    ports: ["4722:4722"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4722/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-memory-review:
+    build: ../companies/hojai-ai/genie-memory-review-service
+    container_name: genie-memory-review
+    ports: ["4723:4723"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4723/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  # ============================================================
+  # GENIE INTEGRATION SERVICES
+  # ============================================================
+
+  genie-browser-history:
+    build: ../companies/hojai-ai/genie-browser-history-service
+    container_name: genie-browser-history
+    ports: ["4724:4724"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4724/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-drive:
+    build: ../companies/hojai-ai/genie-drive-connector
+    container_name: genie-drive
+    ports: ["4726:4726"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4726/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  # ============================================================
+  # GENIE BUSINESS INTELLIGENCE
+  # ============================================================
+
+  genie-business:
+    build: ../companies/hojai-ai/genie-business-intelligence
+    container_name: genie-business
+    ports: ["4725:4725"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4725/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+networks:
+  rtnm-network:
+    driver: bridge

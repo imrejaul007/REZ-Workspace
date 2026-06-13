@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: nonprofit-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: nonprofitadmin
+      MONGO_INITDB_ROOT_PASSWORD: nonprofitpass123
+      MONGO_INITDB_DATABASE: nonprofit_os
+    ports:
+      - "27040:27017"
+  donor-twin-service:
+    build: ./services/donor-twin-service
+    container_name: nonprofit-donor-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3150
+      MONGODB_URI: mongodb://nonprofitadmin:nonprofitpass123@mongodb:27017/nonprofit_os?authSource=admin
+    ports:
+      - "3150:3150"
+  nginx:
+    image: nginx:alpine
+    container_name: nonprofit-os-nginx
+    ports:
+      - "3151:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: nonprofit-rez-crm
+    environment:
+      PORT: 3102
+      CRM_PROVIDER: salesforce_nonprofit
+    ports:
+      - "3102:3102"

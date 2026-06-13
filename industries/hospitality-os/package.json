@@ -1,0 +1,18 @@
+{
+  "name": "rtmn-hospitality-os",
+  "version": "1.0.0",
+  "description": "RTMN Hospitality Industry OS - Hospitality Services Platform with Digital Twins & AI Agents",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

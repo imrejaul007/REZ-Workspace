@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: homeservices-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: homeadmin
+      MONGO_INITDB_ROOT_PASSWORD: homepass123
+      MONGO_INITDB_DATABASE: homeservices_os
+    ports:
+      - "27044:27017"
+  customer-twin-service:
+    build: ./services/customer-twin-service
+    container_name: home-customer-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3230
+      MONGODB_URI: mongodb://homeadmin:homepass123@mongodb:27017/homeservices_os?authSource=admin
+    ports:
+      - "3230:3230"
+  nginx:
+    image: nginx:alpine
+    container_name: homeservices-os-nginx
+    ports:
+      - "3231:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: homeservices-rez-crm
+    environment:
+      PORT: 3106
+      CRM_PROVIDER: jobber
+    ports:
+      - "3106:3106"

@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: retail-os-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-retailadmin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-retailpass123}
+      MONGO_INITDB_DATABASE: retail_os
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27031:27017"
+    networks:
+      - retail-os-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: retail-os-redis
+    restart: unless-stopped
+    ports:
+      - "6386:6379"
+    networks:
+      - retail-os-network
+
+  customer-twin-service:
+    build:
+      context: ./services/customer-twin-service
+      dockerfile: Dockerfile
+    container_name: retail-customer-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3020
+      MONGODB_URI: mongodb://retailadmin:retailpass123@mongodb:27017/retail_os?authSource=admin
+    ports:
+      - "3020:3020"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - retail-os-network
+
+  shopping-assistant-agent:
+    build:
+      context: ./agents/shopping-assistant
+      dockerfile: Dockerfile
+    container_name: retail-shopping-assistant
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3025
+    ports:
+      - "3025:3025"
+    networks:
+      - retail-os-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: retail-os-nginx
+    restart: unless-stopped
+    ports:
+      - "3021:80"
+    depends_on:
+      - customer-twin-service
+    networks:
+      - retail-os-network
+
+  rez-crm-connector:
+    build:
+      context: ../core/rez-crm-connector
+      dockerfile: Dockerfile
+    container_name: retail-rez-crm
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3093
+      MONGODB_URI: mongodb://retailadmin:retailpass123@mongodb:27017/retail_os?authSource=admin
+      CRM_PROVIDER: ${CRM_PROVIDER:-shopify}
+    ports:
+      - "3093:3093"
+    depends_on:
+      - mongodb
+    networks:
+      - retail-os-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  retail-os-network:
+    driver: bridge

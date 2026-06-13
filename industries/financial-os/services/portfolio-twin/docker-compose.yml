@@ -1,0 +1,87 @@
+# Portfolio Twin Service Docker Compose
+# Part of Financial OS Digital Twin Services
+
+version: '3.8'
+
+services:
+  portfolio-twin-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: portfolio-twin-service
+    ports:
+      - "8950:8950"
+    environment:
+      - PORT=8950
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/portfolio_twin
+      - REDIS_URL=redis://redis:6379
+      - API_KEY=${PORTFOLIO_TWIN_API_KEY:-portfolio-twin-api-key}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-internal-token}
+      - ASSETMIND_URL=http://assetmind:8943
+      - RABTUL_CONNECT_URL=http://rabtul-connect:8947
+      - MARKET_INTELLIGENCE_URL=http://market-intelligence:8951
+      - PORTFOLIO_ANALYSIS_URL=http://portfolio-analysis:8952
+      - RTNM_GATEWAY_URL=${RTNM_GATEWAY_URL:-http://rez-unified-hub:4600}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:8080}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - financial-os-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8950/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - portfolio-twin-data:/app/data
+
+  # Local dependencies (for standalone development)
+  mongodb:
+    image: mongo:6
+    container_name: portfolio-twin-mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=portfolio_twin
+    volumes:
+      - portfolio-twin-mongo-data:/data/db
+    networks:
+      - financial-os-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: portfolio-twin-redis
+    command: redis-server --appendonly yes --requirepass password
+    volumes:
+      - portfolio-twin-redis-data:/data
+    networks:
+      - financial-os-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "password", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  financial-os-network:
+    driver: bridge
+
+volumes:
+  portfolio-twin-data:
+  portfolio-twin-mongo-data:
+  portfolio-twin-redis-data:

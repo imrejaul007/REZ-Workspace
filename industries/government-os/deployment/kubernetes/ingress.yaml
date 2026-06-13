@@ -1,0 +1,217 @@
+# Government OS - Kubernetes Ingress
+# Ingress configuration for external access
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: government-os-ingress
+  namespace: government-os
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/limit-connections: "10"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-req: "100"
+    nginx.ingress.kubernetes.io/limit-req-zone: "100r/s"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "govos-session"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "3600"
+    nginx.ingress.kubernetes.io/session-cookie-maxage: "3600"
+  labels:
+    app: government-os
+    tier: gateway
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.government-os.example.com
+        - staging.government-os.example.com
+      secretName: government-os-tls-cert
+  rules:
+    - host: api.government-os.example.com
+      http:
+        paths:
+          # Health check
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: citizen-twin-service
+                port:
+                  number: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          # Citizen Twin Service
+          - path: /api/citizen-twins
+            pathType: Prefix
+            backend:
+              service:
+                name: citizen-twin-service
+                port:
+                  number: 3001
+
+          # Service Twin Service
+          - path: /api/services
+            pathType: Prefix
+            backend:
+              service:
+                name: service-twin-service
+                port:
+                  number: 3002
+
+          # Permit Twin Service
+          - path: /api/permits
+            pathType: Prefix
+            backend:
+              service:
+                name: permit-twin-service
+                port:
+                  number: 3003
+          - path: /api/applications
+            pathType: Prefix
+            backend:
+              service:
+                name: permit-twin-service
+                port:
+                  number: 3003
+
+          # Compliance Twin Service
+          - path: /api/compliance
+            pathType: Prefix
+            backend:
+              service:
+                name: compliance-twin-service
+                port:
+                  number: 3004
+          - path: /api/regulations
+            pathType: Prefix
+            backend:
+              service:
+                name: compliance-twin-service
+                port:
+                  number: 3004
+
+          # Service Navigator Agent
+          - path: /api/navigate
+            pathType: Prefix
+            backend:
+              service:
+                name: service-navigator
+                port:
+                  number: 4001
+
+          # Application Processor Agent
+          - path: /api/process
+            pathType: Prefix
+            backend:
+              service:
+                name: application-processor
+                port:
+                  number: 4002
+
+          # Compliance Checker Agent
+          - path: /api/check
+            pathType: Prefix
+            backend:
+              service:
+                name: compliance-checker
+                port:
+                  number: 4003
+
+          # Notification Agent
+          - path: /api/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: notification-agent
+                port:
+                  number: 4004
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: government-os-network-policy
+  namespace: government-os
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app: nginx-ingress
+      ports:
+        - protocol: TCP
+          port: 3001
+        - protocol: TCP
+          port: 3002
+        - protocol: TCP
+          port: 3003
+        - protocol: TCP
+          port: 3004
+        - protocol: TCP
+          port: 4001
+        - protocol: TCP
+          port: 4002
+        - protocol: TCP
+          port: 4003
+        - protocol: TCP
+          port: 4004
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: citizen-twin-service
+      ports:
+        - protocol: TCP
+          port: 3001
+    - to:
+        - podSelector:
+            matchLabels:
+              app: service-twin-service
+      ports:
+        - protocol: TCP
+          port: 3002
+    - to:
+        - podSelector:
+            matchLabels:
+              app: permit-twin-service
+      ports:
+        - protocol: TCP
+          port: 3003
+    - to:
+        - podSelector:
+            matchLabels:
+              app: compliance-twin-service
+      ports:
+        - protocol: TCP
+          port: 3004
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53

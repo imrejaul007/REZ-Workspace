@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  upsell-engine:
+    container_name: upsell-engine
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8448:8448"
+    environment:
+      - NODE_ENV=production
+      - PORT=8448
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password}@mongodb:27017/upsell-engine?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - GUEST_MEMORY_URL=http://guest-memory:8447
+      - LOG_LEVEL=info
+      - CORS_ORIGIN=*
+    volumes:
+      - upsell-engine-logs:/app/logs
+    networks:
+      - rez-ecosystem
+    depends_on:
+      - mongodb
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8448/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  upsell-engine-logs:
+    driver: local
+
+networks:
+  rez-ecosystem:
+    external: true

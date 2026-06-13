@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  investor-twin-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: investor-twin-service
+    restart: unless-stopped
+    ports:
+      - "4030:4030"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=investor-twin-service
+      - SERVICE_PORT=4030
+      - MONGODB_URI=mongodb://mongodb:27017/investor_twin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - TRADING_SERVICE_URL=http://trading-service:4031
+      - PORTFOLIO_SERVICE_URL=http://portfolio-service:4032
+      - RISK_ANALYTICS_SERVICE_URL=http://risk-analytics-service:4033
+      - MARKET_DATA_SERVICE_URL=http://market-data-service:4034
+      - REZ_DASHBOARD_SERVICE_URL=http://rez-dashboard:4060
+      - LOG_LEVEL=info
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - financial-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4030/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  financial-os-network:
+    external: true

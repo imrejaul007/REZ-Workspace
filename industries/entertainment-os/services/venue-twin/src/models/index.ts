@@ -1,0 +1,1 @@
+export { VenueTwinModel, type IVenueTwin } from './venue-twin.model.js';

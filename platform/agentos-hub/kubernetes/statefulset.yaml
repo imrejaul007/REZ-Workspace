@@ -1,0 +1,278 @@
+# AgentOS Hub - Kubernetes StatefulSet for Kafka
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: agentos-hub
+spec:
+  serviceName: kafka
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: confluentinc/cp-kafka:7.5.0
+          ports:
+            - containerPort: 9092
+              name: kafka
+            - containerPort: 29092
+              name: internal
+          env:
+            - name: KAFKA_BROKER_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['broker-id']
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: "zookeeper:2181"
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://$(POD_NAME).kafka:9092,PLAINTEXT_INTERNAL://localhost:29092"
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT"
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "PLAINTEXT_INTERNAL"
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "3"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard-ssd
+        resources:
+          requests:
+            storage: 50Gi
+---
+# AgentOS Hub - Zookeeper StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+  namespace: agentos-hub
+spec:
+  serviceName: zookeeper
+  replicas: 3
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: confluentinc/cp-zookeeper:7.5.0
+          ports:
+            - containerPort: 2181
+              name: client
+          env:
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+            - name: ZOOKEEPER_TICK_TIME
+              value: "2000"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: zookeeper-data
+              mountPath: /var/lib/zookeeper/data
+  volumeClaimTemplates:
+    - metadata:
+        name: zookeeper-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard-ssd
+        resources:
+          requests:
+            storage: 10Gi
+---
+# AgentOS Hub - Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: agentos-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+              name: redis
+          command:
+            - redis-server
+            - --appendonly
+            - yes
+            - --maxmemory
+            - 512mb
+            - --maxmemory-policy
+            - allkeys-lru
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: agentos-hub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard-ssd
+  resources:
+    requests:
+      storage: 5Gi
+---
+# AgentOS Hub - PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: agentos-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              value: agentos
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: agentos-secrets
+                  key: postgres-password
+            - name: POSTGRES_DB
+              value: agentos
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: agentos-hub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard-ssd
+  resources:
+    requests:
+      storage: 20Gi
+---
+# AgentOS Hub - Kafka Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: agentos-hub
+spec:
+  clusterIP: None
+  ports:
+    - port: 9092
+      name: kafka
+  selector:
+    app: kafka
+---
+# AgentOS Hub - Zookeeper Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  namespace: agentos-hub
+spec:
+  ports:
+    - port: 2181
+      name: client
+  selector:
+    app: zookeeper
+---
+# AgentOS Hub - Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: agentos-hub
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+---
+# AgentOS Hub - PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: agentos-hub
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: postgres

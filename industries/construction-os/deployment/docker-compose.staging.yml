@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: construction-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: constadmin
+      MONGO_INITDB_ROOT_PASSWORD: constpass123
+      MONGO_INITDB_DATABASE: construction_os
+    ports:
+      - "27041:27017"
+  project-twin-service:
+    build: ./services/project-twin-service
+    container_name: const-project-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3190
+      MONGODB_URI: mongodb://constadmin:constpass123@mongodb:27017/construction_os?authSource=admin
+    ports:
+      - "3190:3190"
+  nginx:
+    image: nginx:alpine
+    container_name: construction-os-nginx
+    ports:
+      - "3191:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: construction-rez-crm
+    environment:
+      PORT: 3103
+      CRM_PROVIDER: procore
+    ports:
+      - "3103:3103"

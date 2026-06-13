@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  room-twin-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: room-twin-service
+    restart: unless-stopped
+    ports:
+      - "8444:8444"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=room-twin-service
+      - SERVICE_PORT=8444
+      - MONGODB_URI=mongodb://mongodb:27017/room_twin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - PREDICTIVE_HK_URL=http://predictive-hk:8446
+      - INVISIBLE_HOTEL_URL=http://invisible-hotel:8443
+      - SMART_MINIBAR_URL=http://smart-minibar:8445
+      - LOG_LEVEL=info
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8444/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  hotel-os-network:
+    external: true

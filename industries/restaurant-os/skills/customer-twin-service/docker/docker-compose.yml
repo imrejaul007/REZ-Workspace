@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  customer-twin-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: customer-twin-service
+    restart: unless-stopped
+    ports:
+      - "4017:4017"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=customer-twin-service
+      - SERVICE_PORT=4017
+      - MONGODB_URI=mongodb://mongodb:27017/customer_twin_service
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - LOG_LEVEL=info
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4017/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  restaurant-os-network:
+    external: true

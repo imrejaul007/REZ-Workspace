@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: healthcare-os-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-healthadmin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-healthpass123}
+      MONGO_INITDB_DATABASE: healthcare_os
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27030:27017"
+    networks:
+      - healthcare-os-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: healthcare-os-redis
+    restart: unless-stopped
+    ports:
+      - "6385:6379"
+    networks:
+      - healthcare-os-network
+
+  patient-twin-service:
+    build:
+      context: ./services/patient-twin-service
+      dockerfile: Dockerfile
+    container_name: health-patient-twin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3030
+      MONGODB_URI: mongodb://healthadmin:healthpass123@mongodb:27017/healthcare_os?authSource=admin
+    ports:
+      - "3030:3030"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - healthcare-os-network
+
+  intake-agent:
+    build:
+      context: ./agents/intake-agent
+      dockerfile: Dockerfile
+    container_name: health-intake-agent
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      AGENT_PORT: 3035
+    ports:
+      - "3035:3035"
+    networks:
+      - healthcare-os-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: healthcare-os-nginx
+    restart: unless-stopped
+    ports:
+      - "3031:80"
+    depends_on:
+      - patient-twin-service
+    networks:
+      - healthcare-os-network
+
+  rez-crm-connector:
+    build:
+      context: ../core/rez-crm-connector
+      dockerfile: Dockerfile
+    container_name: healthcare-rez-crm
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3092
+      MONGODB_URI: mongodb://healthadmin:healthpass123@mongodb:27017/healthcare_os?authSource=admin
+      CRM_PROVIDER: ${CRM_PROVIDER:-epic}
+    ports:
+      - "3092:3092"
+    depends_on:
+      - mongodb
+    networks:
+      - healthcare-os-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  healthcare-os-network:
+    driver: bridge

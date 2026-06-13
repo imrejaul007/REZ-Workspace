@@ -1,0 +1,1 @@
+export { EventTwinModel, type IEventTwin } from './event-twin.model.js';

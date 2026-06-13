@@ -1,0 +1,46 @@
+# AgentOS Hub - Kubernetes Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentos-hub-service
+  namespace: agentos-hub
+  labels:
+    app: agentos-hub
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app: agentos-hub
+---
+# AgentOS Hub - LoadBalancer Service (for external access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentos-hub-lb
+  namespace: agentos-hub
+  labels:
+    app: agentos-hub
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: agentos-hub

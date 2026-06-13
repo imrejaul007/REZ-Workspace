@@ -1,0 +1,25 @@
+{
+  "name": "rtmn-hotel-os",
+  "version": "1.0.0",
+  "description": "RTMN Hotel OS - Hotel Management with Digital Twins (Guest, Room, Property)",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "twins:start": "concurrently \"npm run twin:guest\" \"npm run twin:room\" \"npm run twin:property\"",
+    "twin:guest": "cd services/guest-twin-service && npm start",
+    "twin:room": "cd services/room-twin-service && npm start",
+    "twin:property": "cd services/property-twin-service && npm start"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "concurrently": "^8.2.2"
+  }
+}

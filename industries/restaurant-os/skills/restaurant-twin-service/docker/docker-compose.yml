@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  restaurant-twin-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: restaurant-twin-service
+    restart: unless-stopped
+    ports:
+      - "4011:4011"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=restaurant-twin-service
+      - SERVICE_PORT=4011
+      - MONGODB_URI=mongodb://mongodb:27017/restaurant_twin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://rabbitmq:5672
+      - REZ_POS_SERVICE_URL=http://rez-pos:4013
+      - REZ_DASHBOARD_SERVICE_URL=http://rez-dashboard:4060
+      - LOG_LEVEL=info
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - restaurant-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  restaurant-os-network:
+    external: true

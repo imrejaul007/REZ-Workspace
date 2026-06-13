@@ -1,0 +1,40 @@
+# AgentOS Hub - Kubernetes Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agentos-hub-ingress
+  namespace: agentos-hub
+  labels:
+    app: agentos-hub
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - agentos-hub.example.com
+      secretName: agentos-tls-cert
+  rules:
+    - host: agentos-hub.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: agentos-hub-service
+                port:
+                  name: http
+          - path: /metrics
+            pathType: Exact
+            backend:
+              service:
+                name: agentos-hub-service
+                port:
+                  name: metrics

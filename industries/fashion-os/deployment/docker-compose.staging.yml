@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: fashion-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: fashionadmin
+      MONGO_INITDB_ROOT_PASSWORD: fashionpass123
+      MONGO_INITDB_DATABASE: fashion_os
+    ports:
+      - "27035:27017"
+  customer-twin-service:
+    build: ./services/customer-twin-service
+    container_name: fashion-customer-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3160
+      MONGODB_URI: mongodb://fashionadmin:fashionpass123@mongodb:27017/fashion_os?authSource=admin
+    ports:
+      - "3160:3160"
+  nginx:
+    image: nginx:alpine
+    container_name: fashion-os-nginx
+    ports:
+      - "3161:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: fashion-rez-crm
+    environment:
+      PORT: 3097
+      CRM_PROVIDER: magento
+    ports:
+      - "3097:3097"

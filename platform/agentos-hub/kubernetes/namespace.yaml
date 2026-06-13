@@ -1,0 +1,8 @@
+# AgentOS Hub - Kubernetes Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agentos-hub
+  labels:
+    name: agentos-hub
+    environment: production

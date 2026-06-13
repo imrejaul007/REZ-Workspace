@@ -1,0 +1,1 @@
+{ "name": "travel-os-traveler-twin-service", "version": "1.0.0", "main": "index.js", "dependencies": { "express": "^4.18.2", "mongoose": "^8.0.0", "winston": "^3.11.0" } }

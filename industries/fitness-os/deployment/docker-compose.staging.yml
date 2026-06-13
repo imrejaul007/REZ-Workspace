@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: fitness-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: fitadmin
+      MONGO_INITDB_ROOT_PASSWORD: fitpass123
+      MONGO_INITDB_DATABASE: fitness_os
+    ports:
+      - "27042:27017"
+  member-twin-service:
+    build: ./services/member-twin-service
+    container_name: fit-member-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3090
+      MONGODB_URI: mongodb://fitadmin:fitpass123@mongodb:27017/fitness_os?authSource=admin
+    ports:
+      - "3090:3090"
+  nginx:
+    image: nginx:alpine
+    container_name: fitness-os-nginx
+    ports:
+      - "3091:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: fitness-rez-crm
+    environment:
+      PORT: 3104
+      CRM_PROVIDER: mindbody
+    ports:
+      - "3104:3104"

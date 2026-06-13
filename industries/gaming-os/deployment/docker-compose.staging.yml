@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: gaming-os-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: gamingadmin
+      MONGO_INITDB_ROOT_PASSWORD: gamingpass123
+      MONGO_INITDB_DATABASE: gaming_os
+    ports:
+      - "27037:27017"
+  player-twin-service:
+    build: ./services/player-twin-service
+    container_name: gaming-player-twin
+    environment:
+      NODE_ENV: staging
+      PORT: 3180
+      MONGODB_URI: mongodb://gamingadmin:gamingpass123@mongodb:27017/gaming_os?authSource=admin
+    ports:
+      - "3180:3180"
+  nginx:
+    image: nginx:alpine
+    container_name: gaming-os-nginx
+    ports:
+      - "3181:80"
+  rez-crm-connector:
+    build: ../core/rez-crm-connector
+    container_name: gaming-rez-crm
+    environment:
+      PORT: 3099
+      CRM_PROVIDER: steam
+    ports:
+      - "3099:3099"

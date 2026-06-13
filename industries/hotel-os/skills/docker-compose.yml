@@ -1,0 +1,323 @@
+version: '3.8'
+
+# Hotel OS Twin Services - Business Copilot Skills
+# This docker-compose includes all three twin services plus infrastructure
+
+services:
+  # ===========================================
+  # Infrastructure Services
+  # ===========================================
+
+  mongodb:
+    image: mongo:7.0
+    container_name: hotel-os-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: hotel-os-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: hotel-os-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ===========================================
+  # Twin Services (Business Copilot Skills)
+  # ===========================================
+
+  guest-twin-service:
+    build:
+      context: ./guest-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: guest-twin-service
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=guest-twin-service
+      - SERVICE_PORT=8443
+      - MONGODB_URI=mongodb://mongodb:27017/guest_twin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+      - GUEST_MEMORY_URL=http://guest-memory:8447
+      - REZ_LOYALTY_URL=http://rez-loyalty:8450
+      - BRANDPULSE_URL=http://brandpulse:8451
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  room-twin-service:
+    build:
+      context: ./room-twin-service
+      dockerfile: docker/Dockerfile
+    container_name: room-twin-service
+    restart: unless-stopped
+    ports:
+      - "8444:8444"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=room-twin-service
+      - SERVICE_PORT=8444
+      - MONGODB_URI=mongodb://mongodb:27017/room_twin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+      - PREDICTIVE_HK_URL=http://predictive-hk:8446
+      - INVISIBLE_HOTEL_URL=http://invisible-hotel:8443
+      - SMART_MINIBAR_URL=http://smart-minibar:8445
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8444/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  property-twin-service:
+    build:
+      context: ./property-twin-service-core
+      dockerfile: docker/Dockerfile
+    container_name: property-twin-service
+    restart: unless-stopped
+    ports:
+      - "8445:8445"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=property-twin-service
+      - SERVICE_PORT=8445
+      - MONGODB_URI=mongodb://mongodb:27017/property_twin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+      - REZ_POS_URL=http://rez-pos:8449
+      - UPSELL_ENGINE_URL=http://upsell-engine:8448
+      - AI_CONCIERGE_URL=http://ai-concierge:8444
+      - LOG_LEVEL=info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8445/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ===========================================
+  # Hotel OS Integration Services (Stubs)
+  # These represent existing services in the Hotel OS ecosystem
+  # ===========================================
+
+  guest-memory:
+    image: nginx:alpine
+    container_name: guest-memory
+    restart: unless-stopped
+    ports:
+      - "8447:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  invisible-hotel:
+    image: nginx:alpine
+    container_name: invisible-hotel
+    restart: unless-stopped
+    ports:
+      - "8443:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  ai-concierge:
+    image: nginx:alpine
+    container_name: ai-concierge
+    restart: unless-stopped
+    ports:
+      - "8444:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  smart-minibar:
+    image: nginx:alpine
+    container_name: smart-minibar
+    restart: unless-stopped
+    ports:
+      - "8445:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  predictive-hk:
+    image: nginx:alpine
+    container_name: predictive-hk
+    restart: unless-stopped
+    ports:
+      - "8446:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  upsell-engine:
+    image: nginx:alpine
+    container_name: upsell-engine
+    restart: unless-stopped
+    ports:
+      - "8448:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  rez-pos:
+    image: nginx:alpine
+    container_name: rez-pos
+    restart: unless-stopped
+    ports:
+      - "8449:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  rez-loyalty:
+    image: nginx:alpine
+    container_name: rez-loyalty
+    restart: unless-stopped
+    ports:
+      - "8450:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  brandpulse:
+    image: nginx:alpine
+    container_name: brandpulse
+    restart: unless-stopped
+    ports:
+      - "8451:80"
+    networks:
+      - hotel-os-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+# ===========================================
+# Networks & Volumes
+# ===========================================
+
+networks:
+  hotel-os-network:
+    driver: bridge
+    name: hotel-os-network
+
+volumes:
+  mongodb_data:
+    name: hotel-os-mongodb-data
+  redis_data:
+    name: hotel-os-redis-data
+  rabbitmq_data:
+    name: hotel-os-rabbitmq-data

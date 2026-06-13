@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # SUTAR OS - Autonomous Business OS
+  sutar-os:
+    build: ./sutar-os
+    container_name: sutar-os
+    ports:
+      - "4240:4240"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4240/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4240
+      - SERVICE_NAME=sutar-os
+    volumes:
+      - sutar-os-data:/app/data
+
+  # SALAR OS - Workforce OS
+  salar-os:
+    build: ./salar-os
+    container_name: salar-os
+    ports:
+      - "4710:4710"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4710/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4710
+      - SERVICE_NAME=salar-os
+    volumes:
+      - salar-os-data:/app/data
+
+  # CorpPerks Supporting Services
+  people-os:
+    build: ./people-os
+    container_name: people-os
+    ports:
+      - "4711:4711"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4711/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4711
+      - SERVICE_NAME=people-os
+    volumes:
+      - people-os-data:/app/data
+
+  talent-ai:
+    build: ./talent-ai
+    container_name: talent-ai
+    ports:
+      - "4712:4712"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4712/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4712
+      - SERVICE_NAME=talent-ai
+    volumes:
+      - talent-ai-data:/app/data
+
+  corp-id:
+    build: ./corp-id
+    container_name: corp-id
+    ports:
+      - "4713:4713"
+    networks:
+      - rtnm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4713/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NODE_ENV=production
+      - PORT=4713
+      - SERVICE_NAME=corp-id
+    volumes:
+      - corp-id-data:/app/data
+
+networks:
+  rtnm-network:
+    driver: bridge
+
+volumes:
+  sutar-os-data:
+  salar-os-data:
+  people-os-data:
+  talent-ai-data:
+  corp-id-data:

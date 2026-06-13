@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hotel-twinos-ingress
+  namespace: hotel-os
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - hotel-twins.staging.rez.io
+      secretName: hotel-twinos-tls
+  rules:
+    - host: hotel-twins.staging.rez.io
+      http:
+        paths:
+          - path: /api/twins/guest
+            pathType: Prefix
+            backend:
+              service:
+                name: hotel-guest-twin
+                port:
+                  number: 80
+          - path: /api/twins/room
+            pathType: Prefix
+            backend:
+              service:
+                name: hotel-room-twin
+                port:
+                  number: 80
+          - path: /api/twins/property
+            pathType: Prefix
+            backend:
+              service:
+                name: hotel-property-twin
+                port:
+                  number: 80
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: hotel-twinos-gateway
+                port:
+                  number: 80
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: hotel-twinos-gateway
+                port:
+                  number: 80

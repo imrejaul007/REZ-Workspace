@@ -1,0 +1,13 @@
+{
+  "name": "professional-os-client-twin-service",
+  "version": "1.0.0",
+  "description": "Client Twin Service for Professional OS",
+  "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "winston": "^3.11.0",
+    "dotenv": "^16.3.1"
+  }
+}
