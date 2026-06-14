@@ -690,3 +690,328 @@ User Query → Intent Classification → Service Routing → Data Aggregation �
 
 **Last Updated:** June 14, 2026
 **Status:** 21/21 Services Running | End-to-End Flow Verified 🎉
+
+---
+
+## 12. HOJAI Core Packages - Detailed Features
+
+### 12.1 hojai-api-gateway (Port 4500)
+- Service registry with health checks
+- Dynamic routing based on service metadata
+- Rate limiting per client/endpoint
+- Tenant isolation middleware
+- Request/response logging
+- Circuit breaker pattern
+- Load balancing strategies
+- API versioning support
+
+### 12.2 hojai-event (Port 4510)
+- Event publishing with type filtering
+- Pub/Sub subscriptions
+- Event streams for real-time processing
+- Dead letter queue for failed events
+- Event replay capability
+- Event schema validation
+- Retention policies
+
+### 12.3 hojai-memory (Port 4511)
+- L1: Conversation (current session)
+- L2: Preference (likes/dislikes)
+- L3: Context (current task)
+- L4: Skill (learned skills)
+- L5: Relationship (person connections)
+- Semantic search with embeddings
+- Importance tiers (critical → low)
+- Memory linking and relationships
+
+### 12.4 hojai-communications (Port 4520)
+- Multi-channel delivery (Email, SMS, Push, WhatsApp)
+- Template management with variables
+- Webhook integration
+- Delivery receipts and tracking
+- User preference management
+- Batch notification support
+- Scheduled notifications
+
+### 12.5 hojai-agents (Port 4550)
+- Agent CRUD operations
+- Agent invocation API
+- Skill orchestration
+- Expert twins (digital representation)
+- Agent status tracking
+- Performance metrics
+- Agent training support
+
+### 12.6 hojai-intelligence (Port 4580)
+- Churn prediction models
+- LTV (Lifetime Value) calculation
+- Intent detection
+- Propensity scoring
+- Revisit prediction
+- Conversion optimization
+- Recommendation engine
+
+### 12.7 hojai-hyperlocal (Port 4590)
+- Zone management (city → micro-zone)
+- Venue database
+- Geo-search and proximity
+- Footfall prediction
+- Demand index calculation
+- Location-based routing
+
+### 12.8 hojai-identity (Port 4610)
+- Identity verification
+- Trust scoring (0-100)
+- Agent identity management
+- Service identity
+- Device identity
+- Verification workflows
+
+### 12.9 hojai-governance (Port 4620)
+- Audit log management
+- Policy enforcement
+- Role-based access control
+- Compliance reporting
+- Access pattern analysis
+- Threat detection
+
+### 12.10 hojai-workflow (Port 4810)
+- Workflow definition (steps, conditions)
+- State machine execution
+- Approval workflows
+- Parallel execution support
+- Rollback capability
+- Step retry with backoff
+
+### 12.11 hojai-industry (Port 4700)
+- Privacy-preserving aggregation
+- Industry-specific patterns
+- Anonymous metrics only
+- Benchmark comparison
+- Pattern discovery
+- Multi-tenant isolation
+
+### 12.12 hojai-analytics (Port 4750)
+- Custom metric recording
+- Aggregation operations (sum, avg, min, max)
+- Time-series data
+- Dashboard-ready metrics
+- Metric filtering by tags
+
+### 12.13 hojai-data (Port 4755)
+- Schema management
+- Record storage
+- Query engine
+- Batch imports
+- Data validation
+
+### 12.14 hojai-ml (Port 4760)
+- Model registry
+- Training management
+- Prediction API
+- Metrics tracking
+- Model versioning
+- A/B testing support
+
+---
+
+## 13. Genie Ecosystem - Detailed Features
+
+### 13.1 genie-personal-os-gateway (Port 4702)
+- Unified API orchestrator
+- Capability routing
+- Context aggregation
+- Multi-service coordination
+- Response formatting
+
+### 13.2 genie-memory-service (Port 4703)
+- Personal memory storage
+- Semantic recall
+- Preference management
+- "Usual" order detection
+- Booking patterns
+- Spending summaries
+
+### 13.3 genie-relationship-service (Port 4704)
+- Contact management
+- Interaction tracking
+- Relationship strength scoring
+- Last contact reminders
+- Importance ranking
+
+### 13.4 genie-briefing-service (Port 4706)
+- Morning briefings
+- Evening summaries
+- Weather integration
+- Task reminders
+- Calendar highlights
+
+### 13.5 genie-sync-service (Port 4707)
+- Cross-device sync
+- Change tracking
+- Conflict resolution
+- Device management
+- Real-time updates
+
+### 13.6 genie-project-service (Port 4712)
+- Project creation
+- Milestone tracking
+- Task management
+- Status updates
+- Progress reporting
+
+### 13.7 genie-memory-review-service (Port 4710)
+- Scheduled memory reviews
+- Pattern identification
+- Insight generation
+- Spaced repetition
+
+### 13.8 genie-browser-history-service (Port 4715)
+- Visit tracking
+- Domain categorization
+- Shopping intent scoring
+- Interest analysis
+
+### 13.9 genie-household-service (Port 4720)
+- Family management
+- Recurring tasks
+- Member coordination
+- Household insights
+
+### 13.10 genie-privacy-service (Port 4716)
+- Privacy settings
+- Data export
+- Consent management
+- Deletion requests
+
+### 13.11 genie-business-intelligence (Port 4725)
+- Sales reports
+- Revenue analytics
+- Customer insights
+- Natural language queries
+
+
+---
+
+## 14. DENTAL AI MODULE (Port 4501)
+
+### 14.1 Dental Imaging Analysis
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| X-ray analysis | Analyze dental X-rays | ✅ NEW |
+| Caries detection | Early cavity detection | ✅ NEW |
+| Bone loss analysis | Periodontal bone assessment | ✅ NEW |
+| Crack/fracture detection | Tooth fracture identification | ✅ NEW |
+| Scan comparison | Compare with previous scans | ✅ NEW |
+
+### 14.2 Dental Findings
+
+| Finding Type | Description | Status |
+|--------------|-------------|--------|
+| caries | Dental caries detection | ✅ NEW |
+| bone_loss | Bone loss assessment | ✅ NEW |
+| crack | Tooth crack detection | ✅ NEW |
+| fracture | Fracture identification | ✅ NEW |
+| abscess | Abscess detection | ✅ NEW |
+| impaction | Impacted tooth | ✅ NEW |
+| cyst | Cyst identification | ✅ NEW |
+| tumor | Tumor detection | ✅ NEW |
+| root_fracture | Root fracture | ✅ NEW |
+| periapical_lesion | Periapical pathology | ✅ NEW |
+
+### 14.3 Treatment Recommendations
+
+| Type | Description | Status |
+|------|-------------|--------|
+| immediate | Urgent treatments | ✅ NEW |
+| planned | Scheduled treatments | ✅ NEW |
+| preventive | Preventive care | ✅ NEW |
+| cost estimation | Treatment costs | ✅ NEW |
+
+### 14.4 API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/ai/dental/analyze` | POST | Analyze X-ray |
+| `/api/v1/ai/dental/compare` | POST | Compare X-rays |
+| `/api/v1/ai/dental/cavity-detect` | POST | Early cavity detection |
+| `/api/v1/ai/dental/treatment-plan` | POST | Generate treatment plan |
+| `/api/v1/ai/dental/gum-health` | POST | Gum health analysis |
+
+---
+
+## 15. SMILECRAFT DENTAL CLINIC INTEGRATION
+
+### Story Time: 11:40 AM - Digital Scan Analysis
+
+```
+Digital scan begins
+
+AI compares:
+  Current scan
+  Previous scan
+  Historical patterns
+
+Dental Twin discovers:
+  Early cavity forming
+  Mild gum inflammation
+  No emergency risk
+
+Problem identified months before pain begins
+```
+
+| Component | Service | Port | Status |
+|-----------|---------|------|--------|
+| Dental X-ray Analysis | Dental AI Module | 4501 | ✅ NEW |
+| Scan Comparison | Dental AI Module | 4501 | ✅ NEW |
+| Treatment Plan | Care Plans | - | ✅ Existing |
+| Patient Context | Dental Twin | 4751 | ✅ NEW |
+
+---
+
+## 16. SMILECRAFT STORY SERVICES
+
+### 16.1 Genie Dental Health (Port 4708)
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Dental Memory | Store dental visit memories | ✅ NEW |
+| Risk Assessment | Calculate dental risks | ✅ NEW |
+| Reminders | Send dental checkup reminders | ✅ NEW |
+| Gum Risk | Gum inflammation prediction | ✅ NEW |
+
+### 16.2 Dental Expansion Agent (Port 4555)
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Goal Decomposition | "Open 20 Clinics" | ✅ NEW |
+| Multi-Agent | Coordinate 5 agents | ✅ NEW |
+| Location Finding | RisnaEstate integration | ✅ NEW |
+| Staff Planning | CorpPerks integration | ✅ NEW |
+| Equipment Sourcing | Nexha integration | ✅ NEW |
+| Marketing Launch | AdBazaar integration | ✅ NEW |
+| Financial Models | RIDZA integration | ✅ NEW |
+
+### 16.3 Dental Twin Service (Port 4751)
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Tooth Records | 32 teeth mapping | ✅ NEW |
+| Treatment History | Per-tooth treatment | ✅ NEW |
+| X-Ray Management | X-ray storage/comparison | ✅ NEW |
+| Oral Health | Gum/periodontal health | ✅ NEW |
+| Predictions | Risk assessment | ✅ NEW |
+
+### 16.4 Dental Inventory Service (Port 4752)
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Supply Catalog | 40+ dental supplies | ✅ NEW |
+| Auto-Reorder | Low-stock triggers | ✅ NEW |
+| Nexha Integration | Procurement automation | ✅ NEW |
+
+---
+
+*Last Updated: June 14, 2026*
+*New Features: Dental AI Module, Genie Dental Health, Dental Expansion Agent, Dental Twin, Dental Inventory*

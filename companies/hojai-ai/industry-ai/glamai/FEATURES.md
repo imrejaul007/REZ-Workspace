@@ -402,3 +402,112 @@ interface CustomerIntelligence {
 - Dashboard (stats, schedule)
 - Appointments (grouped by status)
 - Customer View (beauty profile, notes, recommendations)
+---
+
+## Integration Connectors (6 Connectors) ✅ NEW!
+
+**Location:** `src/connectors/`
+
+| Connector | File | Lines | Purpose |
+|-----------|------|-------|---------|
+| **Beauty Discovery** | beauty-discovery-connector.ts | 450 | DO App → Salon discovery |
+| **Procurement** | salon-procurement-connector.ts | 350 | Nexha → Product order |
+| **Wealth** | salon-wealth-connector.ts | 280 | AssetMind → Profit transfer |
+| **Expansion** | salon-expansion-connector.ts | 320 | SUTAR → Multi-location |
+| **Scheduler** | stylist-scheduler-connector.ts | 350 | Auto-booking |
+| **Inventory** | salon-inventory-connector.ts | 320 | Stock alerts |
+
+### Beauty Discovery Connector
+
+```typescript
+import { beautyDiscoveryConnector } from './src/connectors';
+
+const result = await beautyDiscoveryConnector.discoverSalons({
+  query: "Best salon for hair coloring nearby",
+  userId: "customer-123",
+  latitude: 12.97,
+  longitude: 77.59
+});
+```
+
+### Procurement Connector
+
+```typescript
+const result = await salonProcurementConnector.sendInventorySignal({
+  salonId: "salon-1",
+  item: { name: "Hair Color", currentStock: 5, reorderPoint: 20 },
+  severity: "high"
+});
+```
+
+### Wealth Connector
+
+```typescript
+const result = await salonWealthConnector.transferDailyProfits({
+  salonId: "salon-1",
+  profitData: { revenue: 50000, netProfit: 15000 }
+});
+```
+
+### Expansion Connector
+
+```typescript
+const plan = await salonExpansionConnector.createExpansionPlan({
+  salonId: "salon-1",
+  targetLocations: 5,
+  timeline: "12 months"
+});
+```
+
+### Scheduler Connector
+
+```typescript
+const slot = await stylistSchedulerConnector.autoBook({
+  salonId: "salon-1",
+  customerId: "customer-123",
+  serviceId: "haircut",
+  date: "2026-06-20"
+});
+```
+
+### Inventory Connector
+
+```typescript
+const report = await salonInventoryConnector.checkInventory("salon-1");
+```
+
+---
+
+## Story Flow
+
+```
+9:00 AM  → Customer asks Genie → "Best salon nearby"
+           ↓
+           beautyDiscoveryConnector.discoverSalons()
+           ↓
+           GlamAI recommended (based on preferences)
+
+10:00 AM → Products running low
+           ↓
+           salonInventoryConnector.checkInventory()
+           ↓
+           salonProcurementConnector.processAlerts() → Nexha
+           ↓
+           Auto-order triggered
+
+6:00 PM  → End of day
+           ↓
+           salonWealthConnector.transferDailyProfits()
+           ↓
+           Profits → AssetMind
+
+8:00 PM  → Owner wants to expand
+           ↓
+           salonExpansionConnector.createExpansionPlan()
+           ↓
+           New locations found via RisnaEstate
+```
+
+---
+
+**Last Updated:** June 15, 2026
