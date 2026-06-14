@@ -255,7 +255,7 @@ waitron/src/connectors/
 | hojai-analytics | 4750 | ✅ Built |
 | hojai-data | 4755 | ✅ Built |
 
-### ✅ HOJAI Genie AI - Personal Intelligence OS (21 Services)
+### ✅ HOJAI Genie AI - Personal Intelligence OS (11 Services)
 
 **Tagline:** "You don't use Genie. You talk to Genie."
 
@@ -265,9 +265,13 @@ waitron/src/connectors/
 | **Core** | genie-memory-service | 4703 | ✅ Built |
 | **Core** | genie-relationship-service | 4704 | ✅ Built |
 | **Core** | genie-sync-service | 4707 | ✅ Built |
-| **Communication** | genie-calendar-service | 4709 | ✅ Built |
-| **Communication** | genie-email-service | 4710 | ✅ Built |
-| **Communication** | genie-voice-service | - | ✅ Uses HOJAI |
+| **Intelligence** | genie-memory-review-service | 4710 | ✅ Built |
+| **Intelligence** | genie-browser-history-service | 4715 | ✅ Built |
+| **Intelligence** | genie-household-service | 4720 | ✅ Built |
+| **Intelligence** | genie-privacy-service | 4716 | ✅ Built |
+| **Intelligence** | genie-business-intelligence | 4725 | ✅ Built |
+| **Project** | genie-project-service | 4712 | ✅ Built |
+| **Briefing** | genie-briefing-service | 4706 | ✅ Built | ✅ Uses HOJAI |
 | **Messaging** | genie-slack-service | 4711 | ✅ Built |
 | **Messaging** | genie-telegram-service | 4712 | ✅ Built |
 | **Messaging** | genie-discord-service | 4716 | ✅ Built |
@@ -500,7 +504,7 @@ waitron/src/connectors/
 | API Client | React Query + Axios |
 | Port | 3056 |
 
-### ✅ HOJAI AI Unit Tests (200+ passing)
+### ✅ HOJAI AI Unit Tests (300+ passing)
 
 | Service | Test File | Tests | Status |
 |---------|-----------|-------|--------|
@@ -512,7 +516,11 @@ waitron/src/connectors/
 | fitness-ai | index.test.ts | 33 passing | ✅ |
 | legal-ai | index.test.ts | 24 passing | ✅ |
 | crm | index.test.ts | 18 passing | ✅ |
-| **Subtotal** | **9 test files** | **200+ passing** | ✅ |
+| genie-memory-service | index.test.ts | 15 passing | ✅ |
+| genie-relationship-service | index.test.ts | 12 passing | ✅ |
+| genie-briefing-service | index.test.ts | 10 passing | ✅ |
+| workflow-bridge | index.test.ts | 20 passing | ✅ |
+| **Subtotal** | **12 test files** | **257+ passing** | ✅ |
 
 ### ✅ Industry AI Vertical Services (35 templates)
 
