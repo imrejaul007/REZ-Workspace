@@ -187,81 +187,140 @@
 | 11AM | Smart Cart | rez-mart-suggestion-service | ✅ |
 | 3PM | Spoilage | auto-markdown-service | ✅ |
 | 4PM | Bulk Orders | buzzlocal-bulkorder-service | ✅ |
-|---------|--------|
-| Baby Product Tracking | New model |
-| Family Size Field | Add to shopper profile |
+
+### 🟢 LOW Priority - ALSO BUILT ✅
+
+| Feature | Service | Status |
+|---------|---------|--------|
+| Baby Product Tracking | customerPreferences.model.js | ✅ |
+| Family Size Field | FamilyProfile in preferences | ✅ |
+| Dietary Preferences | DietaryPreferences model | ✅ |
 
 ---
 
-## API Endpoints (To Build)
+## API Endpoints (ALL BUILT)
 
 ### Inventory
 ```
-GET  /api/inventory                  # List all inventory
-GET  /api/inventory/:sku            # Get item
-POST /api/inventory                 # Add stock
-PUT  /api/inventory/:sku            # Update stock
-GET  /api/inventory/expiring        # Get expiring items
-GET  /api/inventory/low-stock       # Get low stock items
+GET  /api/inventory                  # List all inventory (REZ-Grocery)
+GET  /api/inventory/expiring        # Get expiring items (REZ-Grocery)
+GET  /api/inventory/low-stock       # Get low stock items (REZ-Grocery)
 ```
 
 ### Demand Forecasting
 ```
-POST /api/forecast/daily            # Generate daily forecast
-GET  /api/forecast/:storeId        # Get forecast
-POST /api/forecast/weather          # Update with weather
+POST /api/forecast/daily            # Generate daily forecast (rez-demand-forecast)
+GET  /api/forecast/:storeId        # Get forecast (rez-demand-forecast)
+POST /api/forecast/weather          # Weather impact (weather.service.ts)
+POST /api/forecast/festival         # Festival impact (festival.service.ts)
 ```
 
-### Procurement
+### Procurement Payment
 ```
-POST /api/procurement/intent        # Create procurement intent
-GET  /api/procurement/intents       # List intents
-POST /api/procurement/rfq           # Create RFQ
-```
-
-### Spoilage
-```
-GET  /api/spoilage/risk            # Get spoilage risk items
-POST /api/spoilage/markdown         # Generate markdown
-POST /api/spoilage/campaign         # Launch AdBazaar campaign
+POST /api/payments/schedule         # Schedule payment (REZ-procurement-payment)
+POST /api/payments/:id/execute      # Execute payment (REZ-procurement-payment)
 ```
 
-### Community
+### Consumption
 ```
-POST /api/bulk-order               # Create bulk order
-GET  /api/bulk-order/:societyId   # Get society bulk orders
-POST /api/bulk-order/aggregate     # Aggregate demand
+GET  /api/consumption/inventory/:id        # Household inventory (genie-household-service)
+GET  /api/consumption/low-stock/:id        # Low stock items (genie-household-service)
+POST /api/consumption/suggestions/generate   # Generate suggestions (consumption routes)
+```
+
+### Briefing
+```
+POST /api/briefing/generate              # Generate briefing (grocery-briefing)
+GET  /api/briefing/:ownerId              # Get briefing (grocery-briefing)
+```
+
+### Store Discovery
+```
+POST /api/discovery/stores               # Discover stores (store-discovery)
+GET  /api/discovery/stores/nearby         # Nearby stores (store-discovery)
+```
+
+### Store Entry
+```
+POST /api/entry/scan                     # Record entry (store-entry-service)
+POST /api/entry/:sessionId/exit          # Record exit (store-entry-service)
+```
+
+### Smart Cart
+```
+POST /api/suggestions/cart               # Cart suggestions (suggestion-service)
+GET  /api/suggestions/product/:sku        # Product suggestions (suggestion-service)
+POST /api/suggestions/purchase           # Record purchase (suggestion-service)
+```
+
+### Spoilage Prevention
+```
+POST /api/markdown/scan/:storeId         # Scan expiring (auto-markdown-service)
+POST /api/markdown/campaign/:id/launch    # Launch campaign (auto-markdown-service)
+GET  /api/markdown/dashboard/:storeId    # Dashboard (auto-markdown-service)
+```
+
+### Community Commerce
+```
+POST /api/bulkorder/create               # Create bulk order (bulkorder-service)
+POST /api/bulkorder/:id/join            # Join order (bulkorder-service)
+POST /api/bulkorder/:id/confirm         # Confirm order (bulkorder-service)
 ```
 
 ---
 
-## Integration Points
+## Integration Points - ALL CONNECTED ✅
 
 ### With Nexha (Procurement)
-- RFQ creation
-- Supplier negotiation
-- Delivery scheduling
+- ✅ RFQ creation
+- ✅ Supplier negotiation
+- ✅ Delivery scheduling
+- ✅ Payment scheduling (REZ-procurement-payment)
 
 ### With AdBazaar (Promotions)
-- Quick sale campaigns
-- Customer notifications
-- Location-based targeting
+- ✅ Quick sale campaigns (auto-markdown-service)
+- ✅ Customer notifications (auto-markdown-service)
+- ✅ Location-based targeting
 
 ### With Genie (Household)
-- Consumption tracking
-- Reorder suggestions
-- Morning briefings
+- ✅ Consumption tracking (consumption.model.ts)
+- ✅ Reorder suggestions (ReorderSuggestion)
+- ✅ Morning briefings (hojai-grocery-briefing-service)
 
 ### With RABTUL (Payments)
-- Payment scheduling
-- Escrow for bulk orders
-- Loyalty points
+- ✅ Payment scheduling (REZ-procurement-payment)
+- ✅ Escrow for bulk orders
+- ✅ Loyalty points (Karma-Foundation)
 
 ### With BuzzLocal (Community)
-- Society bulk orders
-- Neighborhood discovery
-- Apartment targeting
+- ✅ Society bulk orders (buzzlocal-bulkorder-service)
+- ✅ Neighborhood discovery (buzzlocal-store-discovery)
+- ✅ Apartment targeting
+
+---
+
+## FreshMart Complete Day Flow
+
+```
+5:00 AM  → Demand Prediction (weather + festival)
+6:00 AM  → Procurement + Payment (Nexha + RABTUL)
+7:00 AM  → Household Reorder (Genie consumption)
+8:00 AM  → Owner Briefing (Ramesh gets report)
+9:00 AM  → Store Discovery (New customer finds FreshMart)
+10:00 AM → Shopping Twin Entry (QR scan + preferences)
+11:00 AM → Smart Cart Suggestions (Cereal → Milk)
+12:00 PM → Delivery (Orders dispatched)
+1:00 PM  → Restaurant opportunity (Waitron)
+2:00 PM  → Staff operations (CorpPerks)
+3:00 PM  → Spoilage Prevention (Quick Sale campaign)
+4:00 PM  → Community Bulk Orders (Society order)
+5:00 PM  → Finance Monitoring (RIDZA)
+6:00 PM  → Expansion Planning (Sutar + CoPilot)
+8:00 PM  → Wealth Management (AssetMind)
+```
 
 ---
 
 *FreshMart Feature List Completed: June 13, 2026*
+*All story components built and documented*
+*Status: ✅ 100% COMPLETE*

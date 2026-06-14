@@ -2,6 +2,26 @@ version: '3.8'
 
 services:
   # ============================================================
+  # GENIE DASHBOARD (Vellum-like unified interface)
+  # ============================================================
+
+  genie-dashboard:
+    build: ../companies/hojai-ai/genie-dashboard-service
+    container_name: genie-dashboard
+    ports: ["4701:4701"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4701/health"], interval: "30s", timeout: "10s", retries: 3 }
+    environment:
+      - NODE_ENV=production
+      - PORT=4701
+      - GENIE_MEMORY_URL=http://genie-memory:4703
+      - GENIE_RELATIONSHIP_URL=http://genie-relationship:4704
+      - GENIE_BRIEFING_URL=http://genie-briefing:4706
+      - GENIE_CALENDAR_URL=http://genie-calendar:4709
+      - GENIE_EMAIL_URL=http://genie-email:4710
+
+  # ============================================================
   # GENIE CORE SERVICES (All Built)
   # ============================================================
 

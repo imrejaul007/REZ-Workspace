@@ -118,10 +118,166 @@
 | Product | Port | Description |
 |---------|------|-------------|
 | rendez | 4060 | Social meeting platform |
-| Cosmic-OS | 4070 | Mobile OS interface |
+| **Cosmic-OS** | 4070 | **Astrology-based Life OS with Daily Readings, Council of Agents, Cosmic Twin** |
 | scam-call-detection | 4065 | Fraud call detection |
 | trust-os-shield-app | 3002 | Security mobile app |
 | trust-os-shield-sdk | 3003 | Security SDK |
+
+---
+
+## Cosmic-OS - Complete Documentation (Updated June 14, 2026)
+
+### About Cosmic-OS
+
+**Cosmic-OS** is an astrology-based life operating system that provides cosmic guidance, digital twin services, and narrative intelligence for the REZ ecosystem. It reimagines mobile experience with cosmic, space-inspired design.
+
+### Project Structure
+
+```
+companies/Axom/Cosmic-OS/
+├── cosmic-mobile/                      # React Native Expo mobile app
+│   ├── src/
+│   │   ├── types.ts                   # TypeScript interfaces (CREATED)
+│   │   └── services/
+│   │       └── api.ts                # API client
+│   ├── app/
+│   │   ├── _layout.tsx               # Root layout
+│   │   └── index.tsx                 # Home screen
+│   ├── assets/                        # Icons (CREATED)
+│   └── package.json                   # expo-secure-store, axios ADDED
+│
+├── src/services/
+│   └── cosmic-os-api/                 # Express.js REST API
+│       ├── src/index.ts               # Express server
+│       ├── package.json
+│       └── tsconfig.json
+│
+├── README.md                          # Full documentation
+└── CLAUDE.md                          # Developer guide
+```
+
+### Cosmic-OS Components
+
+| Component | Description | Status | Port |
+|-----------|-------------|--------|------|
+| **cosmic-mobile** | React Native Expo mobile app | ✅ Built | 19006 (dev) |
+| **cosmic-os-api** | Express.js REST API | ✅ Built | 4070 |
+| **cosmicService.ts** | Main cosmic service | ✅ Built | 4163-4167 |
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Daily Cosmic Reading** | Astrology-based daily guidance |
+| **Council of Agents** | Multi-agent AI consultation |
+| **Mood Check-In** | Wellness tracking |
+| **Domain Guidance** | Career, health, relationships, finance |
+| **Life Story Engine** | Narrative intelligence |
+| **Life Pattern Engine** | Pattern recognition |
+| **Cosmic Twin** | Digital twin with cosmic context |
+
+### API Endpoints (cosmic-os-api - Port 4070)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check with status info |
+| `/api/status` | GET | OS status and features |
+| `/api/system` | GET | System metrics (memory, CPU) |
+| `/api/apps` | GET | Registered apps registry |
+
+### API Endpoints (cosmicService.ts - Ports 4163-4167)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/cosmic/:userId` | GET | Get cosmic context |
+| `/api/cosmic/daily/:userId` | GET | Daily reading |
+| `/api/cosmic/council` | POST | Consult AI council |
+| `/api/mood/checkin` | POST | Mood tracking |
+| `/api/guidance/:userId/:domain` | GET | Domain guidance |
+| `/api/agents` | GET | List AI agents |
+| `/api/user/:userId` | GET | User profile + wallet + streak |
+
+### Life Story Engine (Port 4167)
+
+| Feature | Description |
+|---------|-------------|
+| **Narrative Intelligence** | Turning data into meaningful stories |
+| **Story Arcs** | Character, setting, conflict, resolution |
+| **Cosmic Narrative** | Life as mythology |
+| **Personal Mythology** | User's unique life narrative |
+| **Timeline Narrative** | Events as chapters |
+| **Daily Narrative** | Day-by-day storytelling |
+
+### AI Life Agents
+
+| Agent | Domain |
+|-------|--------|
+| **Career Counselor** | Professional guidance |
+| **Health Advisor** | Wellness, fitness |
+| **Relationship Guide** | Personal connections |
+| **Finance Planner** | Money decisions |
+| **Spiritual Guide** | Life purpose |
+
+### Mobile App Screens (cosmic-mobile)
+
+| Screen | Description |
+|--------|-------------|
+| Home | Cosmic-themed dashboard with launch button |
+| Settings | System configuration |
+| Status | System status indicator |
+
+### Quick Start
+
+```bash
+# API Service
+cd companies/Axom/Cosmic-OS/src/services/cosmic-os-api
+npm install
+npm run dev          # Development with hot reload
+
+# Mobile App
+cd companies/Axom/Cosmic-OS/cosmic-mobile
+npm install
+npm start            # Start Expo dev server
+```
+
+### Docker Deployment
+
+```bash
+cd companies/Axom/Cosmic-OS/src/services/cosmic-os-api
+docker build -t cosmic-os-api .
+docker run -p 4070:4070 cosmic-os-api
+```
+
+### Technology Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Mobile** | React Native 0.76.9, Expo SDK 53, expo-router 5.0.0 |
+| **Backend** | Node.js 20+, Express.js 4.18.2, TypeScript 5.3.3 |
+| **Security** | Helmet, CORS |
+| **Auth** | expo-secure-store |
+
+### Bug Fixes Applied (June 14, 2026)
+
+| # | Issue | Fix |
+|---|-------|-----|
+| 1 | TypeScript compiler missing | Reinstalled node_modules |
+| 2 | Missing `types.ts` file | Created src/types.ts |
+| 3 | Missing `expo-secure-store` | Installed dependency |
+| 4 | Missing `axios` | Installed dependency |
+| 5 | Missing `assets/` directory | Created with placeholder images |
+| 6 | Wrong API port (4163 vs 4070) | Fixed to port 4070 |
+
+### Related Services
+
+| Service | Location | Port | Purpose |
+|---------|----------|------|---------|
+| **REZ-cosmic-twin** | companies/Axom/REZ-cosmic-twin | 4055 | Digital twin with cosmic context |
+| **REZ-cosmic-twin** | companies/hojai-ai/REZ-cosmic-twin | 4055 | Digital twin (hojai) |
+| **REZ-life-pattern-engine** | companies/Axom | 4053 | Life pattern recognition |
+| **REZ-life-story-engine** | companies/Axom | 4056 | Life narratives |
+
+---
 
 ### Axom Complete Port Map
 
