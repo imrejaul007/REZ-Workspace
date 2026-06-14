@@ -423,8 +423,7 @@ export class ContextEnricher {
       userType: 'new',
       preferences: {},
       pastCategories: intent.category ? [intent.category] : [],
-      totalOrders: 0,
-      conversionRate: 0
+      totalOrders: 0
     };
   }
 
@@ -434,6 +433,7 @@ export class ContextEnricher {
       sessionStart: new Date().toISOString(),
       pageViews: 1,
       searchQueries: [],
+      activeFilters: {},
       recentCategories: intent.category ? [intent.category] : [],
       timeOnSite: 0,
       bounceRisk: false
@@ -443,7 +443,8 @@ export class ContextEnricher {
   private createDefaultHistoricalContext(): HistoricalContext {
     return {
       conversionRate: 0,
-      avgSessionDuration: 0
+      avgSessionDuration: 0,
+      addresses: []
     };
   }
 

@@ -33,7 +33,7 @@ export interface EmotionScore {
   indicators: string[];
 }
 
-export type Emotion = 'joy' | 'sadness' | 'anger' | 'fear' | 'surprise' | 'disgust' | 'anticipation' | 'trust';
+export type Emotion = 'joy' | 'sadness' | 'anger' | 'fear' | 'surprise' | 'disgust' | 'anticipation' | 'trust' | 'gratitude' | 'frustration';
 
 interface SentimentWord {
   word: string;
