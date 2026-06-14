@@ -1,0 +1,954 @@
+# CLAUDE.md - HOJAI AI
+
+## Project Overview
+
+**Name:** HOJAI AI
+**Type:** AI Infrastructure Company
+**Purpose:** Build AI Operating Systems for organizations and individuals
+**GitHub:** github.com/imrejaul007/hojai-ai
+
+HOJAI AI powers the entire RTNM ecosystem (16 companies, 615+ services) while also selling AI capabilities externally.
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Runtime | Node.js 20+ |
+| Framework | Express.js |
+| Language | TypeScript |
+| Database | MongoDB |
+| Cache | Redis |
+| Container | Docker |
+| Orchestration | Kubernetes |
+
+## Project Structure
+
+```
+hojai-ai/
+├── services/
+│   ├── hojai-shared/             # Shared clients
+│   ├── hojai-business-copilot/   # ✅ NEW - Unified Business Copilot (Port 4600)
+│   ├── hojai-product-intelligence/ # ✅ NEW - Product Intelligence (Port 4755)
+│   ├── hojai-competitive-intelligence/ # ✅ NEW - Competitive Intel (Port 4756)
+│   ├── hojai-revenue-intelligence/  # ✅ NEW - Revenue Intel (Port 4757)
+│   ├── hojai-founder-os/         # ✅ NEW - FounderOS (Port 4260)
+│   ├── hojai-meeting-intelligence/ # ✅ NEW - Meeting Intel (Port 4700)
+│   ├── hojai-goal-os/            # ✅ NEW - GoalOS (Port 4242)
+│   ├── genie-project-service/    # Project & task execution
+│   └── ...
+├── hojai-sutar-os/
+│   ├── services/
+│   │   ├── sutar-flow-os/       # ✅ NEW - FlowOS (Port 4244)
+│   │   └── ... (25 SUTAR services)
+│   └── src/
+│       └── integration-hub.ts
+├── packages/
+│   ├── hojai-board/             # AI C-Suite (CEO/CFO/COO/CMO/CTO/CHRO/CLO)
+│   ├── hojai-twin/              # Digital Twins (Employee/Customer/Company/Merchant)
+│   ├── hojai-workforce/         # AI Employee Marketplace
+│   ├── hojai-graph/             # ✅ ENRICHED - Knowledge Graph (31 entities, 27 relationships)
+│   └── ...
+├── products/
+│   └── hojai-command-center/    # ✅ NEW - Executive Dashboard (Port 4801, Next.js)
+├── employees/                   # 200+ AI employees
+├── industry-ai/                # 15 industry verticals
+├── RAZO-Keyboard/
+├── docs/
+│   └── hojai-ai/
+├── CLAUDE.md                    # This file
+├── README.md
+└── docker-compose.integration.yml
+```
+
+## Integration Points
+
+### RABTUL Services (Core Infrastructure)
+
+| Service | Port | Integration |
+|---------|------|-------------|
+| RABTUL Auth | 4002 | JWT validation, user verification |
+| RABTUL Payment | 4001 | Payment processing |
+| RABTUL Wallet | 4004 | Balance management |
+| RABTUL Notification | 4005 | Push/email/SMS notifications |
+
+### REZ Services
+
+| Service | Port | Integration |
+|---------|------|-------------|
+| REZ Identity Hub | 6000 | Pre-call research, 25 data sources |
+| REZ Intelligence | 4200 | Intent prediction |
+| REZ Consumer | - | Rider app |
+| REZ Merchant | - | Merchant platform |
+
+### HOJAI Services
+
+| Service | Port | Integration |
+|---------|------|-------------|
+| SkillNet | 5120-5140 | Skill marketplace, execution |
+| BrandPulse | 4770 | Brand intelligence |
+| Genie Voice | 4760 | Voice AI |
+| ExpertOS | 4550 | Agent runtime |
+
+## HOJAI CoPilot - Business Intelligence Platform ✅ NEW!
+
+**Tagline:** "Every Company Fully Understood."
+**Status:** ALL 16 PRODUCT GROUPS BUILT | June 13, 2026
+
+### Architecture
+
+HOJAI CoPilot connects Memory, Twins, Knowledge Graphs, Agents, Workflows, and Executive Decision Intelligence into a unified business brain.
+
+### 16 Product Groups
+
+| # | Product Group | Service | Port | Status |
+|---|--------------|---------|------|--------|
+| 1 | Company Intelligence | hojai-graph | 4810 | ✅ |
+| 2 | Executive AI Suite | hojai-board | 4870 | ✅ |
+| 3 | Company Twin | hojai-twin | 4860 | ✅ |
+| 4 | Decision Intelligence | hojai-board | 4870 | ✅ |
+| 5 | GoalOS | hojai-goal-os | 4242 | ✅ NEW |
+| 6 | Project Intelligence | genie-project-service | 4708 | ✅ |
+| 7 | Meeting Intelligence | hojai-meeting-intelligence | 4700 | ✅ NEW |
+| 8 | Workforce Intelligence | hojai-workforce | 4820 | ✅ |
+| 9 | Customer Intelligence | hojai-customer-intelligence | 4752 | ✅ |
+| 10 | Product Intelligence | hojai-product-intelligence | 4755 | ✅ NEW |
+| 11 | Competitive Intelligence | hojai-competitive-intelligence | 4756 | ✅ NEW |
+| 12 | Revenue Intelligence | hojai-revenue-intelligence | 4757 | ✅ NEW |
+| 13 | FounderOS | hojai-founder-os | 4260 | ✅ NEW |
+| 14 | Agent Workforce | hojai-agent-marketplace | 4580 | ✅ |
+| 15 | Workflow Intelligence | sutar-flow-os | 4244 | ✅ NEW |
+| 16 | Executive Command Center | hojai-command-center | 4801 | ✅ NEW |
+
+### Business Copilot - Unified Gateway (Port 4600)
+
+**hojai-business-copilot** provides 7 unified interfaces:
+
+| Interface | Backing Service | Port | Routes |
+|-----------|----------------|------|--------|
+| Memory | hojai-memory | 4520 | Context, Search, Timeline |
+| Twin | hojai-twin | 4860 | Employee/Customer/Company/Merchant Twin |
+| Intelligence | hojai-graph + hojai-intelligence | 4810 + 4530 | Graph queries, Entity extraction, ML predictions |
+| Agent | hojai-expert-os | 4550 | Agent invocation, Smart routing |
+| Workflow | sutar-flow-os | 4244 | Flow execution, Triggers |
+| Execution | genie-project-service | 4708 | Tasks, Projects, Dashboard, Audit |
+| Simulation | sutar-simulation-os | 4241 | What-If, Monte Carlo, Forecasting, Risk, Compliance |
+
+**Central Query Router:**
+```
+POST /api/query
+Body: { query: "What is our biggest revenue risk?" }
+→ Intent classification → Routes to appropriate interfaces → Synthesizes response
+```
+
+### Command Center Dashboard (Port 4801)
+
+Next.js dashboard with 12 pages:
+- `/` Executive Command Center
+- `/revenue` Revenue Intelligence
+- `/customers` Customer 360
+- `/products` Product Hub
+- `/projects` Project Hub
+- `/team` Workforce Dashboard
+- `/goals` GoalOS
+- `/meetings` Meeting Hub
+- `/competitors` Competitive Intelligence
+- `/decisions` Decision Center
+- `/agents` Agent Workforce
+- `/workflows` Workflow Hub
+
+### Pre-built What-If Scenarios (15)
+
+| Category | Scenarios |
+|----------|-----------|
+| Revenue Drop | -10%, -20%, -30% |
+| Revenue Growth | +10%, +20%, +50% |
+| Hiring | 10, 50, 100 people |
+| CAC Increase | +10%, +25%, +50% |
+| Market Expansion | Dubai, UK, US |
+
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| PORT | No | 3000 | Service port |
+| NODE_ENV | No | development | Environment |
+| MONGODB_URI | Yes | - | MongoDB connection |
+| JWT_SECRET | Yes | - | JWT signing |
+| REDIS_URL | No | localhost:6379 | Redis |
+| RABTUL_AUTH_URL | Yes | localhost:4002 | RABTUL Auth |
+| RABTUL_PAYMENT_URL | Yes | localhost:4001 | RABTUL Payment |
+| RABTUL_WALLET_URL | Yes | localhost:4004 | RABTUL Wallet |
+| RABTUL_NOTIFICATION_URL | Yes | localhost:4005 | RABTUL Notification |
+| REZ_IDENTITY_URL | Yes | localhost:6000 | REZ Identity Hub |
+| SKILLNET_URL | Yes | localhost:5130 | SkillNet |
+| INTELLIGENCE_URL | Yes | localhost:5130 | Intelligence Engine |
+| RUNTIME_URL | Yes | localhost:5120 | Runtime Cloud |
+| BRANDPULSE_URL | No | localhost:4770 | BrandPulse |
+| GENIE_VOICE_URL | No | localhost:4760 | Genie Voice |
+
+### CoPilot Backing Services (for Business Copilot Gateway)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| MEMORY_SERVICE_URL | localhost:4520 | hojai-memory |
+| TWIN_SERVICE_URL | localhost:4860 | hojai-twin |
+| GRAPH_SERVICE_URL | localhost:4810 | hojai-graph |
+| INTELLIGENCE_SERVICE_URL | localhost:4530 | hojai-intelligence |
+| EXPERT_OS_URL | localhost:4550 | hojai-expert-os |
+| FLOW_OS_URL | localhost:4244 | sutar-flow-os |
+| PROJECT_SERVICE_URL | localhost:4708 | genie-project-service |
+| SIMULATION_OS_URL | localhost:4241 | sutar-simulation-os |
+
+### Industry AI URLs
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| INDUSTRY_HEALTHCARE_URL | localhost:3001 | Healthcare AI |
+| INDUSTRY_LEGAL_URL | localhost:3002 | Legal AI |
+| INDUSTRY_FINANCE_URL | localhost:3003 | Finance AI |
+| INDUSTRY_RE_URL | localhost:3004 | Real Estate AI |
+| INDUSTRY_HOSPITALITY_URL | localhost:3005 | Hospitality AI |
+| INDUSTRY_RESTAURANT_URL | localhost:3006 | Restaurant AI |
+| INDUSTRY_FLEET_URL | localhost:3007 | Fleet AI |
+| INDUSTRY_EDUCATION_URL | localhost:3008 | Education AI |
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
+| `npm test` | Run tests |
+| `docker-compose -f docker-compose.integration.yml up -d` | Start all services |
+
+### CoPilot Quick Start
+
+```bash
+# Business Copilot Gateway (Port 4600)
+cd services/hojai-business-copilot && npm install && npm run dev
+
+# Command Center Dashboard (Port 4801)
+cd products/hojai-command-center && npm install && npm run dev
+
+# Individual CoPilot Services
+cd services/hojai-product-intelligence && npm run dev
+cd services/hojai-competitive-intelligence && npm run dev
+cd services/hojai-goal-os && npm run dev
+cd services/hojai-meeting-intelligence && npm run dev
+cd services/hojai-revenue-intelligence && npm run dev
+cd services/hojai-founder-os && npm run dev
+cd hojai-sutar-os/services/sutar-flow-os && npm run dev
+```
+
+## Architecture
+
+### SUTAR OS Integration Hub
+
+Central hub connecting all RTNM services:
+
+```typescript
+import { sutarHub } from './integration-hub';
+
+// Get complete user context
+const context = await sutarHub.prepareContext(userId, query);
+
+// Process with industry expertise
+const result = await sutarHub.processWithIndustryExpertise(
+  userId, 
+  query, 
+  'healthcare'
+);
+
+// Execute with payment
+const payment = await sutarHub.executeWithPayment(userId, 'action', 100);
+```
+
+### Genie Integration
+
+Personal AI with industry expertise:
+
+```typescript
+import { genieIntegration } from './genie-integration';
+
+// Process voice command
+const result = await genieIntegration.processCommand(
+  "Hey Genie, help with legal contract",
+  userId
+);
+```
+
+### CoPilot Integration
+
+Keyboard AI with Genie:
+
+```typescript
+import { copilotIntegration } from './copilot-integration';
+
+// Process keyboard input
+const result = await copilotIntegration.processKeyboardInput(
+  "Hey Genie, draft email to client",
+  userId
+);
+```
+
+### Business Copilot Integration
+
+Unified business intelligence gateway:
+
+```typescript
+// Access all 7 interfaces from one service
+import fetch from 'node-fetch';
+
+// Memory
+const memory = await fetch('http://localhost:4600/api/memory/context?entityType=company&entityId=xxx');
+
+// Twin
+const twin = await fetch('http://localhost:4600/api/twin/company/xxx');
+
+// Intelligence
+const intel = await fetch('http://localhost:4600/api/intelligence/query', {
+  method: 'POST',
+  body: JSON.stringify({ query: 'What is our biggest risk?' })
+});
+
+// Agent
+const agent = await fetch('http://localhost:4600/api/agent/list');
+
+// Workflow
+const workflow = await fetch('http://localhost:4600/api/workflow/list');
+
+// Simulation (What-If)
+const simulation = await fetch('http://localhost:4600/api/simulate/scenarios/revenue-drop-20');
+
+// Natural Language Query
+const result = await fetch('http://localhost:4600/api/query', {
+  method: 'POST',
+  body: JSON.stringify({ query: 'Show me our Q3 revenue performance' })
+});
+```
+
+## Shared Clients
+
+All services use shared clients from `hojai-shared`:
+
+```typescript
+import { rabtul, rezIdentity, skillnet, industryAI } from './clients';
+
+// RABTUL
+await rabtul.verifyToken(token);
+await rabtul.processPayment(data);
+await rabtul.getBalance(userId);
+await rabtul.sendNotification(data);
+
+// REZ Identity
+await rezIdentity.getUserProfile(userId);
+await rezIdentity.getPreCallResearch(userId);
+await rezIdentity.get360View(userId);
+
+// SkillNet
+await skillnet.getSkills();
+await skillnet.executeGoal(goal, context);
+await skillnet.runSkill(skillId, input);
+
+// Industry AI
+await industryAI.analyze('healthcare', data);
+await industryAI.getIndustryContext('legal');
+```
+
+## Health Endpoints
+
+All services implement:
+
+| Endpoint | Purpose |
+|----------|---------|
+| GET /health | Full health check |
+| GET /health/live | Kubernetes liveness |
+| GET /health/ready | Kubernetes readiness |
+
+## Security
+
+- [x] JWT authentication required
+- [x] CORS whitelist configured
+- [x] Rate limiting enabled
+- [x] Request body size limits
+- [x] Helmet security headers
+- [x] No hardcoded secrets
+- [x] Tenant isolation on all schemas
+- [x] Input validation (Zod)
+- [x] Graceful shutdown handlers
+
+## Deployment
+
+### Docker Compose
+
+```bash
+docker-compose -f docker-compose.integration.yml up -d
+```
+
+### Kubernetes
+
+```bash
+kubectl apply -f k8s/
+```
+
+### Cloud
+
+| Platform | Status |
+|----------|--------|
+| GCP Cloud Run | ✅ Ready |
+| AWS ECS | ✅ Ready |
+| Azure | ✅ Ready |
+
+## Port Registry
+
+| Range | Service |
+|-------|---------|
+| 3000-3099 | RABTUL Core |
+| 4000-4099 | RABTUL Extended |
+| 4100-4199 | SUTAR OS |
+| 4180-4185 | HOJAI Compliance |
+| 4500-4610 | HOJAI Core |
+| 3053 | hib-code-intelligence |
+| 3054 | hib-soar |
+| 4241 | sutar-simulation-os |
+| 4242 | hojai-goal-os |
+| 4244 | sutar-flow-os |
+| 4260 | hojai-founder-os |
+| 4520 | hojai-memory |
+| 4530 | hojai-skillnet (combined) |
+| 4580 | hojai-agent-marketplace |
+| 4600 | hojai-business-copilot | Business Copilot (Unified Gateway) |
+| 4700 | hojai-meeting-intelligence |
+| 4707 | genie-sync-service |
+| 4708 | genie-project-service |
+| 4752 | hojai-customer-intelligence |
+| 4755 | hojai-product-intelligence |
+| 4756 | hojai-competitive-intelligence |
+| 4757 | hojai-revenue-intelligence |
+| 4801 | hojai-command-center |
+| 4810 | hojai-graph |
+| 4820 | hojai-workforce |
+| 4860 | hojai-twin |
+| 4870 | hojai-board |
+| 4700-4799 | GENIE / RisaCare |
+| 4750-4754 | HOJAI Intelligence |
+| 4850-4899 | HOJAI VoiceOS |
+
+## Unit Tests (333+ passing)
+
+| Service | Tests | Status |
+|---------|-------|--------|
+| hojai-expert-os | 30 | ✅ |
+| hib-code-intelligence | 40+ | ✅ |
+| hib-soar | 15 | ✅ |
+| genie-sync-service | 10 | ✅ |
+| hojai-industry | 30 | ✅ |
+| fitness-ai | 33 | ✅ |
+| legal-ai | 24 | ✅ |
+| crm | 18 | ✅ |
+| **hojai-skillnet** | **133** | ✅ |
+| **Total** | **333+** | ✅ |
+
+### HOJAI SkillNet Unit Tests (133 passing)
+
+| Test File | Tests | Status |
+|-----------|-------|--------|
+| auth.test.ts | 13 | ✅ JWT authentication |
+| config.test.ts | 14 | ✅ Environment validation |
+| sanitize.test.ts | 19 | ✅ Input sanitization |
+| tenant.test.ts | 13 | ✅ Tenant middleware |
+| shutdown.test.ts | 6 | ✅ Graceful shutdown |
+| cache.test.ts | 17 | ✅ Redis caching |
+| validation.test.ts | 22 | ✅ Input validation |
+| entity.test.ts | 13 | ✅ Entity types |
+| error.test.ts | 22 | ✅ Error handling |
+| response.test.ts | 20 | ✅ Response format |
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run specific service tests
+cd hojai-industry && npx vitest run
+cd industry-ai/fitness-ai && npx vitest run
+cd industry-ai/legal-ai && npx vitest run
+cd industry-ai/crm && npx vitest run
+
+# Run HOJAI SkillNet tests
+cd hojai-skillnet && npm test
+```
+
+## Industry AI Services
+
+### HOJAI Industry Intelligence (Port 4700)
+
+Privacy-preserving industry intelligence platform with 3-layer architecture:
+- Layer 1: Tenant Learning (Private)
+- Layer 2: Industry Learning (Anonymous)
+- Layer 3: Global Learning (Platform)
+
+**Supported Industries:** Jewellery, Healthcare, Hospitality, Retail, Education, Finance, Real Estate
+
+### Industry AI Vertical Templates (35 services)
+
+| Service | Industry | Tests |
+|---------|----------|-------|
+| fitness-ai | Fitness | ✅ 33 |
+| legal-ai | Legal | ✅ 24 |
+| crm | CRM | ✅ 18 |
+| salon-ai | Commerce | ✅ Implemented |
+| retail-ai | Commerce | Template |
+| pharmacy-ai | Healthcare | Template |
+| carecode | Healthcare | Template |
+| + 30 more | Various | Templates |
+
+### GlamAI - Salon Intelligence OS (Port 3000) - NEW
+
+**Location:** `industry-ai/glamai/`
+**Tagline:** "The brain that makes the salon know you better than you know yourself."
+
+GlamAI is the unified AI orchestration layer for salon operations:
+
+#### Services Built
+
+| Service | Purpose |
+|---------|---------|
+| **BeautyMemoryService** | Beauty-specific memory (hair color, notes, reactions) |
+| **ServicePlanService** | AI service plan generation |
+| **CustomerService** | Unified customer intelligence |
+| **StylistService** | Stylist-facing APIs |
+| **InventoryService** | Inventory intelligence |
+| **RecommendationService** | Personalized recommendations |
+| **BeautyGenieService** | Beauty-specific Genie |
+| **TrainingAcademyService** | Stylist certification |
+
+#### Bridges
+
+| Bridge | Connects To |
+|--------|-------------|
+| **SalonBridge** | REZ Salon CRM (4012), Booking (4201), POS (4902), Inventory (4906) |
+| **MindSalonBridge** | REZ Mind Salon AI (4010) |
+| **GenieBridge** | Genie Memory (4703), Genie Briefing (4704) |
+| **NexhaBridge** | Nexha Procurement (B2B commerce) |
+
+#### Salon AI Agents
+
+| Agent | Port | Status |
+|-------|------|--------|
+| **Treatment Advisor** | 4813 | ✅ Built |
+| **Inventory Alert Agent** | 4814 | ✅ Built |
+| Beauty Advisor | 4810 | ✅ Implemented |
+| Appointment Manager | 4810 | ✅ Implemented |
+| Campaign Manager | 4810 | ✅ Implemented |
+| Retention Manager | 4810 | ✅ Implemented |
+
+#### GlamAI Stylist Tablet App
+
+**Location:** `industry-ai/glamai-stylist-app/`
+
+React tablet app for stylists:
+- Dashboard with today's appointments
+- Customer view with beauty profile
+- Add notes, record colors, track reactions
+
+#### Running GlamAI
+
+```bash
+cd industry-ai/glamai && npm install && npm run dev
+cd industry-ai/glamai-stylist-app && npm install && npm run dev
+```
+
+### REZ-Merchant Industry OS (2,474 files)
+
+Full implementation covering:
+- Restaurant OS (48 files)
+- Hotel OS (47 files)
+- Salon OS (35 files)
+- Healthcare OS (45 files)
+- Retail OS (13 files)
+- Fitness OS (26 files)
+
+## Status
+
+- [x] Codebase exists
+- [x] Documentation complete
+- [x] Integration clients added
+- [x] Production Dockerfiles
+- [x] Health endpoints
+- [x] Security fixes applied
+- [x] 100% documentation coverage
+- [x] 100% Docker support
+- [x] All services connected
+- [x] **CoPilot: All 16 Product Groups Built**
+- [x] **CoPilot: Business Copilot Gateway (Port 4600)**
+- [x] **CoPilot: Command Center Dashboard (Port 4801)**
+- [x] **CoPilot: All Intelligence Services Built**
+- [x] **HOJAI Industry AI Built (Port 4700)**
+- [x] **HIB Code Intelligence Built (Port 3053)**
+- [x] **HIB SOAR Built (Port 3054)**
+- [x] **Genie Sync Service Built (Port 4707)**
+- [x] **Industry AI Vertical Templates (35 services)**
+- [x] **HOJAI SkillNet: 10/10 Production Ready**
+- [x] **Unit Tests: 333+ passing**
+- [x] **18 Services Running** (June 13, 2026)
+- [x] **End-to-End Flow Verified**
+- [x] **Business Copilot Gateway Operational (Port 4600)**
+
+## HOJAI SkillNet - 10/10 Production Ready
+
+**Location:** `hojai-skillnet/`
+**Build Status:** ✅ TypeScript compiled successfully
+**Test Status:** ✅ 133 tests passing
+
+### Build & Run
+
+```bash
+cd hojai-skillnet
+npm install
+npm run build    # TypeScript compilation
+npm run dev      # Development mode
+npm start        # Production
+npm test         # Run tests
+```
+
+### HOJAI SkillNet Features
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| ML Predictions | Churn, LTV, Intent Detection | ✅ |
+| Recommendations | Product, Content, Action | ✅ |
+| Event Bus | Pub/Sub, Subscriptions, Streams | ✅ |
+| Insights | Segments, Trends, Anomalies | ✅ |
+| Tenant Management | CRUD operations | ✅ |
+| API Keys | Create, revoke | ✅ |
+| MongoDB Persistence | All data persisted | ✅ |
+| Graceful Shutdown | SIGTERM/SIGINT | ✅ |
+| JWT Authentication | Bearer token auth | ✅ |
+| XSS Sanitization | Input validation | ✅ |
+
+### HOJAI SkillNet Environment Variables
+
+| Variable | Required | Default |
+|----------|----------|---------|
+| PORT | No | 4530 |
+| MONGODB_URI | Yes | mongodb://localhost:27017/hojai-skillnet |
+| JWT_SECRET | Yes | (min 32 chars) |
+| CORS_ORIGINS | No | - |
+| NODE_ENV | No | development |
+
+## Related Files
+
+| File | Description |
+|------|-------------|
+| README.md | Quick start |
+| COMPANIES-AUDIT.md | Complete companies audit |
+| PRODUCTS-FEATURES-AUDIT.md | Products & features |
+| INTEGRATION-AUDIT.md | Integration audit |
+| DEPLOYMENT-GUIDE.md | Deployment instructions |
+| MASTER-PRODUCTION-REPORT.md | Production status |
+| HOJAI-HOLISTIC-ARCHITECTURE.md | Holistic architecture |
+
+## CoPilot Documentation
+
+| Document | Location |
+|----------|----------|
+| Business Copilot Gateway | services/hojai-business-copilot/CLAUDE.md |
+| Product Intelligence | services/hojai-product-intelligence/CLAUDE.md |
+| Competitive Intelligence | services/hojai-competitive-intelligence/CLAUDE.md |
+| GoalOS | services/hojai-goal-os/CLAUDE.md |
+| SimulationOS | hojai-sutar-os/services/sutar-simulation-os/CLAUDE.md |
+| Meeting Intelligence | services/hojai-meeting-intelligence/CLAUDE.md |
+| Revenue Intelligence | services/hojai-revenue-intelligence/CLAUDE.md |
+| FounderOS | services/hojai-founder-os/CLAUDE.md |
+| FlowOS | hojai-sutar-os/services/sutar-flow-os/CLAUDE.md |
+| Command Center | products/hojai-command-center/CLAUDE.md |
+| Knowledge Graph | packages/hojai-graph/CLAUDE.md |
+
+---
+
+**Last Updated:** June 13, 2026
+**Version:** 2.0 (CoPilot Added)
+
+---
+
+# HOJAI Genie AI - Personal Intelligence OS (ADDED June 13, 2026)
+
+## Overview
+
+**Tagline:** "You don't use Genie. You talk to Genie."
+
+Genie is HOJAI AI's Personal Intelligence OS - 21 microservices for personal memory, relationships, briefings, messaging, and business insights.
+
+## All Genie Services (21 Built)
+
+### Core Services (6)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| genie-personal-os-gateway | 4702 | API Orchestrator |
+| genie-memory-service | 4703 | Personal memory |
+| genie-relationship-service | 4704 | Relationships |
+| genie-briefing-service | 4706 | Daily briefings |
+| genie-meeting-service | 4713 | Meeting intelligence |
+| genie-sync-service | 4707 | Cross-service sync |
+
+### Communication Services (3)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| genie-calendar-service | 4709 | Calendar aggregation |
+| genie-email-service | 4710 | Email management |
+| genie-voice-service | - | Voice (uses HOJAI-VOICE-PLATFORM) |
+
+### Messaging Services (4)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| genie-slack-service | 4711 | Slack integration |
+| genie-telegram-service | 4712 | Telegram bot |
+| genie-discord-service | 4716 | Discord integration |
+| genie-whatsapp-service | 4717 | WhatsApp integration |
+
+### Notetaking Services (2)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| genie-obsidian-service | 4708 | Obsidian vault sync |
+| genie-notion-service | 4719 | Notion integration |
+
+### Intelligence Services (4)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| genie-privacy-service | 4720 | Privacy controls |
+| genie-project-service | 4721 | Project management |
+| genie-household-service | 4722 | Household context |
+| genie-memory-review-service | 4723 | Memory consolidation |
+
+### Integration Services (2)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| genie-browser-history-service | 4724 | Browser context |
+| genie-drive-connector | 4726 | Google Drive |
+
+### Business Intelligence (1)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| genie-business-intelligence | 4725 | Business insights & NL queries |
+
+## Key Features
+
+### Memory Features
+- Remember/Recall memories
+- Preferences (food, cuisine, dietary)
+- "Usual" order detection
+- Booking patterns
+- Timeline view
+- Importance tiers (Critical→Low)
+
+### Business Intelligence
+- Natural language queries
+- Sales analytics
+- Customer insights
+- Top items analysis
+- Peak hours
+- Report generation
+
+### Voice (via HOJAI-VOICE-PLATFORM)
+- STT/TTS via 4033
+- Wake words: "Hey Genie" + Hindi
+- 33+ languages
+
+## Documentation
+
+| Document | Location |
+|----------|----------|
+| Genie Status | `GENIE-SERVICES-STATUS.md` |
+| Full Documentation | `GENIE-COMPLETE-DOCUMENTATION.md` |
+| Features | `FEATURES.md` |
+| Docker Compose | `docker/docker-compose.genie.yml` |
+
+## Quick Start
+
+```bash
+# Start all Genie services
+cd docker
+docker-compose -f docker-compose.genie.yml up -d
+
+# Start individual service
+cd genie-memory-service
+npm install
+npm run dev
+```
+
+## Environment Variables
+
+```bash
+GENIE_MEMORY=http://localhost:4703
+GENIE_RELATIONSHIP=http://localhost:4704
+GENIE_BRIEFING=http://localhost:4706
+GENIE_MEETING=http://localhost:4713
+GENIE_GATEWAY=http://localhost:4702
+GENIE_BUSINESS=http://localhost:4725
+```
+
+---
+
+## RTMN Foundation Services Integration
+
+**Location:** `services/` (root)  
+**Status:** ✅ CONNECTED TO HOJAI AI
+
+### Foundation Services Connected to HOJAI AI
+
+| Foundation Service | Port | HOJAI Integration |
+|--------------------|------|-------------------|
+| **CorpID Service** | 4702 | User identity, trust scores, agent registration |
+| **MemoryOS** | 4703 | Personal memory, context, preferences |
+| **GoalOS** | 4242 | Business goals, targets |
+| **Decision Engine** | 4240 | Authorization, risk assessment |
+| **Agent Economy** | 4251 | Karma rewards, agent payments |
+
+### HOJAI AI Services Using Foundation
+
+| HOJAI Service | Foundation Service | Purpose |
+|---------------|-------------------|---------|
+| **Business Copilot** | MemoryOS | User context, conversation memory |
+| **BOA Dashboard** | CorpID | User identity, trust scores |
+| **SkillNet** | Agent Economy | Agent marketplace, karma |
+| **BrandPulse** | Decision Engine | Brand authorization |
+| **Genie** | MemoryOS | Personal AI memory |
+
+### Foundation Services Summary
+
+| Service | Port | Key Features |
+|---------|------|--------------|
+| **CorpID** | 4702 | 9 entity types, trust scores, relationships |
+| **MemoryOS** | 4703 | 4 memory types, context, preferences |
+| **GoalOS** | 4242 | Decomposition, progress propagation |
+| **Decision Engine** | 4240 | Policy engine, holds, appeals |
+| **Agent Economy** | 4251 | Karma, SLB, escrow, leaderboard |
+
+### Running Foundation Services
+
+```bash
+# Start CorpID Service
+cd services/corpid-service && npm install && npm start
+
+# Start MemoryOS
+cd services/memory-os && npm install && npm start
+
+# Start GoalOS
+cd services/goal-os && npm install && npm start
+
+# Start Decision Engine
+cd services/decision-engine && npm install && npm start
+
+# Start Agent Economy
+cd services/agent-economy && npm install && npm start
+```
+
+### HOJAI AI + Foundation Integration Examples
+
+```javascript
+// User trust check for AI assistant
+const trustRes = await fetch('http://localhost:4702/api/trust/score/{userCorpId}');
+
+// Store user preference
+await fetch('http://localhost:4703/api/context/preferences', {
+  method: 'POST',
+  body: JSON.stringify({ corpId: userCorpId, key: 'theme', value: 'dark' })
+});
+
+// Create business goal
+await fetch('http://localhost:4242/api/goals', {
+  method: 'POST',
+  body: JSON.stringify({ title: 'Increase sales 20%', ownerCorpId: businessCorpId, priority: 2 })
+});
+
+// Decision on agent action
+const decision = await fetch('http://localhost:4240/api/decisions/decide', {
+  method: 'POST',
+  body: JSON.stringify({ corpId: agentCorpId, action: 'execute_trade', amount: 100000 })
+});
+
+// Award karma for good agent performance
+await fetch('http://localhost:4251/api/economy/karma/award', {
+  method: 'POST',
+  body: JSON.stringify({ corpId: agentCorpId, amount: 100, reason: 'Excellent customer service' })
+});
+```
+
+---
+
+*Foundation Services: `services/corpid-service/`, `services/memory-os/`, `services/goal-os/`, `services/decision-engine/`, `services/agent-economy/`*
+
+*Last Updated: June 14, 2026*
+
+---
+
+## AI Employees (Updated June 14, 2026)
+
+HOJAI AI Employees are specialized AI agents that work as employees in various industries.
+
+### Recently Connected Employees
+
+| Port | Employee | Category | Connected To | Status |
+|------|-----------|----------|--------------|--------|
+| 5600 | ai-waiter | Hospitality | REZ Menu/POS/KDS + Memory | ✅ Connected |
+| 4849 | maintenance-agent | Hospitality | REZ Maintenance + Predictive Engine | ✅ Connected |
+| 4786 | procurement-agent | L3 | Nexha Procurement OS | ✅ Connected |
+
+### ai-waiter (Port 5600)
+
+**Location:** `employees/ai-waiter/`
+
+AI Waiter is an AI employee that handles restaurant customer interactions via WhatsApp and voice.
+
+**Services:**
+- `src/services/menu-service.ts` - Menu Service client (REZ Menu 4030)
+- `src/services/order-service.ts` - Order Service client (REZ POS 4081)
+- `src/services/reservation-service.ts` - Reservation Service client (REZ Table 4070)
+- `src/services/memory-service.ts` - Memory Service client (HOJAI Memory 4520)
+
+**Start:** `npm run dev`
+
+### maintenance-agent (Port 4849)
+
+**Location:** `employees/maintenance-agent/`
+
+Intelligent maintenance management with predictive capabilities.
+
+**Features:**
+- Work order creation and tracking
+- Predictive maintenance engine (AC, elevator, plumbing, electrical, kitchen)
+- Equipment health monitoring
+- Vendor management
+- Proactive parts ordering via Nexha Procurement
+
+**Start:** `npm start`
+
+### procurement-agent (Port 4786)
+
+**Location:** `employees/procurement-agent/`
+
+Intelligent procurement with supplier matching and negotiation.
+
+**Features:**
+- RFQ creation and management
+- Supplier matching by category (AC, plumbing, electrical, linen, food, general)
+- Negotiation strategies (standard 10%, aggressive 20%, friendly 5%)
+- Contract generation
+- Trust score evaluation
+
+**Start:** `npm start`
+
+---
+
+*Last Updated: June 14, 2026*
