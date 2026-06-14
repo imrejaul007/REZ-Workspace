@@ -24,6 +24,20 @@ This document consolidates all port allocations across the 24 industry verticals
 | 3010 | AgentOS Hub | Agent orchestration |
 | 3011 | Twinos Hub | Digital twin management |
 | 3012 | Knowledge Graph OS | Entity relationships |
+| **3013** | **Capability Matrix** | **Formal capability inheritance model** |
+| **3014** | **Unified Twin OS** | **Cross-industry twin federation** |
+| **3015** | **Memory Network** | **Personal/Business/Industry/Ecosystem memory** |
+| **3016** | **BOA Council** | **Multi-BOA synthesis & decisions** |
+| **3017** | **Economic Graph** | **Value flow mapping & network analysis** |
+| **3018** | **Simulation OS** | **Digital twin simulation & scenarios** |
+| **3020** | **Marketing OS** | **Multi-industry marketing orchestration** |
+| **3021** | **Workforce OS** | **AI workforce management** |
+| **3022** | **Commerce OS** | **Unified commerce transactions** |
+| **3023** | **Finance OS** | **Financial operations & reporting** |
+| **3030** | **Industry AI Company** | **AI company packaging for 24 industries** |
+| **3031** | **Marketplace Network** | **Unified marketplace across industries** |
+| **3032** | **Revenue Network** | **Revenue stream orchestration** |
+| **3040** | **Developer Cloud** | **Unified API platform & SDKs** |
 
 ## Platform Services
 
