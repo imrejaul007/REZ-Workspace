@@ -7,7 +7,7 @@
 **Tagline:** "AI-Powered Retail Management"
 **Built from:** REZ-Merchant POS, hojai-analytics
 **Version:** 1.0.0
-**Date:** June 12, 2026
+**Date:** June 14, 2026
 
 ## Target Customers
 
@@ -24,6 +24,25 @@
 | POS Service | 4820 | Point of Sale operations |
 | Inventory Service | 4821 | Stock management |
 | Demand Forecast | 4822 | Sales prediction |
+
+---
+
+## Integration Hub ✅ NEW!
+
+**Location:** `src/connectors/index.ts`
+
+```typescript
+import { retailHub } from './src/connectors';
+await retailHub.healthCheck();
+```
+
+### Connectors
+
+| Connector | Purpose | Status |
+|-----------|---------|--------|
+| Procurement | Low stock → Nexha order | Built |
+| Loyalty | Customer tracking | Built |
+| Discovery | Store search | Built |
 
 ---
 

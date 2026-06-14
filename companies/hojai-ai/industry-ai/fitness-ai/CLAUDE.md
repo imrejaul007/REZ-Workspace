@@ -7,7 +7,7 @@
 **Tagline:** "AI-Powered Gym & Fitness Management"
 **Built from:** REZ-Merchant, REZ-intent-graph, hojai-voice-os
 **Version:** 1.0.0
-**Date:** June 12, 2026
+**Date:** June 14, 2026
 
 ## Target Customers
 
@@ -25,6 +25,25 @@
 | Class Scheduler | 4802 | Class scheduling, trainer assignment |
 | Attendance Service | 4803 | Attendance tracking |
 | Membership Plan | 4804 | Plan management, pricing |
+
+---
+
+## Integration Hub ✅ NEW!
+
+**Location:** `src/connectors/index.ts`
+
+```typescript
+import { fitnessHub } from './src/connectors';
+await fitnessHub.healthCheck();
+```
+
+### Connectors
+
+| Connector | Purpose | Status |
+|-----------|---------|--------|
+| Weather | Rain → Indoor classes | Built |
+| Wealth | Membership profits | Built |
+| Discovery | Gym search for Genie | Built |
 
 ---
 

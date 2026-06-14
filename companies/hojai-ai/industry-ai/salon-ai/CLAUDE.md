@@ -7,7 +7,7 @@
 **Tagline:** "AI-Powered Salon & Spa Management"
 **Built from:** REZ-Merchant, hojai-telecom-bridge
 **Version:** 1.0.0
-**Date:** June 12, 2026
+**Date:** June 14, 2026
 
 ## Target Customers
 
@@ -24,6 +24,25 @@
 | Booking Service | 4810 | Customer management, appointments |
 | Staff Scheduler | 4811 | Shift management, rota generation |
 | Inventory Service | 4812 | Product tracking, usage recording |
+
+---
+
+## Integration Hub ✅ NEW!
+
+**Location:** `src/connectors/index.ts`
+
+```typescript
+import { salonAIHub } from './src/connectors';
+await salonAIHub.healthCheck();
+```
+
+### Connectors
+
+| Connector | Purpose | Status |
+|-----------|---------|--------|
+| Booking | Appointment automation | Built |
+| Inventory | Stock management | Built |
+| Staff | Scheduling | Built |
 
 ---
 
