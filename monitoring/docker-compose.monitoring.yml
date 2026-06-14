@@ -1,0 +1,126 @@
+# RTNM Ecosystem Monitoring Stack
+# Docker Compose for Prometheus + Grafana + AlertManager
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # PROMETHEUS - Metrics Collection
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: rtnm-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - rtnm-monitoring
+
+  # =============================================================================
+  # GRAFANA - Dashboards & Visualization
+  # =============================================================================
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: rtnm-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_ALERTING_ENABLED=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./dashboards:/etc/grafana/provisioning/dashboards
+      - ./datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    networks:
+      - rtnm-monitoring
+    depends_on:
+      - prometheus
+
+  # =============================================================================
+  # ALERTMANAGER - Alert Routing
+  # =============================================================================
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: rtnm-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    networks:
+      - rtnm-monitoring
+    depends_on:
+      - prometheus
+
+  # =============================================================================
+  # NODE EXPORTER - System Metrics
+  # =============================================================================
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: rtnm-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - rtnm-monitoring
+
+  # =============================================================================
+  # CADVISOR - Container Metrics
+  # =============================================================================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: rtnm-cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - rtnm-monitoring
+
+  # =============================================================================
+  # PAGERDUTY INTEGRATION (Optional)
+  # =============================================================================
+  # Uncomment and configure for PagerDuty alerts
+  # pagerduty-webhook:
+  #   image: nginx:alpine
+  #   container_name: rtnm-pagerduty-webhook
+  #   ports:
+  #     - "9094:80"
+  #   volumes:
+  #     - ./webhooks:/usr/share/nginx/html
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  alertmanager_data:
+
+networks:
+  rtnm-monitoring:
+    driver: bridge

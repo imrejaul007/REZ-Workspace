@@ -33,6 +33,14 @@ const serviceRegistry = {
     'genie-os': { url: process.env.GENIE_OS_URL || 'http://localhost:4001', status: 'active' },
     'agent-os': { url: process.env.AGENT_OS_URL || 'http://localhost:4003', status: 'active' }
   },
+  // Economic Network (RTNM-Group)
+  economic: {
+    'company-registry': { url: process.env.COMPANY_REGISTRY_URL || 'http://localhost:6000', port: 6000, status: 'active' },
+    'inter-company-graph': { url: process.env.INTER_COMPANY_GRAPH_URL || 'http://localhost:6001', port: 6001, status: 'active' },
+    'company-twins': { url: process.env.COMPANY_TWINS_URL || 'http://localhost:6002', port: 6002, status: 'active' },
+    'company-trust': { url: process.env.COMPANY_TRUST_URL || 'http://localhost:6003', port: 6003, status: 'active' },
+    'inter-company-ledger': { url: process.env.INTER_COMPANY_LEDGER_URL || 'http://localhost:6004', port: 6004, status: 'active' }
+  },
   // Industry OS (24 Industries)
   industries: {
     'restaurant-os': { url: process.env.RESTAURANT_OS_URL || 'http://localhost:5010', port: 5010, twins: ['Order', 'Menu', 'Kitchen', 'Table', 'Inventory'] },
@@ -67,6 +75,7 @@ const serviceRegistry = {
 const allServices = {
   ...serviceRegistry.core,
   ...serviceRegistry.platform,
+  ...serviceRegistry.economic,
   ...serviceRegistry.industries
 };
 
@@ -88,16 +97,18 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     name: 'RTMN Platform Hub',
-    description: 'Real-Time Multi-Industry Network - Unified Platform for 24 Industries',
+    description: 'Real-Time Multi-Industry Network - Unified Platform for 24 Industries + Economic Network',
     version: '1.0.0',
     architecture: {
       core: 'CorpID → MemoryOS → KnowledgeGraphOS → TwinOS → SimulationOS',
       platform: 'Business Copilot → BOA → SUTAR → Genie → AgentOS',
+      economic: 'Company Registry → Company Twins → Trust → Inter-Company Graph → Ledger',
       industries: '24 Industry Operating Systems'
     },
     services: {
       core: Object.keys(serviceRegistry.core).length,
       platform: Object.keys(serviceRegistry.platform).length,
+      economic: Object.keys(serviceRegistry.economic).length,
       industries: Object.keys(serviceRegistry.industries).length,
       total: Object.keys(allServices).length
     },

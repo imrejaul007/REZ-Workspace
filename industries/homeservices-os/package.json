@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/homeservices-os",
+  "version": "1.0.0",
+  "description": "HomeServices Industry OS - Provider, Customer, Booking, Service management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "homeservices", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}

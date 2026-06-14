@@ -43,6 +43,15 @@ The RTMN Platform Hub is the central orchestration layer for the Real-Time Multi
 | genie-os | http://localhost:4001 | 4001 |
 | agent-os | http://localhost:4003 | 4003 |
 
+### Economic Network (RTNM-Group)
+| Service | URL | Port | Purpose |
+|---------|-----|------|---------|
+| company-registry | http://localhost:6000 | 6000 | Company registration, trust scores, services |
+| inter-company-graph | http://localhost:6001 | 6001 | Relationship mapping (pays, provides, consumes) |
+| company-twins | http://localhost:6002 | 6002 | Company digital twins with budget, policies |
+| company-trust | http://localhost:6003 | 6003 | Trust score calculation |
+| inter-company-ledger | http://localhost:6004 | 6004 | Financial transactions between companies |
+
 ### Industry OS (24 Industries)
 | Industry | Port | Twins |
 |----------|------|-------|

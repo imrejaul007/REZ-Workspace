@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/financial-os",
+  "version": "1.0.0",
+  "description": "Financial Industry OS - Account, Transaction, Customer, Loan management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "financial", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/manufacturing-os",
+  "version": "1.0.0",
+  "description": "Manufacturing Industry OS - Product, Machine, Production, Inventory management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "manufacturing", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}

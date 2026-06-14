@@ -1,0 +1,135 @@
+# RTNM Ecosystem Alert Rules
+
+groups:
+  - name: rtnm-services
+    interval: 30s
+    rules:
+      # Service Health Alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.instance }} is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }}"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High latency on {{ $labels.service }}"
+          description: "P95 latency is {{ $value }}s"
+
+      # Resource Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: ops
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | humanize }}%"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: ops
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | humanize }}%"
+
+      - alert: HighDiskUsage
+        expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+          team: ops
+        annotations:
+          summary: "High disk usage on {{ $labels.instance }}"
+          description: "Disk usage is {{ $value | humanize }}%"
+
+  - name: rtnm-business
+    interval: 60s
+    rules:
+      # Business Metrics
+      - alert: HighPaymentFailureRate
+        expr: rate(payment_failures_total[5m]) / rate(payments_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: critical
+          team: payments
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: HighOrderCancellationRate
+        expr: rate(orders_cancelled_total[5m]) / rate(orders_total[5m]) > 0.15
+        for: 5m
+        labels:
+          severity: warning
+          team: commerce
+        annotations:
+          summary: "High order cancellation rate"
+          description: "Cancellation rate is {{ $value | humanizePercentage }}"
+
+      - alert: LowConversionRate
+        expr: rate(checkout_completed_total[10m]) / rate(checkout_started_total[10m]) < 0.3
+        for: 10m
+        labels:
+          severity: warning
+          team: commerce
+        annotations:
+          summary: "Low checkout conversion rate"
+          description: "Conversion rate is {{ $value | humanizePercentage }}"
+
+  - name: rtnm-security
+    interval: 30s
+    rules:
+      # Security Alerts
+      - alert: HighAuthFailureRate
+        expr: rate(auth_failures_total[5m]) / rate(auth_attempts_total[5m]) > 0.3
+        for: 2m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Auth failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: SuspiciousAPIAccess
+        expr: rate(api_suspicious_requests_total[5m]) > 100
+        for: 1m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Suspicious API access detected"
+          description: "{{ $value }} suspicious requests in the last 5 minutes"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: mongodb_connection_pool_size / mongodb_connection_pool_max > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Database connection pool exhausted"
+          description: "Connection pool utilization is {{ $value | humanizePercentage }}"

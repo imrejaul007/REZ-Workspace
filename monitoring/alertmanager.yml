@@ -1,0 +1,110 @@
+# AlertManager Configuration
+
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@rtnm.app'
+  smtp_auth_username: 'alerts@rtnm.app'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+
+# Slack notification
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+route:
+  group_by: ['alertname', 'severity', 'team']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'default'
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+
+    # Security alerts
+    - match:
+        team: security
+      receiver: 'security-alerts'
+
+    # Platform alerts
+    - match:
+        team: platform
+      receiver: 'platform-alerts'
+
+    # Payment alerts
+    - match:
+        team: payments
+      receiver: 'payments-alerts'
+
+# Receivers
+receivers:
+  - name: 'default'
+    # Email
+    email_configs:
+      - to: 'team@rtnm.app'
+        send_resolved: true
+        headers:
+          subject: '[RTNM] {{ .GroupLabels.alertname }}'
+
+  # Critical alerts - All channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@rtnm.app,team@rtnm.app'
+        send_resolved: true
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#critical-alerts'
+        send_resolved: true
+        title: '🚨 {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Service:* {{ .Labels.service }}
+          {{ end }}
+
+  # Security alerts
+  - name: 'security-alerts'
+    email_configs:
+      - to: 'security@rtnm.app'
+        send_resolved: true
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#security-alerts'
+        send_resolved: true
+
+  # Platform alerts
+  - name: 'platform-alerts'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#platform-alerts'
+        send_resolved: true
+
+  # Payment alerts
+  - name: 'payments-alerts'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#payments-alerts'
+        send_resolved: true
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_KEY}'
+        severity: critical
+
+inhibit_rules:
+  # Suppress lower severity when higher is firing
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: ['alertname']
+
+  # Suppress duplicate alerts
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match_re:
+      alertname: '.*'
+    equal: ['instance']

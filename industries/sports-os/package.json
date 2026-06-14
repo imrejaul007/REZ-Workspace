@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/sports-os",
+  "version": "1.0.0",
+  "description": "Sports Industry OS - Team, Player, Match, Venue management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "sports", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}

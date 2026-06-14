@@ -1,0 +1,134 @@
+# RTNM Ecosystem - Prometheus Configuration
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  external_labels:
+    cluster: 'rtnm-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load rules once and then periodically
+rule_files:
+  - "alerts.yml"
+
+# =============================================================================
+# SCRAPE CONFIGURATIONS
+# =============================================================================
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter - System Metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # cAdvisor - Container Metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # =============================================================================
+  # RABTUL Technologies Services
+  # =============================================================================
+  - job_name: 'rabtul-services'
+    static_configs:
+      - targets:
+          - 'localhost:4002'  # Auth
+          - 'localhost:4001'  # Payment
+          - 'localhost:4004'  # Wallet
+          - 'localhost:4006'  # Order
+          - 'localhost:4011'  # Notifications
+          - 'localhost:4040'  # Loyalty
+
+  # =============================================================================
+  # REZ-Consumer Services
+  # =============================================================================
+  - job_name: 'rez-consumer'
+    static_configs:
+      - targets:
+          - 'localhost:3011'  # REZ-assistant
+          - 'localhost:3012'  # REZ-bills
+          - 'localhost:3013'  # REZ-expense
+          - 'localhost:3014'  # REZ-nearby
+          - 'localhost:3016'  # REZ-save
+          - 'localhost:3017'  # REZ-scan
+          - 'localhost:4001'  # safe-qr-service
+          - 'localhost:4003'  # verify-qr-service
+
+  # =============================================================================
+  # REZ-Mart Services
+  # =============================================================================
+  - job_name: 'rez-mart'
+    static_configs:
+      - targets:
+          - 'localhost:4100'  # Gateway
+          - 'localhost:4101'  # Driver
+          - 'localhost:4102'  # Tracking
+          - 'localhost:4103'  # Store
+          - 'localhost:4104'  # Product
+          - 'localhost:4105'  # Order
+          - 'localhost:4106'  # Delivery
+          - 'localhost:4108'  # Cart
+          - 'localhost:4109'  # Offer
+
+  # =============================================================================
+  # HOJAI AI Services
+  # =============================================================================
+  - job_name: 'hojai-ai'
+    static_configs:
+      - targets:
+          - 'localhost:4500'  # Gateway
+          - 'localhost:4520'  # Memory
+          - 'localhost:4550'  # Agents
+          - 'localhost:4703'  # Genie Memory
+          - 'localhost:4704'  # Genie Relation
+
+  # =============================================================================
+  # KHAIRMOVE Services
+  # =============================================================================
+  - job_name: 'khaimove'
+    static_configs:
+      - targets:
+          - 'localhost:4600'  # Ride
+          - 'localhost:4601'  # Fleet
+          - 'localhost:4603'  # Delivery
+
+  # =============================================================================
+  # Airzy Airport Services
+  # =============================================================================
+  - job_name: 'airzy'
+    static_configs:
+      - targets:
+          - 'localhost:4501'  # Flight
+          - 'localhost:4502'  # Lounge
+          - 'localhost:4503'  # Wallet
+
+  # =============================================================================
+  # REZ-Merchant Services
+  # =============================================================================
+  - job_name: 'rez-merchant'
+    static_configs:
+      - targets:
+          - 'localhost:4012'  # Restaurant
+          - 'localhost:4015'  # Hotel
+          - 'localhost:4110'  # Salon
+
+  # =============================================================================
+  # Integration Hub
+  # =============================================================================
+  - job_name: 'integration-hub'
+    static_configs:
+      - targets:
+          - 'localhost:4099'  # Integration Hub

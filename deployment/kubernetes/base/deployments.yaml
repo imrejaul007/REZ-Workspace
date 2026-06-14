@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtmn-complete
+  namespace: rtmn
+  labels:
+    app: rtmn-complete
+    tier: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rtmn-complete
+  template:
+    metadata:
+      labels:
+        app: rtmn-complete
+        tier: api
+    spec:
+      containers:
+        - name: rtmn-complete
+          image: rtmn/complete:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: rtmn-config
+            - configMapRef:
+                name: rtmn-complete-config
+            - secretRef:
+                name: rtmn-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: energy-os
+  namespace: rtmn
+  labels:
+    app: energy-os
+    tier: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: energy-os
+  template:
+    metadata:
+      labels:
+        app: energy-os
+        tier: api
+    spec:
+      containers:
+        - name: energy-os
+          image: rtmn/energy-os:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3015
+              name: http
+          envFrom:
+            - configMapRef:
+                name: energy-os-config
+            - secretRef:
+                name: rtmn-secrets
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3015
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3015
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-dashboard
+  namespace: rtmn
+  labels:
+    app: boa-dashboard
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: boa-dashboard
+  template:
+    metadata:
+      labels:
+        app: boa-dashboard
+        tier: frontend
+    spec:
+      containers:
+        - name: boa-dashboard
+          image: rtmn/boa-dashboard:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: "http://rtmn-complete:3000"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10

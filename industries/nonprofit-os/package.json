@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/nonprofit-os",
+  "version": "1.0.0",
+  "description": "NonProfit Industry OS - Donor, Campaign, Beneficiary, Volunteer management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "nonprofit", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}

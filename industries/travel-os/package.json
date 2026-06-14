@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/travel-os",
+  "version": "1.0.0",
+  "description": "Travel Industry OS - Destination, Package, Booking, Traveler management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "travel", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}

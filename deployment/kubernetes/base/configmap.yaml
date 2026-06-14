@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rtmn-config
+  namespace: rtmn
+data:
+  PORT: "3000"
+  NODE_ENV: "production"
+  REDIS_HOST: "redis-master"
+  REDIS_PORT: "6379"
+  MONGODB_URI: "mongodb://mongodb:27017/rtmn"
+  LOG_LEVEL: "info"
+  API_CORS_ORIGINS: "*"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rtmn-complete-config
+  namespace: rtmn
+data:
+  PORT: "3000"
+  TWIN_REFRESH_INTERVAL: "300000"
+  SESSION_TTL: "86400"
+  MAX_TWIN_QUERY: "50"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: energy-os-config
+  namespace: rtmn
+data:
+  PORT: "3015"
+  GRID_UPDATE_INTERVAL: "5000"
+  TRADING_ENABLED: "true"
+  CARBON_TRACKING: "true"

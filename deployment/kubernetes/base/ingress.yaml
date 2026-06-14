@@ -1,0 +1,63 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rtmn-ingress
+  namespace: rtmn
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: rtmn.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: rtmn-complete
+                port:
+                  number: 3000
+          - path: /energy
+            pathType: Prefix
+            backend:
+              service:
+                name: energy-os
+                port:
+                  number: 3015
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: boa-dashboard
+                port:
+                  number: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rtmn-tls
+  namespace: rtmn
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - rtmn.example.com
+      secretName: rtmn-tls-cert
+  rules:
+    - host: rtmn.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: boa-dashboard
+                port:
+                  number: 3000

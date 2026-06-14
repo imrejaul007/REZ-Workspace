@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/professional-os",
+  "version": "1.0.0",
+  "description": "Professional Industry OS - Consultant, Client, Project, Invoice management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "professional", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}

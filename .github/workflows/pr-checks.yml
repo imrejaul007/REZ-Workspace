@@ -1,0 +1,77 @@
+name: RTNM PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-checks:
+    name: PR Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check file changes
+        id: changed
+        uses: tj-actions/changed-files@v41
+
+      - name: List changed files
+        run: |
+          echo "Changed files:"
+          echo "${{ steps.changed.outputs.all_changed_files }}"
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## PR Checks\n\n- [ ] Tests added/updated\n- [ ] Documentation updated\n- [ ] Types updated\n- [ ] No breaking changes'
+            })
+
+  code-review:
+    name: Code Review Checklist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for security issues
+        run: |
+          echo "Checking for security issues..."
+          # Add security checks here
+
+      - name: Check for console.log
+        run: |
+          if grep -r "console.log" --include="*.ts" --include="*.tsx" ./companies; then
+            echo "⚠️ Found console.log statements"
+            exit 1
+          fi
+
+      - name: Check for TODO comments
+        run: |
+          if grep -r "// TODO" --include="*.ts" --include="*.tsx" ./companies | grep -v "node_modules"; then
+            echo "⚠️ Found TODO comments"
+            exit 1
+          fi
+
+  size-check:
+    name: Bundle Size Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check bundle size
+        run: |
+          echo "Checking bundle sizes..."
+          # Add bundle size check here

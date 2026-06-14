@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/fitness-os",
+  "version": "1.0.0",
+  "description": "Fitness Industry OS - Member, Trainer, Equipment, Class management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "fitness", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@rtmn/entertainment-os",
+  "version": "1.0.0",
+  "description": "Entertainment Industry OS - Event, Venue, Ticket, Artist management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["rtmn", "entertainment", "industry-os"],
+  "author": "RTNM",
+  "license": "MIT"
+}
