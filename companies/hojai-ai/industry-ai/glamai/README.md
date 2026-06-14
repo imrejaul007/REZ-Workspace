@@ -16,6 +16,32 @@ GlamAI is the unified AI orchestration layer for salon operations that connects:
 - **REZ Salon Ecosystem** - CRM, Booking, POS, Inventory
 - **Genie services** - Personal AI memory and briefings
 - **Nexha** - Supplier/procurement network
+- **TwinOS Hub** - Digital twin graph relationships
+- **SUTAR** - Goal orchestration for expansion
+- **AssetMind** - Wealth analytics and forecasting
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              GLAMAI (Port 3000)                              │
+│                         Salon Intelligence OS                                │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                        SERVICES LAYER                                │   │
+│  │  BeautyMemory │ ServicePlan │ Stylist │ Customer │ Inventory        │   │
+│  │  Recommendation │ BeautyGenie │ TrainingAcademy                 │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                        BRIDGES LAYER                                 │   │
+│  │  SalonBridge │ MindSalonBridge │ GenieBridge │ NexhaBridge         │   │
+│  │  TwinBridge │ NotificationBridge │ SutarBridge │ AssetMindBridge   │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -31,6 +57,21 @@ GlamAI is the unified AI orchestration layer for salon operations that connects:
 | **RecommendationService** | Personalized recommendations |
 | **BeautyGenieService** | Beauty-specific Genie |
 | **TrainingAcademyService** | Stylist certification |
+
+---
+
+## Bridges
+
+| Bridge | Connects To | Purpose |
+|--------|-------------|---------|
+| **SalonBridge** | REZ Salon CRM (4903), Booking (4201), POS (4902), Inventory | Data sync |
+| **MindSalonBridge** | REZ Mind Salon AI (4010) | AI recommendations |
+| **GenieBridge** | Genie Memory (4703), Genie Briefing (4704) | Personal AI |
+| **NexhaBridge** | Nexha (5000) | Supplier/procurement |
+| **TwinBridge** | TwinOS Hub (4142), CorpID (4702) | Digital twins |
+| **NotificationBridge** | RABTUL Notification, WhatsApp | Follow-ups |
+| **SutarBridge** | SUTAR GoalOS (4242) | Expansion goals |
+| **AssetMindBridge** | AssetMind (5001) | Wealth analytics |
 
 ---
 
@@ -91,26 +132,93 @@ interface BeautyMemory {
 
 ---
 
-## Bridges
+## Related Services
 
-| Bridge | Connects To |
-|--------|-------------|
-| **SalonBridge** | REZ Salon CRM (4012), Booking (4201), POS (4902), Inventory (4906) |
-| **MindSalonBridge** | REZ Mind Salon AI (4010) |
-| **GenieBridge** | Genie Memory (4703), Genie Briefing (4704) |
-| **NexhaBridge** | Nexha Procurement (B2B commerce) |
+### REZ Salon Bridge (Port 4905)
+**Location:** `REZ-Merchant/industry-os/salon-os/integrations/glamai-bridge/`
+
+Bridges REZ Salon ecosystem to GlamAI:
+- Appointment sync
+- Customer profile sync
+- QR check-in sync
+- Inventory alerts
+- Hair color sync
+- Stylist notes
+- Beauty follow-ups
+
+### Salon AI Agents
+
+| Agent | Port | Purpose |
+|-------|------|---------|
+| **Treatment Advisor** | 4813 | Bundle suggestions, upsells |
+| **Inventory Alert Agent** | 4814 | Stock alerts, forecasting |
+| Beauty Advisor | 4810 | Service recommendations |
+| Appointment Manager | 4810 | Booking automation |
+| Campaign Manager | 4810 | Marketing, loyalty |
+| Retention Manager | 4810 | Churn prediction |
 
 ---
 
-## Related Services
+## Integration Flow
 
-### Salon AI Agents
-- **Treatment Advisor** (Port 4813) - Bundle suggestions, upsells
-- **Inventory Alert Agent** (Port 4814) - Stock alerts, forecasting
+### Story Moments Connected
 
-### GlamAI Stylist Tablet App
-- **Location:** `glamai-stylist-app/`
-- React tablet app for stylists
+| Time | Story | Integration |
+|------|-------|-------------|
+| 7:00 AM | Beauty Twin predictions | TwinBridge → TwinOS Hub |
+| 8:00 AM | Genie briefing | GenieBridge → Genie Memory |
+| 10:00 AM | Sarah books | SalonBridge → Booking |
+| 11:00 AM | QR check-in | REZ Salon Bridge → GlamAI |
+| 11:05 AM | Stylist sees profile | SalonBridge → GlamAI |
+| 11:15 AM | AI service plan | MindSalonBridge → REZ Mind Salon |
+| 12:00 PM | Inventory alert | InventoryBridge → Nexha |
+| 3:00 PM | Memory stores color | BeautyMemoryService → GenieBridge |
+| 4:00 PM | Genie follows up | NotificationBridge → WhatsApp |
+| 6:00 PM | Expansion | SutarBridge → SUTAR GoalOS |
+| 8:00 PM | Wealth tracking | AssetMindBridge → AssetMind |
+
+---
+
+## Environment Variables
+
+```env
+# Server
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/glamai
+REDIS_URL=redis://localhost:6379
+
+# REZ Salon Services
+SALON_CRM_URL=http://localhost:4903
+SALON_BOOKING_URL=http://localhost:4201
+SALON_POS_URL=http://localhost:4902
+SALON_INVENTORY_URL=http://localhost:4906
+
+# REZ Mind Salon
+MIND_SALON_URL=http://localhost:4010
+
+# Genie
+GENIE_MEMORY_URL=http://localhost:4703
+GENIE_BRIEFING_URL=http://localhost:4704
+
+# TwinOS
+TWINOS_URL=http://localhost:4142
+CORPID_URL=http://localhost:4702
+
+# Nexha
+NEXHA_URL=http://localhost:5000
+
+# SUTAR
+GOAL_OS_URL=http://localhost:4242
+FLOW_OS_URL=http://localhost:4244
+SIMULATION_URL=http://localhost:4241
+
+# AssetMind
+ASSETMIND_URL=http://localhost:5001
+
+# Notifications
+NOTIFICATION_URL=http://localhost:4005
+WHATSAPP_URL=http://localhost:4006
+```
 
 ---
 
@@ -125,61 +233,33 @@ npm run dev
 
 # Build for production
 npm run build
-
-# Start production
-npm start
 ```
+
+---
+
+## Running All Services
+
+```bash
+# 1. Start REZ Salon Services
+cd REZ-Merchant/industry-os/salon-os/integrations/glamai-bridge
+npm install && npm run dev  # Port 4905
+
+# 2. Start GlamAI
+cd glamai && npm run dev  # Port 3000
+
+# 3. Start Treatment Advisor
+cd salon-ai/employees/treatment-advisor && npm start  # Port 4813
+
+# 4. Start Inventory Alert Agent
+cd salon-ai/employees/inventory-alert-agent && npm start  # Port 4814
+```
+
+---
 
 ## Docker
 
 ```bash
 docker-compose up
-```
-
----
-
-## Environment Variables
-
-```env
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/glamai
-REDIS_URL=redis://localhost:6379
-SALON_CRM_URL=http://localhost:4012
-SALON_BOOKING_URL=http://localhost:4201
-SALON_POS_URL=http://localhost:4902
-SALON_INVENTORY_URL=http://localhost:4906
-MIND_SALON_URL=http://localhost:4010
-GENIE_MEMORY_URL=http://localhost:4703
-NEXHA_URL=http://localhost:5000
-```
-
----
-
-## File Structure
-
-```
-glamai/
-├── src/
-│   ├── index.ts                # Main API server
-│   ├── services/
-│   │   ├── beautyMemoryService.ts
-│   │   ├── servicePlanService.ts
-│   │   ├── customerService.ts
-│   │   ├── stylistService.ts
-│   │   ├── inventoryService.ts
-│   │   ├── recommendationService.ts
-│   │   ├── beautyGenieService.ts
-│   │   └── trainingAcademyService.ts
-│   ├── bridges/
-│   │   ├── salonBridge.ts
-│   │   ├── mindSalonBridge.ts
-│   │   ├── genieBridge.ts
-│   │   └── nexhaBridge.ts
-│   └── utils/logger.ts
-├── glamai-stylist-app/         # Stylist Tablet App
-├── docker-compose.yml
-├── Dockerfile
-└── package.json
 ```
 
 ---
