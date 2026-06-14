@@ -491,10 +491,13 @@ export class DecisionEngineIntegrationService {
    */
   async isEngineAvailable(): Promise<boolean> {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
       const response = await fetch(`${DECISION_ENGINE_URL}/health`, {
         method: 'GET',
-        timeout: 2000,
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       return response.ok;
     } catch {
       return false;

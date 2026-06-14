@@ -58,8 +58,9 @@ export class CategoryService {
     if (data.parentId) {
       const parent = this.getCategory(data.parentId);
       if (parent) {
+        const childNode: CategoryTree = { id: category.id, name: category.name, slug: category.slug, icon: category.icon, children: [], serviceCount: 0 };
         this.updateCategory(data.parentId, {
-          children: [...parent.children, { id: category.id, name: category.name, slug: category.slug, icon: category.icon, children: [], serviceCount: 0 }],
+          children: [...parent.children, childNode],
         });
       }
     }

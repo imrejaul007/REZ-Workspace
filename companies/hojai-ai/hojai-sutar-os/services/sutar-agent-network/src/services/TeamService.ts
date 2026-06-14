@@ -401,7 +401,7 @@ export class TeamService {
   } {
     const team = this.teams.get(teamId);
     if (!team) {
-      return { covered: [], missing: team.requiredCapabilities };
+      return { covered: [], missing: [] };
     }
 
     const covered: AgentCapability[] = [];

@@ -140,12 +140,12 @@ export class StorageService {
     return Array.from(collection.values());
   }
 
-  public update<T extends { id: string }>(collectionName: string, id: string, data: Partial<T>): T | undefined {
+  public update<T>(collectionName: string, id: string, data: Partial<T>): T | undefined {
     const collection = this.getCollection<T>(collectionName);
     const existing = collection.get(id);
     if (!existing) return undefined;
 
-    const updated = { ...existing, ...data, id: existing.id };
+    const updated = { ...existing, ...data } as T;
     collection.set(id, updated);
     this.markDirty(collectionName);
     return updated;
