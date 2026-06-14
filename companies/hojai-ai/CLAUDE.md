@@ -518,6 +518,57 @@ cd industry-ai/crm && npx vitest run
 cd hojai-skillnet && npm test
 ```
 
+---
+
+## HOJAI Core Packages (14 Built - June 2026)
+
+| Package | Port | Purpose |
+|---------|------|---------|
+| hojai-api-gateway | 4500 | Service registry, routing |
+| hojai-event | 4510 | Event bus, pub/sub |
+| hojai-memory | 4511 | Personal memory |
+| hojai-communications | 4520 | Multi-channel messaging |
+| hojai-agents | 4550 | Agent runtime |
+| hojai-intelligence | 4580 | ML predictions |
+| hojai-hyperlocal | 4590 | Geo intelligence |
+| hojai-identity | 4610 | Identity management |
+| hojai-governance | 4620 | Audit, policies |
+| hojai-workflow | 4810 | Workflow engine |
+| hojai-industry | 4700 | Industry patterns |
+| hojai-analytics | 4750 | Metrics, reporting |
+| hojai-data | 4755 | Datasets |
+| hojai-ml | 4760 | ML pipeline |
+
+## Genie Ecosystem (11 Built - June 2026)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| genie-personal-os-gateway | 4702 | Unified API |
+| genie-memory-service | 4703 | Personal memory |
+| genie-relationship-service | 4704 | Relationships |
+| genie-briefing-service | 4706 | Daily briefings |
+| genie-sync-service | 4707 | Cross-device sync |
+| genie-project-service | 4712 | Projects |
+| genie-memory-review-service | 4710 | Memory review |
+| genie-browser-history-service | 4715 | Browsing patterns |
+| genie-household-service | 4720 | Households |
+| genie-privacy-service | 4716 | Privacy controls |
+| genie-business-intelligence | 4725 | Business insights |
+
+## Deployment
+
+```bash
+# Deploy all services
+cd companies/hojai-ai
+docker-compose up -d
+
+# Individual service
+cd <service> && npm start
+```
+
+*Updated: June 14, 2026*
+
+
 ## Industry AI Services
 
 ### HOJAI Industry Intelligence (Port 4700)

@@ -434,6 +434,16 @@ export class BonusCalculationEngine {
 export class BundleGenerationEngine {
 
   /**
+   * Get user purchase history
+   */
+  async getUserPurchaseHistory(userId: string): Promise<unknown> {
+    const key = `${PURCHASE_PREFIX}history:${userId}`;
+    const data = await redis.get(key);
+    if (!data) return null;
+    return JSON.parse(data);
+  }
+
+  /**
    * Generate all default bundles
    */
   generateDefaultBundles(coinType: CoinType = 'rez', brandId?: string): CoinBundle[] {
