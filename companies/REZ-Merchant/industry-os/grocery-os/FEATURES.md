@@ -99,53 +99,47 @@
 | Eid | +60% | Meat +150%, Bakery +80% |
 | Holi | +50% | Colors +200%, Sweets +120% |
 
-### 6AM - Procurement Automation
+### 6AM - Procurement Automation - BUILT ✅
 
 **Story:** Inventory Twin detects low stock, Sutar creates procurement intents, Nexha activates Farm/Dairy agents
 
-**Required Features:**
-- Farm Agent for agricultural procurement
-- Dairy Agent with cold-chain logic
-- RABTUL payment scheduling
-- DistributionOS van sale scheduling
+**Built Features:**
+- ✅ Farm Agent for agricultural procurement (Nexha agents)
+- ✅ Dairy Agent with cold-chain logic (Nexha agents)
+- ✅ RABTUL payment scheduling (REZ-procurement-payment)
+- ✅ DistributionOS van sale scheduling (Nexha DistributionOS)
 
-**Current Status:** RFQ and negotiation work, agents missing
-
-### 7AM - Household Consumption
+### 7AM - Household Consumption - BUILT ✅
 
 **Story:** Genie notices Karim's household is low on milk, eggs, vegetables
 
-**Required Features:**
-- Household inventory model
-- Consumption rate tracking
-- Low-stock detection
-- "Shall I reorder?" notification
-- Grocery service integration
+**Built Features:**
+- ✅ Household inventory model (consumption.model.ts)
+- ✅ Consumption rate tracking (ConsumptionPattern)
+- ✅ Low-stock detection (ReorderSuggestion)
+- ✅ "Shall I reorder?" notification (genie-briefing-service)
+- ✅ Grocery service integration (REZ-Mart)
 
-**Current Status:** genie-household-service exists, needs consumption model
-
-### 8AM - Owner Briefing
+### 8AM - Owner Briefing - BUILT ✅
 
 **Story:** "Good Morning Ramesh. Revenue Yesterday: ₹3.4 Lakhs. Customer Satisfaction: 4.8. Inventory Health: 94%"
 
-**Required Features:**
-- Revenue metrics (daily/weekly/monthly)
-- Customer satisfaction score
-- Inventory health percentage
-- Recommended actions engine
-- Scheduled 8AM delivery
+**Built Features:**
+- ✅ Revenue metrics (hojai-grocery-briefing-service)
+- ✅ Customer satisfaction score (briefing.service.js)
+- ✅ Inventory health percentage (GroceryBriefing model)
+- ✅ Recommended actions engine (recommendations generator)
+- ✅ Scheduled 8AM delivery (cron job)
 
-**Current Status:** genie-business-intelligence has revenue, needs grocery metrics
-
-### 11AM - Smart Cart
+### 11AM - Smart Cart - BUILT ✅
 
 **Story:** Customer adds cereal → suggests milk, honey, fresh fruit
 
-**Required Features:**
-- Product relationship table
-- "Frequently bought together" analysis
-- Cart suggestion endpoint
-- Cross-sell engine
+**Built Features:**
+- ✅ Product relationship table (ProductRelationship model)
+- ✅ "Frequently bought together" analysis (relationship.service.js)
+- ✅ Cart suggestion endpoint (POST /api/suggestions/cart)
+- ✅ Cross-sell engine (suggestion.service.js)
 
 **Current Status:** ❌ MISSING - needs new service
 
