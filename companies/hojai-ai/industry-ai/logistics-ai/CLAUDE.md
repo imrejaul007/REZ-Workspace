@@ -7,7 +7,7 @@
 **Tagline:** "AI-Powered Fleet & Delivery Management"
 **Built from:** KHAIRMOVE
 **Version:** 1.0.0
-**Date:** June 12, 2026
+**Date:** June 14, 2026
 
 ## Target Customers
 
@@ -21,6 +21,25 @@
 |---------|------|-------------|
 | Fleet Service | 4880 | Vehicle management, driver management, maintenance |
 | Dispatch Service | 4881 | Order assignment, route optimization, delivery tracking |
+
+---
+
+## Integration Hub ✅ NEW!
+
+**Location:** `src/connectors/index.ts`
+
+```typescript
+import { logisticsHub } from './src/connectors';
+await logisticsHub.optimizeRoute(vehicles, deliveries);
+```
+
+### Connectors
+
+| Connector | Purpose | Status |
+|-----------|---------|--------|
+| Route | Optimize delivery routes | Built |
+| Driver | Driver status tracking | Built |
+| Tracking | Delivery tracking | Built |
 
 ---
 

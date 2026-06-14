@@ -7,7 +7,7 @@
 **Tagline:** "AI-Powered Travel Management"
 **Built from:** Airzy
 **Version:** 1.0.0
-**Date:** June 12, 2026
+**Date:** June 14, 2026
 
 ## Target Customers
 
@@ -20,6 +20,26 @@
 | Service | Port | Description |
 |---------|------|-------------|
 | Travel Service | 4910 | Trip planning, itinerary, bookings |
+
+---
+
+## Integration Hub ✅ NEW!
+
+**Location:** `src/connectors/index.ts`
+
+```typescript
+import { travelHub } from './src/connectors';
+await travelHub.searchFlights({ from: 'BLR', to: 'DEL', date: '2026-07-01' });
+```
+
+### Connectors
+
+| Connector | Purpose | Status |
+|-----------|---------|--------|
+| Flights | Search & booking | Built |
+| Hotels | Search & booking | Built |
+| Itinerary | Trip planning | Built |
+| Currency | Conversion | Built |
 
 ---
 

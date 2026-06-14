@@ -7,7 +7,7 @@
 **Tagline:** "AI-Powered Real Estate Management"
 **Built from:** RisnaEstate
 **Version:** 1.0.0
-**Date:** June 12, 2026
+**Date:** June 14, 2026
 
 ## Target Customers
 
@@ -20,6 +20,26 @@
 | Service | Port | Description |
 |---------|------|-------------|
 | Property Service | 4830 | Listings, search, lead management |
+
+---
+
+## Integration Hub ✅ NEW!
+
+**Location:** `src/connectors/index.ts`
+
+```typescript
+import { realEstateHub } from './src/connectors';
+await realEstateHub.getValuation('prop-1');
+```
+
+### Connectors
+
+| Connector | Purpose | Status |
+|-----------|---------|--------|
+| Valuation | Property value estimation | Built |
+| Leads | Lead scoring | Built |
+| Tours | Schedule property tours | Built |
+| Mortgage | EMI calculation | Built |
 
 ---
 

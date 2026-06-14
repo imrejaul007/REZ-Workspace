@@ -7,7 +7,7 @@
 **Tagline:** "AI-Powered MES (Manufacturing Execution System)"
 **Built from:** NeXha
 **Version:** 1.0.0
-**Date:** June 12, 2026
+**Date:** June 14, 2026
 
 ## Target Customers
 
@@ -20,6 +20,25 @@
 | Service | Port | Description |
 |---------|------|-------------|
 | MES Service | 4890 | Work orders, workstations, quality inspections |
+
+---
+
+## Integration Hub ✅ NEW!
+
+**Location:** `src/connectors/index.ts`
+
+```typescript
+import { manufacturingHub } from './src/connectors';
+await manufacturingHub.checkSupplyChain('material-1');
+```
+
+### Connectors
+
+| Connector | Purpose | Status |
+|-----------|---------|--------|
+| Supply | Material availability | Built |
+| Quality | Defect tracking | Built |
+| Maintenance | Predictive maintenance | Built |
 
 ---
 
