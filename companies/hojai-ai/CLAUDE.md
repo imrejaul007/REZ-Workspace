@@ -244,6 +244,42 @@ cd hojai-sutar-os/services/sutar-flow-os && npm run dev
 
 ## Architecture
 
+### SUTAR OS - 26 Services (100,000+ Lines)
+
+**Status:** ✅ 10/10 COMPLETE
+
+| Layer | Service | Port | Lines | Features |
+|-------|---------|------|-------|----------|
+| 3 | GoalOS | 4242 | 3,402 | Decomposition, OKR, milestones |
+| 4 | Decision Engine | 4240 | 1,946 | Policy, risk, PROCEED/HOLD/REJECT |
+| 5 | SimulationOS | 4241 | 2,933 | Monte Carlo, 14 types |
+| 6 | Agent Network | 4155 | 6,778 | Registry, matching, teams |
+| 7 | Negotiation | 4191 | 523 | RFQ, quotes, counter |
+| 8 | Trust Engine | 4180 | 1,977 | Scoring, KYC, credit |
+| 9 | Contract OS | 4190 | 5,913 | Contracts, signatures |
+| 10 | Economy OS | 4251 | 7,618 | Karma, transactions |
+| 11 | Marketplace | 4250 | 6,478 | Catalog, orders |
+| 12 | Learning | 4243 | 6,719 | Patterns, recommendations |
+| - | Intent Bus | 4154 | 6,838 | Capture, routing |
+| - | Gateway | 4140 | 6,790 | Routing, auth |
+| - | Memory Bridge | 4143 | 4,321 | Vector storage |
+| - | Identity OS | 4147 | 2,349 | KYC, credentials |
+| - | Agent ID | 4146 | 6,028 | Registration, verification |
+| - | Discovery | 4256 | 1,642 | Search, matching |
+| - | Exploration | 4255 | 3,798 | Market scanning |
+| - | Policy OS | 4254 | 1,259 | Policy enforcement |
+| - | Twin OS | 4142 | 1,226 | Digital twins |
+| - | Monitoring | 3100 | 1,293 | Health, metrics |
+| - | Usage Tracker | 4253 | 1,289 | Usage, quotas |
+| - | ROI Calculator | - | 2,766 | ROI, cost-benefit |
+| - | Reputation | - | 2,784 | Reviews, sentiment |
+| - | Multi-Agent | - | 2,935 | Evaluation, consensus |
+| - | Flow OS | 4244 | 3,521 | Workflow orchestration |
+
+**SimulationOS Types:** DEMAND, CASHFLOW, REVENUE, COST, PRICING, OFFER, CASHBACK, BUNDLE, RISK, COMPLIANCE, STAFFING, INVENTORY, PROCUREMENT, CUSTOM
+
+**Decision Types:** OFFER, CASHBACK, PERSONALIZATION, ROUTING, FRAUD, PRICING, NEXT_ACTION, RETENTION, APPROVAL, RISK
+
 ### SUTAR OS Integration Hub
 
 Central hub connecting all RTNM services:
