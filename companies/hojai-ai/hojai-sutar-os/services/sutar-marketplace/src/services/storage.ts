@@ -190,12 +190,12 @@ export class StorageService {
     return collection ? collection.has(id) : false;
   }
 
-  public bulkCreate<T extends { id?: string }>(collectionName: string, items: (Omit<T, 'id'> & { id?: string })[]): T[] {
-    return items.map(item => this.create(collectionName, item));
+  public bulkCreate<T>(collectionName: string, items: T[]): T[] {
+    return items.map(item => this.create(collectionName, item as T & { id?: string }));
   }
 
-  public bulkUpdate<T extends { id: string }>(collectionName: string, updates: { id: string; data: Partial<T> }[]): (T | undefined)[] {
-    return updates.map(({ id, data }) => this.update(collectionName, id, data));
+  public bulkUpdate<T>(collectionName: string, updates: { id: string; data: Partial<T> }[]): (T | undefined)[] {
+    return updates.map(({ id, data }) => this.update<T>(collectionName, id, data));
   }
 
   public query<T>(

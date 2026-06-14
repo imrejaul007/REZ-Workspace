@@ -288,7 +288,7 @@ export class RecommendationService {
   private buildUserProfile(userId: string, orders: any[], favorites: any[]): UserProfile {
     const purchasedServices = orders
       .filter(o => o.status === 'completed')
-      .flatMap(o => o.items.map(i => i.serviceId));
+      .flatMap((o: any) => o.items.map((i: any) => i.serviceId));
 
     const serviceDetails = purchasedServices
       .map(id => serviceCatalog.getService(id))

@@ -469,7 +469,6 @@ export class PricingPlansService {
         description: f.description,
         included: f.included,
         limit: f.limit,
-        icon: f.icon,
       })),
       limits: { ...original.limits, customLimits: { ...original.limits.customLimits } },
       isActive: original.isActive,
