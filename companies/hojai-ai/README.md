@@ -124,13 +124,24 @@ HOJAI Industry AI sells AI layer to **non-REZ clients**, connecting to REZ-Merch
 
 **Tagline:** "The brain that makes the salon know you better than you know yourself."
 
-GlamAI connects Beauty Memory, REZ Mind Salon AI, REZ Salon Ecosystem, Genie services, and Nexha procurement.
+GlamAI connects Beauty Memory, REZ Mind Salon AI, REZ Salon Ecosystem, Genie services, Nexha procurement, TwinOS, SUTAR, and AssetMind.
 
 **Services:** Beauty Memory, Service Plan Generator, Customer Intelligence, Stylist APIs, Inventory Intelligence, Recommendations, Beauty Genie, Training Academy
 
-**Bridges:** Salon (CRM, Booking, POS, Inventory), Mind Salon, Genie, Nexha
+**Bridges:** Salon (CRM, Booking, POS, Inventory), Mind Salon, Genie, Nexha, TwinOS, Notification, SUTAR, AssetMind
 
 **Stylist App:** React tablet app with dashboard, customer profiles, and service tracking
+
+**Integration Flow:**
+- 7:00 AM: Beauty Twin predictions (TwinBridge → TwinOS Hub)
+- 8:00 AM: Genie briefing (GenieBridge)
+- 10:00 AM: Booking (SalonBridge → Booking)
+- 11:00 AM: QR check-in (GlamAI Bridge)
+- 11:15 AM: AI service plan (MindSalonBridge)
+- 12:00 PM: Inventory alert (Nexha)
+- 4:00 PM: Follow-up (NotificationBridge)
+- 6:00 PM: Expansion (SutarBridge)
+- 8:00 PM: Wealth tracking (AssetMindBridge)
 
 ### 7. Industry OS (RTNM Ecosystem)
 

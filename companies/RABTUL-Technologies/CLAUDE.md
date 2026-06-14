@@ -274,6 +274,20 @@ DELETE /api/v1/webhooks/:id
 | investment.test.ts | Creation, redemption, M2M, portfolio |
 | forecast.test.ts | 13-week forecast, shortfall, variance |
 | integration.test.ts | Wallet, Payment, Notification integration |
+| dashboard.spec.ts | E2E tests with Playwright |
+
+### React Hooks (10+)
+
+| Hook | Purpose |
+|------|---------|
+| useCashPosition | Cash position data |
+| useAccounts | Account CRUD operations |
+| useInvestments | Investment portfolio |
+| useMLForecast | AI-powered forecast |
+| useBankStatements | Bank statement import |
+| useFXExposure | FX exposure tracking |
+| useFXRate | Real-time FX rates |
+| useWebhooks | Webhook subscriptions |
 
 ### Webhook Events
 
