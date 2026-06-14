@@ -12,6 +12,9 @@ export interface CampaignMetrics {
   coinsSpent: number;
   revenue: number;
   roi: number;
+  channel?: string;
+  targeting?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 export interface OptimizationResult {
@@ -121,8 +124,8 @@ export class CampaignOptimizer {
     const scans = parseInt(metrics.scans || '0', 10);
     const redemptions = parseInt(metrics.redemptions || '0', 10);
     const purchases = parseInt(metrics.purchases || '0', 10);
-    const coinsSpent = parseFloat(metrics.coinsSpent || '0', 10);
-    const revenue = parseFloat(metrics.revenue || '0', 10);
+    const coinsSpent = parseFloat(metrics.coinsSpent || '0');
+    const revenue = parseFloat(metrics.revenue || '0');
 
     const roi = coinsSpent > 0 ? (revenue - coinsSpent) / coinsSpent : 0;
 
@@ -325,8 +328,8 @@ export class CampaignOptimizer {
     }
 
     // Factor 4: Default to predicted optimal with some variance
-    // Use crypto.randomInt for cryptographically secure variance
-    const variance = 0.9 + (crypto.randomInt(10, 30) / 100);
+    // Use Math.random for variance (cross-version compatible)
+    const variance = 0.9 + (Math.random() * 0.2 + 0.1);
     return Math.round(Math.max(predictedOptimal * variance, 15));
   }
 

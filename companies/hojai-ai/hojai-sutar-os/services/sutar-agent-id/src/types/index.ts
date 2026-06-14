@@ -438,15 +438,3 @@ export interface AgentActivity {
   userAgent?: string;
   details?: Record<string, unknown>;
 }
-
-// Re-export Zod schemas
-export {
-  AgentMetadataSchema,
-  AgentRegistrationSchema,
-  AgentUpdateSchema,
-  AgentVerifySchema,
-  AgentAuthSchema,
-  PermissionSchema,
-  PermissionUpdateSchema,
-  AgentSearchSchema,
-};

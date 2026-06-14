@@ -47,8 +47,10 @@ export interface CoinBundle {
   discount?: number;
   originalPrice?: number;
   tags: string[];
+  active?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  [key: string]: unknown;
 }
 
 export interface BundlePurchase {
@@ -65,7 +67,11 @@ export interface BundlePurchase {
   paymentId: string;
   discountApplied: number;
   bonusType?: BonusType;
+  refunded?: boolean;
+  refundReason?: string;
+  refundedAt?: Date;
   timestamp: Date;
+  [key: string]: unknown;
 }
 
 export interface BundleConfig {

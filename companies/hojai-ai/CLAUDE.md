@@ -954,3 +954,61 @@ Intelligent procurement with supplier matching and negotiation.
 ---
 
 *Last Updated: June 14, 2026*
+
+### supplier-agent (Port 4850)
+
+**Location:** `employees/supplier-agent/`
+
+Autonomous RFQ response agent that handles supplier side of procurement.
+
+**Features:**
+- RFQ receive and parse
+- Auto quote generation with volume discounts
+- Negotiation handling (multi-round)
+- Contract generation
+- SUTAR trust validation
+
+**Supplier Categories:**
+- AC/HVAC: CoolAir Solutions, Climate Pro, Metro Cooling
+- Plumbing: AquaFix Services, PipeMaster Pro
+- Electrical: Spark Electric, PowerSafe Solutions
+- Linen: SoftLinens Hotel Supply, Hotel Essentials
+- Food: FreshFarm Foods, Quality Meats & More
+
+**Start:** `npm run dev`
+
+---
+
+## NEW SERVICES - June 14, 2026
+
+### AI Waiter (Port 5600)
+- WhatsApp/Chat order taking
+- Menu browsing with dietary filtering
+- Table reservations
+- Kitchen display notification
+- Connected to: REZ Menu (4030), POS (4081), KDS (4080), Table (4070), Memory (4520)
+
+### Maintenance Agent (Port 4849)
+- Work order creation and tracking
+- Predictive maintenance engine
+- Equipment health monitoring
+- Vendor management
+- Connected to: REZ Maintenance (4831), Nexha (4320)
+
+### Procurement Agent (Port 4786)
+- RFQ creation and management
+- Supplier matching by category
+- Negotiation strategies
+- Contract generation
+- Connected to: Nexha Procurement OS (4320)
+
+### Supplier Agent (Port 4850)
+- Autonomous RFQ response
+- Auto quote generation
+- Volume discounts (5%, 10%, 15%)
+- Negotiation handling
+- Connected to: Procurement Agent (4786), SUTAR (4518)
+
+---
+
+*Last Updated: June 14, 2026*

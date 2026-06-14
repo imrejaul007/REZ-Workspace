@@ -24,7 +24,7 @@ import type {
 // API CONFIGURATION
 // ============================================
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_COSMIC_API_URL || 'http://localhost:4163';
+const API_BASE_URL = process.env.EXPO_PUBLIC_COSMIC_API_URL || 'http://localhost:4070';
 
 const TIMEOUT = 10000;
 

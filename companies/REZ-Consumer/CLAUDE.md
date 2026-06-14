@@ -1,8 +1,8 @@
 # REZ-Consumer - Developer Guide
 
-**Version:** 8.0.0
-**Updated:** June 12, 2026
-**Status:** ✅ ALL 43 PRODUCTS/SERVICES PRODUCTION READY
+**Version:** 9.0.0
+**Updated:** June 14, 2026
+**Status:** ✅ ALL 43 PRODUCTS/SERVICES PRODUCTION READY + INTEGRATIONS + CI/CD + MONITORING
 
 ---
 
@@ -579,10 +579,11 @@ cd go4food-api && npm run dev        # Port 3002
 | [RTNM-PRODUCTS-FEATURES-AUDIT.md](./RTNM-PRODUCTS-FEATURES-AUDIT.md) | Products & features audit |
 | [SERVICE-STATUS.md](./SERVICE-STATUS.md) | Complete service catalog |
 | [API.md](./API.md) | API documentation |
+| [INTEGRATION-STATUS.md](./INTEGRATION-STATUS.md) | Integration status |
 
 ---
 
-## PRODUCTION FIXES (June 12, 2026)
+## PRODUCTION FIXES (June 14, 2026)
 
 - ✅ Company boundary cleanup (airzy, rider-circle, buzzlocal)
 - ✅ JWT secret fallbacks removed
@@ -591,9 +592,87 @@ cd go4food-api && npm run dev        # Port 3002
 - ✅ Integration tests added
 - ✅ Swagger/OpenAPI documentation added
 - ✅ CSP, HSTS security headers added
+- ✅ Integration Hub built (Port 4099)
+- ✅ CI/CD pipelines configured
+- ✅ Monitoring stack deployed
 
 ---
 
-**Last Updated:** June 12, 2026
-**Version:** 8.0.0
-**Status:** ✅ ALL 43 PRODUCTS/SERVICES PRODUCTION READY
+## CI/CD & DEPLOYMENT
+
+### GitHub Actions Workflows
+
+| Workflow | Purpose |
+|----------|---------|
+| `ci.yml` | Lint, TypeCheck, Test, Build |
+| `deploy.yml` | Multi-environment deployment |
+| `pr-checks.yml` | PR validation |
+
+### Deployment
+
+```bash
+# Deploy all services
+cd ../deploy && ./DEPLOY-MASTER.sh
+
+# Deploy specific company
+./DEPLOY-MASTER.sh --company REZ-Consumer
+```
+
+---
+
+## INTEGRATION HUB (Port 4099)
+
+**Location:** `companies/RABTUL-Technologies/REZ-integration-hub/`
+
+### Services Connected
+
+| Service | Company | Purpose |
+|---------|---------|---------|
+| RABTUL Auth | RABTUL Technologies | User authentication |
+| RABTUL Payment | RABTUL Technologies | UPI, Cards, Razorpay |
+| RABTUL Wallet | RABTUL Technologies | Coins, Balance |
+| HOJAI Gateway | HOJAI AI | AI orchestration |
+| HOJAI Memory | HOJAI AI | User memory |
+| Genie Memory | Genie AI | Personal AI |
+| REZ-Mart | REZ-Consumer | Quick commerce |
+| Airzy | KHAIRMOVE | Airport ecosystem |
+| AdBazaar | AdBazaar | Advertising |
+
+### Integration Features
+
+| Feature | Description |
+|---------|-------------|
+| Unified User Profile | Aggregate from RABTUL + HOJAI + REZ |
+| Cross-Platform Payment | Single API for payments |
+| Event Bus | Company-to-company events |
+| Service Proxy | Proxy to any registered service |
+| Health Check | All services health status |
+
+---
+
+## MONITORING
+
+### Monitoring Stack (Docker)
+
+| Component | Port | Purpose |
+|-----------|------|---------|
+| Prometheus | 9090 | Metrics collection |
+| Grafana | 3001 | Dashboards |
+| AlertManager | 9093 | Alert routing |
+| Node Exporter | 9100 | System metrics |
+| cAdvisor | 8080 | Container metrics |
+
+### Alert Rules
+
+| Alert | Condition | Severity |
+|-------|-----------|----------|
+| ServiceDown | `up == 0` for 1m | critical |
+| HighErrorRate | >5% errors for 2m | warning |
+| HighLatency | P95 >2s for 5m | warning |
+| HighCPU | >80% for 5m | warning |
+
+---
+
+**Last Updated:** June 14, 2026
+**Version:** 9.0.0
+**Status:** ✅ ALL 43 PRODUCTS/SERVICES PRODUCTION READY + INTEGRATIONS + CI/CD + MONITORING

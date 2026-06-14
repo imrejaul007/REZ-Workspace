@@ -1,6 +1,6 @@
 # RABTUL Technologies - Economic Layer Complete Feature List
 
-**Version:** 4.0
+**Version:** 5.0
 **Date:** June 13, 2026
 **Company:** RABTUL Technologies
 **Status:** ✅ PRODUCTION READY - All Services Complete
@@ -25,6 +25,19 @@
 | Error Classes | utils/errors.ts | 500+ | 25+ custom errors |
 | Models | models/index.ts | 500+ | 9 MongoDB collections |
 
+### API Routes (50+ Endpoints)
+
+| Category | Endpoints | Count |
+|----------|----------|-------|
+| Cash Management | POST/GET accounts, deposit, withdraw, transfer | 8 |
+| Investments | POST/GET investments, redeem, value | 6 |
+| Forecasting | POST/GET forecast, shortfall | 4 |
+| ML Forecasting | POST ml forecast, insights, anomaly | 3 |
+| Bank Statement | POST import, GET banks | 2 |
+| FX Hedging | GET rate, POST hedge, exposure | 10 |
+| Webhooks | POST/GET/DELETE webhooks | 4 |
+| Alerts | GET/POST acknowledge, resolve | 3 |
+
 ### Unit Tests
 
 | Test File | Coverage |
@@ -33,6 +46,7 @@
 | investment.test.ts | Creation, redemption, M2M, portfolio |
 | forecast.test.ts | 13-week forecast, shortfall, variance |
 | integration.test.ts | Wallet, Payment, Notification integration |
+| dashboard.spec.ts | E2E with Playwright |
 
 ### Dashboard (REZ-treasury-dashboard)
 
@@ -44,15 +58,20 @@
 | Forecast | /forecast | 13-week forecast |
 | Alerts | /alerts | Alert management |
 
-### Deployment & Infrastructure
+### Dashboard React Hooks (10+ Hooks)
 
-| File | Description |
-|------|-------------|
-| Dockerfile | Multi-stage build, production ready |
-| docker-compose.yml | Full stack (MongoDB, Redis, Prometheus, Grafana) |
-| docker-compose.dev.yml | Development with hot reload |
-| nginx.conf | Production load balancer, rate limiting |
-| k8s-deployment.yaml | Kubernetes deployment manifest |
+| Hook | Purpose |
+|------|---------|
+| useCashPosition | Cash position data |
+| useAccounts | Account CRUD operations |
+| useInvestments | Investment portfolio |
+| useForecast | 13-week forecast |
+| useMLForecast | AI-powered forecast |
+| useAlerts | Alert management |
+| useBankStatements | Bank statement import |
+| useFXExposure | FX exposure tracking |
+| useFXRate | Real-time FX rates |
+| useWebhooks | Webhook subscriptions |
 
 ### CI/CD
 

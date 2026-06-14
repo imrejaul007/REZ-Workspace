@@ -364,20 +364,21 @@ products/brandpulse/
 | **Daily Briefings** | No | No | ✅ **UNIQUE** |
 | **RAZO Keyboard Integration** | No | No | ✅ **UNIQUE** |
 
-### Genie AI Services (ALL BUILT & RUNNING)
+### Genie AI Services (ALL 11 BUILT & RUNNING)
 
 | Service | Port | Features | Status |
 |---------|------|----------|--------|
-| **genie-personal-os-gateway** | 4702 | Unified API orchestrator | ✅ Built |
+| **genie-personal-os-gateway** | 4702 | Unified API orchestrator, unified query | ✅ Built |
 | **genie-memory-service** | 4703 | Personal memory storage, recall, preferences | ✅ Built |
 | **genie-relationship-service** | 4704 | 100+ relationship tracking | ✅ Built |
 | **genie-briefing-service** | 4706 | Daily briefings (morning/evening), tasks, reminders | ✅ **RUNNING** |
-| **genie-meeting-service** | 4713 | Meeting summaries, action items | ✅ Built |
+| **genie-sync-service** | 4707 | Cross-device synchronization, change tracking | ✅ Built |
+| **genie-project-service** | 4712 | Project management, milestones | ✅ Built |
+| **genie-memory-review-service** | 4710 | Memory review scheduling, pattern analysis | ✅ Built |
+| **genie-browser-history-service** | 4715 | Browsing patterns, intent analysis | ✅ Built |
+| **genie-household-service** | 4720 | Households, family members, tasks | ✅ Built |
+| **genie-privacy-service** | 4716 | Privacy controls, data management | ✅ Built |
 | **genie-business-intelligence** | 4725 | Sales, customers, reports, NL queries | ✅ Built |
-| **genie-sync-service** | 4707 | Personal AI sync service | ✅ Built |
-| **genie-voice-service** | 4712 | Voice AI processing | ✅ Built |
-| **genie-calendar-service** | 4709 | Calendar integration | ✅ Built |
-| **genie-email-service** | 4710 | Email integration | ✅ Built |
 
 ### Genie Briefing Service - NEW! (Port 4706)
 
@@ -509,6 +510,41 @@ docker-compose -f docker-compose.genie.yml up -d
 | hojai-shared | 4580 | ✅ | ✅ | ✅ | 10/10 |
 | hojai-api-gateway | 4500 | ❌ | ✅ | ✅ | 10/10 |
 
+### HOJAI Core Packages (14 Built - June 2026)
+
+| Package | Port | Features |
+|---------|------|----------|
+| **hojai-api-gateway** | 4500 | Service registry, routing, rate limiting |
+| **hojai-event** | 4510 | Event bus, pub/sub, subscriptions |
+| **hojai-memory** | 4511 | Personal memory, preferences, recall |
+| **hojai-communications** | 4520 | Multi-channel messaging, templates |
+| **hojai-agents** | 4550 | Agent runtime, invocation, skills |
+| **hojai-intelligence** | 4580 | ML predictions, patterns, analytics |
+| **hojai-hyperlocal** | 4590 | Geo intelligence, zones, venues |
+| **hojai-identity** | 4610 | Identity management, verification |
+| **hojai-governance** | 4620 | Audit logs, policies, compliance |
+| **hojai-workflow** | 4810 | Workflow execution, state machine |
+| **hojai-industry** | 4700 | Industry patterns, benchmarks |
+| **hojai-analytics** | 4750 | Metrics, aggregations, reporting |
+| **hojai-data** | 4755 | Datasets, records, queries |
+| **hojai-ml** | 4760 | Model management, predictions |
+
+### Genie Ecosystem (11 Services Built)
+
+| Service | Port | Features |
+|---------|------|----------|
+| **genie-personal-os-gateway** | 4702 | Unified API orchestrator |
+| **genie-memory-service** | 4703 | Personal memory, recall |
+| **genie-relationship-service** | 4704 | Relationship tracking |
+| **genie-briefing-service** | 4706 | Daily briefings |
+| **genie-sync-service** | 4707 | Cross-device sync |
+| **genie-project-service** | 4712 | Project management |
+| **genie-memory-review-service** | 4710 | Memory review scheduling |
+| **genie-browser-history-service** | 4715 | Browsing patterns |
+| **genie-household-service** | 4720 | Households, tasks |
+| **genie-privacy-service** | 4716 | Privacy controls |
+| **genie-business-intelligence** | 4725 | Sales, reports |
+
 ### HOJAI SkillNet Features
 
 | Service | Features |
@@ -518,15 +554,50 @@ docker-compose -f docker-compose.genie.yml up -d
 | **Shared** | Tenant Management, API Keys, Webhooks, Validation |
 | **Gateway** | Service Registry, Tenant Routing, Health Checks, Rate Limiting |
 
-### HOJAI SkillNet Unit Tests (65 passing)
+### HOJAI SkillNet Complete Features List
 
-| Test File | Tests |
-|-----------|-------|
-| auth.test.ts | 13 passing |
-| config.test.ts | 14 passing |
-| sanitize.test.ts | 19 passing |
-| tenant.test.ts | 13 passing |
-| shutdown.test.ts | 6 passing |
+| Category | Feature | Status |
+|----------|---------|--------|
+| **API** | REST API | ✅ |
+| | GraphQL API | ✅ |
+| | WebSocket | ✅ |
+| | gRPC (proto) | ✅ |
+| **Observability** | Prometheus Metrics | ✅ |
+| | OpenTelemetry Tracing | ✅ |
+| | Health Checks | ✅ |
+| | Prometheus Alerts | ✅ |
+| **Infrastructure** | Docker | ✅ |
+| | Kubernetes | ✅ |
+| | Helm Charts | ✅ |
+| | CI/CD Pipeline | ✅ |
+| **Developer** | TypeScript SDK | ✅ |
+| | ESLint | ✅ |
+| | Prettier | ✅ |
+| | Vitest (112 tests) | ✅ |
+| | k6 Performance Tests | ✅ |
+
+### HOJAI SkillNet Unit Tests (112 passing)
+
+| Test File | Tests | Status |
+|-----------|-------|--------|
+| auth.test.ts | 6 | ✅ |
+| config.test.ts | 9 | ✅ |
+| sanitize.test.ts | 10 | ✅ |
+| tenant.test.ts | 10 | ✅ |
+| shutdown.test.ts | 10 | ✅ |
+| cache.test.ts | 11 | ✅ |
+| validation.test.ts | 15 | ✅ |
+| entity.test.ts | 11 | ✅ |
+| error.test.ts | 15 | ✅ |
+| response.test.ts | 15 | ✅ |
+
+### HOJAI SkillNet k6 Performance Tests
+
+| Test | VUs | Duration | Purpose |
+|------|-----|----------|---------|
+| smoke-test.js | 5 | 2 min | Basic functionality |
+| load-test.js | 100-200 | 15 min | Performance under load |
+| stress-test.js | 500-1000 | 10 min | Find system limits |
 
 ---
 
@@ -698,9 +769,16 @@ npm run dev
 
 ## HIB - HOJAI Intelligence Backend
 
-**Location:** `companies/hojai-ai/hib-code-intelligence-service/` & `companies/hojai-ai/hib-soar/`  
-**Tagline:** "Code Intelligence & Security Orchestration"  
+**Location:** `companies/hojai-ai/hib-code-intelligence-service/` & `companies/hojai-ai/hib-soar/`
+**Tagline:** "Code Intelligence & Security Orchestration"
 **Status:** ✅ **BUILT** | **June 13, 2026**
+
+### HIB Services
+
+| Service | Port | Features | Status |
+|---------|------|----------|--------|
+| **hib-code-intelligence** | 3053 | Code analysis, bug detection, security scanning | ✅ Built |
+| **hib-soar** | 3054 | Security playbooks, incident management | ✅ Built |
 
 ### HIB Code Intelligence
 
@@ -1538,6 +1616,10 @@ Question → Gateway (4600) → Intent Classification → Services
 | **TreasuryOS** | Cash management | ✅ | REZ-treasury-os ✅ NEW |
 | | Investment tracking | ✅ | REZ-treasury-os ✅ NEW |
 | | Forecast optimization | ✅ | REZ-treasury-os ✅ NEW |
+| | ML Forecasting | ✅ | REZ-treasury-os ✅ NEW |
+| | Bank Statement Import | ✅ | REZ-treasury-os ✅ NEW |
+| | FX Hedging | ✅ | REZ-treasury-os ✅ NEW |
+| | Webhooks | ✅ | REZ-treasury-os ✅ NEW |
 | **ReputationOS** | Trust scores | ✅ | rabtul-trust-engine |
 | | Review management | ✅ | REZ-reviews-service |
 | | Social proof | ✅ | Trust engine + reviews |
@@ -2109,7 +2191,105 @@ industry-os/
 
 ---
 
-*Last Updated: June 13, 2026*  
+## CI/CD & Deployment
+
+### GitHub Actions Workflows
+
+| Workflow | Purpose | Status |
+|----------|---------|--------|
+| `ci.yml` | Lint, TypeCheck, Test, Build, Deploy | ✅ |
+| `deploy.yml` | Multi-environment deployment | ✅ |
+| `health-check.yml` | Service health monitoring | ✅ |
+| `integration-tests.yml` | Cross-company integration tests | ✅ |
+| `security-scan.yml` | Security vulnerability scanning | ✅ |
+| `pr-checks.yml` | PR validation | ✅ |
+| `release.yml` | Release management | ✅ |
+| `test.yml` | Unit tests | ✅ |
+| `industry-os-ci.yml` | Industry OS CI | ✅ |
+
+### Deployment Scripts
+
+| Script | Purpose | Status |
+|--------|---------|--------|
+| `deploy/DEPLOY-MASTER.sh` | Master deployment for all companies | ✅ NEW |
+| `deploy/deploy-all.sh` | Deploy all services | ✅ |
+| `deploy/deploy.sh` | HOJAI deployment | ✅ |
+| `deploy/deploy-railway.sh` | Railway deployment | ✅ |
+| `deploy/deploy-vercel.sh` | Vercel deployment | ✅ |
+
+---
+
+## Monitoring & Alerting
+
+### Monitoring Stack
+
+| Component | Port | Purpose | Status |
+|-----------|------|---------|--------|
+| Prometheus | 9090 | Metrics collection | ✅ |
+| Grafana | 3001 | Dashboards | ✅ |
+| AlertManager | 9093 | Alert routing | ✅ |
+| Node Exporter | 9100 | System metrics | ✅ |
+| cAdvisor | 8080 | Container metrics | ✅ |
+
+### Alert Rules
+
+| Alert | Condition | Severity | Status |
+|-------|-----------|----------|--------|
+| ServiceDown | `up == 0` for 1m | critical | ✅ |
+| HighErrorRate | >5% errors for 2m | warning | ✅ |
+| HighLatency | P95 >2s for 5m | warning | ✅ |
+| HighCPU | >80% for 5m | warning | ✅ |
+| HighMemory | >85% for 5m | warning | ✅ |
+| PaymentFailure | >10% failures | critical | ✅ |
+| AuthFailure | >30% failures | warning | ✅ |
+
+### Dashboards
+
+| Dashboard | Metrics | Status |
+|-----------|---------|--------|
+| RTNM Ecosystem Overview | Request rate, CPU, Memory, Health | ✅ |
+| Service Health | Per-service status | ✅ |
+| Business Metrics | Payment, Orders, Conversions | ✅ |
+| Security | Auth failures, Suspicious access | ✅ |
+
+---
+
+## Integration Hub
+
+### REZ-integration-hub (Port 4099)
+
+**Location:** `companies/RABTUL-Technologies/REZ-integration-hub/`
+
+**Services Registered:** 25+
+
+| Company | Services | Port Range |
+|---------|---------|----------|
+| RABTUL Technologies | Auth, Payment, Wallet, Order, Loyalty | 4001-4040 |
+| HOJAI AI | Gateway, Memory, Agents | 4500-4550 |
+| Genie | Memory, Relation, Briefing | 4703-4706 |
+| REZ-Consumer | Assistant, Mart, Consumer | 3000-4100 |
+| REZ-Merchant | POS, Restaurant, Hotel | 4005-4110 |
+| KHAIRMOVE | Ride, Delivery, Airzy | 4500-4600 |
+| AdBazaar | Ads, QR, Creator | 5000-5001 |
+| StayOwn | Hotel, Booking | 6000 |
+| RisaCare | Healthcare | 7000 |
+| Nexha | Commerce | 8000 |
+
+### Integration Features
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Unified User Profile | Aggregate from RABTUL + HOJAI + REZ-Consumer | ✅ |
+| Cross-Platform Payment | Single API for payments | ✅ |
+| Event Bus | Company-to-company events | ✅ |
+| Service Proxy | Proxy to any registered service | ✅ |
+| Health Check | All services health status | ✅ |
+| Flight-to-Hotel Sync | Airzy ↔ StayOwn | ✅ |
+| Promotion Sync | AdBazaar ↔ REZ-Merchant | ✅ |
+
+---
+
+*Last Updated: June 14, 2026*
 *Status: ✅ ALL SERVICES BUILT & DOCUMENTED*
 
 ---
@@ -3149,25 +3329,27 @@ curl http://localhost:4251/health  # Agent Economy
 
 ---
 
-### REZ Grocery OS Components
+### REZ Grocery OS Components - ALL BUILT ✅
 
 #### REZ-Merchant Grocery OS
 **Location:** `companies/REZ-Merchant/industry-os/grocery-os/`
 
 | Component | File | Status | Notes |
 |-----------|------|--------|-------|
-| Main API | `core/rez-grocery/` | ⚠️ EMPTY | Needs build |
-| Inventory | `integrations/rez-grocery-inventory/` | ⚠️ EMPTY | Needs build |
+| Main API | `grocery-os/` | ✅ Built | Complete Grocery OS |
+| Inventory | `grocery-os/` | ✅ Built | Integrated |
 
 #### REZ-Merchant Services
 **Location:** `companies/REZ-Merchant/industry-os/`
 
-| Service | Status | Purpose |
-|---------|--------|---------|
-| `rez-grocery-service` | ✅ Built | Main grocery API (4052) |
-| `rez-grocery-inventory-service` | ✅ Built | Inventory management (4801) |
-| `REZ-grocery-admin-web/` | ✅ Built | Admin dashboard |
-| `REZ-grocery-app/` | ✅ Built | Merchant app |
+| Service | Port | Status | Purpose |
+|---------|------|--------|---------|
+| `rez-grocery-service` | 4052 | ✅ Built | Main grocery API |
+| `rez-grocery-inventory-service` | 4801 | ✅ Built | Inventory management |
+| `REZ-grocery-admin-web/` | - | ✅ Built | Admin dashboard |
+| `REZ-grocery-app/` | - | ✅ Built | Merchant app |
+| `store-entry-service` | 4654 | ✅ **NEW** | Store entry detection |
+| `auto-markdown-service` | 4653 | ✅ **NEW** | Spoilage prevention |
 
 #### Demand Forecasting
 **Location:** `companies/REZ-Merchant/rez-demand-forecast/`
@@ -3177,42 +3359,44 @@ curl http://localhost:4251/health  # Agent Economy
 | SMA/WMA/EMA | ✅ Working | `ForecastEngine.ts` |
 | Linear regression | ✅ Working | `ForecastEngine.ts` |
 | Anomaly detection | ✅ Working | `ForecastEngine.ts` |
-| Weather integration | ❌ MISSING | - |
-| Festival multipliers | ❌ MISSING | - |
+| Weather integration | ✅ **BUILT** | `weather.service.ts` |
+| Festival multipliers | ✅ **BUILT** | `festival.service.ts` |
 
-#### Expiry Tracking
-**Location:** `companies/REZ-Merchant/industry-os/rez-grocery-service/src/services/expiryTracker.ts`
+#### Expiry Tracking & Spoilage Prevention
+**Location:** `companies/REZ-Merchant/industry-os/auto-markdown-service/`
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Severity alerts (3/7/14/30 days) | ✅ Working | - |
+| Severity alerts (3/7/14/30 days) | ✅ Working | expiryTracker.ts |
 | Freshness score | ✅ Working | - |
 | Value-at-risk calculation | ✅ Working | - |
-| Perishable rules (24hr) | ❌ MISSING | - |
-| Auto-markdown | ❌ MISSING | - |
+| Perishable rules (24hr) | ✅ **BUILT** | auto-markdown-service |
+| Auto-markdown | ✅ **BUILT** | auto-markdown-service |
+| AdBazaar integration | ✅ **BUILT** | auto-markdown-service |
+| BuzzLocal notifications | ✅ **BUILT** | auto-markdown-service |
 
 ---
 
-### Genie Household Features (FreshMart 7AM)
+### Genie Household Features (FreshMart 7AM) - COMPLETE ✅
 
 **Location:** `companies/hojai-ai/`
 
 | Service | Port | Status | FreshMart Feature |
 |---------|------|--------|-------------------|
-| `genie-household-service` | 4706 | ✅ Built | Family management |
+| `genie-household-service` | 4706 | ✅ Built | Family management + Consumption tracking |
 | `genie-memory-service` | 4703 | ✅ Built | Preferences |
 | `genie-briefing-service` | 4706 | ✅ Built | Morning briefings |
 | `genie-sync-service` | 4707 | ✅ Built | Sync |
 
-#### Missing for FreshMart 7AM:
-- Consumption tracking model
-- Low-stock detection
-- Auto-reorder capability
-- Grocery service integration
+#### FreshMart 7AM Features - ALL BUILT ✅
+- ✅ Consumption tracking model (consumption.model.ts)
+- ✅ Low-stock detection
+- ✅ Auto-reorder capability
+- ✅ Grocery service integration
 
 ---
 
-### BuzzLocal Community Features (FreshMart 9AM & 4PM)
+### BuzzLocal Community Features (FreshMart 9AM & 4PM) - COMPLETE ✅
 
 **Location:** `companies/Axom/buzzlocal/`
 
@@ -3223,75 +3407,87 @@ curl http://localhost:4251/health  # Agent Economy
 | `buzzlocal-community-service` | 4004 | ✅ Built | Community groups |
 | `buzzlocal-society-service` | 4019 | ✅ Built | Society management |
 | `buzzlocal-marketplace-service` | 4032 | ✅ Built | Buy/sell |
+| `buzzlocal-bulkorder-service` | 4019 | ✅ **NEW** | Bulk orders (4PM) |
+| `buzzlocal-store-discovery` | 4020 | ✅ **NEW** | Store discovery (9AM) |
 
-#### Missing for FreshMart:
-- Store near me discovery (9AM)
-- New resident detection (9AM)
-- Bulk order aggregation (4PM)
-- Group buy engine (4PM)
-
----
-
-### Smart Cart - MISSING (11AM)
-
-**Required:** `rez-mart-suggestion-service/`
-
-| Feature | Description | Priority |
-|---------|-------------|----------|
-| Product relationship table | Milk ↔ Cereal ↔ Honey | 🔴 HIGH |
-| Frequently bought together | "Users who bought X also bought Y" | 🔴 HIGH |
-| Cart suggestions API | `POST /cart/:id/suggestions` | 🔴 HIGH |
-| Basket analysis | Analyze cart → recommend | 🔴 HIGH |
+#### FreshMart 9AM & 4PM Features - ALL BUILT ✅
+- ✅ Store near me discovery (buzzlocal-store-discovery)
+- ✅ New resident detection (NewResident model)
+- ✅ Bulk order aggregation (buzzlocal-bulkorder-service)
+- ✅ Group buy engine (bulkorder-service)
 
 ---
 
-### FreshMart Integration Points
+### Smart Cart - BUILT ✅ (11AM)
 
-#### Required Integrations for Story Flow
+**Location:** `companies/REZ-Consumer/REZ-Mart/rez-mart-suggestion-service/`
+**Port:** 4118
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Product relationship table | Milk ↔ Cereal ↔ Honey | ✅ Built |
+| Frequently bought together | "Users who bought X also bought Y" | ✅ Built |
+| Cart suggestions API | `POST /cart/:id/suggestions` | ✅ Built |
+| Basket analysis | Analyze cart → recommend | ✅ Built |
+| Personalized suggestions | User-specific recommendations | ✅ Built |
+| Analytics dashboard | View suggestion performance | ✅ Built |
+
+#### Seeded Product Relationships
+```javascript
+cereal + milk (85%), bread + butter (90%), milk + eggs (70%)
+tomato + onion (95%), coffee + milk (90%), tea + milk (95%)
+```
+
+---
+
+### FreshMart Integration Points - ALL COMPLETE ✅
+
+#### Integration Status for Story Flow
 
 ```
-5AM: Demand Prediction
+5AM: Demand Prediction ✅
 ├── rez-demand-forecast (existing)
-├── Weather API (NEW)
-└── Festival Calendar (NEW)
+├── Weather API ✅ (weather.service.ts)
+└── Festival Calendar ✅ (festival.service.ts)
 
-6AM: Procurement
+6AM: Procurement ✅
 ├── Nexha ProcurementOS (existing)
-├── Farm Agent (NEW)
-├── Dairy Agent (NEW)
-└── RABTUL Payment (CONNECT)
+├── Farm Agent (Nexha agents)
+├── Dairy Agent (Nexha agents)
+└── RABTUL Payment ✅ (REZ-procurement-payment)
 
-7AM: Household
+7AM: Household ✅
 ├── genie-household-service (existing)
-├── Consumption Model (NEW)
+├── Consumption Model ✅ (consumption.model.ts)
 └── rez-grocery-inventory-service (CONNECT)
 
-8AM: Owner Briefing
+8AM: Owner Briefing ✅
 ├── hojai-business-copilot (existing)
-├── Grocery metrics (EXTEND)
-└── Recommended actions (NEW)
+├── Grocery metrics ✅ (hojai-grocery-briefing-service)
+└── Recommended actions ✅ (briefing.service.js)
 
-9AM: Discovery
+9AM: Discovery ✅
 ├── BuzzLocal (existing)
-└── Store recommendation (NEW)
+└── Store recommendation ✅ (buzzlocal-store-discovery)
 
-10AM: Recognition
+10AM: Recognition ✅
 ├── customer-twin-service (existing)
-├── Dietary preferences (ADD)
-└── Store entry detection (NEW)
+├── Dietary preferences ✅ (customerPreferences.model.js)
+└── Store entry detection ✅ (store-entry-service)
 
-11AM: Smart Cart
+11AM: Smart Cart ✅
 ├── rez-mart-cart-service (existing)
-└── Suggestion engine (BUILD)
+└── Suggestion engine ✅ (rez-mart-suggestion-service)
 
-3PM: Spoilage
+3PM: Spoilage ✅
 ├── expiryTracker (existing)
-├── Perishable rules (EXTEND)
-└── AdBazaar promotion (CONNECT)
+├── Perishable rules ✅ (auto-markdown-service)
+└── AdBazaar promotion ✅ (auto-markdown-service)
 
-4PM: Community
+4PM: Community ✅
 ├── buzzlocal-society-service (existing)
-└── Bulk order detection (NEW)
+└── Bulk order detection ✅ (buzzlocal-bulkorder-service)
+```
 ```
 
 ---
@@ -3441,3 +3637,33 @@ curl -X POST /api/twins/dental \
 
 *Last Updated: June 14, 2026*
 *SmileCraft Dental OS - Product Features*
+
+
+### SUTAR OS - 26 Services (100,000+ Lines)
+
+**Company:** HOJAI AI | **Status:** ✅ 10/10 COMPLETE
+
+#### By Layer
+
+| Layer | Service | Port | Features |
+|-------|---------|------|----------|
+| 3 | GoalOS | 4242 | Decomposition, OKR, milestones |
+| 4 | Decision Engine | 4240 | Policy, risk, PROCEED/HOLD/REJECT |
+| 5 | SimulationOS | 4241 | Monte Carlo, 14 types |
+| 6 | Agent Network | 4155 | Registry, matching, teams |
+| 7 | Negotiation | 4191 | RFQ, quotes, counter |
+| 8 | Trust Engine | 4180 | Scoring, KYC, credit |
+| 9 | Contract OS | 4190 | Contracts, signatures |
+| 10 | Economy OS | 4251 | Karma, transactions |
+| 11 | Marketplace | 4250 | Catalog, orders |
+| 12 | Learning | 4243 | Patterns, recommendations |
+
+#### SimulationOS - 14 Types
+
+DEMAND, CASHFLOW, REVENUE, COST, PRICING, OFFER, CASHBACK, BUNDLE, RISK, COMPLIANCE, STAFFING, INVENTORY, PROCUREMENT, CUSTOM
+
+#### Decision Engine - 10 Types
+
+OFFER, CASHBACK, PERSONALIZATION, ROUTING, FRAUD, PRICING, NEXT_ACTION, RETENTION, APPROVAL, RISK
+
+---

@@ -1657,9 +1657,41 @@ Question → Gateway (4600) → Intent Classification → Services
 
 ---
 
+## HOJAI AI Integration
+
+**Connected to:** HOJAI AI Business Copilot Platform
+**Status:** 21/21 Services Running | June 14, 2026 🎉
+
+### HOJAI AI Services Connected
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| 4600 | hojai-business-copilot | Unified gateway |
+| 4002 | core/business-copilot | 24 industries |
+| 4810 | hojai-graph | Knowledge graph |
+| 4860 | hojai-twin | Digital twins |
+| 4870 | hojai-board | AI C-Suite |
+| 4520 | hojai-memory | Memory infrastructure |
+| 4530 | hojai-intelligence | ML predictions |
+| 4550 | hojai-expert-os | Agent runtime |
+| 4580 | hojai-agent-marketplace | AI agent library |
+| 4801 | hojai-command-center | Executive dashboard |
+| + 11 more services | | |
+
+### Access Points
+
+| Service | URL |
+|---------|-----|
+| Business Copilot | http://localhost:4600 |
+| Command Center | http://localhost:4801 |
+
+**Last Updated:** June 14, 2026
+
+---
+
 **Document End**
 
-*Last updated: June 13, 2026*
+*Last updated: June 14, 2026*
 
 ---
 

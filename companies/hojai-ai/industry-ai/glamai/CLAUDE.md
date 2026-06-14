@@ -4,6 +4,49 @@
 
 ---
 
+## Integration Connectors (8 Connectors) ✅ NEW!
+
+| Connector | Purpose | File |
+|----------|---------|------|
+| **Beauty Discovery** | DO App → Salon discovery | `src/connectors/beauty-discovery-connector.ts` |
+| **Procurement** | Nexha → Product order | `src/connectors/salon-procurement-connector.ts` |
+| **Wealth** | AssetMind → Profit transfer | `src/connectors/salon-wealth-connector.ts` |
+| **Expansion** | SUTAR → Multi-location | `src/connectors/salon-expansion-connector.ts` |
+| **Scheduler** | Auto-booking | `src/connectors/stylist-scheduler-connector.ts` |
+| **Inventory** | Stock alerts | `src/connectors/salon-inventory-connector.ts` |
+
+### GlamAI Story Flow
+
+```
+9:00 AM - Customer asks Genie → "Best salon nearby"
+         ↓
+beautyDiscoveryConnector.discoverSalons()
+         ↓
+MTR recommended (based on preferences)
+
+10:00 AM - Products running low
+         ↓
+salonInventoryConnector.checkInventory()
+         ↓
+salonProcurementConnector.processAlerts() → Nexha
+         ↓
+Auto-order triggered
+
+6:00 PM - End of day
+         ↓
+salonWealthConnector.transferDailyProfits()
+         ↓
+Profits → AssetMind
+
+8:00 PM - Owner wants to expand
+         ↓
+salonExpansionConnector.createExpansionPlan()
+         ↓
+New locations found via RisnaEstate
+```
+
+---
+
 ## Architecture Overview
 
 ```

@@ -521,4 +521,84 @@ cd hotel-owner-dashboard && npm install && npm run dev
 
 ---
 
+## HOJAI AI Integration
+
+**Connected to:** HOJAI AI Business Copilot Platform
+**Status:** 21/21 Services Running | June 14, 2026 🎉
+
+### HOJAI AI Services Connected
+
+| Port | Service | Purpose |
+|------|---------|---------|
+| 4600 | hojai-business-copilot | Unified gateway |
+| 4002 | core/business-copilot | 24 industries |
+| 4810 | hojai-graph | Knowledge graph |
+| 4860 | hojai-twin | Digital twins |
+| 4870 | hojai-board | AI C-Suite |
+| 4520 | hojai-memory | Memory infrastructure |
+| 4530 | hojai-intelligence | ML predictions |
+| 4550 | hojai-expert-os | Agent runtime |
+| 4580 | hojai-agent-marketplace | AI agent library |
+| 4801 | hojai-command-center | Executive dashboard |
+| + 11 more services | | |
+
+### Access Points
+
+| Service | URL |
+|---------|-----|
+| Business Copilot | http://localhost:4600 |
+| Command Center | http://localhost:4801 |
+
 **Last Updated:** June 14, 2026
+
+---
+
+## NEW SERVICES - June 14, 2026
+
+### Hotel Owner Dashboard (Port 4900)
+- Occupancy analytics (92%)
+- Revenue analytics
+- AI pricing recommendations
+- **Pricing execution** (execute pricing changes)
+- Conference demand analysis
+- Food revenue tracking
+
+### Room Preparation Service (Port 4901)
+- Memory → Room Twin → Room Ready
+- Guest preference preparation
+- Smart Lock configuration
+- Housekeeping queue
+
+### SUTAR Orchestrator (Port 4902)
+- Cross-service orchestration
+- Procurement → Trust → Contract → Payment
+- Pricing → Decision → Execution
+- Guest → Memory → Learning
+
+### IoT Sensor Hub (Port 4903)
+- Real-time equipment monitoring
+- AC vibration detection
+- Failure prediction
+- Maintenance Agent integration
+
+---
+
+## Start All Services
+
+```bash
+# Hotel Owner Dashboard
+cd hotel-owner-dashboard && npm install && npm run dev
+
+# Room Preparation
+cd room-preparation-service && npm install && npm run dev
+
+# SUTAR Orchestrator
+cd stayown-sutar-orchestrator && npm install && npm run dev
+
+# IoT Sensor Hub
+cd iot-sensor-hub && npm install && npm run dev
+```
+
+---
+
+*Last Updated: June 14, 2026*

@@ -7,6 +7,12 @@
 **Port:** 4180
 **Company:** RABTUL Technologies
 **Part of:** SUTAR OS Phase 6 - Trust Engine
+**Lines:** 358
+**Status:** ✅ PRODUCTION READY
+
+## What is Trust Scorer?
+
+Trust Scorer calculates and manages trust scores for all entities (agents, companies, suppliers) in the RTNM ecosystem. It provides the foundation for autonomous trust-based decisions.
 
 ## Tech Stack
 
@@ -14,19 +20,6 @@
 - Express.js
 - TypeScript
 - MongoDB/Mongoose
-
-## Architecture
-
-```
-Trust Scorer (4180)
-    │
-    ├── Credit Score (25%)
-    ├── Payment History (25%)
-    ├── Dispute Rate (25%)
-    └── Delivery Success (25%)
-            │
-            └──► Overall Trust Score (0-100)
-```
 
 ## Commands
 
@@ -44,31 +37,65 @@ Trust Scorer (4180)
 | PORT | No | 4180 | Service port |
 | MONGODB_URI | Yes | - | MongoDB connection |
 
-## Key Files
+## Features
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| src/index.ts | ~358 | Main server |
+### 1. Trust Score Calculation
 
-## Trust Metrics
+| Feature | Description |
+|---------|-------------|
+| **Overall Score (0-100)** | Calculated trust score |
+| **Weighted Metrics** | Four equally weighted factors |
+| **Real-time Updates** | Score updates on payment events |
+| **History Tracking** | Full score history |
+
+### 2. Trust Metrics (Weighted 25% each)
 
 | Metric | Weight | Description |
 |--------|--------|-------------|
-| Credit Score | 25% | Financial stability |
-| Payment History | 25% | Timeliness of payments |
-| Dispute Rate | 25% | Disputes filed |
-| Delivery Success | 25% | On-time delivery rate |
+| **Credit Score** | 25% | Financial stability and payment capacity |
+| **Payment History** | 25% | Timeliness of past payments |
+| **Dispute Rate** | 25% | Percentage of disputes filed |
+| **Delivery Success** | 25% | On-time, complete delivery rate |
 
-## Tier System
+### 3. Trust Tiers
 
-| Score | Tier |
-|-------|------|
-| 90-100 | Enterprise |
-| 80-89 | Verified |
-| 70-79 | Conditional |
-| 0-69 | Review |
+| Score | Tier | Description | Transaction Limit |
+|-------|------|-------------|------------------|
+| 90-100 | **Enterprise** | Auto-approved | Full autonomy |
+| 80-89 | **Verified** | Standard approval | High limits |
+| 70-79 | **Conditional** | Enhanced monitoring | Medium limits |
+| 0-69 | **Review** | Manual review required | Low limits |
+
+### 4. Risk Flags
+
+| Feature | Description |
+|---------|-------------|
+| **Flag Types** | Multiple flag categories |
+| **Severity Levels** | low, medium, high |
+| **Score Impact** | Automatic score deduction |
+| **Description** | Flag details |
+
+### 5. Payment Tracking
+
+| Feature | Description |
+|---------|-------------|
+| **Payment Records** | Track all payments |
+| **Payment Status** | paid, late, defaulted |
+| **Days Late** | Calculate lateness |
+| **Due/Paid Dates** | Track timeline |
+
+### 6. Entity Types
+
+| Type | Description |
+|------|-------------|
+| supplier | Product suppliers |
+| buyer | Product buyers |
+| agent | Autonomous agents |
+| company | Companies |
 
 ## API Endpoints
+
+### Trust Score
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -76,13 +103,58 @@ Trust Scorer (4180)
 | POST | `/api/trust/:entityId/calculate` | Recalculate score |
 | PUT | `/api/trust/:entityId` | Update metrics |
 | POST | `/api/trust/:entityId/flag` | Raise risk flag |
+
+### Payments
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | POST | `/api/payments` | Record payment |
 | GET | `/api/payments` | List payments |
+
+## Score Calculation Formula
+
+```
+Trust Score = (Credit Score × 0.25) + 
+              (Payment History × 0.25) + 
+              (Dispute Rate × 0.25) + 
+              (Delivery Success × 0.25)
+```
+
+## Risk Flag Impact
+
+| Severity | Score Impact |
+|----------|--------------|
+| high | -10 points |
+| medium | -5 points |
+| low | No change |
+
+## Integration
+
+### Upstream
+- Payment systems
+- Delivery tracking
+- Dispute resolution
+
+### Downstream
+- SUTAR Decision Engine
+- ContractOS
+- NegotiationOS
 
 ## Health Endpoints
 
 - `GET /health` - Health check
 - `GET /health/ready` - Readiness probe
+
+## File Structure
+
+```
+REZ-trust-scorer/
+├── src/
+│   └── index.ts                    # Main server (all-in-one)
+├── package.json
+├── tsconfig.json
+└── CLAUDE.md (this file)
+```
 
 ## Notes
 

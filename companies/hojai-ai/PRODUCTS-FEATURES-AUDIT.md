@@ -369,6 +369,15 @@
 | **Agent Platform** | agent-communication-hub, agent-identity, **agent-marketplace**, **agent-streaming**, agent-wallet |
 | **ExpertOS** | **hojai-expert-os** (Agent Runtime), skill orchestration, expert twins, workflow execution |
 | **Product Intelligence** | **hojai-product-intelligence** (Product analytics), feature tracking, feedback analysis, roadmap management |
+| **Competitive Intelligence** | **hojai-competitive-intelligence** (Competitor tracking), funding, hiring, news, alerts |
+| **Revenue Intelligence** | **hojai-revenue-intelligence** (Revenue analytics), ARR/MRR/LTV/CAC tracking, forecasting |
+| **Customer Intelligence** | **hojai-customer-intelligence** (Customer 360), lifecycle, interactions, sentiment |
+| **Meeting Intelligence** | **hojai-meeting-intelligence** (Meeting management), action items, decisions, notes |
+| **GoalOS** | **hojai-goal-os** (Goal management), OKRs, milestones, progress tracking |
+| **Command Center** | **hojai-command-center** (Executive dashboard), widgets, KPI dashboards |
+| **Executive Dashboard** | **hojai-executive-dashboard** (KPI reports), insights, metrics |
+| **FlowOS** | **hojai-flow-os** (Workflow automation), flow execution, step orchestration |
+| **Graph Enrichment** | **hojai-graph-enrichment** (Knowledge graph), entities, relationships |
 | Intelligence | intelligence-gateway, llm, rag, vector |
 | Voice | voice-os, voice-sdk, voice-commerce, voice-agent |
 | Monitoring | alerting, observability, tracing, trace-explorer, sla-monitor, audit-logs |
