@@ -194,10 +194,10 @@ cd rez-referral-os && npm run dev
 - VaR Calculation (95%, 99%)
 - Auto-Hedging Strategies
 
-### API Endpoints
+### API Endpoints (50+)
 
 ```
-# Cash Management
+# Cash Management (8 routes)
 POST   /api/v1/accounts
 GET    /api/v1/accounts/:businessId
 GET    /api/v1/accounts/:businessId/position
@@ -205,36 +205,54 @@ POST   /api/v1/accounts/:id/deposit
 POST   /api/v1/accounts/:id/withdraw
 POST   /api/v1/transfers
 GET    /api/v1/cash-flow/:businessId
+POST   /api/v1/accounts/:id/reserve
+POST   /api/v1/accounts/:id/release
 
-# Investments
+# Investments (6 routes)
 POST   /api/v1/investments
 GET    /api/v1/investments/:businessId
-GET    /api/v1/investments/:id/summary
+GET    /api/v1/investments/:businessId/summary
+PATCH  /api/v1/investments/:id/value
 POST   /api/v1/investments/:id/redeem
+GET    /api/v1/investments/:id/returns
 
-# Forecasting
+# Forecasting (4 routes)
 POST   /api/v1/forecast/:businessId
+GET    /api/v1/forecast/:businessId/current
 GET    /api/v1/forecast/:businessId/shortfall
+PATCH  /api/v1/forecast/:id/actuals
 
-# Alerts
+# ML Forecasting (3 routes)
+POST   /api/v1/forecast/:businessId/ml
+GET    /api/v1/forecast/:businessId/ml/insights
+POST   /api/v1/forecast/anomaly
+
+# Alerts (3 routes)
 GET    /api/v1/alerts/:businessId
 POST   /api/v1/alerts/:id/acknowledge
 POST   /api/v1/alerts/:id/resolve
 
-# Bank Statement
+# Bank Statement (2 routes)
 POST   /api/v1/bank-statements/import
 GET    /api/v1/bank-statements/banks
 
-# FX Hedging
+# FX Hedging (10 routes)
 GET    /api/v1/fx/rate/:from/:to
-POST   /api/v1/fx/hedge
+GET    /api/v1/fx/spot/:from/:to
+POST   /api/v1/fx/hedge/forward
+POST   /api/v1/fx/hedge/option
 GET    /api/v1/fx/exposure/:businessId
+GET    /api/v1/fx/positions/:businessId
 GET    /api/v1/fx/recommendations/:businessId
+POST   /api/v1/fx/positions/:id/settle
+POST   /api/v1/fx/auto-hedge/:businessId
+GET    /api/v1/fx/currencies
 
-# Webhooks
+# Webhooks (4 routes)
 POST   /api/v1/webhooks
-DELETE /api/v1/webhooks/:id
+GET    /api/v1/webhooks/:businessId
 GET    /api/v1/webhooks/:id/deliveries
+DELETE /api/v1/webhooks/:id
 ```
 
 ### Scheduled Jobs

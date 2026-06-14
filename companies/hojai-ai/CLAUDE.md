@@ -600,6 +600,27 @@ Privacy-preserving industry intelligence platform with 3-layer architecture:
 
 GlamAI is the unified AI orchestration layer for salon operations:
 
+#### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              GLAMAI (Port 3000)                              │
+│                         Salon Intelligence OS                                │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                        SERVICES LAYER                                │   │
+│  │  BeautyMemory │ ServicePlan │ Stylist │ Customer │ Inventory        │   │
+│  │  Recommendation │ BeautyGenie │ TrainingAcademy                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                        BRIDGES LAYER                                 │   │
+│  │  SalonBridge │ MindSalon │ Genie │ Nexha │ Twin │ Notification      │   │
+│  │  Sutar │ AssetMind                                                │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 #### Services Built
 
 | Service | Purpose |
@@ -615,19 +636,63 @@ GlamAI is the unified AI orchestration layer for salon operations:
 
 #### Bridges
 
-| Bridge | Connects To |
-|--------|-------------|
-| **SalonBridge** | REZ Salon CRM (4012), Booking (4201), POS (4902), Inventory (4906) |
-| **MindSalonBridge** | REZ Mind Salon AI (4010) |
-| **GenieBridge** | Genie Memory (4703), Genie Briefing (4704) |
-| **NexhaBridge** | Nexha Procurement (B2B commerce) |
+| Bridge | Connects To | Purpose |
+|--------|-------------|---------|
+| **SalonBridge** | REZ Salon CRM (4903), Booking (4201), POS (4902), Inventory (4906) | Data sync |
+| **MindSalonBridge** | REZ Mind Salon AI (4010) | AI recommendations |
+| **GenieBridge** | Genie Memory (4703), Genie Briefing (4704) | Personal AI |
+| **NexhaBridge** | Nexha (5000) | Supplier/procurement |
+| **TwinBridge** | TwinOS Hub (4142), CorpID (4702) | Digital twins |
+| **NotificationBridge** | RABTUL Notification, WhatsApp | Follow-ups |
+| **SutarBridge** | SUTAR GoalOS (4242) | Expansion goals |
+| **AssetMindBridge** | AssetMind (5001) | Wealth analytics |
+
+#### Integration Flow - Story Moments
+
+| Time | Story | Integration |
+|------|-------|-------------|
+| 7:00 AM | Beauty Twin predictions | TwinBridge → TwinOS Hub |
+| 8:00 AM | Genie briefing | GenieBridge → Genie Memory |
+| 10:00 AM | Sarah books | SalonBridge → Booking |
+| 11:00 AM | QR check-in | REZ Salon Bridge → GlamAI |
+| 11:05 AM | Stylist sees profile | SalonBridge → GlamAI |
+| 11:15 AM | AI service plan | MindSalonBridge → REZ Mind Salon |
+| 12:00 PM | Inventory alert | InventoryBridge → Nexha |
+| 3:00 PM | Memory stores color | BeautyMemoryService → GenieBridge |
+| 4:00 PM | Genie follows up | NotificationBridge → WhatsApp |
+| 6:00 PM | Expansion | SutarBridge → SUTAR GoalOS |
+| 8:00 PM | Wealth tracking | AssetMindBridge → AssetMind |
+
+#### Service Features
+
+**BeautyMemoryService:**
+- Hair color formulas (color, brand, developer, processing time)
+- Stylist notes (treatment, preference, allergy, concern, general)
+- Product reactions (loved, liked, neutral, disliked, allergic)
+- Allergy and sensitivity tracking
+
+**ServicePlanService:**
+- Overdue service detection (haircut >28 days, color >21 days)
+- Seasonal recommendations (wedding, monsoon, festive)
+- Beauty profile-based recommendations
+
+**CustomerService:**
+- Unified customer intelligence
+- Customer tier (new, regular, vip, at-risk, churned)
+- Churn risk assessment
+- Lifetime value prediction
+
+**TrainingAcademyService:**
+- 7 courses (Hair Cutting, Hair Color, Skincare, etc.)
+- Certification management
+- Skill profiling
 
 #### Salon AI Agents
 
 | Agent | Port | Status |
 |-------|------|--------|
-| **Treatment Advisor** | 4813 | ✅ Built |
-| **Inventory Alert Agent** | 4814 | ✅ Built |
+| **Treatment Advisor** | 4813 | ✅ Built - Bundle suggestions, upsells |
+| **Inventory Alert Agent** | 4814 | ✅ Built - Low stock alerts |
 | Beauty Advisor | 4810 | ✅ Implemented |
 | Appointment Manager | 4810 | ✅ Implemented |
 | Campaign Manager | 4810 | ✅ Implemented |
@@ -642,10 +707,35 @@ React tablet app for stylists:
 - Customer view with beauty profile
 - Add notes, record colors, track reactions
 
+#### REZ Salon GlamAI Bridge (Port 4905)
+
+**Location:** `REZ-Merchant/industry-os/salon-os/integrations/glamai-bridge/`
+
+Bridge connecting REZ Salon ecosystem to GlamAI:
+- Appointment sync
+- Customer profile sync
+- QR check-in sync
+- Inventory alerts
+- Hair color sync
+- Beauty follow-ups
+
 #### Running GlamAI
 
 ```bash
-cd industry-ai/glamai && npm install && npm run dev
+# 1. Start REZ Salon Services
+cd REZ-Merchant/industry-os/salon-os/integrations/glamai-bridge
+npm install && npm run dev  # Port 4905
+
+# 2. Start GlamAI
+cd industry-ai/glamai && npm install && npm run dev  # Port 3000
+
+# 3. Start Treatment Advisor
+cd industry-ai/salon-ai/employees/treatment-advisor && npm start  # Port 4813
+
+# 4. Start Inventory Alert Agent
+cd industry-ai/salon-ai/employees/inventory-alert-agent && npm start  # Port 4814
+
+# 5. Start Stylist Tablet App
 cd industry-ai/glamai-stylist-app && npm install && npm run dev
 ```
 
