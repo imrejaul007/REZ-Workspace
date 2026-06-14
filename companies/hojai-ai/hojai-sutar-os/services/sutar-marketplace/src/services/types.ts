@@ -151,7 +151,7 @@ export interface PlanFeature {
   name: string;
   description: string;
   included: boolean;
-  limit?: number;
+  limit?: string;
   unit?: string;
 }
 

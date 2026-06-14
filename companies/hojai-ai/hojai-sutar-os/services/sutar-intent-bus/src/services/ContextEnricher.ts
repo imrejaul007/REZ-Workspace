@@ -209,8 +209,8 @@ export class ContextEnricher {
       historicalContext = this.createDefaultHistoricalContext();
     }
 
-    // Update with current intent
-    historicalContext.lastIntent = intent;
+    // Update with current intent (store only the ID to avoid circular reference)
+    historicalContext.lastIntent = { id: intent.id, category: intent.category, intent: intent.intent } as any;
     historicalContext.lastCategory = intent.category;
 
     this.historicalContexts.set(userId, historicalContext);
