@@ -1954,3 +1954,76 @@ NEXHA_URL=http://localhost:5000
 
 *Last updated: June 14, 2026*
 *New service: Hotel Owner Dashboard - Ahmed's Intelligence View*
+
+---
+
+## NEW SERVICES BUILT - June 14, 2026 (Complete)
+
+### 1. Supplier Agent (Port 4850)
+**Location:** `companies/hojai-ai/employees/supplier-agent/`
+
+Autonomous RFQ response agent that:
+- Receives RFQs from Procurement Agent
+- Auto-generates quotes
+- Handles negotiation
+- Generates contracts
+- Connected to SUTAR for trust validation
+
+### 2. Room Preparation Service (Port 4901)
+**Location:** `companies/StayOwn-Hospitality/room-preparation-service/`
+
+Memory → Room Twin → Room Ready:
+- Fetches guest preferences from Memory Service
+- Prepares room based on preferences
+- Updates Room Twin
+- Configures Smart Lock
+- Queues Housekeeping
+
+**Story Coverage:** Ch 4 (The Room), Ch 17 (Memory)
+
+### 3. SUTAR Orchestrator (Port 4902)
+**Location:** `companies/StayOwn-Hospitality/stayown-sutar-orchestrator/`
+
+Cross-service orchestration:
+- Procurement → Trust → Contract → Payment
+- Pricing → Decision → Execution
+- Guest → Memory → Learning
+
+**Story Coverage:** Ch 18 ("Sutar orchestrates everything")
+
+### 4. IoT Sensor Hub (Port 4903)
+**Location:** `companies/StayOwn-Hospitality/iot-sensor-hub/`
+
+Real-time equipment monitoring:
+- AC vibration detection
+- Equipment health scoring
+- Failure probability prediction
+- Maintenance Agent integration
+
+**Story Coverage:** Ch 14 (AC → Maintenance)
+
+### 5. Hotel Owner Dashboard - Pricing Execution (Port 4900)
+**Location:** `companies/StayOwn-Hospitality/hotel-owner-dashboard/`
+
+Updated with execution flow:
+- Ahmed approves pricing recommendation
+- Dashboard executes → StayBot → Booking System
+- All services updated in real-time
+
+**Story Coverage:** Ch 10 (8% pricing = ₹18L)
+
+---
+
+## GAPS SOLVED
+
+| Gap | Solution | Status |
+|-----|----------|--------|
+| Pricing Execution | Dashboard → StayBot → Booking | ✅ |
+| Supplier Responses | Supplier Agent autonomous RFQ | ✅ |
+| Room Preparation | Memory → Room Twin → Ready | ✅ |
+| SUTAR Orchestration | SUTAR Orchestrator Service | ✅ |
+| IoT Sensor Data | IoT Sensor Hub | ✅ |
+
+---
+
+**Last updated: June 14, 2026**

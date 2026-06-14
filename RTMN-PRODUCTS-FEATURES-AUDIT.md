@@ -1971,3 +1971,94 @@ Ahmed's intelligence view of Pentouz Hotel operations.
 
 *Last updated: June 14, 2026*
 *New service: Hotel Owner Dashboard*
+
+---
+
+## NEW SERVICES - June 14, 2026 (Complete)
+
+### 📦 Supplier Agent (Port 4850)
+
+**Autonomous RFQ response for procurement ecosystem**
+
+| Feature | Status |
+|---------|--------|
+| RFQ receive and parse | ✅ |
+| Auto quote generation | ✅ |
+| Volume discount calculation | ✅ |
+| Negotiation handling | ✅ |
+| Contract generation | ✅ |
+| SUTAR trust validation | ✅ |
+
+**Story Coverage:** Ch 11 (Procurement → Supplier Agent → Quote → Contract)
+
+---
+
+### 🏠 Room Preparation Service (Port 4901)
+
+**Memory → Room Twin → Room Ready**
+
+| Feature | Status |
+|---------|--------|
+| Guest preference fetch | ✅ |
+| Room temperature set | ✅ |
+| Minibar preparation | ✅ |
+| Amenities configuration | ✅ |
+| Smart Lock access | ✅ |
+| Housekeeping queue | ✅ |
+
+**Story Coverage:** Ch 4 (22°C, soft pillow, sparkling water), Ch 17 (Memory retrieval)
+
+---
+
+### 🔄 SUTAR Orchestrator (Port 4902)
+
+**Cross-service orchestration for StayOwn**
+
+| Feature | Status |
+|---------|--------|
+| Procurement orchestration | ✅ |
+| Pricing orchestration | ✅ |
+| Guest experience orchestration | ✅ |
+| Trust validation | ✅ |
+| Contract generation | ✅ |
+| Decision engine | ✅ |
+
+**Story Coverage:** Ch 18 ("Sutar orchestrates everything")
+
+---
+
+### 📡 IoT Sensor Hub (Port 4903)
+
+**Real-time equipment monitoring**
+
+| Feature | Status |
+|---------|--------|
+| AC vibration detection | ✅ |
+| Equipment health scoring | ✅ |
+| Failure probability | ✅ |
+| Alert generation | ✅ |
+| Maintenance Agent integration | ✅ |
+| Room 1521 AC story | ✅ |
+
+**Story Coverage:** Ch 14 (82% failure risk, parts ordered)
+
+---
+
+### 🏨 Hotel Owner Dashboard - Execution (Port 4900)
+
+**Updated with full execution pipeline**
+
+| Feature | Status |
+|---------|--------|
+| Pricing recommendation | ✅ |
+| Ahmed approval | ✅ |
+| StayBot notification | ✅ |
+| Booking system update | ✅ |
+| Room Twin update | ✅ |
+| Revenue intelligence notify | ✅ |
+
+**Story Coverage:** Ch 10 (8% increase = ₹18 Lakhs/month)
+
+---
+
+**Last updated: June 14, 2026**
