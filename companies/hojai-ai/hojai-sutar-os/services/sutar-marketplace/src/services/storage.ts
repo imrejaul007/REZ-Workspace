@@ -122,10 +122,10 @@ export class StorageService {
   }
 
   // CRUD Operations
-  public create<T extends { id?: string }>(collectionName: string, data: Omit<T, 'id'> & { id?: string }): T {
+  public create<T>(collectionName: string, data: T & { id?: string }): T {
     const collection = this.getCollection<T>(collectionName);
-    const item = { ...data, id: data.id || `${collectionName}-${uuidv4()}` } as T;
-    collection.set(item.id!, item);
+    const item = { ...data, id: (data as any).id || `${collectionName}-${uuidv4()}` } as T;
+    collection.set((item as any).id, item);
     this.markDirty(collectionName);
     return item;
   }

@@ -433,7 +433,7 @@ app.post('/api/v1/intents/:id/route', async (req: Request, res: Response) => {
       });
 
       res.json(apiResponse(true, {
-        intent,
+        intent: JSON.parse(JSON.stringify(intent)),
         routingDecision,
         agentResponse
       }, undefined, (req as any).requestId));
@@ -441,7 +441,7 @@ app.post('/api/v1/intents/:id/route', async (req: Request, res: Response) => {
     }
 
     res.json(apiResponse(true, {
-      intent,
+      intent: JSON.parse(JSON.stringify(intent)),
       routingDecision
     }, undefined, (req as any).requestId));
   } catch (error) {

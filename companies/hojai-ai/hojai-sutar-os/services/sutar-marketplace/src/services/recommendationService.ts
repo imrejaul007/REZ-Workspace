@@ -181,9 +181,9 @@ export class RecommendationService {
     orders.forEach(order => {
       const relatedServices = order.items
         .filter((i: any) => i.serviceId !== serviceId)
-        .map((i: any) => i.serviceId);
+        .map((i: any) => i.serviceId as string);
 
-      relatedServices.forEach(relatedId => {
+      relatedServices.forEach((relatedId: string) => {
         coOccurrence.set(relatedId, (coOccurrence.get(relatedId) || 0) + 1);
       });
     });

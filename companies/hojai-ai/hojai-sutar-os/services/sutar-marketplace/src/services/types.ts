@@ -106,7 +106,7 @@ export interface Category {
   image?: string;
   parentId?: string;
   parent?: Category;
-  children: Category[];
+  children: CategoryTree[];
   order: number;
   status: CategoryStatus;
   serviceCount: number;
