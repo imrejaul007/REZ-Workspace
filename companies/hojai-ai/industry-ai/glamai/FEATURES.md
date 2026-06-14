@@ -303,6 +303,56 @@ interface CustomerIntelligence {
 - Location analysis
 - Trade finance
 
+### TwinBridge
+
+**Purpose:** Connect to TwinOS Hub
+
+**Capabilities:**
+- Beauty Twin sync
+- Hair Color Twin
+- Stylist Twin
+- Product Twin
+- Graph queries
+- Similar customer matching
+
+### NotificationBridge
+
+**Purpose:** Connect to RABTUL Notification & WhatsApp
+
+**Capabilities:**
+- Beauty follow-up reminders
+- Appointment reminders
+- Product recommendations
+- Birthday offers
+- Loyalty updates
+- Stylist notifications
+- Inventory alerts
+- Bulk notifications
+
+### SutarBridge
+
+**Purpose:** Connect to SUTAR GoalOS
+
+**Capabilities:**
+- Expansion goals
+- Location analysis
+- Flow execution
+- Agent coordination
+- Progress tracking
+- Simulation
+
+### AssetMindBridge
+
+**Purpose:** Connect to AssetMind
+
+**Capabilities:**
+- Wealth tracking
+- Investment recommendations
+- LTV predictions
+- Revenue forecasting
+- Business insights
+- Tax planning
+
 ---
 
 ## Salon AI Agents
