@@ -555,6 +555,23 @@ cd hojai-skillnet && npm test
 | genie-privacy-service | 4716 | Privacy controls |
 | genie-business-intelligence | 4725 | Business insights |
 
+## HIB Services
+
+| Service | Port | Features |
+|---------|------|----------|
+| hib-code-intelligence | 3053 | Code analysis, bug detection, security scanning |
+| hib-soar | 3054 | Security playbooks, incident management |
+
+## Main Services
+
+| Service | Port | Features |
+|---------|------|----------|
+| hojai-expert-os | 4550 | Agent runtime, skills, expert twins |
+| workflow-bridge | 4800 | Agent<->Workflow bidirectional bridge |
+| hojai-clinic-ai | 3000 | Healthcare AI, patient management |
+| hojai-voice-platform | 4850 | Voice AI, STT/TTS |
+| brandpulse | 4770 | Brand intelligence, sentiment |
+
 ## Deployment
 
 ```bash
@@ -582,16 +599,16 @@ Privacy-preserving industry intelligence platform with 3-layer architecture:
 
 ### Industry AI Vertical Templates (35 services)
 
-| Service | Industry | Tests |
-|---------|----------|-------|
-| fitness-ai | Fitness | ✅ 33 |
-| legal-ai | Legal | ✅ 24 |
-| crm | CRM | ✅ 18 |
-| salon-ai | Commerce | ✅ Implemented |
-| retail-ai | Commerce | Template |
-| pharmacy-ai | Healthcare | Template |
-| carecode | Healthcare | Template |
-| + 30 more | Various | Templates |
+| Service | Industry | Status | Tests | Lines |
+|---------|----------|--------|-------|-------|
+| **fitness-ai** | Fitness | ✅ **10/10 COMPLETE** | 53 | 700+ |
+| legal-ai | Legal | ⚠️ Template | 24 | 56 |
+| crm | CRM | ⚠️ Partial | 18 | 727 |
+| salon-ai | Commerce | ⚠️ Template | 0 | - |
+| retail-ai | Commerce | ⚠️ Template | 0 | - |
+| pharmacy-ai | Healthcare | ⚠️ Template | 0 | - |
+| carecode | Healthcare | ⚠️ Template | 0 | - |
+| + 30 more | Various | ⚠️ Templates | - | - |
 
 ### GlamAI - Salon Intelligence OS (Port 3000) - NEW
 
@@ -849,8 +866,66 @@ npm test         # Run tests
 
 ---
 
-**Last Updated:** June 13, 2026
-**Version:** 2.0 (CoPilot Added)
+**Last Updated:** June 14, 2026
+**Version:** 2.1 (Industry AI + External Services)
+
+---
+
+# External Services - Connected Ecosystem
+
+## LawGens - Legal AI Platform
+
+**Location:** `companies/LawGens/`
+**Status:** ✅ BUILT | **June 14, 2026**
+
+### LawGens Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| LawGens Services | 5100 | API Gateway |
+| Contract OS | 4190 | Contract Lifecycle Engine |
+| LawGens Web | 3001 | Next.js 14 Web App |
+| RTMZ Forensic OS | 3000-5100 | Enterprise Intelligence |
+
+### LawGens Core Features
+
+| Category | Features |
+|----------|----------|
+| **Contract Analysis** | AI-powered contract review, clause extraction, risk identification |
+| **Legal Research** | Case law search, precedent analysis, citation checking |
+| **Compliance Management** | Auto compliance check, regulatory updates, audit trails |
+| **Court Case Tracking** | Case management, deadlines, document management |
+| **RTMZ Forensic OS** | Enterprise intelligence, forensic capabilities |
+
+### LawGens Products
+
+| Product | Purpose |
+|---------|---------|
+| LawGens Web | Consumer legal services |
+| LawGens Biz | Business legal services |
+| LawGens Pro | Professional legal tools |
+| Contract OS | Contract lifecycle management |
+| RTMZ Enterprise | Enterprise intelligence |
+
+---
+
+## REZ CRM - Retail CRM Service
+
+**Location:** `companies/REZ-Merchant/rez-retail-crm-service/`
+**Status:** ✅ BUILT
+
+### REZ CRM Features
+
+| Feature | Description |
+|---------|-------------|
+| Customer Management | CRUD operations, customer profiles |
+| Interactions | Track all customer touchpoints |
+| MongoDB Integration | Persistent storage |
+| Health Endpoints | Service monitoring |
+
+### Connected to Business Copilot
+
+The REZ CRM is connected via the Business Copilot gateway (Port 4600) for unified access.
 
 ---
 

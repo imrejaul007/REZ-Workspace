@@ -20,6 +20,7 @@ export interface HealthAggregatorConfig {
     degraded: number;
     unhealthy: number;
     unknown: number;
+  starting: number;
   };
   thresholds: {
     criticalScore: number;

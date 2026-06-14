@@ -313,6 +313,167 @@ GENIE_BUSINESS=http://localhost:4725
 
 ---
 
+# HOJAI Core Packages - Detailed Features
+
+## hojai-api-gateway (Port 4500)
+- Service registry with health checks
+- Dynamic routing based on service metadata
+- Rate limiting per client/endpoint
+- Tenant isolation middleware
+- Request/response logging
+- Circuit breaker pattern
+- Load balancing strategies
+- API versioning support
+
+## hojai-event (Port 4510)
+- Event publishing with type filtering
+- Pub/Sub subscriptions
+- Event streams for real-time processing
+- Dead letter queue for failed events
+- Event replay capability
+- Event schema validation
+- Retention policies
+
+## hojai-memory (Port 4511)
+- L1: Conversation (current session)
+- L2: Preference (likes/dislikes)
+- L3: Context (current task)
+- L4: Skill (learned skills)
+- L5: Relationship (person connections)
+- Semantic search with embeddings
+- Importance tiers (critical → low)
+- Memory linking
+
+## hojai-communications (Port 4520)
+- Multi-channel delivery (Email, SMS, Push, WhatsApp)
+- Template management with variables
+- Webhook integration
+- Delivery receipts and tracking
+- User preference management
+- Batch notification support
+- Scheduled notifications
+
+## hojai-agents (Port 4550)
+- Agent CRUD operations
+- Agent invocation API
+- Skill orchestration
+- Expert twins (digital representation)
+- Agent status tracking
+- Performance metrics
+- Agent training support
+
+## hojai-intelligence (Port 4580)
+- Churn prediction models
+- LTV (Lifetime Value) calculation
+- Intent detection
+- Propensity scoring
+- Revisit prediction
+- Conversion optimization
+- Recommendation engine
+
+## hojai-hyperlocal (Port 4590)
+- Zone management (city → micro-zone)
+- Venue database
+- Geo-search and proximity
+- Footfall prediction
+- Demand index calculation
+- Location-based routing
+
+## hojai-identity (Port 4610)
+- Identity verification
+- Trust scoring (0-100)
+- Agent identity management
+- Service identity
+- Device identity
+- Verification workflows
+
+## hojai-governance (Port 4620)
+- Audit log management
+- Policy enforcement
+- Role-based access control
+- Compliance reporting
+- Access pattern analysis
+- Threat detection
+
+## hojai-workflow (Port 4810)
+- Workflow definition (steps, conditions)
+- State machine execution
+- Approval workflows
+- Parallel execution support
+- Rollback capability
+- Step retry with backoff
+
+## hojai-industry (Port 4700)
+- Privacy-preserving aggregation
+- Industry-specific patterns
+- Anonymous metrics only
+- Benchmark comparison
+- Pattern discovery
+- Multi-tenant isolation
+
+## hojai-analytics (Port 4750)
+- Custom metric recording
+- Aggregation (sum, avg, min, max)
+- Time-series data
+- Dashboard-ready metrics
+- Metric filtering by tags
+
+## hojai-data (Port 4755)
+- Schema management
+- Record storage
+- Query engine
+- Batch imports
+- Data validation
+
+## hojai-ml (Port 4760)
+- Model registry
+- Training management
+- Prediction API
+- Metrics tracking
+- Model versioning
+- A/B testing support
+
+---
+
+# HIB - Human Intelligence Bridge
+
+## hib-code-intelligence (Port 3053)
+- Code complexity analysis
+- Bug detection
+- Security vulnerability scanning
+- Best practice checking
+- Document summarization
+- Entity extraction
+
+## hib-soar (Port 3054)
+- Security playbooks
+- Incident management
+- Automated response
+- Step-by-step execution
+- Role-based access
+
+---
+
+# ExpertOS - Agent Runtime
+
+## hojai-expert-os (Port 4550)
+- Agent marketplace
+- Skill discovery
+- Agent evaluation
+- Performance metrics
+- Category browsing
+- Industry filtering
+- Agent CRUD management
+- Agent invocation & execution
+- Agent training
+- Skill orchestration
+- Workflow execution
+- Expert Twins
+- MongoDB + Redis integration
+
+
+---
+
 # AI Employees (Updated June 14, 2026)
 
 ## ai-waiter (5600) - Restaurant Employee

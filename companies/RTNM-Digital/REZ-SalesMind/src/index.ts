@@ -1,13 +1,16 @@
 /**
  * REZ SalesMind - AI Sales Intelligence Platform
- * Port: 5150
+ * Port: 5170 (Professional OS in RTNM Port Registry)
  *
  * Formerly REZ Atlas - Renamed to reflect AI-powered sales intelligence
  *
  * Integrations:
- * - HOJAI AI: Web Intelligence, Merchant Intelligence, Lead Service, Knowledge Graph
- * - AdBazaar: Campaign Manager, Attribution, Retail Media
- * - REZ CRM Hub: Unified CRM data
+ * - HOJAI AI: Web Intelligence, Merchant Intelligence, Lead Service, Knowledge Graph, TwinOS
+ * - REZ CRM Hub: Unified CRM data (port 4056)
+ * - REZ Identity Hub: Unified identity (port 4702)
+ * - Genie Voice: Communication (port 4760)
+ * - AssetMind: Financial forecasting (port 5200)
+ * - AdBazaar: Campaign management (port 4300)
  */
 
 import express from 'express';
@@ -25,14 +28,17 @@ import { WebSocketHandler } from './services/websocketHandler.js';
 import { salesRoutes } from './routes/sales.js';
 import { insightRoutes } from './routes/insights.js';
 import { leadRoutes } from './routes/leads.js';
-import { aiRoutes } from './routes/ai.js';
-import { integrationRoutes } from './routes/integrations.js';
-import { dashboardRoutes } from './routes/dashboard.js';
-import { ecosystemRoutes } from './routes/ecosystem.js';
+import aiRoutes from './routes/ai.js';
+import integrationRoutes from './routes/integrations.js';
+import dashboardRoutes from './routes/dashboard.js';
+import ecosystemRoutes from './routes/ecosystem.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { authMiddleware } from './middleware/auth.js';
+import { apiLimiter, writeLimiter } from './middleware/rateLimit.js';
 
-const PORT = process.env.PORT || 5150;
+// Port 5170 aligns with Professional OS in RTNM Port Registry
+const PORT = process.env.PORT || 5170;
 const app = express();
 const server = createServer(app);
 
@@ -47,14 +53,24 @@ const wsHandler = new WebSocketHandler();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Apply rate limiting
+app.use('/api', apiLimiter);
+app.use('/api/leads', writeLimiter);
+app.use('/api/sales', writeLimiter);
+app.use('/api/ecosystem', writeLimiter);
+
+// Apply authentication
+app.use(authMiddleware);
 
 // Health check
 app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     service: 'REZ SalesMind',
-    version: '2.0.0',
+    version: '2.1.0',
     integrations: {
       hojaiAI: 'connected',
       adBazaar: 'connected',
@@ -100,7 +116,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 server.listen(PORT, () => {
-  console.log(`REZ SalesMind v2.0.0 running on port ${PORT}`);
+  console.log(`REZ SalesMind v2.1.0 running on port ${PORT}`);
   console.log('Integrations: HOJAI AI, AdBazaar, REZ CRM Hub');
   console.log('WebSocket: ws://localhost:' + PORT + '/ws');
 });

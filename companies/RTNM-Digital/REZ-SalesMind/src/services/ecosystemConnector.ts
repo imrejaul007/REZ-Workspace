@@ -2,7 +2,7 @@
  * RTNM Ecosystem Connector
  *
  * Connects REZ SalesMind to all existing RTNM services
- * No new services needed - just wire up existing ones
+ * Ports aligned with RTNM Port Registry
  */
 
 import axios from 'axios';
@@ -22,15 +22,15 @@ const ECOSYSTEM_SERVICES = {
   },
   // REZ Services
   rez: {
-    identityHub: process.env.REZ_IDENTITY_HUB || 'http://localhost:6000',
-    crmHub: process.env.REZ_CRM_HUB || 'http://localhost:6100',
+    identityHub: process.env.REZ_IDENTITY_HUB || 'http://localhost:4702', // CorpID in RTNM Registry
+    crmHub: process.env.REZ_CRM_HUB || 'http://localhost:4056', // REZ-crm-hub port
     merchant: process.env.REZ_MERCHANT || 'http://localhost:4100',
     consumer: process.env.REZ_CONSUMER || 'http://localhost:4200',
     booking: process.env.REZ_BOOKING || 'http://localhost:4020',
   },
   // AssetMind
   assetMind: {
-    main: process.env.ASSETMIND || 'http://localhost:5000',
+    main: process.env.ASSETMIND || 'http://localhost:5200',
   },
   // AdBazaar
   adBazaar: {
@@ -250,56 +250,86 @@ export class IdentityConnector {
 }
 
 // ============================================
-// CRM & PIPELINE - REZ CRM Hub
+// CRM & PIPELINE - REZ CRM Hub (Port 4056)
 // ============================================
 export class CRMConnector {
-  private crmClient = axios.create({ baseURL: ECOSYSTEM_SERVICES.rez.crmHub, timeout: 5000 });
+  private crmClient = axios.create({
+    baseURL: ECOSYSTEM_SERVICES.rez.crmHub,
+    timeout: 5000,
+    headers: {
+      ...(INTERNAL_TOKEN ? { 'X-Internal-Token': INTERNAL_TOKEN } : {}),
+    }
+  });
 
-  async getLeads(filters?: any): Promise<any[]> {
+  async getLeads(filters?: any): Promise<{ data: any[]; error: string | null }> {
     try {
-      const response = await this.crmClient.get('/api/leads', { params: filters });
-      return response.data.leads || [];
+      const response = await this.crmClient.get('/api/contacts', { params: filters });
+      return { data: response.data.contacts || response.data || [], error: null };
     } catch (error) {
-      return [];
+      const message = error instanceof Error ? error.message : 'Failed to get leads';
+      console.warn('CRM Connector - getLeads:', message);
+      return { data: [], error: message };
     }
   }
 
-  async getDeals(filters?: any): Promise<any[]> {
+  async getDeals(filters?: any): Promise<{ data: any[]; error: string | null }> {
     try {
       const response = await this.crmClient.get('/api/deals', { params: filters });
-      return response.data.deals || [];
+      return { data: response.data.deals || response.data || [], error: null };
     } catch (error) {
-      return [];
+      const message = error instanceof Error ? error.message : 'Failed to get deals';
+      console.warn('CRM Connector - getDeals:', message);
+      return { data: [], error: message };
     }
   }
 
-  async updateLeadStage(leadId: string, stage: string): Promise<boolean> {
+  async updateLeadStage(leadId: string, stage: string): Promise<{ success: boolean; error: string | null }> {
     try {
-      await this.crmClient.patch('/api/leads/' + leadId, { stage });
-      return true;
+      await this.crmClient.patch('/api/contacts/' + leadId, { lifecycleStage: stage });
+      return { success: true, error: null };
     } catch (error) {
-      return false;
+      const message = error instanceof Error ? error.message : 'Failed to update lead stage';
+      console.error('CRM Connector - updateLeadStage:', message);
+      return { success: false, error: message };
     }
   }
 
-  async getActivities(contactId: string): Promise<any[]> {
+  async getActivities(contactId: string): Promise<{ data: any[]; error: string | null }> {
     try {
       const response = await this.crmClient.get('/api/activities', { params: { contactId } });
-      return response.data.activities || [];
+      return { data: response.data.activities || [], error: null };
     } catch (error) {
-      return [];
+      const message = error instanceof Error ? error.message : 'Failed to get activities';
+      console.warn('CRM Connector - getActivities:', message);
+      return { data: [], error: message };
     }
   }
 
-  async logActivity(activity: any): Promise<boolean> {
+  async logActivity(activity: any): Promise<{ success: boolean; error: string | null }> {
     try {
       await this.crmClient.post('/api/activities', activity);
-      return true;
+      return { success: true, error: null };
     } catch (error) {
-      return false;
+      const message = error instanceof Error ? error.message : 'Failed to log activity';
+      console.error('CRM Connector - logActivity:', message);
+      return { success: false, error: message };
+    }
+  }
+
+  async createLead(leadData: any): Promise<{ data: any | null; error: string | null }> {
+    try {
+      const response = await this.crmClient.post('/api/contacts', leadData);
+      return { data: response.data, error: null };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create lead';
+      console.error('CRM Connector - createLead:', message);
+      return { data: null, error: message };
     }
   }
 }
+
+// Add INTERNAL_TOKEN to ecosystemConnector
+const INTERNAL_TOKEN = process.env.INTERNAL_SERVICE_TOKEN || '';
 
 // ============================================
 // BOOKING & SCHEDULING - REZ Booking + Zoom

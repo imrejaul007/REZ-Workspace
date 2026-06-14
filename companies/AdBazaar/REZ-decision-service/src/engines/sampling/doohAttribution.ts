@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * DOOH ATTRIBUTION TRACKER
  * Phase 5: Digital Out of Home attribution - Screen → QR Scan → Visit → Purchase

@@ -1,450 +1,384 @@
-# Nexha — Network Layer Audit vs. Agentic Commerce Vision
+# Nexha — Complete Network + SUTAR Audit
 
 **Date:** June 14, 2026
 **Auditor:** Claude Code
-**Purpose:** Gap analysis between strategic vision and actual implementation
+**Purpose:** Full gap analysis between strategic vision and implementation
 
 ---
 
 ## Executive Summary
 
-| Vision Component | Status | Code Evidence | Gap |
-|----------------|--------|--------------|-----|
-| **Commerce Identity Layer** | ❌ Missing | No CorpID commerce fork in Nexha | Critical |
-| **Guest Participant Model** | ❌ Missing | No guest/anon RFQ endpoints | Critical |
-| **Commerce Reputation Network** | ⚠️ Partial | supplier_scores table exists, no auto-population | High |
-| **Multi-Dimensional Vendor Scoring** | ⚠️ Partial | Scoring engine exists, manual triggers only | High |
-| **Supplier Agent (bidirectional)** | ⚠️ Partial | Buyer agent exists, no supplier agent | High |
-| **Commerce Memory** | ❌ Missing | No transaction history store | High |
-| **ContractOS** | ⚠️ Partial | Contract type exists, no generation | Medium |
-| **Commerce Feed** | ❌ Missing | No activity stream | Medium |
-| **Opportunity Graph** | ❌ Missing | No cross-buyer insights | Medium |
-| **Network Learning** | ❌ Missing | No agent-to-agent knowledge transfer | Low |
-| **SimulationOS** | ⚠️ Partial | sutar-flow-os exists, no scenario planning | Medium |
+| Category | Status | Notes |
+|----------|--------|-------|
+| Nexha Commerce Software | 70-80% ✅ | RFQ, Deal State Machine, Scoring, Route Opt |
+| Nexha → SUTAR Integration | ❌ Missing | No bridge service exists |
+| SUTAR Services (25+) | ⚠️ Partial | Built but not connected to Nexha |
+| SUTAR Buyer-Side Agents | ⚠️ Partial | ProcurementOS has buyer agents |
+| SUTAR Seller-Side Agents | ⚠️ Partial | ProcurementOS has supplier agents |
+| SUTAR Identity/Trust | ✅ Built | sutar-identity-os, sutar-trust-engine |
+| SUTAR Reputation | ✅ Built | sutar-reputation-aggregator |
+| SUTAR Contracts | ✅ Built | sutar-contract-os |
+| SUTAR Memory | ⚠️ Partial | sutar-memory-bridge exists |
+| SUTAR Network Learning | ✅ Built | sutar-network learning |
 
 ---
 
-## Detailed Code Audit
+## The Core Problem
 
-### 1. Commerce Identity Layer — ❌ MISSING
+**SUTAR has 25+ services built.**
+**Nexha has zero bridges to SUTAR services.**
 
-**Vision:** CorpID Commerce Edition — every participant gets Business ID, Agent ID, Asset ID, Guest ID.
+The integration document claims everything is connected. Code evidence shows:
 
-**Code Reality:**
-- No commerce identity service in Nexha
-- RABTUL has `REZ-unified-identity` (user-level)
-- HOJAI has `hojai-trust` (agent-level)
-- **Nexha has NO commerce-specific identity layer**
-
-**Evidence:**
 ```bash
-# Search results for identity in Nexha code:
-grep -r "commerce.*id\|business.*id\|participant.*id" Nexha/ --include="*.ts"
-# Returns: nothing commerce-specific
+# No SUTAR services in Nexha ecosystem connector:
+grep -r "sutar-identity\|sutar-trust\|sutar-reputation" Nexha/
+# Returns: nothing
 
-grep -r "corpId\|corp_id\|participant" Nexha/ --include="*.ts"
-# Returns: nothing commerce-specific
-```
-
-**Gap:** Every transaction needs a Commerce ID that tracks:
-- Buyer Commerce ID
-- Supplier Commerce ID
-- Logistics Provider Commerce ID
-- Agent Commerce ID (for autonomous commerce)
-
----
-
-### 2. Guest Participant Model — ❌ MISSING
-
-**Vision:** Any supplier, buyer, or logistics provider can transact without full onboarding.
-
-**Code Reality:**
-- ALL Nexha endpoints require `requireAuth()`
-- ALL NextaBizz endpoints require authentication
-- No guest/anonymous RFQ endpoints exist
-- No "instant invite via WhatsApp" workflow
-
-**Evidence:**
-```typescript
-// Every endpoint looks like this:
-app.post('/api/rfqs',
-  requireAuth(),  // ❌ Blocks all guests
-  async (req, res) => { ... }
-);
-
-// No guest endpoints found in codebase:
-grep -r "guest.*rfq\|anonymous.*order\|no.*auth.*rfq" Nexha/ --include="*.ts"
+# No Nexha-SUTAR bridge service:
+find Nexha/ -name "*nexha-sutar*" -o -name "*sutar-bridge*"
 # Returns: nothing
 ```
 
-**Gap:** Cannot do:
-```yaml
-# Guest supplier flow:
-Restaurant → sends WhatsApp link → Supplier clicks → responds to RFQ
-# (Currently impossible without full account creation)
+---
+
+## What SUTAR Already Has Built
+
+### SUTAR OS Services (25+)
+
+| Service | Purpose | Commerce Relevance |
+|---------|---------|------------------|
+| **sutar-identity-os** | Human, Business, Agent, Asset IDs | ✅ Critical |
+| **sutar-trust-engine** | Trust scoring | ✅ Critical |
+| **sutar-reputation-aggregator** | Multi-dimensional reviews | ✅ Critical |
+| **sutar-contract-os** | Contract generation, tracking | ✅ Critical |
+| **sutar-memory-bridge** | Commerce memory | ✅ Critical |
+| **sutar-network learning** | Agent knowledge transfer | ✅ High |
+| **sutar-goal-os** | Goal decomposition | ✅ High |
+| **sutar-flow-os** | Workflow execution | ✅ High |
+| **sutar-discovery-engine** | Agent discovery | ✅ High |
+| **sutar-negotiation-engine** | Auto-negotiation | ✅ High |
+| **sutar-simulation-os** | What-if scenarios | ✅ Medium |
+| **sutar-policy-os** | Policy compliance | ✅ Medium |
+| **sutar-economy-os** | Karma, payments | ✅ Medium |
+| **sutar-agent-id** | Agent identity | ✅ Medium |
+| **sutar-agent-network** | Agent registry | ✅ Medium |
+
+### What's Missing in SUTAR for Commerce
+
+| Gap | Impact |
+|-----|--------|
+| No commerce-specific identity types | Guest/Supplier/Buyer not differentiated |
+| No commerce memory store | Transaction history scattered |
+| No opportunity graph | No cross-buyer insights |
+| No commerce feed | No activity stream |
+| No industry-specific scorecards | Restaurant ≠ Hotel ≠ Manufacturer |
+
+---
+
+## Buyer vs Seller: What SUTAR Does
+
+### BUYER-Side (Procurement Agent)
+
+| Task | SUTAR Capability | Nexha Implementation |
+|------|------------------|---------------------|
+| Monitor inventory | Intent detection | ✅ Inventory agent in orchestration |
+| Create goal | GoalOS | ✅ Goal decomposition in orchestrator |
+| Find suppliers | Discovery Engine | ✅ Capability matching in ProcurementOS |
+| Send RFQ | Intent Bus | ✅ Supplier Agent service |
+| Compare quotes | Negotiation Engine | ⚠️ Manual comparison only |
+| Arrange finance | Economy OS | ✅ BNPL + Credit Line |
+| Create PO | Flow OS | ⚠️ Manual PO creation |
+| Track delivery | Monitoring | ✅ Delivery tracking |
+| Review reputation | Reputation Aggregator | ⚠️ Manual review only |
+
+**Verdict: Buyer side is 60% automated, 40% manual.**
+
+### SELLER-Side (Supplier Agent)
+
+| Task | SUTAR Capability | Nexha Implementation |
+|------|-----------------|---------------------|
+| Receive RFQ | Intent Bus | ❌ No supplier webhook |
+| Check inventory | Memory | ❌ No inventory check |
+| Generate quote | Contract OS | ❌ Manual only |
+| Negotiate | Negotiation Engine | ❌ No auto-negotiation |
+| Accept terms | Contract OS | ❌ Manual only |
+| Track order | Monitoring | ✅ Delivery updates |
+| Receive payment | Economy OS | ✅ BNPL settlement |
+| Build reputation | Reputation Aggregator | ❌ Manual reviews only |
+
+**Verdict: Seller side is 20% automated, 80% manual.**
+
+---
+
+## What SUTAR Can Do (Both Sides)
+
+### For BUYER (Procurement Agent)
+
+```typescript
+// Already possible with SUTAR + Nexha integration:
+// 1. GoalOS decomposes: "Buy 500L oil, below ₹70K, 5 days"
+// 2. Discovery finds suppliers matching criteria
+// 3. Intent Bus routes RFQ to matched suppliers
+// 4. Negotiation Engine handles counter-offers
+// 5. Flow OS creates PO on acceptance
+// 6. Economy OS arranges BNPL credit
+// 7. Monitoring tracks shipment
+// 8. Reputation Aggregator scores supplier post-delivery
+```
+
+### For SELLER (Supplier Agent)
+
+```typescript
+// What needs to be built:
+// 1. Supplier webhook endpoint (no auth) for RFQ receipt
+// 2. Inventory auto-check on RFQ receipt
+// 3. Quote auto-generation from pricing DB
+// 4. Counter-offer negotiation workflow
+// 5. Auto-accept/reject based on policies
+// 6. Contract auto-generation from templates
+// 7. Payment tracking + reminders
 ```
 
 ---
 
-### 3. Commerce Reputation Network — ⚠️ PARTIAL
+## The Missing Bridge: Nexha-SUTAR Integration
 
-**Vision:** Auto-generated scores from verified transaction data:
-- Delivery reliability: 95%
-- Quality pass rate: 98%
-- Price stability: Stable
-- Payment behavior: On-time
+### What Needs to Be Built
 
-**Code Reality:**
-- ✅ `supplier_scores` table exists (NextaBizz DB)
-- ✅ `scoring-engine/src/calculator.ts` exists with weighted scoring
-- ❌ No automatic post-transaction score updates
-- ❌ Scores are calculated manually, not event-driven
-- ❌ No delivery tracking → score pipeline
-- ❌ No quality pass/fail → score pipeline
-
-**Evidence:**
-```sql
--- Table exists:
-CREATE TABLE supplier_scores (
-  on_time_delivery_rate,
-  quality_rejection_rate,
-  price_consistency,
-  response_rate,
-  avg_lead_time_days,
-  overall_score
-);
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         NEXHA                                 │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
+│  │Distribution│  │Franchise│  │Procurement│ │Manufacture│        │
+│  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘        │
+│       └──────────────┬┴──────────┬──────────────┘            │
+│                      │            │                          │
+│              ┌────────┴────────────┴────────┐                │
+│              │    NEXHA-SUTAR BRIDGE         │ ← MISSING    │
+│              │                              │                │
+│              │  • Commerce → Intent Bus     │                │
+│              │  • Supplier Agent ↔ Buyer Agent               │
+│              │  • Contract OS integration  │                │
+│              │  • Reputation → Supplier Graph               │
+│              │  • Memory → Commerce Memory │                │
+│              └──────────────┬────────────────┘                │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         SUTAR                                  │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
+│  │Identity-OS│  │Trust-Eng │  │Reputation │  │Contract-OS│  │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘  │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
+│  │Goal-OS    │  │Negotiation│  │Discovery  │  │Memory-    │  │
+│  │           │  │Engine     │  │Engine     │  │Bridge     │  │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
+---
+
+## Priority Build Order
+
+### Sprint 1: Nexha-SUTAR Bridge (2 weeks)
+
 ```typescript
-// Manual trigger only:
-async calculateSupplierScore(supplierId, periodStart, periodEnd, supabase) {
-  // Must be called manually
-  // No webhook/event trigger on order completion
+// 1. Create bridge service
+nexha-sutar-bridge/
+├── src/
+│   ├── intent-handler.ts      // Commerce events → Intent Bus
+│   ├── supplier-agent.ts       // Supplier-side webhook + auto-quote
+│   ├── reputation-sync.ts     // Delivery → Reputation Aggregator
+│   ├── contract-generator.ts  // Auto-contract from negotiated terms
+│   └── memory-sync.ts        // Transactions → Commerce Memory
+```
+
+### Sprint 2: Seller-Side Automation (2 weeks)
+
+```typescript
+// 2. Supplier webhook endpoint (no auth required)
+POST /api/suppliers/rfq-webhook
+{
+  "supplier_id": "guest_123",  // Guest supplier
+  "rfq_id": "rfq_456",
+  "action": "receive" | "quote" | "accept" | "reject"
+}
+
+// Auto-quote generation
+POST /api/suppliers/auto-quote
+{
+  "supplier_id": "guest_123",
+  "rfq_items": [...],
+  "generate": true  // From pricing DB
 }
 ```
 
-**Gap:** Need:
-1. Event listener on `order.delivered` → update delivery score
-2. Event listener on `order.quality_check` → update quality score
-3. Event listener on `payment.received` → update payment score
-4. Daily aggregation job → recalculate all scores
+### Sprint 3: Buyer-Seller Auto-Negotiation (2 weeks)
 
----
-
-### 4. Multi-Dimensional Vendor Scoring — ⚠️ PARTIAL
-
-**Vision:**
-| Dimension | Score |
-|-----------|-------|
-| Delivery Reliability | 95 |
-| Quality Consistency | 92 |
-| Pricing Fairness | 88 |
-| Contract Compliance | 97 |
-| Communication | 85 |
-| Financial Reliability | 93 |
-
-**Code Reality:**
-- ✅ Scoring engine has 5 dimensions (quality, delivery, price, response, lead time)
-- ❌ No communication score
-- ❌ No contract compliance score
-- ❌ No financial reliability score
-- ❌ No industry-specific scorecards (restaurant vs. hotel vs. manufacturer)
-
-**Evidence:**
 ```typescript
-// Current scoring weights:
-quality_rejection_rate: 30%,   // Quality
-on_time_delivery_rate: 25%,     // Delivery
-price_consistency: 20%,         // Price
-response_rate: 15%,             // Responsiveness
-credit_boost: 10%,             // Financial
-```
-
-**Missing dimensions:**
-```yaml
-Communication_Score:       # Missing
-Contract_Compliance:        # Missing
-Quality_Consistency:        # Missing (variance, not just pass/fail)
-Innovation_Score:          # Missing
-ESG_Compliance:            # Missing
-```
-
----
-
-### 5. Supplier Agent (Bidirectional) — ⚠️ PARTIAL
-
-**Vision:** Supplier has an agent that:
-- Reads RFQs automatically
-- Checks inventory automatically
-- Generates quotes automatically
-- Negotiates automatically
-- Accepts/rejects terms automatically
-
-**Code Reality:**
-- ✅ `supplierAgentService` exists in ProcurementOS
-- ✅ Can send RFQ to supplier (email/SMS/WhatsApp/API)
-- ❌ No supplier-side agent to receive/respond
-- ❌ No auto-quote generation
-- ❌ No inventory auto-check
-- ❌ No auto-negotiation
-
-**Evidence:**
-```typescript
-// Current: Only buyer can send RFQ
-async sendRFQToSupplier(input) {
-  // Sends message TO supplier
-  // Supplier must manually respond
+// 3. Bidirectional negotiation
+Intent Bus receives:
+{
+  "type": "rfq.quote_received",
+  "buyer_agent": "buyer_agent_id",
+  "supplier_agent": "supplier_agent_id",
+  "quoted_amount": 68000,
+  "counter_from": 70000  // Buyer wanted 70K
 }
 
-// No equivalent:
-// Supplier-side webhook for receiving RFQ
-// Auto-quote generation from inventory/pricing
-// Auto-negotiation engine
+// Negotiation Engine evaluates:
+// - Supplier's cost structure
+// - Buyer's target price
+// - Market rates
+// - Delivery terms
+
+// Auto counter-offer generated
 ```
 
-**Gap:** Need:
-1. Supplier webhook endpoint (unauthenticated) for RFQ receipt
-2. Auto-quote generation from supplier's product/pricing DB
-3. Counter-offer negotiation workflow
-4. Supplier inventory check automation
+### Sprint 4: Commerce Memory + Reputation (2 weeks)
 
----
-
-### 6. Commerce Memory — ❌ MISSING
-
-**Vision:**
-> "Supplier A consistently raises prices 12% before Diwali. An agent should know that automatically."
-
-**Code Reality:**
-- GENIE has `genie-memory-service` (personal memory)
-- HOJAI has `hojai-memory` (agent memory)
-- **Nexha has NO commerce transaction memory**
-
-**Evidence:**
-```bash
-# No commerce history store:
-find Nexha/ -name "*memory*" -type d | grep -v node_modules
-# Returns: nothing
-
-# No transaction history model:
-grep -r "transaction_history\|order_history\|purchase_history" Nexha/ --include="*.ts"
-# Returns: nothing
-```
-
-**Gap:** Need commerce memory store:
 ```typescript
-interface CommerceMemory {
-  supplierId: string;
-  purchases: Array<{
-    date: Date;
-    product: string;
-    price: number;
-    delivery_days: number;
-    quality: 'pass' | 'fail';
-  }>;
-  price_trends: PriceTrend[];
-  delivery_trends: DeliveryTrend[];
-  quality_issues: QualityIssue[];
-}
+// 4. Post-transaction memory
+await sutarMemory.record({
+  supplier_id: "supplier_123",
+  transaction: {
+    product: "cooking_oil",
+    quantity: 500,
+    price: 68000,
+    delivery_days: 4,
+    quality: "pass",
+    buyer_reputation: 95
+  },
+  insights: [
+    "Delivered 4 days ahead of schedule",
+    "Price 2% below market average",
+    "Zero quality issues"
+  ]
+});
+
+// Auto-reputation update
+await sutarReputation.update({
+  entity_id: "supplier_123",
+  entity_type: "supplier",
+  metrics: {
+    delivery_score: 98,    // +2 for early delivery
+    quality_score: 100,    // +2 for zero defects
+    price_score: 92,      // Based on market comparison
+    communication_score: 85  // From chat analysis
+  }
+});
 ```
 
 ---
 
-### 7. ContractOS — ⚠️ PARTIAL
+## What SUTAR Does For Both Sides
 
-**Vision:** Auto-generate contracts from templates, track obligations, enforce SLAs.
+### BUYER Agent Workflow (Automated)
 
-**Code Reality:**
-- `contract` type exists in shared-types
-- No contract generation service
-- No obligation tracking
-- No SLA enforcement
-
-**Evidence:**
-```typescript
-// Just a type definition:
-contract: z.object({
-  id: z.string(),
-  terms: z.string(),
-  validUntil: z.date(),
-}),
+```
+1. Inventory Agent detects: Oil below threshold
+         ↓
+2. GoalOS: "Purchase 500L oil, ₹70K budget, 5 days"
+         ↓
+3. Discovery Engine: Find matching suppliers
+         ↓
+4. Intent Bus: Send RFQ to matched suppliers
+         ↓
+5. Negotiation Engine: Handle counter-offers
+         ↓
+6. Contract OS: Generate PO contract
+         ↓
+7. Economy OS: Arrange BNPL credit (via RABTUL)
+         ↓
+8. Flow OS: Track delivery
+         ↓
+9. Reputation Aggregator: Update supplier scores
+         ↓
+10. Memory Bridge: Store transaction for future reference
 ```
 
-**Gap:** Need:
-1. Contract template library (purchase, supply, service)
-2. Auto-fill from negotiated terms
-3. Digital signature integration
-4. Obligation tracker
-5. Auto-renewal alerts
+### SELLER Agent Workflow (Partially Automated)
 
----
-
-### 8. Commerce Feed — ❌ MISSING
-
-**Vision:** LinkedIn-style activity feed for businesses:
-- Supplier posts new products
-- Manufacturer posts capacity available
-- Franchise posts territory available
-
-**Code Reality:**
-- No feed service in Nexha
-- No activity stream
-- No discovery engine
-
-**Gap:** Need:
-```typescript
-interface CommerceFeedItem {
-  participantId: string;
-  type: 'product_update' | 'capacity_available' | 'territory_available' | 'promotion' | 'new_supplier';
-  payload: object;
-  audience: 'all' | 'industry' | 'network';
-  timestamp: Date;
-}
+```
+1. Intent Bus: Receive RFQ (WhatsApp link or webhook)
+         ↓
+2. Supplier Agent: Check inventory availability
+         ↓
+3. Contract OS: Auto-generate quote from pricing
+         ↓
+4. Negotiation Engine: Negotiate terms
+         ↓
+5. Contract OS: Accept/reject based on policies
+         ↓
+6. Flow OS: Track delivery obligations
+         ↓
+7. Economy OS: Receive payment
+         ↓
+8. Reputation Aggregator: Accumulate positive reviews
 ```
 
 ---
 
-### 9. Opportunity Graph — ❌ MISSING
+## Complete Component Map
 
-**Vision:**
-> "80 similar restaurants also buy disposable cutlery. Opportunity created for supplier."
-
-**Code Reality:**
-- No opportunity detection
-- No cross-buyer insight engine
-- No demand aggregation
-
-**Gap:** Need:
-1. Buyer similarity graph (what restaurants buy what)
-2. Demand aggregation (how many buyers need X)
-3. Supplier opportunity alerts
-4. Buyer discovery recommendations
-
----
-
-### 10. SimulationOS — ⚠️ PARTIAL
-
-**Vision:** Before committing, simulate:
-- Scenario A: Buy from Vendor A
-- Scenario B: Split order with Vendor C
-- Risk impact, cost impact, delivery impact
-
-**Code Reality:**
-- `sutar-flow-os` exists (FlowOS) at port 4244
-- No procurement scenario simulation
-- No what-if analysis
-- No Monte Carlo
-
-**Evidence:**
-```bash
-# FlowOS exists but for general workflows, not commerce:
-ls Nexha/hojai-sutar-os/services/sutar-flow-os/
-# Returns: Flow execution service
-
-# No commerce-specific simulation:
-grep -r "simulate\|scenario\|what_if" Nexha/ --include="*.ts"
-# Returns: nothing
-```
-
-**Gap:** Need commerce simulation service:
-```typescript
-interface CommerceSimulation {
-  runScenario(order: PurchaseOrder, supplier: Supplier): SimulationResult;
-  compareSuppliers(order: PurchaseOrder, suppliers: Supplier[]): ComparisonResult;
-  predictDeliveryRisk(order: PurchaseOrder): RiskScore;
-}
-```
-
----
-
-## What's Actually Built (Confirming Reality)
-
-### ✅ Built Services
-
-| Service | Port | Implementation |
-|---------|------|----------------|
-| ProcurementOS | 4320 | ✅ Full CRUD, supplier search, RFQ |
-| Supplier Agent | 4320 | ✅ Multi-channel RFQ dispatch |
-| Deal State Machine | 4320 | ✅ 17 states, transition validation |
-| Capability Matching | 4320 | ✅ 7-dimension scoring |
-| Scoring Engine | NextaBizz | ✅ Weighted metrics, DB-backed |
-| supplier_scores table | Supabase | ✅ Migration exists |
-| Route Optimization | 4300 | ✅ TSP nearest-neighbor |
-| Delivery Tracking | 4300 | ✅ GPS + ETA |
-| FX Conversion | 4340 | ✅ INR/USD/EUR/GBP |
-| Dispute Resolution | 4340 | ✅ Evidence + escalation |
-| Compliance Monitoring | 4310 | ✅ Audit + violations |
-| Real ML Forecasting | 4350 | ✅ Exponential Smoothing + MAPE |
-
-### ❌ Not Built Services
-
-| Service | Priority | Complexity |
-|---------|----------|-------------|
-| Commerce Identity Layer | Critical | Medium |
-| Guest Participant Model | Critical | High |
-| Commerce Reputation Auto-Scoring | High | Medium |
-| Supplier Agent (bidirectional) | High | High |
-| Commerce Memory | High | Medium |
-| Multi-Dimensional Scoring | High | Low |
-| ContractOS | Medium | High |
-| Commerce Feed | Medium | Medium |
-| Opportunity Graph | Medium | High |
-| Commerce Simulation | Medium | High |
-
----
-
-## Build Priority Recommendation
-
-### Phase 1: Network Foundation (1-2 months)
-1. **Guest RFQ System** — Any supplier can respond to RFQ via link
-2. **Commerce Identity IDs** — Temporary commerce IDs for all participants
-3. **Auto-Reputation Scorer** — Post-transaction score updates
-
-### Phase 2: Intelligence (2-3 months)
-4. **Commerce Memory** — Transaction history store
-5. **Supplier Agent Lite** — Webhook + auto-quote
-6. **Multi-Dimensional Scores** — Add communication, compliance, financial
-
-### Phase 3: Network Effects (3-4 months)
-7. **ContractOS** — Template library + auto-generation
-8. **Commerce Feed** — Activity stream
-9. **Opportunity Graph** — Demand aggregation
-10. **Simulation Engine** — What-if scenarios
-
----
-
-## Code Locations for Implementation
-
-| Component | Start Here |
-|-----------|-----------|
-| Guest RFQ | `procurement-os/src/index.ts` — add no-auth routes |
-| Commerce ID | Create new `commerce-identity/` service |
-| Auto-Scoring | `nextabizz/services/scoring-engine/` — add event triggers |
-| Supplier Agent | `procurement-os/src/services/agent.service.ts` — add supplier-side |
-| Commerce Memory | Create new `commerce-memory/` service |
-| ContractOS | Create new `commerce-contracts/` service |
-| Commerce Feed | Create new `commerce-feed/` service |
-| Opportunity Graph | Create new `commerce-insights/` service |
+| Component | Location | Commerce Use | Nexha Status |
+|-----------|----------|--------------|---------------|
+| **sutar-identity-os** | SUTAR | Business/Agent IDs | ❌ Not connected |
+| **sutar-trust-engine** | SUTAR | Trust scoring | ❌ Not connected |
+| **sutar-reputation-aggregator** | SUTAR | Multi-dim reviews | ❌ Not connected |
+| **sutar-contract-os** | SUTAR | Auto-contracts | ❌ Not connected |
+| **sutar-memory-bridge** | SUTAR | Commerce memory | ❌ Not connected |
+| **sutar-goal-os** | SUTAR | Goal decomposition | ❌ Not connected |
+| **sutar-intent-bus** | SUTAR | RFQ routing | ❌ Not connected |
+| **sutar-discovery-engine** | SUTAR | Supplier matching | ⚠️ Partial |
+| **sutar-negotiation-engine** | SUTAR | Counter-offers | ❌ Not connected |
+| **sutar-flow-os** | SUTAR | Workflows | ⚠️ Partial |
+| **sutar-simulation-os** | SUTAR | What-if scenarios | ❌ Not connected |
+| **sutar-network learning** | SUTAR | Agent knowledge | ❌ Not connected |
+| **sutar-policy-os** | SUTAR | Policy compliance | ❌ Not connected |
+| **sutar-economy-os** | SUTAR | Karma/payments | ❌ Not connected |
+| **nexha-bridge** | MISSING | Nexha-SUTAR | ❌ Must build |
 
 ---
 
 ## Summary
 
-**Built:** 40% of the platform
-**Missing:** 60% of the network
+### What SUTAR Can Do (Already Built)
 
-The microservices are solid. The transaction flow works. The scoring engine exists.
+| For Buyer | For Seller |
+|-----------|-----------|
+| Goal decomposition | Intent routing |
+| Supplier discovery | RFQ receipt |
+| Quote comparison | Auto-quote generation |
+| Contract tracking | Contract acceptance |
+| Payment arrangement | Payment tracking |
+| Delivery monitoring | Delivery updates |
+| Reputation lookup | Reputation building |
+| Memory of past purchases | Memory of past sales |
 
-**What's missing is the network infrastructure:**
-- Identity for all participants (not just authenticated users)
-- Reputation that updates automatically from transactions
-- Memory that makes every agent smarter than the last
-- Suppliers that have agents too (not just buyers)
-- A feed that surfaces opportunities
-- A simulation engine that prevents bad decisions
+### What SUTAR Needs (Bridge + Automation)
 
-**This is the difference between:**
-> "We have a procurement platform" vs. "We have an Agentic Commerce Network"
+| For Buyer | For Seller |
+|-----------|-----------|
+| Auto-goal from inventory | Supplier webhook (no auth) |
+| Auto-negotiation | Inventory auto-check |
+| Auto-contract generation | Auto-counter-offers |
+| Auto-policy validation | Auto-accept/reject |
+| Auto-scenario simulation | Auto-contract signing |
+
+---
+
+## Next Step
+
+Build the **Nexha-SUTAR Bridge** service:
+
+```bash
+mkdir -p nexha-sutar-bridge/src/services
+```
+
+This is the critical missing piece that connects the commerce platform to the autonomous workforce.
 
 ---
 

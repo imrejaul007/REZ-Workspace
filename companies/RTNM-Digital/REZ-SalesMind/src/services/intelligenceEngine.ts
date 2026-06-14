@@ -75,15 +75,20 @@ export class IntelligenceEngine {
    */
   async getSalesIntelligence(leadId: string): Promise<SalesIntelligence | null> {
     // Fetch all data sources in parallel
-    const [lead, companyIntel, activities, campaigns, contacts] = await Promise.all([
+    const [leadResult, activitiesResult, campaigns, contacts] = await Promise.all([
       this.rezCRMClient.getLead(leadId),
-      this.fetchCompanyIntel(leadId),
       this.rezCRMClient.getActivities(leadId),
       this.adbazaarClient.getCampaigns('default'),
       this.adbazaarClient.getContacts('default'),
     ]);
 
+    const lead = leadResult.data;
+    const activities = activitiesResult.data;
+
     if (!lead) return null;
+
+    // Fetch company intel
+    const companyIntel = await this.fetchCompanyIntel(lead);
 
     // Get market signals from HOJAI AI
     const marketSignals = await this.hojaiClient.getMarketSignals(lead.company || '');
@@ -121,7 +126,8 @@ export class IntelligenceEngine {
    * Generate pre-call brief for a sales rep
    */
   async getPreCallBrief(leadId: string): Promise<PreCallBrief | null> {
-    const lead = await this.rezCRMClient.getLead(leadId);
+    const leadResult = await this.rezCRMClient.getLead(leadId);
+    const lead = leadResult.data;
     if (!lead) return null;
 
     // Get company intelligence from HOJAI AI
@@ -129,7 +135,8 @@ export class IntelligenceEngine {
     const marketSignals = await this.hojaiClient.getMarketSignals(lead.company || '');
 
     // Get recent activities
-    const activities = await this.rezCRMClient.getActivities(leadId);
+    const activitiesResult = await this.rezCRMClient.getActivities(leadId);
+    const activities = activitiesResult.data;
     const recentActivities = activities.slice(0, 3).map(a => ({
       type: a.type,
       date: a.timestamp,
@@ -181,11 +188,15 @@ export class IntelligenceEngine {
    * Get pipeline intelligence
    */
   async getPipelineIntelligence(): Promise<any> {
-    const [leads, deals, pipeline] = await Promise.all([
+    const [leadsResult, dealsResult, pipelineResult] = await Promise.all([
       this.rezCRMClient.getLeads(),
       this.rezCRMClient.getDeals(),
       this.rezCRMClient.getPipelineSummary()
     ]);
+
+    const leads = leadsResult.data;
+    const deals = dealsResult.data;
+    const pipeline = pipelineResult.data;
 
     // Analyze stage distribution
     const stageAnalysis = this.analyzeStages(leads, deals);
@@ -204,8 +215,7 @@ export class IntelligenceEngine {
     };
   }
 
-  private async fetchCompanyIntel(leadId: string): Promise<BusinessIntelligence | null> {
-    const lead = await this.rezCRMClient.getLead(leadId);
+  private async fetchCompanyIntel(lead: Lead): Promise<BusinessIntelligence | null> {
     if (!lead?.company) return null;
     return this.hojaiClient.getBusinessIntelligence(lead.company);
   }

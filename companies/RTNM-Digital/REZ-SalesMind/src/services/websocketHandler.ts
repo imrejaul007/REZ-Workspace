@@ -62,16 +62,14 @@ export class WebSocketHandler {
       timestamp: new Date().toISOString()
     });
 
-    this.clients.forEach((client) => {
-      if (client.subscriptions.has(channel)) {
-        client && (client as any).ws?.readyState === WebSocket.OPEN;
-      }
-    });
-
-    // Simple broadcast to all connected clients
-    this.clients.forEach((_, ws) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(message);
+    this.clients.forEach((clientInfo, ws) => {
+      // Only send to clients subscribed to this channel
+      if (clientInfo.subscriptions.has(channel) && ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.send(message);
+        } catch (error) {
+          console.error('Failed to send WebSocket message:', error);
+        }
       }
     });
   }

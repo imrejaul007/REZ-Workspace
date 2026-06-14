@@ -5,6 +5,7 @@
  * Uses existing RTNM services - no new services needed
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   prospectingConnector,
   communicationConnector,
@@ -32,69 +33,119 @@ export interface SalesWorkflowResult {
     action: string;
     status: 'pending' | 'completed' | 'failed';
     result?: any;
+    error?: string;
   }[];
   preCallBrief?: any;
   talkingPoints?: string[];
   nextBestAction?: string;
   estimatedCloseProbability?: number;
+  errors?: string[];
 }
 
 export class AISalesAgent {
-  private workflowIdCounter = 0;
-
   /**
    * Run complete sales workflow for a prospect
    */
   async runWorkflow(input: SalesWorkflowInput): Promise<SalesWorkflowResult> {
-    const workflowId = 'wf_' + (++this.workflowIdCounter) + '_' + Date.now();
+    const workflowId = 'wf_' + uuidv4(); // Use UUID for unique IDs
     const actions: any[] = [];
 
     console.log('Starting AI Sales Workflow:', workflowId);
 
+    const errors: string[] = [];
+
     // Step 1: Enrich prospect from multiple sources
-    const enrichmentResult = await this.enrichProspect(input);
-    actions.push({ action: 'enrich_prospect', status: 'completed', result: enrichmentResult });
+    try {
+      const enrichmentResult = await this.enrichProspect(input);
+      actions.push({ action: 'enrich_prospect', status: 'completed', result: enrichmentResult });
+    } catch (error) {
+      errors.push(`enrich_prospect: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      actions.push({ action: 'enrich_prospect', status: 'failed', error: errors[errors.length - 1] });
+    }
 
     // Step 2: Get market intelligence
-    const marketIntel = await intelligenceConnector.getMarketSignals(input.company);
-    actions.push({ action: 'market_intel', status: 'completed', result: marketIntel });
+    try {
+      const marketIntel = await intelligenceConnector.getMarketSignals(input.company);
+      actions.push({ action: 'market_intel', status: 'completed', result: marketIntel });
+    } catch (error) {
+      errors.push(`market_intel: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      actions.push({ action: 'market_intel', status: 'failed', error: errors[errors.length - 1] });
+    }
 
     // Step 3: Generate pre-call brief
-    const preCallBrief = await this.generatePreCallBrief(input, enrichmentResult);
-    actions.push({ action: 'pre_call_brief', status: 'completed', result: preCallBrief });
+    try {
+      const preCallBrief = await this.generatePreCallBrief(input);
+      actions.push({ action: 'pre_call_brief', status: 'completed', result: preCallBrief });
+    } catch (error) {
+      errors.push(`pre_call_brief: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      actions.push({ action: 'pre_call_brief', status: 'failed', error: errors[errors.length - 1] });
+    }
 
     // Step 4: Create CRM lead if not exists
-    const leadCreated = await this.createOrUpdateLead(input, enrichmentResult);
-    actions.push({ action: 'crm_lead', status: 'completed', result: leadCreated });
+    try {
+      const leadCreated = await this.createOrUpdateLead(input);
+      actions.push({ action: 'crm_lead', status: 'completed', result: leadCreated });
+    } catch (error) {
+      errors.push(`crm_lead: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      actions.push({ action: 'crm_lead', status: 'failed', error: errors[errors.length - 1] });
+    }
 
     // Step 5: Generate talking points
-    const talkingPoints = await this.generateTalkingPoints(input, enrichmentResult, marketIntel);
-    actions.push({ action: 'talking_points', status: 'completed', result: talkingPoints });
+    try {
+      const talkingPoints = await this.generateTalkingPoints(input, []);
+      actions.push({ action: 'talking_points', status: 'completed', result: talkingPoints });
+    } catch (error) {
+      errors.push(`talking_points: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      actions.push({ action: 'talking_points', status: 'failed', error: errors[errors.length - 1] });
+    }
 
     // Step 6: Determine next best action
-    const nextBestAction = await this.determineNextAction(input, enrichmentResult);
-    actions.push({ action: 'next_action', status: 'completed', result: nextBestAction });
+    try {
+      const nextBestAction = await this.determineNextAction(input);
+      actions.push({ action: 'next_action', status: 'completed', result: nextBestAction });
+    } catch (error) {
+      errors.push(`next_action: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      actions.push({ action: 'next_action', status: 'failed', error: errors[errors.length - 1] });
+    }
 
     // Step 7: Calculate close probability
-    const closeProbability = await this.calculateCloseProbability(input, enrichmentResult);
-    actions.push({ action: 'probability_calc', status: 'completed', result: { probability: closeProbability } });
+    try {
+      const closeProbability = await this.calculateCloseProbability(input);
+      actions.push({ action: 'probability_calc', status: 'completed', result: { probability: closeProbability } });
+    } catch (error) {
+      errors.push(`probability_calc: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      actions.push({ action: 'probability_calc', status: 'failed', error: errors[errors.length - 1] });
+    }
 
     // Step 8: Store in identity hub for future reference
-    await identityConnector.storeInteraction('salesmind', input.prospectEmail || 'unknown', {
-      workflowId,
-      prospect: input,
-      enrichment: enrichmentResult,
-      timestamp: new Date(),
-    });
+    try {
+      await identityConnector.storeInteraction('salesmind', input.prospectEmail || 'unknown', {
+        workflowId,
+        prospect: input,
+        timestamp: new Date(),
+      });
+      actions.push({ action: 'store_identity', status: 'completed' });
+    } catch (error) {
+      errors.push(`store_identity: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      actions.push({ action: 'store_identity', status: 'failed', error: errors[errors.length - 1] });
+    }
+
+    // Get the completed actions data for return values
+    const enrichAction = actions.find(a => a.action === 'enrich_prospect');
+    const briefAction = actions.find(a => a.action === 'pre_call_brief');
+    const talkingPointsAction = actions.find(a => a.action === 'talking_points');
+    const nextAction = actions.find(a => a.action === 'next_action');
+    const probAction = actions.find(a => a.action === 'probability_calc');
 
     return {
       workflowId,
-      status: 'completed',
+      status: errors.length > 0 && errors.length === actions.length ? 'failed' : 'completed',
       actions,
-      preCallBrief,
-      talkingPoints,
-      nextBestAction,
-      estimatedCloseProbability: closeProbability,
+      preCallBrief: briefAction?.result,
+      talkingPoints: talkingPointsAction?.result as string[] | undefined,
+      nextBestAction: nextAction?.result as string | undefined,
+      estimatedCloseProbability: (probAction?.result as { probability: number })?.probability || 50,
+      errors: errors.length > 0 ? errors : undefined,
     };
   }
 
@@ -156,29 +207,32 @@ export class AISalesAgent {
     };
   }
 
-  private async generatePreCallBrief(input: SalesWorkflowInput, enrichment: any): Promise<any> {
+  private async generatePreCallBrief(input: SalesWorkflowInput): Promise<any> {
+    const company = await this.getCompanyIntel(input.company);
+    const marketSignals = await intelligenceConnector.getMarketSignals(input.company);
+
     return {
       prospect: {
         name: input.prospectName,
-        title: enrichment.linkedIn?.headline || 'Unknown',
+        title: 'Unknown',
         company: input.company,
         email: input.prospectEmail,
         phone: input.phone,
       },
       companyIntel: {
-        industry: enrichment.company?.industry || 'Unknown',
-        size: enrichment.company?.size || 'Unknown',
-        funding: enrichment.company?.funding || 'Unknown',
-        founded: enrichment.company?.founded || 'Unknown',
+        industry: company?.industry || 'Unknown',
+        size: company?.size || 'Unknown',
+        funding: company?.funding || 'Unknown',
+        founded: company?.founded || 'Unknown',
       },
-      talkingPoints: enrichment.marketSignals.slice(0, 5).map((s: any) => s.content),
-      recentActivity: enrichment.conversationHistory.slice(0, 3),
+      talkingPoints: marketSignals.slice(0, 5).map((s: any) => s.content),
+      recentActivity: [],
       keyInsights: [
-        `Company in ${enrichment.company?.industry || 'tech'} industry`,
-        enrichment.company?.size ? `Team of ${enrichment.company.size}` : '',
-        enrichment.company?.funding ? `Recent ${enrichment.company.funding}` : '',
+        `Company in ${company?.industry || 'tech'} industry`,
+        company?.size ? `Team of ${company.size}` : '',
+        company?.funding ? `Recent ${company.funding}` : '',
       ].filter(Boolean),
-      recommendedApproach: this.getRecommendedApproach(input, enrichment),
+      recommendedApproach: this.getRecommendedApproach(input),
       questionsToAsk: [
         'What are your current priorities?',
         'What challenges are you facing?',
@@ -188,11 +242,13 @@ export class AISalesAgent {
     };
   }
 
-  private getRecommendedApproach(input: SalesWorkflowInput, enrichment: any): string {
-    if (enrichment.company?.funding?.includes('Series A')) {
+  private async getRecommendedApproach(input: SalesWorkflowInput): Promise<string> {
+    const company = await this.getCompanyIntel(input.company);
+
+    if (company?.funding?.includes('Series A')) {
       return 'Emphasize ROI and quick implementation - early stage companies need fast results';
     }
-    if (enrichment.company?.size?.includes('500+')) {
+    if (company?.size?.includes('500+')) {
       return 'Focus on enterprise features, security, and integration capabilities';
     }
     return 'Standard SMB approach - emphasize ease of use and quick time to value';
@@ -200,26 +256,29 @@ export class AISalesAgent {
 
   private async generateTalkingPoints(
     input: SalesWorkflowInput,
-    enrichment: any,
-    marketSignals: any[]
+    _marketSignals: any[]
   ): Promise<string[]> {
     const points: string[] = [];
 
+    // Get company intel
+    const company = await this.getCompanyIntel(input.company);
+
     // Company-specific points
-    if (enrichment.company?.industry) {
-      points.push(`${input.company} operates in the ${enrichment.company.industry} sector - key trends include market growth and digital transformation`);
+    if (company?.industry) {
+      points.push(`${input.company} operates in the ${company.industry} sector - key trends include market growth and digital transformation`);
     }
 
-    if (enrichment.company?.funding) {
-      points.push(`${input.company} recently raised ${enrichment.company.funding} funding - showing growth trajectory`);
+    if (company?.funding) {
+      points.push(`${input.company} recently raised ${company.funding} funding - showing growth trajectory`);
     }
 
-    if (enrichment.company?.growth) {
-      points.push(`${input.company} is growing at ${enrichment.company.growth} - they may be scaling operations`);
+    if (company?.growth) {
+      points.push(`${input.company} is growing at ${company.growth} - they may be scaling operations`);
     }
 
-    // Market signals
-    marketSignals.slice(0, 3).forEach((signal: any) => {
+    // Market signals from intelligence connector
+    const signals = await intelligenceConnector.getMarketSignals(input.company);
+    signals.slice(0, 3).forEach((signal: any) => {
       points.push(signal.content);
     });
 
@@ -236,32 +295,35 @@ export class AISalesAgent {
     return points.slice(0, 8);
   }
 
-  private async determineNextAction(input: SalesWorkflowInput, enrichment: any): Promise<string> {
-    // Check engagement history
-    const historyCount = enrichment.conversationHistory?.length || 0;
+  private async determineNextAction(input: SalesWorkflowInput): Promise<string> {
+    const company = await this.getCompanyIntel(input.company);
 
-    if (historyCount === 0) {
-      return 'Send introductory email with value proposition';
+    if (input.prospectEmail) {
+      const history = await identityConnector.getConversationHistory('salesmind', input.prospectEmail);
+      if (history.length === 0) {
+        return 'Send introductory email with value proposition';
+      }
+      if (history.length < 3) {
+        return 'Schedule discovery call to understand their needs';
+      }
     }
 
-    if (historyCount < 3) {
-      return 'Schedule discovery call to understand their needs';
-    }
-
-    if (enrichment.company?.size?.includes('500+')) {
+    if (company?.size?.includes('500+')) {
       return 'Request meeting with decision makers, prepare executive briefing';
     }
 
     return 'Send personalized proposal based on their requirements';
   }
 
-  private async calculateCloseProbability(input: SalesWorkflowInput, enrichment: any): Promise<number> {
+  private async calculateCloseProbability(input: SalesWorkflowInput): Promise<number> {
     let probability = 50; // Base probability
 
+    const company = await this.getCompanyIntel(input.company);
+
     // Positive factors
-    if (enrichment.company?.funding) probability += 15;
-    if (enrichment.company?.size?.includes('200+')) probability += 10;
-    if (enrichment.conversationHistory?.length > 0) probability += 15;
+    if (company?.funding) probability += 15;
+    if (company?.size?.includes('200+')) probability += 10;
+    if (input.prospectEmail) probability += 15;
     if (input.painPoint) probability += 10;
 
     // Negative factors
@@ -271,22 +333,30 @@ export class AISalesAgent {
     return Math.min(Math.max(probability, 5), 95);
   }
 
-  private async createOrUpdateLead(input: SalesWorkflowInput, enrichment: any): Promise<any> {
+  private async createOrUpdateLead(input: SalesWorkflowInput): Promise<any> {
+    const company = await this.getCompanyIntel(input.company);
+
     const leadData = {
       name: input.prospectName,
       email: input.prospectEmail,
       phone: input.phone,
       company: input.company,
       source: input.source,
-      stage: 'new',
-      score: enrichment.company?.score || 50,
-      industry: enrichment.company?.industry,
-      companySize: enrichment.company?.size,
+      stage: 'new' as const,
+      score: company?.score || 50,
+      industry: company?.industry,
+      companySize: company?.size,
     };
 
-    // In real implementation, this would create/update in CRM
+    // Create/update lead in CRM
+    const result = await crmConnector.createLead ? await crmConnector.createLead(leadData) : null;
+    if (result) {
+      return result;
+    }
+
+    // Fallback to local ID
     console.log('Creating/updating lead:', leadData);
-    return { id: 'lead_' + Date.now(), ...leadData };
+    return { id: 'lead_' + uuidv4(), ...leadData };
   }
 
   /**

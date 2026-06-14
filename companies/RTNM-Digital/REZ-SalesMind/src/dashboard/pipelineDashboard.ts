@@ -153,7 +153,7 @@ export class PipelineDashboard {
       date.setDate(date.getDate() - i);
       dates.push({
         date: date.toISOString().split('T')[0],
-        value: 100000 + Math.random() * 50000,
+        value: 0, // Will be populated from real data
       });
     }
     return dates;
@@ -163,8 +163,8 @@ export class PipelineDashboard {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     return days.map(day => ({
       day,
-      actual: 10000 + Math.random() * 20000,
-      target: 15000,
+      actual: 0, // Will be populated from real data
+      target: 0, // Will be populated from real data
     }));
   }
 

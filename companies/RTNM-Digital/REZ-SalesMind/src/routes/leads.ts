@@ -16,15 +16,15 @@ export const leadRoutes = (
   router.get('/', async (req, res) => {
     try {
       const { stage, owner } = req.query;
-      const leads = await intelligenceEngine.getCRMClient().getLeads({
+      const result = await intelligenceEngine.getCRMClient().getLeads({
         stage: stage as string,
         owner: owner as string
       });
 
-      res.json({ leads, count: leads.length });
+      res.json({ leads: result.data, count: result.data.length, error: result.error });
     } catch (error) {
       console.error('Error fetching leads:', error);
-      res.status(500).json({ error: 'Failed to fetch leads' });
+      res.status(500).json({ error: 'Failed to fetch leads', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -32,16 +32,16 @@ export const leadRoutes = (
   router.get('/:leadId', async (req, res) => {
     try {
       const { leadId } = req.params;
-      const lead = await intelligenceEngine.getCRMClient().getLead(leadId);
+      const result = await intelligenceEngine.getCRMClient().getLead(leadId);
 
-      if (!lead) {
-        return res.status(404).json({ error: 'Lead not found' });
+      if (!result.data) {
+        return res.status(404).json({ error: 'Lead not found', details: result.error });
       }
 
-      res.json(lead);
+      res.json(result.data);
     } catch (error) {
       console.error('Error fetching lead:', error);
-      res.status(500).json({ error: 'Failed to fetch lead' });
+      res.status(500).json({ error: 'Failed to fetch lead', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -49,16 +49,16 @@ export const leadRoutes = (
   router.post('/', async (req, res) => {
     try {
       const leadData = req.body;
-      const lead = await intelligenceEngine.getCRMClient().createLead(leadData);
+      const result = await intelligenceEngine.getCRMClient().createLead(leadData);
 
-      if (!lead) {
-        return res.status(500).json({ error: 'Failed to create lead' });
+      if (!result.data) {
+        return res.status(500).json({ error: 'Failed to create lead', details: result.error });
       }
 
-      res.status(201).json(lead);
+      res.status(201).json(result.data);
     } catch (error) {
       console.error('Error creating lead:', error);
-      res.status(500).json({ error: 'Failed to create lead' });
+      res.status(500).json({ error: 'Failed to create lead', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -68,16 +68,16 @@ export const leadRoutes = (
       const { leadId } = req.params;
       const { stage } = req.body;
 
-      const success = await intelligenceEngine.getCRMClient().updateLeadStage(leadId, stage);
+      const result = await intelligenceEngine.getCRMClient().updateLeadStage(leadId, stage);
 
-      if (!success) {
-        return res.status(500).json({ error: 'Failed to update lead stage' });
+      if (!result.success) {
+        return res.status(500).json({ error: 'Failed to update lead stage', details: result.error });
       }
 
       res.json({ success: true, leadId, stage });
     } catch (error) {
       console.error('Error updating lead stage:', error);
-      res.status(500).json({ error: 'Failed to update lead stage' });
+      res.status(500).json({ error: 'Failed to update lead stage', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -102,13 +102,13 @@ export const leadRoutes = (
   router.post('/:leadId/score', async (req, res) => {
     try {
       const { leadId } = req.params;
-      const lead = await intelligenceEngine.getCRMClient().getLead(leadId);
+      const result = await intelligenceEngine.getCRMClient().getLead(leadId);
 
-      if (!lead) {
-        return res.status(404).json({ error: 'Lead not found' });
+      if (!result.data) {
+        return res.status(404).json({ error: 'Lead not found', details: result.error });
       }
 
-      const scoring = await hojaiClient.scoreLead(lead);
+      const scoring = await hojaiClient.scoreLead(result.data);
 
       res.json({
         leadId,
@@ -118,7 +118,7 @@ export const leadRoutes = (
       });
     } catch (error) {
       console.error('Error scoring lead:', error);
-      res.status(500).json({ error: 'Failed to score lead' });
+      res.status(500).json({ error: 'Failed to score lead', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

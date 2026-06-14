@@ -1,8 +1,8 @@
-# REZ SalesMind v2.1
+# REZ SalesMind v2.1.0
 
 **AI Sales Intelligence Platform** (Formerly REZ Atlas)
 
-Port: **5150**
+Port: **5170** (Professional OS in RTNM Port Registry)
 
 ---
 
@@ -32,29 +32,27 @@ REZ SalesMind is an AI-powered sales intelligence platform that connects to the 
 ### REZ Services ✅
 | Service | Port | Purpose | Connection |
 |---------|------|---------|------------|
-| REZ Identity Hub | 6000 | Unified identity, memory | ✅ Connected |
-| REZ CRM Hub | 6100 | Leads, deals, pipeline | ✅ Connected |
+| REZ Identity Hub (CorpID) | 4702 | Unified identity, memory | ✅ Connected |
+| REZ CRM Hub | 4056 | Leads, deals, pipeline | ✅ Connected |
 | REZ Merchant | 4100 | Business data | ✅ Connected |
 | REZ Consumer | 4200 | Consumer profiles | ✅ Connected |
-| REZ Booking | 4020 | Reservations, scheduling | ✅ Connected |
 
 ### AssetMind ✅
 | Service | Port | Purpose | Connection |
 |---------|------|---------|------------|
-| AssetMind Main | 5000 | Revenue twins, forecasting | ✅ Connected |
+| AssetMind Main | 5200 | Revenue twins, forecasting | ✅ Connected |
 
 ### AdBazaar ✅
 | Service | Port | Purpose | Connection |
 |---------|------|---------|------------|
 | Campaign Manager | 4300 | Marketing campaigns | ✅ Connected |
-| Attribution | 4301 | Conversion tracking | ✅ Connected |
-| CRM | 4303 | Customer data | ✅ Connected |
+| Attribution | 4303 | Conversion tracking | ✅ Connected |
 
 ---
 
 ## Features
 
-### AI Sales Agent (NEW v2.1)
+### AI Sales Agent (v2.1)
 - Complete sales workflow orchestration
 - Multi-channel outreach sequences
 - Conversation analysis and insights
@@ -104,7 +102,7 @@ GET  /api/ecosystem/crm/leads                     - CRM leads
 GET  /api/ecosystem/crm/deals                     - CRM deals
 POST /api/ecosystem/workflow/run                  - Run AI workflow
 POST /api/ecosystem/conversation/analyze          - Analyze conversation
-GET  /api/ecosystem/status                        - Connection status
+GET  /api/ecosystem/status                       - Connection status (with real health checks)
 ```
 
 ### Communication Routes (`/api/ecosystem/communication`)
@@ -142,6 +140,22 @@ GET  /api/leads                        - All leads
 
 ---
 
+## Security
+
+All API endpoints (except health checks) require the `X-Internal-Token` header:
+
+```bash
+curl -H "X-Internal-Token: your-token" \
+  http://localhost:5170/api/leads
+```
+
+### Rate Limiting
+- General API: 100 requests per minute
+- Write operations: 20 requests per minute
+- External API calls: 50 requests per minute
+
+---
+
 ## Comparison: REZ SalesMind vs Outplay
 
 | Feature | Outplay | REZ SalesMind |
@@ -152,8 +166,8 @@ GET  /api/leads                        - All leads
 | Conversation Intelligence | Call Recording | TwinOS + Memory |
 | Email Writing | ✅ | ✅ |
 | Forecasting | ✅ | ✅ + AssetMind Twin |
-| CRM | Salesforce, HubSpot | REZ CRM Hub |
-| Identity | ❌ | REZ Identity Hub |
+| CRM | Salesforce, HubSpot | REZ CRM Hub (HubSpot + Zoho) |
+| Identity | ❌ | REZ Identity Hub (CorpID) |
 | Memory | ❌ | ✅ Full History |
 | Knowledge Graph | ❌ | HOJAI Knowledge Graph |
 | Business Twin | ❌ | AssetMind |
@@ -164,31 +178,7 @@ GET  /api/leads                        - All leads
 
 ## Environment Variables
 
-```env
-# HOJAI AI
-HOJAI_WEB_INTEL=http://localhost:4595
-HOJAI_MERCHANT_INTEL=http://localhost:4751
-HOJAI_LEAD_SERVICE=http://localhost:4752
-HOJAI_KG=http://localhost:4786
-HOJAI_TWIN_OS=http://localhost:4521
-
-# Genie Voice
-GENIE_VOICE=http://localhost:4760
-
-# REZ Services
-REZ_IDENTITY_HUB=http://localhost:6000
-REZ_CRM_HUB=http://localhost:6100
-REZ_MERCHANT=http://localhost:4100
-REZ_CONSUMER=http://localhost:4200
-REZ_BOOKING=http://localhost:4020
-
-# AssetMind
-ASSETMIND=http://localhost:5000
-
-# AdBazaar
-ADBAZAAR_CAMPAIGNS=http://localhost:4300
-ADBAZAAR_CRM=http://localhost:4303
-```
+See `.env.example` for all configuration options.
 
 ---
 
@@ -202,13 +192,13 @@ npm install
 npm run dev
 
 # Health check
-curl http://localhost:5150/health
+curl http://localhost:5170/health
 
-# Check ecosystem connections
-curl http://localhost:5150/api/ecosystem/status
+# Check ecosystem connections (with real health checks)
+curl http://localhost:5170/api/ecosystem/status
 
 # Dashboard UI
-open http://localhost:5150/dashboard
+open http://localhost:5170/dashboard
 ```
 
 ---
@@ -217,7 +207,7 @@ open http://localhost:5150/dashboard
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 2.1.0 | June 2026 | Ecosystem connector, AI Sales Agent, all RTNM services wired |
+| 2.1.0 | June 2026 | Port changed to 5170, real CRM connectivity, auth middleware, rate limiting, ecosystem status |
 | 2.0.0 | June 2026 | Renamed from REZ Atlas, added AdBazaar + REZ CRM Hub |
 | 1.0.0 | Earlier | Initial REZ Atlas release |
 

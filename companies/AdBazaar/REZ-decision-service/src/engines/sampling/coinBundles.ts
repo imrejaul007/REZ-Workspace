@@ -683,7 +683,7 @@ export class BundleGenerationEngine {
 
   private async getRecommendationForUser(userId: string): Promise<CoinBundle> {
     // Get user history
-    const history = await this.getUserPurchaseHistory(userId);
+    const history = await this.getUserPurchaseHistory(userId) as { totalPurchases?: number; loyaltyTier?: string } | null;
 
     if (!history || history.totalPurchases === 0) {
       // New user - recommend starter
@@ -918,7 +918,7 @@ export class PurchaseEngine {
 
     try {
       // Get user purchase history
-      const history = await this.getUserPurchaseHistory(userId);
+      const history = await this.getUserPurchaseHistory(userId) as { totalPurchases?: number; loyaltyTier?: string } | null;
       const isFirstPurchase = !history || history.totalPurchases === 0;
 
       // Get loyalty tier

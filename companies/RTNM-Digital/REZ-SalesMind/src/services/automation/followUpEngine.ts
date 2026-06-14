@@ -20,6 +20,7 @@ export interface FollowUpAction {
   template: string;
   delayDays: number;
   subject?: string;
+  description?: string;
 }
 
 export interface FollowUpSequence {

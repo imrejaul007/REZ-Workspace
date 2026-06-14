@@ -137,7 +137,7 @@ export const salesRoutes = (
       res.json(pipeline);
     } catch (error) {
       console.error('Error fetching pipeline intelligence:', error);
-      res.status(500).json({ error: 'Failed to fetch pipeline intelligence' });
+      res.status(500).json({ error: 'Failed to fetch pipeline intelligence', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

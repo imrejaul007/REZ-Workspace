@@ -396,7 +396,7 @@ export class MetricsCollector {
       },
     };
 
-    return this.successResponse(aggregated);
+    return this.responseTime(aggregated);
   }
 
   // ---------------------------------------------------------------------------

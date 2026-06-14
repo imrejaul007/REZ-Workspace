@@ -150,7 +150,7 @@ export class SalesForecasting {
   }
 
   private predictCloseDate(deal: ForecastData, probability: number): Date {
-    const baseDays = { new: 45, contacted: 35, qualified: 28, proposal: 21, negotiation: 14 };
+    const baseDays: Record<string, number> = { new: 45, contacted: 35, qualified: 28, proposal: 21, negotiation: 14 };
     const baseDaysLeft = baseDays[deal.stage] || 30;
     const adjustedDays = baseDaysLeft * (1 - probability * 0.5);
     return new Date(Date.now() + adjustedDays * 24 * 60 * 60 * 1000);

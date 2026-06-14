@@ -2,7 +2,7 @@
 // SUTAR Contract OS - Analytics Service
 // ============================================================================
 
-import { Contract, ContractType, ContractStatus, ContractAnalytics, TemplateVariable } from '../types/index';
+import { Contract, contract.type, contract.status, ContractAnalytics, TemplateVariable } from '../types/index';
 
 // Analytics store for aggregated data
 const analyticsCache = new Map<string, { data: any; timestamp: number }>();
@@ -37,14 +37,14 @@ export const analyticsService = {
       const activeValue = activeContracts.reduce((sum, c) => sum + (c.value || 0), 0);
 
       // Contracts by type
-      const contractsByType: Record<ContractType, number> = {} as Record<ContractType, number>;
-      Object.values(ContractType).forEach(type => {
+      const contractsByType: Record<contract.type, number> = {} as Record<contract.type, number>;
+      Object.values(contract.type).forEach(type => {
         contractsByType[type] = contracts.filter(c => c.type === type).length;
       });
 
       // Contracts by status
-      const contractsByStatus: Record<ContractStatus, number> = {} as Record<ContractStatus, number>;
-      Object.values(ContractStatus).forEach(status => {
+      const contractsByStatus: Record<contract.status, number> = {} as Record<contract.status, number>;
+      Object.values(contract.status).forEach(status => {
         contractsByStatus[status] = contracts.filter(c => c.status === status).length;
       });
 
@@ -120,8 +120,8 @@ export const analyticsService = {
   },
 
   // Get contract value by type
-  getValueByType: (contracts: Contract[]): Array<{ type: ContractType; value: number; count: number }> => {
-    const byType = new Map<ContractType, { value: number; count: number }>();
+  getValueByType: (contracts: Contract[]): Array<{ type: contract.type; value: number; count: number }> => {
+    const byType = new Map<contract.type, { value: number; count: number }>();
 
     contracts.forEach(c => {
       if (c.value) {
@@ -185,13 +185,13 @@ export const analyticsService = {
 
   // Get contract status distribution
   getStatusDistribution: (contracts: Contract[]): Array<{
-    status: ContractStatus;
+    status: contract.status;
     count: number;
     percentage: number;
     totalValue: number;
   }> => {
     const total = contracts.length;
-    const distribution = new Map<ContractStatus, { count: number; value: number }>();
+    const distribution = new Map<contract.status, { count: number; value: number }>();
 
     contracts.forEach(c => {
       const existing = distribution.get(c.status) || { count: 0, value: 0 };
@@ -378,7 +378,7 @@ export const analyticsService = {
     };
     quickStats: {
       avgValue: number;
-      topType: ContractType | null;
+      topType: contract.type | null;
       avgDuration: number;
     };
   } => {
@@ -409,7 +409,7 @@ export const analyticsService = {
       .slice(0, 5);
 
     // Top contract type
-    const typeCounts = new Map<ContractType, number>();
+    const typeCounts = new Map<contract.type, number>();
     contracts.forEach(c => {
       typeCounts.set(c.type, (typeCounts.get(c.type) || 0) + 1);
     });
@@ -458,8 +458,8 @@ export const analyticsService = {
     exportedAt: string;
     contractCount: number;
     analytics: ContractAnalytics;
-    valueByType: Array<{ type: ContractType; value: number; count: number }>;
-    statusDistribution: Array<{ status: ContractStatus; count: number; percentage: number }>;
+    valueByType: Array<{ type: contract.type; value: number; count: number }>;
+    statusDistribution: Array<{ status: contract.status; count: number; percentage: number }>;
     monthlyTrend: Array<{ month: string; created: number; completed: number; value: number }>;
   } => {
     return {

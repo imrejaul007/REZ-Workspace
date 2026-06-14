@@ -43,7 +43,7 @@ export class CircuitBreaker {
     if (this.state === 'open') {
       // Check if we should transition to half-open
       if (this.nextAttemptTime && Date.now() >= this.nextAttemptTime) {
-        this.transitionTo('half_open');
+        this.transitionTo('halfOpen');
         return false;
       }
       return true;
@@ -57,7 +57,7 @@ export class CircuitBreaker {
   }
 
   isHalfOpen(): boolean {
-    return this.state === 'half_open';
+    return this.state === 'halfOpen';
   }
 
   canExecute(): boolean {
@@ -65,7 +65,7 @@ export class CircuitBreaker {
     if (this.state === 'open') {
       // Check if we should transition to half-open
       if (this.nextAttemptTime && Date.now() >= this.nextAttemptTime) {
-        this.transitionTo('half_open');
+        this.transitionTo('halfOpen');
         return true;
       }
       return false;
@@ -128,7 +128,7 @@ export class CircuitBreaker {
   // ---------------------------------------------------------------------------
 
   recordSuccess(): void {
-    if (this.state === 'half_open') {
+    if (this.state === 'halfOpen') {
       this.successes++;
       this.halfOpenAttempts++;
 
@@ -152,7 +152,7 @@ export class CircuitBreaker {
     this.lastFailureTime = Date.now();
     this.failures++;
 
-    if (this.state === 'half_open') {
+    if (this.state === 'halfOpen') {
       // Any failure in half-open state opens the circuit again
       this.transitionTo('open');
     } else if (this.state === 'closed') {
@@ -184,7 +184,7 @@ export class CircuitBreaker {
         this.halfOpenAttempts = 0;
         break;
 
-      case 'half_open':
+      case 'halfOpen':
         this.nextAttemptTime = undefined;
         this.successes = 0;
         this.failures = 0;
@@ -225,7 +225,7 @@ export class CircuitBreaker {
   }
 
   forceHalfOpen(): void {
-    this.transitionTo('half_open');
+    this.transitionTo('halfOpen');
   }
 
   reset(): void {

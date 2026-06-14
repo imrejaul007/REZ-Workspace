@@ -52,7 +52,8 @@ export class TwinService {
    * Create or update a prospect twin
    */
   async createTwin(leadId: string): Promise<ProspectTwin | null> {
-    const lead = await this.rezCRMClient.getLead(leadId);
+    const leadResult = await this.rezCRMClient.getLead(leadId);
+    const lead = leadResult.data;
     if (!lead) return null;
 
     // Get AI-generated insights

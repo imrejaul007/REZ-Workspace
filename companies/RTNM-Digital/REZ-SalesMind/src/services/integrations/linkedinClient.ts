@@ -51,6 +51,16 @@ export class LinkedInClient {
     headers: {
       Authorization: `Bearer ${LINKEDIN_CONFIG.accessToken}`,
       'LinkedIn-Version': '202304',
+      'X-Restli-Protocol-Version': '2.0.0',
+    },
+    timeout: 5000,
+  });
+
+  private v201904Client = axios.create({
+    baseURL: 'https://api.linkedin.com/v201904',
+    headers: {
+      Authorization: `Bearer ${LINKEDIN_CONFIG.accessToken}`,
+      'LinkedIn-Version': '202304',
     },
     timeout: 5000,
   });
@@ -123,6 +133,7 @@ export class LinkedInClient {
     insights: string[];
   }> {
     const insights: string[] = [];
+    let company: LinkedInCompany | null = null;
 
     const profile = await this.getProfile(leadData.email, leadData.name);
     if (profile) {
@@ -133,7 +144,7 @@ export class LinkedInClient {
     }
 
     if (leadData.company) {
-      const company = await this.getCompany(leadData.company);
+      company = await this.getCompany(leadData.company);
       if (company) {
         if (company.size) insights.push(`Company size: ${company.size}`);
       }

@@ -34,7 +34,8 @@ export class SignalAggregator {
     const signals: Signal[] = [];
 
     // Get CRM signals
-    const activities = await this.rezCRMClient.getActivities(leadId);
+    const activitiesResult = await this.rezCRMClient.getActivities(leadId);
+    const activities = activitiesResult.data;
     signals.push(...this.extractCRMSignals(leadId, activities));
 
     // Get AdBazaar signals
@@ -42,7 +43,8 @@ export class SignalAggregator {
     signals.push(...this.extractAdBazaarSignals(leadId, touchpoints));
 
     // Get HOJAI AI signals
-    const lead = await this.rezCRMClient.getLead(leadId);
+    const leadResult = await this.rezCRMClient.getLead(leadId);
+    const lead = leadResult.data;
     if (lead?.company) {
       const marketSignals = await this.hojaiClient.getMarketSignals(lead.company);
       signals.push(...this.convertMarketSignals(leadId, marketSignals));

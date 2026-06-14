@@ -60,7 +60,7 @@ const initializeSlaTemplates = (): void => {
 initializeSlaTemplates();
 
 // SLA Service Functions
-export const slaService = {
+export const slaService: any = {
   // List SLA templates
   listSlaTemplates: (): Array<{ id: string; name: string; description: string; metricCount: number }> => {
     return Array.from(slaTemplates.entries()).map(([id, template]) => ({
@@ -133,7 +133,7 @@ export const slaService = {
       id: b.id || `bonus-${uuidv4()}`,
     })) as SLABonus[];
 
-    return slaService.createSla(contractId, {
+    return slaService: any.createSla(contractId, {
       name: template.name || 'SLA',
       description: template.description || '',
       metrics,
@@ -365,7 +365,7 @@ export const slaService = {
     const sla = slaStore.get(slaId);
     if (!sla) return [];
 
-    const compliance = slaService.calculateCompliance(slaId);
+    const compliance = slaService: any.calculateCompliance(slaId);
     if (!compliance) return [];
 
     const penalties: Array<{
@@ -416,7 +416,7 @@ export const slaService = {
     const sla = slaStore.get(slaId);
     if (!sla) return [];
 
-    const compliance = slaService.calculateCompliance(slaId);
+    const compliance = slaService: any.calculateCompliance(slaId);
     if (!compliance) return [];
 
     const bonuses: Array<{
@@ -459,7 +459,7 @@ export const slaService = {
     threshold: number;
     severity: 'warning' | 'critical';
   }> => {
-    const compliance = slaService.calculateCompliance(slaId);
+    const compliance = slaService: any.calculateCompliance(slaId);
     if (!compliance) return [];
 
     const recentMeasurements = measurementStore.get(slaId) || [];
@@ -484,10 +484,10 @@ export const slaService = {
   // Get SLA report
   getSlaReport: (slaId: string): {
     sla: SLA;
-    compliance: ReturnType<typeof slaService.calculateCompliance>;
-    penalties: ReturnType<typeof slaService.calculatePenalties>;
-    bonuses: ReturnType<typeof slaService.calculateBonuses>;
-    breaches: ReturnType<typeof slaService.checkBreaches>;
+    compliance: ReturnType<typeof slaService: any.calculateCompliance>;
+    penalties: ReturnType<typeof slaService: any.calculatePenalties>;
+    bonuses: ReturnType<typeof slaService: any.calculateBonuses>;
+    breaches: ReturnType<typeof slaService: any.checkBreaches>;
     reportDate: string;
   } | undefined => {
     const sla = slaStore.get(slaId);
@@ -495,10 +495,10 @@ export const slaService = {
 
     return {
       sla,
-      compliance: slaService.calculateCompliance(slaId),
-      penalties: slaService.calculatePenalties(slaId),
-      bonuses: slaService.calculateBonuses(slaId),
-      breaches: slaService.checkBreaches(slaId),
+      compliance: slaService: any.calculateCompliance(slaId),
+      penalties: slaService: any.calculatePenalties(slaId),
+      bonuses: slaService: any.calculateBonuses(slaId),
+      breaches: slaService: any.checkBreaches(slaId),
       reportDate: new Date().toISOString(),
     };
   },
@@ -520,7 +520,7 @@ export const slaService = {
     const metricBreaches = new Map<string, number>();
 
     slas.forEach(sla => {
-      const compliance = slaService.calculateCompliance(sla.id);
+      const compliance = slaService: any.calculateCompliance(sla.id);
       if (compliance) {
         totalCompliance += compliance.overall;
         complianceCount++;
@@ -574,7 +574,7 @@ export const slaService = {
     let failed = 0;
 
     measurements.forEach(m => {
-      const result = slaService.recordMeasurement(slaId, m.metricId, m.value, {
+      const result = slaService: any.recordMeasurement(slaId, m.metricId, m.value, {
         periodStart: m.periodStart,
         periodEnd: m.periodEnd,
       });
@@ -590,4 +590,4 @@ export const slaService = {
   },
 };
 
-export default slaService;
+export default slaService: any;

@@ -631,6 +631,40 @@ app.post('/apikeys', async (req: Request, res: Response) => {
 // GRAPHIQL (GraphQL Playground)
 // ============================================
 
+// GraphQL endpoint (POST) - Process queries
+app.post('/graphql', async (req, res) => {
+  try {
+    const { query, variables, operationName } = req.body;
+
+    // Simple GraphQL execution (mock for demo)
+    // In production, use graphql-yoga or apollo-server
+    const result = {
+      data: null,
+      errors: null
+    };
+
+    // Parse and execute based on query
+    if (query && query.includes('predictions')) {
+      result.data = { predictions: [] };
+    } else if (query && query.includes('health')) {
+      result.data = {
+        health: {
+          status: 'healthy',
+          version: '1.1.0',
+          uptime: process.uptime()
+        }
+      };
+    } else {
+      result.data = { message: 'GraphQL endpoint ready' };
+    }
+
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ errors: [{ message: 'Invalid GraphQL query' }] });
+  }
+});
+
+// GraphQL Playground (GET) - UI
 app.get('/graphql', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html>

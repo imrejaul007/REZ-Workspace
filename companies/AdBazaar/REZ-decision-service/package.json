@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "Unified Targeting + Action Engine with Phase 3-5 Analytics Engines",
   "main": "dist/index.js",
-  "type": "module",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "dev:debug": "node --inspect=0.0.0.0:9229 --require ts-node/register src/index.ts",
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "build:watch": "tsc --watch",
     "start": "node dist/index.js",
     "start:prod": "NODE_ENV=production node dist/index.js",

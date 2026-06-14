@@ -12,7 +12,7 @@ const workflowStore = new Map<string, Workflow>();
 const workflowTemplates = new Map<string, {
   name: string;
   type: 'sequential' | 'parallel' | 'conditional';
-  steps: Omit<WorkflowStep, 'id' | 'status' | 'currentApprovals' | 'approvers' | 'completedAt'>[];
+  steps: Omit<WorkflowStep, 'id' | 'status' | 'currentApprovals' | 'approverId' | 'completedAt'>[];
 }>();
 
 // Initialize default workflow templates
@@ -118,7 +118,7 @@ export const workflowService = {
         id: `step-${index + 1}`,
         status: 'pending' as WorkflowStepStatus,
         currentApprovals: 0,
-        approvers: [],
+        approverId: [],
       })),
     };
   },
@@ -143,7 +143,7 @@ export const workflowService = {
       order: step.order || index + 1,
       requiredApprovals: step.requiredApprovals || 1,
       currentApprovals: 0,
-      approvers: (step.approvers || []) as WorkflowApprover[],
+      approverId: (step.approverId || []) as WorkflowApprover[],
       deadline: step.deadline || calculateDeadline(undefined, startDate).toISOString(),
       condition: step.condition,
     }));
@@ -199,7 +199,7 @@ export const workflowService = {
       approvedAt: new Date().toISOString(),
       comments,
     };
-    step.approvers.push(approverRecord);
+    step.approverId.push(approverRecord);
     step.currentApprovals++;
 
     // Check if step is complete
@@ -245,7 +245,7 @@ export const workflowService = {
       status: 'rejected',
       comments,
     };
-    step.approvers.push(approverRecord);
+    step.approverId.push(approverRecord);
     step.status = 'rejected';
     step.completedAt = new Date().toISOString();
     workflow.status = 'rejected';
@@ -359,7 +359,7 @@ export const workflowService = {
         if (currentStep && currentStep.status === 'pending') {
           if (currentStep.approverRole === userRole || currentStep.approverId === userId) {
             // Check if user hasn't already approved
-            const alreadyApproved = currentStep.approvers.some(a => a.id === userId);
+            const alreadyApproved = currentStep.approverId.some(a => a.id === userId);
             if (!alreadyApproved) {
               results.push({ workflow, step: currentStep });
             }
