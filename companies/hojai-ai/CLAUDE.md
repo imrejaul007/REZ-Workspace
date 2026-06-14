@@ -1189,3 +1189,52 @@ Autonomous RFQ response agent that handles supplier side of procurement.
 ---
 
 *Last Updated: June 14, 2026*
+
+---
+
+# HOJAI Genie Dashboard - Vellum-like Interface (Added June 14, 2026)
+
+**Port:** 4701
+
+The Genie Dashboard is the Vellum competitor - a simple unified interface for all Genie services.
+
+**Tagline:** "Your Personal Intelligence, Simplified"
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| Unified Dashboard | All services in one view |
+| Quick Actions | One-tap access |
+| Unified Search | Search across all services |
+| AI Insights | Personalized suggestions |
+| Sections | Memory, Calendar, Email, Tasks, Briefing |
+
+## API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| GET /api/dashboard | Complete dashboard |
+| GET /api/search?q= | Unified search |
+| GET /api/quick-actions | Quick actions |
+| POST /api/quick-actions/execute | Execute action |
+| GET /api/summary | Summary numbers |
+
+## Compared to Vellum
+
+| Vellum Feature | Genie Dashboard |
+|----------------|-----------------|
+| Memory | ✅ All Genie memory types |
+| Personal Identity | ✅ CorpID + Twins |
+| Skills | ✅ 235+ AI Employees |
+| Multi-Channel | ✅ WhatsApp, Slack, Email |
+| Agent Builder | ✅ Agent Marketplace |
+| Dashboard | ✅ This service! |
+
+## Service Location
+
+`companies/hojai-ai/genie-dashboard-service/`
+
+## Documentation
+
+`companies/hojai-ai/genie-dashboard-service/README.md`
