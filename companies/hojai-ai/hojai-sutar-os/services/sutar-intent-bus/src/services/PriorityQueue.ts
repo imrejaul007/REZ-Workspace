@@ -316,7 +316,7 @@ export class PriorityQueue {
 
   // Private helper methods
 
-  private determinePriority(intent: Intent, forcedPriority?: string): string {
+  determinePriority(intent: Intent, forcedPriority?: string): string {
     if (forcedPriority) return forcedPriority;
 
     // Check for VIP/Enterprise users

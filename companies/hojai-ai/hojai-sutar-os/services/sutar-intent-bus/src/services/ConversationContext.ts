@@ -208,7 +208,7 @@ export class ConversationContextService {
       return {
         systemPrompt: this.generateSystemPrompt(),
         conversationHistory: [],
-        currentState: conversation?.state || { pendingEntities: {}, contextWindow: [], recentIntents: [], dialogueActs: [], sentiment: 'neutral', engagement: 'medium' },
+        currentState: { pendingEntities: {}, contextWindow: [], recentIntents: [], dialogueActs: [], sentiment: 'neutral', engagement: 'medium' },
         relevantEntities: {}
       };
     }

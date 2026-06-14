@@ -225,7 +225,7 @@ export interface TaskAssignment {
   completedAt?: string;
   estimatedDuration?: number;
   actualDuration?: number;
-  quality: number; // 1-5
+  quality?: number; // 1-5
   feedback?: string;
 }
 
@@ -498,6 +498,7 @@ export interface SkillMatchRequest {
   languages?: string[];
   certifications?: string[];
   teamRequired?: boolean;
+  minExperience?: number;
 }
 
 // Task Routing Request
@@ -520,6 +521,7 @@ export interface TaskRoutingRequest {
   deadline?: string;
   teamRequired: boolean;
   maxTeamSize?: number;
+  estimatedDuration?: number;
 }
 
 // Team Creation Request

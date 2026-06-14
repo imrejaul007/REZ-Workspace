@@ -1146,7 +1146,7 @@ app.post('/api/v1/patterns', (req: Request, res: Response) => {
 
     // Also add to classifier
     intentClassifier.addPattern({
-      keywords: pattern.split('|').map(p => p.trim().toLowerCase()),
+      keywords: pattern.split('|').map((p: string) => p.trim().toLowerCase()),
       category: 'search',
       weight: 1.0,
       examples: []
