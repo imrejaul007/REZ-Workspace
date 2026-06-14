@@ -1,0 +1,98 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Monday at 6 AM
+  workflow_dispatch:
+
+jobs:
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run GitHub Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          comment-summary-in-pr: always
+
+  # ============================================
+  # CORE SERVICES DEPENDENCIES
+  # ============================================
+  update-core-deps:
+    name: Update Core Dependencies
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory:
+          - core/capability-matrix
+          - core/unified-twin-os
+          - core/memory-network
+          - core/boa-council
+          - core/economic-graph
+          - core/simulation-os
+          - core/marketing-os
+          - core/workforce-os
+          - core/commerce-os
+          - core/finance-os
+          - core/industry-ai-company
+          - core/marketplace-network
+          - core/revenue-network
+          - core/developer-cloud
+          - core/knowledge-graph-os
+          - core/boa-os
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '${{ matrix.directory }}/package-lock.json'
+
+      - name: Check outdated
+        id: outdated
+        working-directory: ${{ matrix.directory }}
+        run: |
+          npm install --ignore-scripts 2>/dev/null || true
+          npm outdated --json || echo "[]" > outdated.json
+
+  # ============================================
+  # SERVICES DEPENDENCIES
+  # ============================================
+  update-services-deps:
+    name: Update Services Dependencies
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory:
+          - services/restaurant-os
+          - services/hotel-os
+          - services/hospitality-os
+          - services/twinos-hub
+          - services/agent-twin
+          - services/area-twin
+          - services/buyer-twin
+          - services/deal-twin
+          - services/property-twin
+          - services/referral-twin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '${{ matrix.directory }}/package-lock.json'
+
+      - name: Check outdated
+        working-directory: ${{ matrix.directory }}
+        run: |
+          npm install --ignore-scripts 2>/dev/null || true
+          npm outdated --json || echo "[]" > outdated.json

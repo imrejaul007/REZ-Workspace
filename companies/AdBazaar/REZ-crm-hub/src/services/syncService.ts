@@ -1,4 +1,4 @@
-import logger from './utils/logger';
+import logger from '../utils/logger.js';
 
 import { SyncHistory, ISyncHistoryDocument } from '../models/SyncHistory.js';
 import { CRMConnection } from '../models/CRMConnection.js';
@@ -81,7 +81,7 @@ export class SyncService {
 
       logger.info('Scheduled sync completed.');
     } catch (error) {
-      logger.error('Scheduled sync failed:', error);
+      logger.error('Scheduled sync failed:', { error: error instanceof Error ? error.message : String(error) });
     }
   }
 

@@ -26,6 +26,15 @@ const CONFIG = {
   genieVoice: process.env.EXPO_PUBLIC_GENIE_VOICE_URL || 'http://localhost:4712',
   genieMeeting: process.env.EXPO_PUBLIC_GENIE_MEETING_URL || 'http://localhost:4713',
 
+  // NEW: Genie Dashboard & Twins
+  genieDashboard: process.env.EXPO_PUBLIC_GENIE_DASHBOARD_URL || 'http://localhost:4701',
+  geniePersonalTwin: process.env.EXPO_PUBLIC_GENIE_PERSONAL_TWIN_URL || 'http://localhost:4708',
+  genieRelationshipTwin: process.env.EXPO_PUBLIC_GENIE_RELATIONSHIP_TWIN_URL || 'http://localhost:4705',
+  genieFounderTwin: process.env.EXPO_PUBLIC_GENIE_FOUNDER_TWIN_URL || 'http://localhost:4709',
+  genieHealthTwin: process.env.EXPO_PUBLIC_GENIE_HEALTH_TWIN_URL || 'http://localhost:4730',
+  genieFinancialTwin: process.env.EXPO_PUBLIC_GENIE_FINANCIAL_TWIN_URL || 'http://localhost:4731',
+  genieWhatsAppBot: process.env.EXPO_PUBLIC_GENIE_WHATSAPP_BOT_URL || 'http://localhost:4718',
+
   // HOJAI AI
   hojaiGateway: process.env.EXPO_PUBLIC_HOJAI_GATEWAY_URL || 'http://localhost:4500',
   hojaiMemory: process.env.EXPO_PUBLIC_HOJAI_MEMORY_URL || 'http://localhost:4520',
@@ -437,6 +446,144 @@ class GenieVoiceService {
     }
 
     return results;
+  }
+
+  // ============================================
+  // GENIE DASHBOARD METHODS
+  // ============================================
+
+  /**
+   * Get Genie Dashboard data
+   */
+  async getDashboard(userId: string): Promise<any> {
+    try {
+      const response = await this.axios.get(`${CONFIG.genieDashboard}/api/dashboard`, {
+        headers: { 'X-User-Id': userId },
+        timeout: CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Dashboard fetch failed:', error);
+      return { success: false, error: 'Dashboard unavailable' };
+    }
+  }
+
+  /**
+   * Get Personal Twin
+   */
+  async getPersonalTwin(userId: string): Promise<any> {
+    try {
+      const response = await this.axios.get(`${CONFIG.geniePersonalTwin}/api/twin`, {
+        headers: { 'X-User-Id': userId },
+        timeout: CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Personal Twin fetch failed:', error);
+      return { success: false, error: 'Twin unavailable' };
+    }
+  }
+
+  /**
+   * Get Relationship Twin Summary
+   */
+  async getRelationshipTwinSummary(userId: string): Promise<any> {
+    try {
+      const response = await this.axios.get(`${CONFIG.genieRelationshipTwin}/api/relationships/summary`, {
+        headers: { 'X-User-Id': userId },
+        timeout: CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Relationship Twin fetch failed:', error);
+      return { success: false, error: 'Relationship Twin unavailable' };
+    }
+  }
+
+  /**
+   * Get Founder Twin
+   */
+  async getFounderTwin(userId: string): Promise<any> {
+    try {
+      const response = await this.axios.get(`${CONFIG.genieFounderTwin}/api/founder/summary`, {
+        headers: { 'X-User-Id': userId },
+        timeout: CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Founder Twin fetch failed:', error);
+      return { success: false, error: 'Founder Twin unavailable' };
+    }
+  }
+
+  /**
+   * Get all Twins summary
+   */
+  async getAllTwins(userId: string): Promise<any> {
+    const [personal, relationship, founder, health, financial] = await Promise.all([
+      this.getPersonalTwin(userId),
+      this.getRelationshipTwinSummary(userId),
+      this.getFounderTwin(userId),
+      this.getHealthTwin(userId),
+      this.getFinancialTwin(userId),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        personal,
+        relationship,
+        founder,
+        health,
+        financial,
+      },
+    };
+  }
+
+  /**
+   * Get Health Twin
+   */
+  async getHealthTwin(userId: string): Promise<any> {
+    try {
+      const response = await this.axios.get(`${CONFIG.genieHealthTwin}/api/health/summary`, {
+        headers: { 'X-User-Id': userId },
+        timeout: CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch {
+      return { success: false, error: 'Health Twin unavailable' };
+    }
+  }
+
+  /**
+   * Get Financial Twin
+   */
+  async getFinancialTwin(userId: string): Promise<any> {
+    try {
+      const response = await this.axios.get(`${CONFIG.genieFinancialTwin}/api/financial/summary`, {
+        headers: { 'X-User-Id': userId },
+        timeout: CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch {
+      return { success: false, error: 'Financial Twin unavailable' };
+    }
+  }
+
+  /**
+   * Send WhatsApp Genie message
+   */
+  async sendWhatsAppMessage(phone: string, message: string): Promise<boolean> {
+    try {
+      await this.axios.post(`${CONFIG.genieWhatsAppBot}/api/send`, {
+        to: phone,
+        body: message,
+      });
+      return true;
+    } catch (error) {
+      console.error('WhatsApp message failed:', error);
+      return false;
+    }
   }
 }
 

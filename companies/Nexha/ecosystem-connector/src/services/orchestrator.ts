@@ -28,6 +28,15 @@ const SERVICES = {
   REZ_MERCHANT: process.env.REZ_MERCHANT_URL || 'http://localhost:4003',
   REZ_INTELLIGENCE: process.env.REZ_INTELLIGENCE_URL || 'http://localhost:4018',
   RTNM_FINANCE: process.env.RTNM_FINANCE_URL || 'http://localhost:4004',
+  // SUTAR services
+  SUTAR_IDENTITY: process.env.SUTAR_IDENTITY_URL || 'http://localhost:4147',
+  SUTAR_TRUST: process.env.SUTAR_TRUST_URL || 'http://localhost:4180',
+  SUTAR_REPUTATION: process.env.SUTAR_REPUTATION_URL || 'http://localhost:4185',
+  SUTAR_INTENT: process.env.SUTAR_INTENT_URL || 'http://localhost:4154',
+  SUTAR_GOAL: process.env.SUTAR_GOAL_URL || 'http://localhost:4242',
+  SUTAR_NEGOTIATION: process.env.SUTAR_NEGOTIATION_URL || 'http://localhost:4191',
+  SUTAR_CONTRACT: process.env.SUTAR_CONTRACT_URL || 'http://localhost:4190',
+  SUTAR_MEMORY: process.env.SUTAR_MEMORY_URL || 'http://localhost:4143',
 };
 
 // Internal API key for service-to-service auth
@@ -179,6 +188,7 @@ class EcosystemOrchestrator {
       // Step 1: Get AI recommendation for reorder quantity
       let reorderQty = data.threshold ? data.threshold * 2 : 100;
       let suggestedPrice: number | undefined;
+      let goalId: string | undefined;
 
       try {
         const prediction = await axios.post(`${SERVICES.REZ_INTELLIGENCE}/api/predict/reorder`, {
@@ -195,6 +205,25 @@ class EcosystemOrchestrator {
         }
       } catch {
         logger.info('[Orchestrator] Using threshold-based reorder quantity');
+      }
+
+      // Step 1b: Create goal in SUTAR GoalOS
+      try {
+        const goal = await axios.post(`${SERVICES.SUTAR_GOAL}/api/goals`, {
+          type: 'inventory_replenishment',
+          title: `Purchase ${data.productName}`,
+          priority: data.currentStock === 0 ? 'urgent' : 'high',
+          context: {
+            productId: data.productId,
+            quantity: reorderQty,
+            targetPrice: suggestedPrice,
+            merchantId: data.merchantId,
+          },
+        }, { timeout: 5000 });
+        goalId = goal.data?.id;
+        logger.info(`[Orchestrator] SUTAR Goal created: ${goalId}`);
+      } catch {
+        logger.info('[Orchestrator] SUTAR GoalOS not available');
       }
 
       // Step 2: Match suppliers with capability service
@@ -506,6 +535,37 @@ class EcosystemOrchestrator {
         amount: data.quotedAmount,
       }).catch(() => {});
 
+      // Update reputation: communication score (RFQ response)
+      await axios.post(`${SERVICES.PROCUREMENT}/api/reputation/delivery`, {
+        supplierId: data.supplierId,
+        supplierName: data.supplierName || 'Unknown',
+        onTime: true,
+        deliveryDays: 0,
+        promisedDays: 0,
+      }, { timeout: 5000, headers: getServiceHeaders() }).catch(() => {});
+
+      // Sync to SUTAR Reputation
+      await axios.post(`${SERVICES.SUTAR_REPUTATION}/api/reputation`, {
+        entityId: data.supplierId,
+        entityType: 'supplier',
+        metrics: { communication_score: 100, quote_responses: 1 },
+        source: 'nexha-ecosystem',
+      }, { timeout: 5000 }).catch(() => {});
+
+      // Emit to SUTAR Intent Bus (supplier responded to RFQ)
+      await axios.post(`${SERVICES.SUTAR_INTENT}/api/events`, {
+        type: 'rfq.quote_submitted',
+        data: {
+          dealId: data.dealId,
+          supplierId: data.supplierId,
+          supplierName: data.supplierName,
+          quotedAmount: data.quotedAmount,
+          deliveryDays: data.deliveryDays,
+        },
+        source: 'nexha-ecosystem',
+        timestamp: new Date().toISOString(),
+      }, { timeout: 5000 }).catch(() => {});
+
       logger.info(`[Orchestrator] Quote ₹${data.quotedAmount} from ${data.supplierName} recorded for deal ${data.dealId}`);
 
     } catch (error) {
@@ -615,6 +675,8 @@ class EcosystemOrchestrator {
       orderId?: string;
       amount?: number;
       paymentMethod?: string;
+      supplierId?: string;
+      buyerId?: string;
     };
 
     if (!data.dealId) return;
@@ -625,7 +687,52 @@ class EcosystemOrchestrator {
         amount: data.amount,
       }, { timeout: 5000, headers: getServiceHeaders() }).catch(() => {});
 
-      // Notify supplier of payment
+      // Update reputation pipeline (payment score)
+      if (data.supplierId) {
+        await axios.post(`${SERVICES.PROCUREMENT}/api/reputation/payment`, {
+          supplierId: data.supplierId,
+          supplierName: data.supplierId,
+          onTime: true,
+          amount: data.amount,
+        }, { timeout: 5000, headers: getServiceHeaders() }).catch(() => {});
+      }
+
+      // Record transaction memory
+      if (data.supplierId && data.buyerId) {
+        await axios.post(`${SERVICES.PROCUREMENT}/api/memory/transaction`, {
+          supplierId: data.supplierId,
+          buyerId: data.buyerId,
+          productName: 'Order',
+          quantity: 1,
+          unitPrice: data.amount,
+          totalAmount: data.amount,
+          deliveryDays: 0,
+          quality: 'pass',
+          onTime: true,
+          buyerReputation: 80,
+        }, { timeout: 5000, headers: getServiceHeaders() }).catch(() => {});
+      }
+
+      // Sync to SUTAR Reputation
+      if (data.supplierId) {
+        await axios.post(`${SERVICES.SUTAR_REPUTATION}/api/reputation`, {
+          entityId: data.supplierId,
+          entityType: 'supplier',
+          metrics: { payment_score: 100 },
+          source: 'nexha-ecosystem',
+        }, { timeout: 5000 }).catch(() => {});
+      }
+
+      // Sync to SUTAR Economy
+      if (data.supplierId && data.amount) {
+        await axios.post(`${SERVICES.SUTAR_FLOW}/api/transactions`, {
+          type: 'order_settled',
+          supplierId: data.supplierId,
+          amount: data.amount,
+          source: 'nexha-ecosystem',
+        }, { timeout: 5000 }).catch(() => {});
+      }
+
       logger.info(`[Orchestrator] Payment ₹${data.amount} received for deal ${data.dealId}`);
 
     } catch (error) {

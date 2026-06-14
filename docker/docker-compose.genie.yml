@@ -20,6 +20,67 @@ services:
       - GENIE_BRIEFING_URL=http://genie-briefing:4706
       - GENIE_CALENDAR_URL=http://genie-calendar:4709
       - GENIE_EMAIL_URL=http://genie-email:4710
+      - PERSONAL_TWIN_URL=http://genie-personal-twin:4708
+      - RELATIONSHIP_TWIN_URL=http://genie-relationship-twin:4705
+
+  # ============================================================
+  # GENIE TWIN SERVICES (NEW - June 2026)
+  # ============================================================
+
+  genie-personal-twin:
+    build: ../companies/hojai-ai/genie-personal-twin-service
+    container_name: genie-personal-twin
+    ports: ["4708:4708"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4708/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-relationship-twin:
+    build: ../companies/hojai-ai/genie-relationship-twin-service
+    container_name: genie-relationship-twin
+    ports: ["4705:4705"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4705/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-whatsapp-bot:
+    build: ../companies/hojai-ai/genie-whatsapp-bot-service
+    container_name: genie-whatsapp-bot
+    ports: ["4718:4718"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4718/health"], interval: "30s", timeout: "10s", retries: 3 }
+    environment:
+      - WHATSAPP_ACCESS_TOKEN=${WHATSAPP_ACCESS_TOKEN}
+      - WHATSAPP_VERIFY_TOKEN=${WHATSAPP_VERIFY_TOKEN}
+
+  # ============================================================
+  # GENIE ADDITIONAL TWIN SERVICES
+  # ============================================================
+
+  genie-founder-twin:
+    build: ../companies/hojai-ai/genie-founder-twin-service
+    container_name: genie-founder-twin
+    ports: ["4709:4709"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4709/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-health-twin:
+    build: ../companies/hojai-ai/genie-health-twin-service
+    container_name: genie-health-twin
+    ports: ["4730:4730"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4730/health"], interval: "30s", timeout: "10s", retries: 3 }
+
+  genie-financial-twin:
+    build: ../companies/hojai-ai/genie-financial-twin-service
+    container_name: genie-financial-twin
+    ports: ["4731:4731"]
+    networks: [rtnm-network]
+    restart: unless-stopped
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:4731/health"], interval: "30s", timeout: "10s", retries: 3 }
 
   # ============================================================
   # GENIE CORE SERVICES (All Built)

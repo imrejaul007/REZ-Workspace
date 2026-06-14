@@ -207,7 +207,7 @@ export interface CircuitBreakerConfig {
   resetInterval: number;
 }
 
-export type CircuitState = 'closed' | 'open' | 'half_open';
+export type CircuitState = 'closed' | 'open' | 'halfOpen';
 
 export interface CircuitBreakerState {
   serviceId: string;
@@ -266,6 +266,7 @@ export interface CacheStats {
 export interface WebSocketConnection {
   id: string;
   serviceId: string;
+  serviceName?: string;
   url: string;
   protocols?: string[];
   headers?: Record<string, string>;

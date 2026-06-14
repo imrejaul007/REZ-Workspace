@@ -90,7 +90,7 @@ app.post('/chat', async (req, res) => {
     conversationManager.addMessage(session.id, { role: 'user', content: message });
 
     // Get conversation history for context
-    const history = conversationManager.getHistory(session.id);
+    const history = conversationManager.getSession(session.id);
 
     // Process message with enhanced copilot engine
     const response = await copilotEngine.process({
@@ -224,7 +224,7 @@ app.get('/sessions/:sessionId', async (req, res) => {
 app.get('/sessions/:sessionId/history', async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const history = conversationManager.getHistory(sessionId);
+    const history = conversationManager.getSession(sessionId);
 
     if (!history) {
       return res.status(404).json({ error: 'Session not found' });

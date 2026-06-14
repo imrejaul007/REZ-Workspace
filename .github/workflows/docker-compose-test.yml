@@ -1,0 +1,82 @@
+name: Docker Compose Validation
+
+on:
+  schedule:
+    # Run weekly on Sunday at 2 AM
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  validate-compose:
+    name: Validate Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Validate compose file
+        run: docker-compose config --quiet || docker compose config --quiet
+
+      - name: Check service directories exist
+        run: |
+          SERVICES=(
+            "services/restaurant-os"
+            "services/hotel-os"
+            "services/hospitality-os"
+            "services/twinos-hub"
+            "services/agent-twin"
+            "services/area-twin"
+            "services/buyer-twin"
+            "services/deal-twin"
+            "services/property-twin"
+            "services/referral-twin"
+          )
+          for svc in "${SERVICES[@]}"; do
+            if [ ! -d "$svc" ]; then
+              echo "Missing directory: $svc"
+              exit 1
+            fi
+            if [ ! -f "$svc/Dockerfile" ]; then
+              echo "Missing Dockerfile: $svc/Dockerfile"
+              exit 1
+            fi
+            if [ ! -f "$svc/package.json" ]; then
+              echo "Missing package.json: $svc/package.json"
+              exit 1
+            fi
+          done
+          echo "All service directories validated"
+
+  test-compose-up:
+    name: Test Docker Compose Up
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build images
+        run: docker build -t rtmn-restaurant-os -f services/restaurant-os/Dockerfile services/restaurant-os/
+
+      - name: Run container
+        run: |
+          docker run -d --name rtmn-test -p 5010:5010 rtmn-restaurant-os
+          sleep 5
+
+      - name: Health check
+        run: |
+          curl -f http://localhost:5010/health || exit 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop rtmn-test || true
+          docker rm rtmn-test || true

@@ -1,0 +1,109 @@
+name: Service Docker Builds
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'services/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'services/**'
+  workflow_dispatch:
+
+jobs:
+  # ============================================
+  # INDUSTRY OS SERVICES
+  # ============================================
+  restaurant-os:
+    name: Restaurant OS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-restaurant-os services/restaurant-os/
+
+  hotel-os:
+    name: Hotel OS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-hotel-os services/hotel-os/
+
+  hospitality-os:
+    name: Hospitality OS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-hospitality-os services/hospitality-os/
+
+  twinos-hub:
+    name: TwinOS Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-twinos-hub services/twinos-hub/
+
+  # ============================================
+  # DIGITAL TWIN SERVICES
+  # ============================================
+  agent-twin:
+    name: Agent Twin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-agent-twin services/agent-twin/
+
+  area-twin:
+    name: Area Twin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-area-twin services/area-twin/
+
+  buyer-twin:
+    name: Buyer Twin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-buyer-twin services/buyer-twin/
+
+  deal-twin:
+    name: Deal Twin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-deal-twin services/deal-twin/
+
+  property-twin:
+    name: Property Twin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-property-twin services/property-twin/
+
+  referral-twin:
+    name: Referral Twin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker
+        run: docker build -t rtmn-referral-twin services/referral-twin/

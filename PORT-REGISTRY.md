@@ -407,6 +407,9 @@ This document consolidates all port allocations across the 24 industry verticals
 | 6104 | Resource Twin | gRPC | Resource allocation |
 | 6105 | Invoice Twin | gRPC | Billing management |
 | 6106 | Professional Gateway | REST | API gateway |
+| **5170** | **REZ SalesMind** | REST | **AI Sales Intelligence Platform** |
+| 4100 | REZ Merchant | REST | Merchant services |
+| 4200 | REZ Consumer | REST | Consumer app |
 
 **File:** [industries/professional-os/INTEGRATION-SPEC.md](./industries/professional-os/INTEGRATION-SPEC.md)
 
@@ -577,11 +580,18 @@ This document consolidates all port allocations across the 24 industry verticals
 | 4500 | HOJAI Gateway | REST | Primary API gateway |
 | 4510 | Event Bus | REST | Event publishing and subscriptions |
 | 4520 | Memory Service | REST | Multi-tier memory infrastructure |
+| 4521 | TwinOS | REST | Digital twin management |
 | 4530 | Intelligence | REST | AI intelligence services |
 | 4550 | ExpertOS | REST | Professional AI marketplace |
+| 4595 | Web Intelligence | REST | Market signals, competitor analysis |
+| 4751 | Merchant Intel | REST | Business intelligence |
+| 4752 | Lead Service | REST | Lead scoring and enrichment |
+| 4786 | Knowledge Graph | REST | Entity relationships |
+| 4702 | CorpID (Identity Hub) | REST | Universal identity |
 | 4703 | Genie Memory | REST | Personal AI memory |
 | 4704 | Genie Relations | REST | Relationship tracking |
 | 4706 | Genie Briefing | REST | Daily briefings |
+| 4760 | Genie Voice | REST | Email, SMS, WhatsApp, Calls |
 | **4770** | **BrandPulse API** | REST | Brand intelligence & sentiment |
 | **4780** | **BrandPulse Dashboard** | REST | React analytics dashboard |
 | 4850 | VoiceOS | REST | Voice AI platform |

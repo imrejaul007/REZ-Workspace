@@ -21,6 +21,11 @@ import rateLimit from 'express-rate-limit';
 import { supplierService, marketplaceService, rfqService, orderService, capabilityService } from './services/procurement.service.js';
 import { supplierAgentService } from './services/agent.service.js';
 import { dealStateMachine } from './services/deal.service.js';
+import { supplierBuyerAgent, type SupplierProfile, type SupplierQuote } from './services/supplier-buyer.service.js';
+import { commerceFeed, type FeedItemType } from './services/commerce-feed.service.js';
+import { nexhaSutarBridge } from './services/nexus-sutar-bridge.service.js';
+import { reputationPipeline } from './services/reputation-pipeline.service.js';
+import { commerceMemory } from './services/commerce-network.service.js';
 import { connectDatabase } from './config/database.js';
 import { requireAuth, requireRole, requirePermission, requireInternalToken } from '../../shared/auth-middleware/src/index.js';
 import { createWebhookMiddleware } from '../../shared/webhook-sdk/src/index.js';
@@ -811,6 +816,329 @@ app.get('/api/deals/stats/all',
     try {
       const stats = dealStateMachine.getStats();
       res.json({ success: true, data: stats });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// ============================================================================
+// SELLER AGENT (Supplier) - Webhook for RFQ receipt
+// ============================================================================
+
+// Guest supplier registration (no auth required)
+app.post('/api/sellers/register',
+  async (req, res) => {
+    try {
+      const result = await supplierBuyerAgent.registerSupplier(req.body);
+      res.status(201).json({ success: true, data: result });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Supplier webhook endpoint (no auth required - guest access)
+app.post('/api/sellers/rfq-webhook',
+  async (req, res) => {
+    try {
+      // Accept guest token or supplier ID
+      const { supplierId, guestToken, rfqId, action, counterAmount, counterTerms } = req.body;
+
+      if (guestToken) {
+        const supplier = supplierBuyerAgent.verifyGuestToken(guestToken);
+        if (!supplier) {
+          return res.status(401).json({ success: false, error: 'Invalid or expired guest token' });
+        }
+      }
+
+      if (action === 'receive' || action === 'quote') {
+        const quote = await supplierBuyerAgent.receiveRFQ(supplierId, rfqId, req.body);
+        return res.json({ success: true, data: quote });
+      }
+
+      if (action === 'accept') {
+        const quote = await supplierBuyerAgent.acceptRFQ(rfqId);
+        return res.json({ success: true, data: quote });
+      }
+
+      if (action === 'reject') {
+        const quote = await supplierBuyerAgent.rejectRFQ(rfqId, req.body.reason);
+        return res.json({ success: true, data: quote });
+      }
+
+      if (action === 'counter') {
+        const quote = await supplierBuyerAgent.sendCounterOffer(rfqId, counterAmount, counterTerms);
+        return res.json({ success: true, data: quote });
+      }
+
+      res.status(400).json({ success: false, error: 'Invalid action' });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Auto-generate quote for supplier
+app.post('/api/sellers/auto-quote',
+  async (req, res) => {
+    try {
+      const { supplierId, rfqId, checkInventory, negotiate } = req.body;
+      const quote = await supplierBuyerAgent.autoGenerateQuote(supplierId, rfqId, req.body.items, { checkInventory: !!checkInventory, negotiate: !!negotiate });
+      if (!quote) {
+        return res.status(404).json({ success: false, error: 'Supplier not found' });
+      }
+      res.json({ success: true, data: quote });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Get pending RFQs for supplier
+app.get('/api/sellers/:supplierId/rfqs',
+  async (req, res) => {
+    try {
+      const rfqs = supplierBuyerAgent.getPendingRFQs(req.params.supplierId);
+      res.json({ success: true, data: rfqs });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Upgrade guest supplier to verified
+app.post('/api/sellers/upgrade',
+  async (req, res) => {
+    try {
+      const { guestToken, gstin, documents } = req.body;
+      const supplier = await supplierBuyerAgent.upgradeGuestToVerified(guestToken, gstin, documents || []);
+      if (!supplier) {
+        return res.status(404).json({ success: false, error: 'Invalid guest token' });
+      }
+      res.json({ success: true, data: supplier });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// ============================================================================
+// COMMERCE FEED
+// ============================================================================
+
+// Post to commerce feed
+app.post('/api/feed',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      const item = commerceFeed.post({
+        ...req.body,
+        participantId: (req as any).user?.id || 'unknown',
+        participantName: (req as any).user?.name || 'Unknown',
+        participantType: req.body.participantType || 'supplier',
+        audience: req.body.audience || 'industry',
+        tags: req.body.tags || [],
+      });
+      res.status(201).json({ success: true, data: item });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Get commerce feed
+app.get('/api/feed',
+  async (req, res) => {
+    try {
+      const { type, tags, participantId, limit } = req.query;
+      const items = commerceFeed.getFeed({
+        type: type as FeedItemType,
+        tags: tags ? (tags as string).split(',') : undefined,
+        participantId: participantId as string,
+        limit: limit ? parseInt(limit as string) : 20,
+      });
+      res.json({ success: true, data: items });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// ============================================================================
+// REPUTATION PIPELINE
+// ============================================================================
+
+// Record delivery event (triggers reputation update)
+app.post('/api/reputation/delivery',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      const event = reputationPipeline.recordDelivery(req.body);
+      const reputation = reputationPipeline.getReputation(req.body.supplierId);
+      res.json({ success: true, data: { event, reputation } });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Record quality event
+app.post('/api/reputation/quality',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      const event = reputationPipeline.recordQuality(req.body);
+      const reputation = reputationPipeline.getReputation(req.body.supplierId);
+      res.json({ success: true, data: { event, reputation } });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Get supplier reputation
+app.get('/api/reputation/:supplierId',
+  async (req, res) => {
+    try {
+      const reputation = reputationPipeline.getReputation(req.params.supplierId);
+      if (!reputation) {
+        return res.status(404).json({ success: false, error: 'Supplier not found' });
+      }
+      res.json({ success: true, data: reputation });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Get reputation leaderboard
+app.get('/api/reputation/leaderboard',
+  async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const leaders = reputationPipeline.getLeaderboard(limit);
+      res.json({ success: true, data: leaders });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// ============================================================================
+// COMMERCE MEMORY
+// ============================================================================
+
+// Record transaction memory
+app.post('/api/memory/transaction',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      commerceMemory.recordTransaction(req.body);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Get supplier memory insights
+app.get('/api/memory/suppliers/:supplierId',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      const memory = commerceMemory.getSupplierMemory(req.params.supplierId);
+      const insights = commerceMemory.getSupplierInsights(req.params.supplierId);
+      const deliveryTrend = commerceMemory.getDeliveryTrend(req.params.supplierId);
+      const priceTrends = commerceMemory.getSeasonalPatterns(req.params.supplierId, req.query.productName as string);
+      res.json({ success: true, data: { memory, insights, deliveryTrend, priceTrends });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Get buyer patterns
+app.get('/api/memory/buyers/:buyerId/patterns',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      const patterns = commerceMemory.getBuyerPattern(req.params.buyerId);
+      if (!patterns) {
+        return res.status(404).json({ success: false, error: 'Buyer pattern not found' });
+      }
+      const predictions = commerceMemory.predictNextOrder(req.params.buyerId);
+      res.json({ success: true, data: { patterns, predictions } });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// ============================================================================
+// NEXHA-SUTAR BRIDGE EVENTS
+// ============================================================================
+
+// Emit inventory low event to SUTAR GoalOS
+app.post('/api/bridge/inventory-low',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      await nexhaSutarBridge.emitInventoryLow(req.body);
+      res.json({ success: true, action: 'inventory_low_emitted' });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Emit RFQ created to SUTAR Intent Bus
+app.post('/api/bridge/rfq-created',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      await nexhaBridge.emitRFQCreated(req.body);
+      res.json({ success: true, action: 'rfq_created_emitted' });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Emit order delivered to SUTAR Reputation + Memory
+app.post('/api/bridge/order-delivered',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      const { supplierId, buyerId, onTime, qualityPass, actualAmount, deliveryDays } = req.body;
+      await nexhaSutarBridge.emitOrderDelivered({ dealId: req.body.dealId, supplierId, buyerId, onTime, qualityPass, actualAmount, deliveryDays });
+      res.json({ success: true, action: 'order_delivered_emitted' });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Get bridge event history
+app.get('/api/bridge/history',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      const history = nexhaSutarBridge.getHistory(20);
+      const stats = nexhaSutarBridge.getStats();
+      res.json({ success: true, data: { history, stats });
+    } catch (error) {
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Receive SUTAR events
+app.post('/api/bridge/sutar-event',
+  async (req, res) => {
+    try {
+      await nexhaSutarBridge.receiveSutarEvent(req.body);
+      res.json({ success: true });
     } catch (error) {
       res.status(500).json({ success: false, error: (error as Error).message });
     }

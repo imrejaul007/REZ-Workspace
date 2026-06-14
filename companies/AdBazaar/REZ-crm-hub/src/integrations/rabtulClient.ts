@@ -4,13 +4,13 @@
  */
 
 import axios from 'axios';
+import { logger } from '../utils/logger.js';
 
 // RABTUL Service URLs from environment
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:4002';
 const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://localhost:4001';
 const WALLET_SERVICE_URL = process.env.WALLET_SERVICE_URL || 'http://localhost:4004';
 const NOTIFICATION_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:4011';
-const ANALYTICS_SERVICE_URL = process.env.ANALYTICS_SERVICE_URL || 'http://localhost:4016';
 const EVENT_BUS_URL = process.env.EVENT_BUS_URL || 'http://localhost:4025';
 
 // Internal token for service-to-service calls
@@ -30,7 +30,7 @@ export async function verifyToken(token: string) {
     );
     return response.data;
   } catch (error) {
-    logger.error('ERROR', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('RABTUL Auth error:', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 }
@@ -46,7 +46,7 @@ export async function processPayment(paymentData: Record<string, unknown>) {
     );
     return response.data;
   } catch (error) {
-    logger.error('ERROR', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('RABTUL Payment error:', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 }
@@ -62,7 +62,7 @@ export async function addCoins(userId: string, amount: number, reason: string) {
     );
     return response.data;
   } catch (error) {
-    logger.error('ERROR', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('RABTUL Wallet error:', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 }
@@ -78,7 +78,7 @@ export async function sendNotification(userId: string, notification: Record<stri
     );
     return response.data;
   } catch (error) {
-    logger.error('ERROR', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('RABTUL Notification error:', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 }
@@ -94,7 +94,7 @@ export async function trackEvent(eventType: string, eventData: Record<string, un
     );
     return response.data;
   } catch (error) {
-    logger.error('ERROR', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('REZ Event Bus error:', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 }
@@ -111,7 +111,7 @@ export async function getPredictions(userId: string, features: Record<string, un
     );
     return response.data;
   } catch (error) {
-    logger.error('ERROR', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('REZ Intelligence error:', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 }
