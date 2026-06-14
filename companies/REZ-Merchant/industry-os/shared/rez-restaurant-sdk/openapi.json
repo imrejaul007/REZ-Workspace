@@ -1,0 +1,209 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "REZ Restaurant OS API",
+    "version": "1.0.0",
+    "description": "Unified API for all Restaurant OS services"
+  },
+  "servers": [
+    { "url": "http://localhost:4101", "description": "Development" }
+  ],
+  "paths": {
+    "/api/restaurants/{id}": {
+      "get": {
+        "summary": "Get restaurant details",
+        "tags": ["Restaurant"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Restaurant details" }
+        }
+      }
+    },
+    "/api/restaurants/{id}/menu": {
+      "get": {
+        "summary": "Get restaurant menu",
+        "tags": ["Restaurant"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Menu items" }
+        }
+      }
+    },
+    "/api/orders": {
+      "get": {
+        "summary": "List orders",
+        "tags": ["POS"],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of orders" }
+        }
+      },
+      "post": {
+        "summary": "Create order",
+        "tags": ["POS"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tableId": { "type": "string" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "menuItemId": { "type": "string" },
+                        "name": { "type": "string" },
+                        "quantity": { "type": "number" },
+                        "price": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Order created" }
+        }
+      }
+    },
+    "/api/orders/{id}/pay": {
+      "post": {
+        "summary": "Process payment",
+        "tags": ["POS"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": { "type": "string", "enum": ["card", "upi", "cash"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Payment processed" }
+        }
+      }
+    },
+    "/api/tickets": {
+      "get": {
+        "summary": "List kitchen tickets",
+        "tags": ["KDS"],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Kitchen tickets" }
+        }
+      }
+    },
+    "/api/tickets/{id}/bump": {
+      "post": {
+        "summary": "Bump ticket (mark ready)",
+        "tags": ["KDS"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Ticket bumped" }
+        }
+      }
+    },
+    "/api/reservations": {
+      "get": {
+        "summary": "List reservations",
+        "tags": ["Reservations"],
+        "parameters": [
+          { "name": "date", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of reservations" }
+        }
+      },
+      "post": {
+        "summary": "Create reservation",
+        "tags": ["Reservations"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "guestName": { "type": "string" },
+                  "guestPhone": { "type": "string" },
+                  "date": { "type": "string" },
+                  "time": { "type": "string" },
+                  "partySize": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Reservation created" }
+        }
+      }
+    },
+    "/api/reservations/slots": {
+      "get": {
+        "summary": "Get available time slots",
+        "tags": ["Reservations"],
+        "parameters": [
+          { "name": "date", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "partySize", "in": "query", "required": true, "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": { "description": "Available slots" }
+        }
+      }
+    },
+    "/api/loyalty/{guestId}": {
+      "get": {
+        "summary": "Get loyalty member",
+        "tags": ["Loyalty"],
+        "parameters": [
+          { "name": "guestId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Loyalty member details" }
+        }
+      }
+    },
+    "/api/inventory": {
+      "get": {
+        "summary": "List inventory items",
+        "tags": ["Inventory"],
+        "responses": {
+          "200": { "description": "Inventory items" }
+        }
+      }
+    },
+    "/api/inventory/low-stock": {
+      "get": {
+        "summary": "Get low stock items",
+        "tags": ["Inventory"],
+        "responses": {
+          "200": { "description": "Low stock items" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReZ Schedule - Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Sidebar -->
+  <div class="flex">
+    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white p-6">
+      <div class="mb-8">
+        <h1 class="text-xl font-bold flex items-center gap-2">
+          <i class="fas fa-calendar-check text-purple-400"></i>
+          ReZ Schedule
+        </h1>
+        <p class="text-gray-400 text-sm mt-1">Admin Dashboard</p>
+      </div>
+
+      <nav class="space-y-2">
+        <a href="#dashboard" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg bg-purple-600 text-white">
+          <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="#bookings" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-800 text-gray-300">
+          <i class="fas fa-calendar"></i> Bookings
+        </a>
+        <a href="#event-types" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-800 text-gray-300">
+          <i class="fas fa-clock"></i> Event Types
+        </a>
+        <a href="#users" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-800 text-gray-300">
+          <i class="fas fa-users"></i> Users
+        </a>
+        <a href="#webhooks" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-800 text-gray-300">
+          <i class="fas fa-bolt"></i> Webhooks
+        </a>
+        <a href="#analytics" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-800 text-gray-300">
+          <i class="fas fa-chart-line"></i> Analytics
+        </a>
+        <a href="#settings" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-800 text-gray-300">
+          <i class="fas fa-cog"></i> Settings
+        </a>
+      </nav>
+
+      <div class="absolute bottom-6 left-6 right-6">
+        <div class="bg-slate-800 rounded-lg p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center font-bold">A</div>
+            <div>
+              <p class="font-medium">Admin</p>
+              <p class="text-xs text-gray-400">admin@rez.money</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 p-8">
+
+      <!-- Dashboard View -->
+      <div id="view-dashboard" class="view">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+          <div class="flex gap-4">
+            <select id="date-range" class="px-4 py-2 border rounded-lg">
+              <option>Last 7 days</option>
+              <option>Last 30 days</option>
+              <option>This month</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+              </div>
+              <span class="text-green-500 text-sm font-medium flex items-center">
+                <i class="fas fa-arrow-up mr-1"></i> 12%
+              </span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-800">1,234</h3>
+            <p class="text-gray-500">Total Bookings</p>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+              </div>
+              <span class="text-green-500 text-sm font-medium flex items-center">
+                <i class="fas fa-arrow-up mr-1"></i> 8%
+              </span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-800">892</h3>
+            <p class="text-gray-500">Confirmed</p>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-indian-rupee-sign text-purple-600 text-xl"></i>
+              </div>
+              <span class="text-green-500 text-sm font-medium flex items-center">
+                <i class="fas fa-arrow-up mr-1"></i> 23%
+              </span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-800">₹4.5L</h3>
+            <p class="text-gray-500">Revenue</p>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-users text-orange-600 text-xl"></i>
+              </div>
+              <span class="text-gray-500 text-sm font-medium">Same</span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-800">456</h3>
+            <p class="text-gray-500">New Clients</p>
+          </div>
+        </div>
+
+        <!-- Recent Bookings Table -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-semibold">Recent Bookings</h3>
+            <a href="#bookings" class="text-purple-600 hover:underline text-sm">View All</a>
+          </div>
+          <table class="w-full">
+            <thead>
+              <tr class="text-left text-gray-500 text-sm border-b">
+                <th class="pb-3 font-medium">Booking ID</th>
+                <th class="pb-3 font-medium">Event Type</th>
+                <th class="pb-3 font-medium">Client</th>
+                <th class="pb-3 font-medium">Date & Time</th>
+                <th class="pb-3 font-medium">Status</th>
+                <th class="pb-3 font-medium">Amount</th>
+              </tr>
+            </thead>
+            <tbody class="text-sm">
+              <tr class="border-b hover:bg-gray-50">
+                <td class="py-4 font-mono text-gray-600">bk_abc123</td>
+                <td class="py-4">Haircut & Styling</td>
+                <td class="py-4">John Doe</td>
+                <td class="py-4">May 27, 10:00 AM</td>
+                <td class="py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Confirmed</span></td>
+                <td class="py-4">₹1,500</td>
+              </tr>
+              <tr class="border-b hover:bg-gray-50">
+                <td class="py-4 font-mono text-gray-600">bk_def456</td>
+                <td class="py-4">Consultation</td>
+                <td class="py-4">Jane Smith</td>
+                <td class="py-4">May 27, 2:00 PM</td>
+                <td class="py-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">Pending</span></td>
+                <td class="py-4">₹500</td>
+              </tr>
+              <tr class="border-b hover:bg-gray-50">
+                <td class="py-4 font-mono text-gray-600">bk_ghi789</td>
+                <td class="py-4">Strategy Session</td>
+                <td class="py-4">Bob Wilson</td>
+                <td class="py-4">May 28, 11:00 AM</td>
+                <td class="py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Confirmed</span></td>
+                <td class="py-4">₹10,000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-3 gap-6">
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold mb-4">Create Event Type</h3>
+            <button class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">
+              <i class="fas fa-plus mr-2"></i> New Event Type
+            </button>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold mb-4">View Calendar</h3>
+            <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+              <i class="fas fa-calendar mr-2"></i> Open Calendar
+            </button>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold mb-4">Export Data</h3>
+            <button class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700">
+              <i class="fas fa-download mr-2"></i> Export CSV
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookings View -->
+      <div id="view-bookings" class="view hidden">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-2xl font-bold text-gray-800">Bookings</h2>
+          <div class="flex gap-4">
+            <input type="text" placeholder="Search bookings..." class="px-4 py-2 border rounded-lg w-64">
+            <select class="px-4 py-2 border rounded-lg">
+              <option>All Status</option>
+              <option>Confirmed</option>
+              <option>Pending</option>
+              <option>Cancelled</option>
+            </select>
+            <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+              <i class="fas fa-filter mr-2"></i> Filter
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr class="text-left text-gray-500 text-sm">
+                <th class="p-4 font-medium">Booking ID</th>
+                <th class="p-4 font-medium">Event Type</th>
+                <th class="p-4 font-medium">Client</th>
+                <th class="p-4 font-medium">Date & Time</th>
+                <th class="p-4 font-medium">Host</th>
+                <th class="p-4 font-medium">Status</th>
+                <th class="p-4 font-medium">Amount</th>
+                <th class="p-4 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr class="hover:bg-gray-50">
+                <td class="p-4 font-mono text-sm">bk_abc123</td>
+                <td class="p-4">Haircut & Styling</td>
+                <td class="p-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">J</div>
+                    <div>
+                      <p class="font-medium">John Doe</p>
+                      <p class="text-xs text-gray-500">john@example.com</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <p>May 27, 2026</p>
+                  <p class="text-xs text-gray-500">10:00 AM</p>
+                </td>
+                <td class="p-4">Glam Studio</td>
+                <td class="p-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Confirmed</span></td>
+                <td class="p-4 font-medium">₹1,500</td>
+                <td class="p-4">
+                  <button class="text-gray-400 hover:text-gray-600 mx-1"><i class="fas fa-eye"></i></button>
+                  <button class="text-gray-400 hover:text-gray-600 mx-1"><i class="fas fa-edit"></i></button>
+                  <button class="text-gray-400 hover:text-red-600 mx-1"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-between items-center mt-6">
+          <p class="text-gray-500">Showing 1-10 of 1,234 bookings</p>
+          <div class="flex gap-2">
+            <button class="px-3 py-1 border rounded hover:bg-gray-50">Previous</button>
+            <button class="px-3 py-1 bg-purple-600 text-white rounded">1</button>
+            <button class="px-3 py-1 border rounded hover:bg-gray-50">2</button>
+            <button class="px-3 py-1 border rounded hover:bg-gray-50">3</button>
+            <button class="px-3 py-1 border rounded hover:bg-gray-50">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Types View -->
+      <div id="view-event-types" class="view hidden">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-2xl font-bold text-gray-800">Event Types</h2>
+          <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+            <i class="fas fa-plus mr-2"></i> Create Event Type
+          </button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6">
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-cut text-purple-600 text-xl"></i>
+              </div>
+              <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Active</span>
+            </div>
+            <h3 class="font-semibold mb-1">Haircut & Styling</h3>
+            <p class="text-sm text-gray-500 mb-4">45 min • ₹1,500</p>
+            <div class="flex justify-between text-sm text-gray-500">
+              <span><i class="fas fa-calendar-check mr-1"></i> 234 bookings</span>
+              <span><i class="fas fa-clock mr-1"></i> 45 min</span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-user-doctor text-blue-600 text-xl"></i>
+              </div>
+              <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Active</span>
+            </div>
+            <h3 class="font-semibold mb-1">Consultation</h3>
+            <p class="text-sm text-gray-500 mb-4">15 min • ₹500</p>
+            <div class="flex justify-between text-sm text-gray-500">
+              <span><i class="fas fa-calendar-check mr-1"></i> 456 bookings</span>
+              <span><i class="fas fa-clock mr-1"></i> 15 min</span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-briefcase text-green-600 text-xl"></i>
+              </div>
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">Draft</span>
+            </div>
+            <h3 class="font-semibold mb-1">Strategy Session</h3>
+            <p class="text-sm text-gray-500 mb-4">60 min • ₹10,000</p>
+            <div class="flex justify-between text-sm text-gray-500">
+              <span><i class="fas fa-calendar-check mr-1"></i> 89 bookings</span>
+              <span><i class="fas fa-clock mr-1"></i> 60 min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Webhooks View -->
+      <div id="view-webhooks" class="view hidden">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-2xl font-bold text-gray-800">Webhooks</h2>
+          <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+            <i class="fas fa-plus mr-2"></i> Add Webhook
+          </button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-semibold mb-1">Production Webhook</h3>
+              <p class="text-sm text-gray-500 font-mono">https://api.yourapp.com/webhooks/rez</p>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <p class="text-sm text-gray-500">Last triggered</p>
+                <p class="font-medium">2 minutes ago</p>
+              </div>
+              <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Active</span>
+              <button class="text-gray-400 hover:text-gray-600"><i class="fas fa-ellipsis-v"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h3 class="font-semibold mb-4">Webhook Events</h3>
+          <div class="grid grid-cols-4 gap-4">
+            <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="checkbox" checked class="w-4 h-4 text-purple-600">
+              <span class="text-sm">booking.created</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="checkbox" checked class="w-4 h-4 text-purple-600">
+              <span class="text-sm">booking.confirmed</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="checkbox" checked class="w-4 h-4 text-purple-600">
+              <span class="text-sm">booking.cancelled</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="checkbox" class="w-4 h-4 text-purple-600">
+              <span class="text-sm">booking.rescheduled</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings View -->
+      <div id="view-settings" class="view hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-8">Settings</h2>
+
+        <div class="grid grid-cols-3 gap-8">
+          <div class="col-span-2">
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <h3 class="font-semibold mb-4">Profile</h3>
+              <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" value="Admin User" class="w-full px-4 py-2 border rounded-lg">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" value="admin" class="w-full px-4 py-2 border rounded-lg">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input type="email" value="admin@rez.money" class="w-full px-4 py-2 border rounded-lg">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+                  <select class="w-full px-4 py-2 border rounded-lg">
+                    <option>Asia/Kolkata (IST)</option>
+                    <option>UTC</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="font-semibold mb-4">API Keys</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p class="font-medium">Production Key</p>
+                    <p class="text-xs text-gray-500 font-mono">rez_****************************a1b2</p>
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="text-purple-600 hover:underline text-sm">Copy</button>
+                    <button class="text-red-600 hover:underline text-sm">Revoke</button>
+                  </div>
+                </div>
+              </div>
+              <button class="mt-4 text-purple-600 hover:underline">
+                <i class="fas fa-plus mr-2"></i> Create New Key
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <h3 class="font-semibold mb-4">Integrations</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <i class="fab fa-google text-gray-600"></i>
+                    <span class="text-sm">Google Calendar</span>
+                  </div>
+                  <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">Connected</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <i class="fab fa-stripe text-gray-600"></i>
+                    <span class="text-sm">Stripe</span>
+                  </div>
+                  <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">Connected</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <i class="fas fa-video text-gray-600"></i>
+                    <span class="text-sm">Zoom</span>
+                  </div>
+                  <button class="text-purple-600 hover:underline text-sm">Connect</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="font-semibold mb-4">Quick Actions</h3>
+              <div class="space-y-2">
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-lg text-sm">
+                  <i class="fas fa-file-export mr-2"></i> Export Data
+                </button>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-lg text-sm">
+                  <i class="fas fa-file-import mr-2"></i> Import Data
+                </button>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-lg text-sm text-red-600">
+                  <i class="fas fa-trash mr-2"></i> Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // Navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = link.getAttribute('href').replace('#', '');
+
+        // Update active nav
+        document.querySelectorAll('.nav-link').forEach(l => {
+          l.classList.remove('bg-purple-600', 'text-white');
+          l.classList.add('hover:bg-slate-800', 'text-gray-300');
+        });
+        link.classList.add('bg-purple-600', 'text-white');
+        link.classList.remove('hover:bg-slate-800', 'text-gray-300');
+
+        // Show view
+        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+        document.getElementById(`view-${target}`)?.classList.remove('hidden');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,712 @@
+// ReZ Schedule - Universal Scheduling Platform
+// Enhanced Prisma Schema - World-Class Edition
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+  WAITLISTED
+}
+
+enum LocationType {
+  IN_PERSON
+  PHONE_CALL
+  VIDEO_CALL
+  CUSTOM_LINK
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIAL
+}
+
+enum QuestionType {
+  TEXT
+  TEXTAREA
+  SELECT
+  MULTI_SELECT
+  CHECKBOX
+  RADIO
+  FILE_UPLOAD
+  SIGNATURE
+}
+
+enum SpecialDateType {
+  BLOCKED
+  AVAILABLE
+  MODIFIED_HOURS
+}
+
+enum BookingType {
+  ONE_ON_ONE
+  GROUP
+  COLLECTIVE
+  ROUND_ROBIN
+  POOL
+  CLASS
+}
+
+enum SeatStatus {
+  AVAILABLE
+  RESERVED
+  BOOKED
+  WAITLISTED
+}
+
+enum RecurrenceType {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+enum SyncStatus {
+  PENDING
+  SYNCED
+  FAILED
+  CONFLICT
+}
+
+enum WebhookDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+  RETRYING
+}
+
+// ============================================
+// USER (Host/Provider)
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  userId        String    @unique  // RABTUL Auth user ID
+  username      String    @unique
+  name          String
+  email         String
+  timeZone      String    @default("Asia/Kolkata")
+  weekStartDay  Int       @default(0)  // 0=Sunday, 1=Monday
+  bio           String?
+  avatarUrl     String?
+  active        Boolean   @default(true)
+
+  // Organization
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  role          UserRole @default(MEMBER)
+
+  // Profile
+  phone         String?
+  language      String   @default("en")
+
+  // Video settings
+  videoProvider  String?  // zoom, google_meet, teams
+  videoSettings Json?
+
+  // Calendar integrations
+  calendarIntegrations CalendarIntegration[]
+
+  // Relations
+  eventTypes    EventType[]
+  schedules     Schedule[]
+  bookings      Booking[]   @relation("HostBookings")
+  webhooks      Webhook[]
+
+  // Audit
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+// ============================================
+// ORGANIZATION (Multi-tenant)
+// ============================================
+
+model Organization {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  logo          String?
+  primaryColor  String   @default("#000000")
+
+  // Settings
+  settings      Json?
+
+  // Members
+  members       User[]
+
+  // Event types
+  eventTypes    EventType[]
+
+  // Webhooks
+  webhooks      Webhook[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([slug])
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+  GUEST
+}
+
+// ============================================
+// CALENDAR INTEGRATION
+// ============================================
+
+model CalendarIntegration {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Provider
+  provider      String    // google, outlook, apple
+  email         String
+
+  // OAuth tokens
+  accessToken   String
+  refreshToken  String?
+  tokenExpiry   DateTime?
+
+  // Sync settings
+  syncStatus    SyncStatus @default(PENDING)
+  lastSyncedAt  DateTime?
+  syncDirection String    @default("bidirectional") // bidirectional, to_calendar, from_calendar
+
+  // Calendars
+  calendars     SelectedCalendar[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([userId, provider])
+  @@index([userId])
+}
+
+model SelectedCalendar {
+  id            String    @id @default(cuid())
+  integrationId String
+  integration   CalendarIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  externalId    String
+  name          String
+  color         String?
+  isPrimary     Boolean   @default(false)
+
+  // Sync tracking
+  syncToken     String?
+  channelId     String?
+  channelExpiry DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([integrationId, externalId])
+  @@index([integrationId])
+}
+
+// ============================================
+// EVENT TYPE (Booking Type/Template)
+// ============================================
+
+model EventType {
+  id              String        @id @default(cuid())
+  slug            String        // URL-safe identifier
+  title           String        // "30-min Consultation"
+  description     String?
+  duration        Int           // minutes
+  bufferTime      Int           @default(0)  // minutes after booking
+  beforeBufferTime Int         @default(0) // minutes before booking
+  locationType    LocationType  @default(VIDEO_CALL)
+
+  // Booking type
+  bookingType     BookingType   @default(ONE_ON_ONE)
+
+  // Capacity (for group bookings)
+  capacity        Int           @default(1)
+  seatsPerSlot    Int           @default(1)
+
+  // Location details
+  locationAddress String?
+  meetingUrl      String?
+  phoneNumber     String?
+
+  // Booking settings
+  requiresConfirmation Boolean   @default(false)
+  disableGuests        Boolean   @default(false)
+  hideBranding         Boolean   @default(false)
+  isPublic             Boolean   @default(true)
+
+  // Limits
+  maxBookingsPerDay  Int?
+  minNoticeMinutes   Int         @default(0)
+  maxNoticeMinutes   Int?        // Maximum advance booking
+  slotInterval       Int?        // Custom slot intervals
+
+  // Recurrence
+  recurrence        RecurrenceType @default(NONE)
+  recurringLimit   Int?
+
+  // Pricing
+  price            Float?
+  currency         String      @default("INR")
+  paidBooking      Boolean     @default(false)
+  depositAmount    Float?
+  depositRequired  Boolean     @default(false)
+
+  // Waiting list
+  waitingListEnabled Boolean   @default(false)
+  waitingListCapacity Int       @default(10)
+
+  // Custom branding
+  customBranding   Json?
+
+  // Metadata
+  metadata         Json?
+
+  // Organization
+  organizationId   String?
+  organization     Organization? @relation(fields: [organizationId], references: [id])
+
+  // Status
+  active           Boolean     @default(true)
+
+  // Relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedules       EventTypeSchedule[]
+  bookings        Booking[]
+  customQuestions CustomQuestion[]
+  seats           Seat[]
+  waitingList     WaitingList[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+  @@index([slug])
+  @@index([organizationId])
+  @@index([active])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+// ============================================
+// SEAT (For Group/Class Bookings)
+// ============================================
+
+model Seat {
+  id            String    @id @default(cuid())
+  eventTypeId   String
+  eventType     EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+
+  // Slot info
+  startTime     DateTime
+  endTime       DateTime
+
+  // Status
+  status        SeatStatus @default(AVAILABLE)
+  bookedBy      String?    // Attendee ID
+
+  // Hold (temporary reservation)
+  heldBy        String?
+  holdExpiresAt DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([eventTypeId, startTime, bookedBy])
+  @@index([eventTypeId, startTime])
+  @@index([status])
+}
+
+// ============================================
+// WAITING LIST
+// ============================================
+
+model WaitingList {
+  id            String    @id @default(cuid())
+  eventTypeId   String
+  eventType     EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+
+  // Requested slot
+  requestedStart DateTime
+  requestedEnd   DateTime
+
+  // Guest info
+  email         String
+  name          String
+  phone         String?
+
+  // Status
+  status        String    @default("waiting") // waiting, notified, booked, expired
+  position      Int       @default(0)
+
+  // Notification
+  notifiedAt    DateTime?
+  expiresAt     DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([eventTypeId, status])
+  @@index([requestedStart])
+}
+
+// ============================================
+// SCHEDULE (Availability Rules)
+// ============================================
+
+model Schedule {
+  id          String    @id @default(cuid())
+  name        String    @default("Default")
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isDefault   Boolean   @default(false)
+
+  // RRULE support
+  rrule       String?   // RFC 5545 RRULE string
+  rruleStart  DateTime?
+  rruleEnd    DateTime?
+
+  // Relations
+  availability ScheduleDay[]
+  eventTypes  EventTypeSchedule[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Schedule Day (availability for each weekday)
+model ScheduleDay {
+  id          String    @id @default(cuid())
+  scheduleId  String
+  schedule    Schedule  @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  dayOfWeek   Int       // 0=Sunday, 1=Monday, ... 6=Saturday
+  enabled     Boolean   @default(true)
+  startTime   String    // "09:00" (HH:mm)
+  endTime     String    // "17:00" (HH:mm)
+
+  // Recurrence
+  isRecurring Boolean   @default(false)
+  rrule       String?   // Override for specific day
+
+  @@unique([scheduleId, dayOfWeek])
+}
+
+// Event Type ↔ Schedule junction
+model EventTypeSchedule {
+  eventTypeId String
+  eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  scheduleId  String
+  schedule    Schedule  @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@id([eventTypeId, scheduleId])
+}
+
+// ============================================
+// BOOKING (Reservation)
+// ============================================
+
+model Booking {
+  id              String        @id @default(cuid())
+  uid             String        @unique @default(cuid())  // Public ID
+  idempotencyKey  String?      @unique
+
+  // Status
+  status          BookingStatus @default(PENDING)
+
+  // Event & Host
+  eventTypeId     String
+  eventType       EventType     @relation(fields: [eventTypeId], references: [id])
+  userId          String        // Host user ID
+  user            User          @relation("HostBookings", fields: [userId], references: [id])
+
+  // Timing
+  startTime       DateTime
+  endTime         DateTime
+  timezone        String        @default("Asia/Kolkata")
+  duration         Int?         // Actual duration (may differ from event type)
+
+  // Guest
+  attendeeId      String?
+  attendee        Attendee?     @relation(fields: [attendeeId], references: [id])
+  guestTimezone   String?
+
+  // Additional guests (for group bookings)
+  additionalGuests Int           @default(0)
+
+  // Location
+  locationType     LocationType
+  locationDetails Json?
+
+  // Payment
+  price           Float?
+  currency        String?
+  paymentId       String?
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   String?
+
+  // Reschedule/Cancel
+  rescheduledFrom String?       // Previous booking UID
+  rescheduledTo   String?       // New booking UID
+  cancellationReason String?
+  cancelledAt    DateTime?
+
+  // Source tracking
+  source          String?       // web, api, widget, import
+  utmData         Json?
+
+  // Metadata
+  metadata         Json?
+  responses       Json?         // Custom question answers
+
+  // Reminders
+  remindersSent   Json?         // Track sent reminders
+
+  // Timestamps
+  confirmedAt     DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([eventTypeId, startTime])
+  @@index([userId, startTime])
+  @@index([status])
+  @@index([startTime])
+  @@index([attendeeId])
+}
+
+// ============================================
+// ATTENDEE (Guest)
+// ============================================
+
+model Attendee {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String
+  phone       String?
+  timeZone    String?
+  photoUrl    String?
+
+  // Preferences
+  preferences Json?
+
+  // Relations
+  bookings    Booking[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ============================================
+// CUSTOM QUESTIONS
+// ============================================
+
+model CustomQuestion {
+  id          String       @id @default(cuid())
+  eventTypeId String
+  eventType   EventType    @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  question    String
+  type        QuestionType @default(TEXT)
+  required    Boolean      @default(false)
+  options     String[]     // For SELECT type
+  placeholder String?
+  label       String?
+
+  // Validation
+  minLength   Int?
+  maxLength   Int?
+  pattern     String?      // Regex pattern
+
+  // Conditional logic
+  showIf      Json?        // { questionId, operator, value }
+
+  order       Int          @default(0)
+
+  createdAt   DateTime     @default(now())
+
+  @@index([eventTypeId])
+}
+
+// ============================================
+// SPECIAL DATES (Holidays, Exceptions)
+// ============================================
+
+model SpecialDate {
+  id          String         @id @default(cuid())
+  userId      String
+  date        DateTime       @db.Date
+  type        SpecialDateType
+  startTime  String?         // For partial block
+  endTime    String?
+  title       String?
+  isRecurring Boolean       @default(false)
+
+  @@index([userId, date])
+}
+
+// ============================================
+// BOOKING REFERENCE (Calendar Sync)
+// ============================================
+
+model BookingReference {
+  id          String    @id @default(cuid())
+  bookingId   String    @unique
+  type        String    // "google_calendar", "apple_calendar", "outlook"
+  externalId  String
+  externalLink String?
+  meetingId   String?
+  meetingUrl  String?
+  password    String?
+  organizerEmail String?
+
+  // Sync status
+  syncStatus  SyncStatus @default(PENDING)
+  lastSyncedAt DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ============================================
+// WEBHOOK SYSTEM
+// ============================================
+
+model Webhook {
+  id            String    @id @default(cuid())
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Endpoint
+  url           String
+  secret        String    // For signature verification
+
+  // Triggers
+  triggers      String[]  // booking.created, booking.cancelled, etc.
+
+  // Active state
+  active        Boolean   @default(true)
+
+  // Settings
+  settings      Json?     // { includeFields: [], excludeFields: [] }
+
+  // Stats
+  lastTriggeredAt DateTime?
+  failureCount   Int       @default(0)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model WebhookDelivery {
+  id            String    @id @default(cuid())
+  webhookId     String
+
+  // Event info
+  eventType     String
+  eventId       String
+
+  // Delivery
+  payload       Json
+  responseCode  Int?
+  responseBody  String?
+  attemptCount  Int       @default(1)
+  maxAttempts   Int       @default(5)
+
+  // Status
+  status        WebhookDeliveryStatus @default(PENDING)
+  nextRetryAt   DateTime?
+  lastAttemptAt DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([webhookId, status])
+  @@index([status, nextRetryAt])
+}
+
+// ============================================
+// AUDIT LOG
+// ============================================
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  action        String    // booking.created, booking.cancelled, etc.
+  entityType    String    // booking, eventType, user, etc.
+  entityId      String
+
+  // Actor
+  actorType     String    // user, system, api
+  actorId       String?
+  actorEmail    String?
+  ipAddress     String?
+  userAgent     String?
+
+  // Change details
+  changes       Json?     // { before: {}, after: {} }
+  metadata      Json?
+
+  createdAt     DateTime  @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ============================================
+// VIDEO MEETING
+// ============================================
+
+model VideoMeeting {
+  id            String    @id @default(cuid())
+  bookingId     String    @unique
+
+  provider      String    // zoom, google_meet, teams, daily
+  meetingId     String
+  meetingUrl    String
+  hostUrl       String?
+  password      String?
+
+  // Timing
+  startUrl     String?   // Host join URL
+  joinUrl      String?   // Guest join URL
+
+  // Status
+  status        String    @default("scheduled") // scheduled, started, ended, cancelled
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}

@@ -1,0 +1,210 @@
+groups:
+- name: infrastructure.rules
+  rules:
+
+  # ============================================================================
+  # SYSTEM RESOURCE ALERTS
+  # ============================================================================
+
+  # Critical CPU Usage
+  - alert: CriticalCPUUsage
+    expr: (100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 95
+    for: 2m
+    labels:
+      severity: critical
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "CRITICAL: CPU usage critically high on {{ $labels.instance }}"
+      description: "CPU usage is above 95% for more than 2 minutes on {{ $labels.instance }}. Immediate action required."
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-cpu"
+
+  # High CPU Usage
+  - alert: HighCPUUsage
+    expr: (100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+    for: 5m
+    labels:
+      severity: warning
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "High CPU usage on {{ $labels.instance }}"
+      description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-cpu"
+
+  # Critical Memory Usage
+  - alert: CriticalMemoryUsage
+    expr: (1 - ((node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))) * 100 > 95
+    for: 2m
+    labels:
+      severity: critical
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "CRITICAL: Memory usage critically high on {{ $labels.instance }}"
+      description: "Memory usage is above 95% for more than 2 minutes on {{ $labels.instance }}. Risk of OOM kills."
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-memory"
+
+  # High Memory Usage
+  - alert: HighMemoryUsage
+    expr: (1 - ((node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))) * 100 > 85
+    for: 5m
+    labels:
+      severity: warning
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "High memory usage on {{ $labels.instance }}"
+      description: "Memory usage is above 85% for more than 5 minutes on {{ $labels.instance }}"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-memory"
+
+  # Critical Disk Space
+  - alert: CriticalDiskSpace
+    expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 10
+    for: 1m
+    labels:
+      severity: critical
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "CRITICAL: Disk space critically low on {{ $labels.instance }}"
+      description: "Disk space is below 10% on {{ $labels.instance }} ({{ $labels.mountpoint }}). Risk of service disruption."
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/low-disk-space"
+
+  # Low Disk Space Warning
+  - alert: LowDiskSpace
+    expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 20
+    for: 5m
+    labels:
+      severity: warning
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "Low disk space on {{ $labels.instance }}"
+      description: "Disk space is below 20% on {{ $labels.instance }} ({{ $labels.mountpoint }})"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/low-disk-space"
+
+  # High Disk I/O
+  - alert: HighDiskIO
+    expr: irate(node_disk_io_time_seconds_total[5m]) > 0.8
+    for: 10m
+    labels:
+      severity: warning
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "High disk I/O on {{ $labels.instance }}"
+      description: "Disk I/O utilization is above 80% for more than 10 minutes on {{ $labels.instance }}"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-disk-io"
+
+  # High Network Traffic
+  - alert: HighNetworkTraffic
+    expr: (irate(node_network_receive_bytes_total[5m]) + irate(node_network_transmit_bytes_total[5m])) / 1024 / 1024 > 100
+    for: 10m
+    labels:
+      severity: warning
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "High network traffic on {{ $labels.instance }}"
+      description: "Network traffic is above 100 MB/s for more than 10 minutes on {{ $labels.instance }}"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-network-traffic"
+
+  # ============================================================================
+  # CONTAINER AND DOCKER ALERTS
+  # ============================================================================
+
+  # Container High CPU
+  - alert: ContainerHighCPU
+    expr: sum(rate(container_cpu_usage_seconds_total{name!=""}[5m])) by (name) * 100 > 80
+    for: 5m
+    labels:
+      severity: warning
+      team: platform
+      component: container
+    annotations:
+      summary: "High CPU usage in container {{ $labels.name }}"
+      description: "Container {{ $labels.name }} is using more than 80% CPU for 5 minutes"
+      runbook_url: "https://runbooks.restauranthub.com/containers/high-cpu"
+
+  # Container High Memory
+  - alert: ContainerHighMemory
+    expr: (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) * 100 > 90
+    for: 5m
+    labels:
+      severity: warning
+      team: platform
+      component: container
+    annotations:
+      summary: "High memory usage in container {{ $labels.name }}"
+      description: "Container {{ $labels.name }} is using more than 90% of its memory limit for 5 minutes"
+      runbook_url: "https://runbooks.restauranthub.com/containers/high-memory"
+
+  # Container Restarts
+  - alert: ContainerRestarts
+    expr: increase(container_start_time_seconds{name!=""}[1h]) > 3
+    for: 0m
+    labels:
+      severity: warning
+      team: platform
+      component: container
+    annotations:
+      summary: "Container {{ $labels.name }} restarting frequently"
+      description: "Container {{ $labels.name }} has restarted more than 3 times in the last hour"
+      runbook_url: "https://runbooks.restauranthub.com/containers/frequent-restarts"
+
+  # ============================================================================
+  # NODE AND SYSTEM HEALTH
+  # ============================================================================
+
+  # Node Down
+  - alert: NodeDown
+    expr: up{job="node-exporter"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "Node {{ $labels.instance }} is down"
+      description: "Node exporter on {{ $labels.instance }} has been down for more than 1 minute"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/node-down"
+
+  # System Load High
+  - alert: SystemLoadHigh
+    expr: node_load15 / count(count(node_cpu_seconds_total) by (cpu)) > 2
+    for: 10m
+    labels:
+      severity: warning
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "High system load on {{ $labels.instance }}"
+      description: "15-minute load average is more than 2x the number of CPUs on {{ $labels.instance }}"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-load"
+
+  # File Descriptor Usage High
+  - alert: FileDescriptorUsageHigh
+    expr: (node_filefd_allocated / node_filefd_maximum) * 100 > 80
+    for: 10m
+    labels:
+      severity: warning
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "High file descriptor usage on {{ $labels.instance }}"
+      description: "File descriptor usage is above 80% on {{ $labels.instance }}"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-fd-usage"
+
+  # Inode Usage High
+  - alert: InodeUsageHigh
+    expr: (node_filesystem_files_free{fstype!="tmpfs"} / node_filesystem_files{fstype!="tmpfs"}) * 100 < 20
+    for: 10m
+    labels:
+      severity: warning
+      team: platform
+      component: infrastructure
+    annotations:
+      summary: "High inode usage on {{ $labels.instance }}"
+      description: "Inode usage is above 80% on {{ $labels.instance }} ({{ $labels.mountpoint }})"
+      runbook_url: "https://runbooks.restauranthub.com/infrastructure/high-inode-usage"

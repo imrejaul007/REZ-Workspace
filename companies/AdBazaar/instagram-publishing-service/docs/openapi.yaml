@@ -1,0 +1,946 @@
+openapi: 3.0.0
+info:
+  title: Instagram Publishing Service API
+  version: 1.0.0
+  description: |
+    API for publishing content to Instagram - feed posts, Reels, and Stories.
+    Supports immediate publishing, scheduling, and draft management.
+  contact:
+    name: AdBazaar Support
+    email: support@adbazaar.com
+  license:
+    name: Proprietary
+    url: https://adbazaar.com/license
+
+servers:
+  - url: http://localhost:5081
+    description: Local development server
+  - url: https://api.adbazaar.com/publish/v1
+    description: Production server
+
+tags:
+  - name: System
+    description: System health and monitoring
+  - name: Publishing
+    description: Content publishing operations
+  - name: Accounts
+    description: Instagram account management
+  - name: Webhooks
+    description: Instagram webhook handlers
+  - name: Drafts
+    description: Draft management
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the current health status of the service
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+                service: instagram-publishing-service
+                version: "1.0.0"
+                timestamp: "2026-06-08T10:30:00.000Z"
+                uptime: 3600
+                environment: production
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics for monitoring
+      tags:
+        - System
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /api:
+    get:
+      summary: API info
+      description: Returns API documentation and endpoint overview
+      tags:
+        - System
+      responses:
+        '200':
+          description: API information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                  version:
+                    type: string
+                  description:
+                    type: string
+                  endpoints:
+                    type: object
+
+  # ============ PUBLISHING ============
+  /api/publish:
+    post:
+      summary: Publish content immediately
+      description: Publish content to Instagram immediately
+      tags:
+        - Publishing
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishContentRequest'
+            example:
+              accountId: "acc_123456"
+              contentType: feed_image
+              mediaUrl: "https://example.com/image.jpg"
+              caption: "Check out our new collection! #fashion #style"
+              hashtags:
+                - fashion
+                - style
+                - trending
+              location:
+                id: "123456789"
+                name: "Mumbai, Maharashtra"
+              userTags:
+                - "@fashionista"
+              productTags:
+                - productId: "prod_789"
+                  x: 50
+                  y: 50
+              firstComment: "Shop now at our store!"
+      responses:
+        '201':
+          description: Content published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Publishing failed
+
+  /api/publish/schedule:
+    post:
+      summary: Schedule content
+      description: Schedule content for future publishing
+      tags:
+        - Publishing
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleContentRequest'
+            example:
+              accountId: "acc_123456"
+              contentType: feed_image
+              mediaUrl: "https://example.com/image.jpg"
+              caption: "Mark your calendars! Sale starts tomorrow"
+              scheduledTime: "2026-06-15T10:00:00Z"
+      responses:
+        '201':
+          description: Content scheduled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleResponse'
+        '400':
+          description: Invalid request or scheduled time in past
+
+  /api/publish/draft:
+    post:
+      summary: Save as draft
+      description: Save content as a draft for later editing
+      tags:
+        - Drafts
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveDraftRequest'
+      responses:
+        '201':
+          description: Draft saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftResponse'
+
+  /api/publish/drafts:
+    get:
+      summary: List drafts
+      description: Get all drafts for an account
+      tags:
+        - Drafts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: accountId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Account ID to fetch drafts for
+      responses:
+        '200':
+          description: Drafts retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftListResponse'
+        '400':
+          description: Missing accountId parameter
+
+  /api/content/{id}:
+    get:
+      summary: Get content
+      description: Get published content by ID
+      tags:
+        - Publishing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Content ID
+      responses:
+        '200':
+          description: Content retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentResponse'
+        '404':
+          description: Content not found
+
+    delete:
+      summary: Delete content
+      description: Delete published content
+      tags:
+        - Publishing
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Content ID
+      responses:
+        '200':
+          description: Content deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /api/content/{id}/metrics:
+    put:
+      summary: Update metrics
+      description: Update content metrics from Instagram
+      tags:
+        - Publishing
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Content ID
+      responses:
+        '200':
+          description: Metrics updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  # ============ ACCOUNTS ============
+  /api/accounts:
+    get:
+      summary: List accounts
+      description: Get all connected Instagram Business accounts
+      tags:
+        - Accounts
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Accounts retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountListResponse'
+
+  /api/accounts/{id}:
+    get:
+      summary: Get account
+      description: Get account details by ID
+      tags:
+        - Accounts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Account ID
+      responses:
+        '200':
+          description: Account retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '404':
+          description: Account not found
+
+  /api/accounts/{id}/connect:
+    post:
+      summary: Connect account
+      description: Connect an Instagram Business account
+      tags:
+        - Accounts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Account ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accessToken
+              properties:
+                accessToken:
+                  type: string
+                pageId:
+                  type: string
+            example:
+              accessToken: "IGQVJ..."
+              pageId: "123456789"
+      responses:
+        '201':
+          description: Account connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountConnectionResponse'
+
+  /api/accounts/{id}/disconnect:
+    post:
+      summary: Disconnect account
+      description: Disconnect an Instagram account
+      tags:
+        - Accounts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Account ID
+      responses:
+        '200':
+          description: Account disconnected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /api/accounts/{id}/sync:
+    post:
+      summary: Sync account
+      description: Sync account data from Instagram
+      tags:
+        - Accounts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Account ID
+      responses:
+        '200':
+          description: Account synced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+  /api/accounts/{id}/content:
+    get:
+      summary: Get account content
+      description: Get all content for an account
+      tags:
+        - Accounts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Account ID
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: contentType
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Content retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentListResponse'
+
+  /api/accounts/{id}/stats:
+    get:
+      summary: Get account stats
+      description: Get account statistics
+      tags:
+        - Accounts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Account ID
+      responses:
+        '200':
+          description: Stats retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatsResponse'
+
+  # ============ WEBHOOKS ============
+  /api/webhooks/instagram:
+    get:
+      summary: Webhook verification
+      description: Verify webhook endpoint for Instagram
+      tags:
+        - Webhooks
+      parameters:
+        - name: hub.mode
+          in: query
+          schema:
+            type: string
+        - name: hub.verify_token
+          in: query
+          schema:
+            type: string
+        - name: hub.challenge
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Webhook verified
+          content:
+            text/plain:
+              schema:
+                type: string
+        '403':
+          description: Verification failed
+
+    post:
+      summary: Webhook callback
+      description: Handle Instagram webhook events
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstagramWebhookPayload'
+      responses:
+        '200':
+          description: Webhook processed
+          content:
+            text/plain:
+              schema:
+                type: string
+
+# ============ COMPONENTS ============
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, error]
+        service:
+          type: string
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+        environment:
+          type: string
+
+    PublishContentRequest:
+      type: object
+      required:
+        - accountId
+        - contentType
+      properties:
+        accountId:
+          type: string
+          description: Instagram account ID
+        contentType:
+          type: string
+          enum: [feed_image, feed_album, feed_video, reel, story]
+        mediaUrl:
+          type: string
+          format: uri
+          description: URL for single media (image/video)
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: URLs for album (up to 10)
+        caption:
+          type: string
+          maxLength: 2200
+        hashtags:
+          type: array
+          items:
+            type: string
+          maxItems: 30
+        location:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+        userTags:
+          type: array
+          items:
+            type: string
+          description: Instagram usernames to tag
+        productTags:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+              x:
+                type: number
+                minimum: 0
+                maximum: 100
+              y:
+                type: number
+                minimum: 0
+                maximum: 100
+        storyConfig:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [image, video, poll, question, link]
+            pollQuestion:
+              type: string
+            pollOptions:
+              type: array
+              items:
+                type: string
+            question:
+              type: string
+            linkUrl:
+              type: string
+              format: uri
+            stickerElements:
+              type: array
+              items:
+                type: object
+        firstComment:
+          type: string
+          maxLength: 300
+
+    ScheduleContentRequest:
+      allOf:
+        - $ref: '#/components/schemas/PublishContentRequest'
+        - type: object
+          required:
+            - scheduledTime
+          properties:
+            scheduledTime:
+              type: string
+              format: date-time
+              description: ISO 8601 datetime for scheduled publishing
+
+    PublishResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            publishRequestId:
+              type: string
+            publishedContentId:
+              type: string
+            instagramMediaId:
+              type: string
+            instagramPermalink:
+              type: string
+              format: uri
+
+    ScheduleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            scheduleId:
+              type: string
+            scheduledTime:
+              type: string
+              format: date-time
+
+    SaveDraftRequest:
+      type: object
+      required:
+        - accountId
+        - contentType
+      properties:
+        accountId:
+          type: string
+        contentType:
+          type: string
+          enum: [feed_image, feed_album, feed_video, reel]
+        mediaUrl:
+          type: string
+          format: uri
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+        caption:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        location:
+          type: object
+
+    DraftResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            draftId:
+              type: string
+
+    DraftListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            drafts:
+              type: array
+              items:
+                $ref: '#/components/schemas/Draft'
+            count:
+              type: integer
+
+    Draft:
+      type: object
+      properties:
+        _id:
+          type: string
+        accountId:
+          type: string
+        contentType:
+          type: string
+        mediaUrl:
+          type: string
+        caption:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ContentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Content'
+
+    Content:
+      type: object
+      properties:
+        _id:
+          type: string
+        accountId:
+          type: string
+        contentType:
+          type: string
+        instagramMediaId:
+          type: string
+        instagramPermalink:
+          type: string
+        caption:
+          type: string
+        mediaUrl:
+          type: string
+        metrics:
+          $ref: '#/components/schemas/ContentMetrics'
+        status:
+          type: string
+          enum: [draft, scheduled, published, failed]
+        scheduledTime:
+          type: string
+          format: date-time
+        publishedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    ContentMetrics:
+      type: object
+      properties:
+        likes:
+          type: integer
+        comments:
+          type: integer
+        saves:
+          type: integer
+        shares:
+          type: integer
+        reach:
+          type: integer
+        impressions:
+          type: integer
+
+    ContentListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Content'
+            total:
+              type: integer
+            page:
+              type: integer
+            limit:
+              type: integer
+
+    Account:
+      type: object
+      properties:
+        _id:
+          type: string
+        instagramId:
+          type: string
+        username:
+          type: string
+        displayName:
+          type: string
+        profilePicture:
+          type: string
+          format: uri
+        followersCount:
+          type: integer
+        followingCount:
+          type: integer
+        mediaCount:
+          type: integer
+        connected:
+          type: boolean
+        accessToken:
+          type: string
+        lastSyncedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    AccountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Account'
+
+    AccountListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            accounts:
+              type: array
+              items:
+                $ref: '#/components/schemas/Account'
+            count:
+              type: integer
+
+    AccountConnectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            accountId:
+              type: string
+            success:
+              type: boolean
+
+    AccountStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            accountId:
+              type: string
+            totalPosts:
+              type: integer
+            totalLikes:
+              type: integer
+            totalComments:
+              type: integer
+            totalSaves:
+              type: integer
+            avgLikes:
+              type: integer
+            avgComments:
+              type: integer
+            avgSaves:
+              type: integer
+
+    InstagramWebhookPayload:
+      type: object
+      properties:
+        object:
+          type: string
+          enum: [instagram]
+        entry:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              time:
+                type: integer
+              changes:
+                type: array
+              messaging:
+                type: array
+
+    DeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string

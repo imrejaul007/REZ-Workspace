@@ -1,0 +1,11 @@
+{
+  "name": "@rez/sites-service",
+  "version": "1.0.0",
+  "description": "REZ Sites - Webflow competitor for no-code websites",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  }
+}

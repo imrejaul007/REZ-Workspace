@@ -1,0 +1,354 @@
+# Alertmanager configuration for RestaurantHub
+global:
+  # SMTP configuration for email alerts
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@restauranthub.com'
+  smtp_auth_username: 'alerts@restauranthub.com'
+  smtp_auth_password: 'your-app-password'
+  smtp_require_tls: true
+
+  # Slack configuration
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+  # Discord configuration
+  discord_webhook_url: 'https://discord.com/api/webhooks/YOUR/DISCORD/WEBHOOK'
+
+  # Microsoft Teams configuration
+  teams_webhook_url: 'https://outlook.office.com/webhook/YOUR/TEAMS/WEBHOOK'
+
+  # Telegram configuration
+  telegram_api_url: 'https://api.telegram.org/bot'
+  telegram_bot_token: 'YOUR_TELEGRAM_BOT_TOKEN'
+
+  # Default template files
+  templates:
+    - '/etc/alertmanager/templates/*.tmpl'
+
+# Route configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default-receiver'
+
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 0s
+      group_interval: 5s
+      repeat_interval: 5m
+      routes:
+        # API service critical issues
+        - match:
+            service: api
+        receiver: 'backend-team-critical'
+
+        # Database critical issues
+        - match:
+            service: database
+        receiver: 'backend-team-critical'
+
+        # Infrastructure critical issues
+        - match:
+            service: infrastructure
+        receiver: 'devops-team-critical'
+
+        # Security critical issues
+        - match:
+            team: security
+        receiver: 'security-team-critical'
+
+        # Payment critical issues
+        - match:
+            team: payments
+        receiver: 'payments-team-critical'
+
+    # Warning alerts - regular notification
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 5s
+      group_interval: 5m
+      repeat_interval: 2h
+      routes:
+        # Backend team warnings
+        - match:
+            team: backend
+        receiver: 'backend-team-warnings'
+
+        # DevOps team warnings
+        - match:
+            team: devops
+        receiver: 'devops-team-warnings'
+
+        # Product team warnings
+        - match:
+            team: product
+        receiver: 'product-team-warnings'
+
+        # Security team warnings
+        - match:
+            team: security
+        receiver: 'security-team-warnings'
+
+    # Business alerts
+    - match:
+        service: business
+      receiver: 'business-alerts'
+      group_wait: 15s
+      group_interval: 10m
+      repeat_interval: 4h
+
+    # Monitoring system alerts
+    - match:
+        service: monitoring
+      receiver: 'monitoring-alerts'
+      group_wait: 30s
+      group_interval: 15m
+      repeat_interval: 6h
+
+    # Maintenance mode - silence all non-critical alerts
+    - match:
+        maintenance: 'true'
+      receiver: 'null-receiver'
+      continue: false
+
+# Inhibit rules - suppress certain alerts when others are firing
+inhibit_rules:
+  # Inhibit warning alerts when critical alerts are firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+  # Inhibit individual service alerts when the whole system is down
+  - source_match:
+      alertname: 'APIServiceDown'
+    target_match_re:
+      alertname: '.*'
+      service: 'api'
+
+  # Inhibit high error rate when service is down
+  - source_match:
+      alertname: 'APIServiceDown'
+    target_match:
+      alertname: 'HighErrorRate'
+
+  # Inhibit database-related alerts when PostgreSQL is down
+  - source_match:
+      alertname: 'PostgreSQLDown'
+    target_match_re:
+      alertname: '.*'
+      service: 'database'
+
+  # Inhibit cache-related alerts when Redis is down
+  - source_match:
+      alertname: 'RedisDown'
+    target_match_re:
+      alertname: '.*'
+      service: 'cache'
+
+# Receivers configuration
+receivers:
+  # Default receiver
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'devops@restauranthub.com'
+        subject: '{{ .GroupLabels.alertname }} - RestaurantHub Alert'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Service: {{ .Labels.service }}
+          Team: {{ .Labels.team }}
+          {{ end }}
+
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'alerts-critical@restauranthub.com'
+        subject: '🚨 CRITICAL ALERT: {{ .GroupLabels.alertname }}'
+        body: |
+          CRITICAL ALERT FIRED
+
+          {{ range .Alerts }}
+          🔥 {{ .Annotations.summary }}
+          📝 Description: {{ .Annotations.description }}
+          🏷️ Service: {{ .Labels.service }}
+          👥 Team: {{ .Labels.team }}
+          📊 Runbook: {{ .Annotations.runbook_url }}
+          📈 Dashboard: {{ .Annotations.dashboard_url }}
+          ⏰ Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ end }}
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/CRITICAL/WEBHOOK'
+        channel: '#alerts-critical'
+        title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+
+          *Details:*
+          • Service: {{ .Labels.service }}
+          • Team: {{ .Labels.team }}
+          • <{{ .Annotations.runbook_url }}|Runbook> | <{{ .Annotations.dashboard_url }}|Dashboard>
+          {{ end }}
+        send_resolved: true
+    pagerduty_configs:
+      - routing_key: 'your-pagerduty-integration-key'
+        description: '{{ .GroupLabels.alertname }}'
+        details:
+          summary: '{{ .GroupLabels.alertname }}'
+          source: 'RestaurantHub Monitoring'
+          severity: 'critical'
+
+  # Backend team critical
+  - name: 'backend-team-critical'
+    email_configs:
+      - to: 'backend-team@restauranthub.com'
+        subject: '🚨 BACKEND CRITICAL: {{ .GroupLabels.alertname }}'
+        body: |
+          CRITICAL BACKEND ALERT
+
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/BACKEND/WEBHOOK'
+        channel: '#backend-alerts'
+        title: '🚨 Backend Critical: {{ .GroupLabels.alertname }}'
+
+  # DevOps team critical
+  - name: 'devops-team-critical'
+    email_configs:
+      - to: 'devops-team@restauranthub.com'
+        subject: '🚨 INFRASTRUCTURE CRITICAL: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/DEVOPS/WEBHOOK'
+        channel: '#devops-alerts'
+        title: '🚨 Infrastructure Critical: {{ .GroupLabels.alertname }}'
+
+  # Security team critical
+  - name: 'security-team-critical'
+    email_configs:
+      - to: 'security-team@restauranthub.com'
+        subject: '🔒 SECURITY CRITICAL: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SECURITY/WEBHOOK'
+        channel: '#security-alerts'
+        title: '🔒 Security Critical: {{ .GroupLabels.alertname }}'
+    pagerduty_configs:
+      - routing_key: 'security-pagerduty-key'
+        description: 'Security Alert: {{ .GroupLabels.alertname }}'
+
+  # Payments team critical
+  - name: 'payments-team-critical'
+    email_configs:
+      - to: 'payments-team@restauranthub.com'
+        subject: '💳 PAYMENTS CRITICAL: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/PAYMENTS/WEBHOOK'
+        channel: '#payments-alerts'
+        title: '💳 Payments Critical: {{ .GroupLabels.alertname }}'
+
+  # Warning alerts
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'alerts-warning@restauranthub.com'
+        subject: '⚠️ WARNING: {{ .GroupLabels.alertname }}'
+        body: |
+          WARNING ALERT FIRED
+
+          {{ range .Alerts }}
+          ⚠️ {{ .Annotations.summary }}
+          📝 Description: {{ .Annotations.description }}
+          🏷️ Service: {{ .Labels.service }}
+          👥 Team: {{ .Labels.team }}
+          📊 Runbook: {{ .Annotations.runbook_url }}
+          ⏰ Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ end }}
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/WARNING/WEBHOOK'
+        channel: '#alerts-warning'
+        title: '⚠️ Warning: {{ .GroupLabels.alertname }}'
+
+  # Team-specific warning receivers
+  - name: 'backend-team-warnings'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/BACKEND/WEBHOOK'
+        channel: '#backend-alerts'
+        title: '⚠️ Backend Warning: {{ .GroupLabels.alertname }}'
+
+  - name: 'devops-team-warnings'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/DEVOPS/WEBHOOK'
+        channel: '#devops-alerts'
+        title: '⚠️ DevOps Warning: {{ .GroupLabels.alertname }}'
+
+  - name: 'product-team-warnings'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/PRODUCT/WEBHOOK'
+        channel: '#product-alerts'
+        title: '⚠️ Product Warning: {{ .GroupLabels.alertname }}'
+
+  - name: 'security-team-warnings'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SECURITY/WEBHOOK'
+        channel: '#security-alerts'
+        title: '🔒 Security Warning: {{ .GroupLabels.alertname }}'
+
+  # Business alerts
+  - name: 'business-alerts'
+    email_configs:
+      - to: 'business-ops@restauranthub.com'
+        subject: '📊 BUSINESS ALERT: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/BUSINESS/WEBHOOK'
+        channel: '#business-alerts'
+        title: '📊 Business Alert: {{ .GroupLabels.alertname }}'
+
+  # Monitoring system alerts
+  - name: 'monitoring-alerts'
+    email_configs:
+      - to: 'devops@restauranthub.com'
+        subject: '🔧 MONITORING: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/MONITORING/WEBHOOK'
+        channel: '#monitoring'
+        title: '🔧 Monitoring: {{ .GroupLabels.alertname }}'
+
+  # Null receiver for suppressed alerts
+  - name: 'null-receiver'
+
+# Time-based silencing
+time_intervals:
+  - name: business-hours
+    time_intervals:
+      - times:
+          - start_time: '09:00'
+            end_time: '17:00'
+        weekdays: ['monday:friday']
+        location: 'America/New_York'
+
+  - name: weekends
+    time_intervals:
+      - times:
+          - start_time: '00:00'
+            end_time: '23:59'
+        weekdays: ['saturday', 'sunday']
+
+  - name: maintenance-window
+    time_intervals:
+      - times:
+          - start_time: '02:00'
+            end_time: '04:00'
+        weekdays: ['sunday']

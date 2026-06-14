@@ -1,0 +1,560 @@
+openapi: 3.0.3
+info:
+  title: REZ Verify QR Service API - v2.0 New Endpoints
+  description: |
+    New endpoints added in v2.0 for Ownership Passport, Resale Verification, OEM Dashboard, and Insurance.
+
+    ## New in v2.0
+    - Ownership Passport & Certificates
+    - Resale Verification & Safety
+    - OEM Dashboard & Analytics
+    - Counterfeit Detection
+    - Fraud Maps
+    - Predictive Analytics
+    - Recall Campaigns
+    - Insurance Policies
+  version: 2.0.0
+  contact:
+    name: ReZ Platform Team
+    email: platform@rez.money
+
+servers:
+  - url: https://verify-qr.rezapp.com
+    description: Production
+  - url: http://localhost:4003
+    description: Development
+
+tags:
+  - name: Ownership Passport
+    description: Ownership passport and certificates
+  - name: Resale Verification
+    description: Buyer protection and resale safety
+  - name: OEM Dashboard
+    description: Enterprise brand analytics
+  - name: Insurance
+    description: Insurance policies
+
+paths:
+
+  # ============================================
+  # OWNERSHIP PASSPORT
+  # ============================================
+
+  /api/passport/create:
+    post:
+      tags: [Ownership Passport]
+      summary: Create ownership passport
+      description: Create ownership passport for verified product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serial_number, user_id, customer_name, customer_phone, purchase_date]
+              properties:
+                serial_number: { type: string, example: "REZ123456789" }
+                user_id: { type: string, example: "user_123" }
+                customer_name: { type: string, example: "John Doe" }
+                customer_phone: { type: string, example: "+919999999999" }
+                customer_email: { type: string, example: "john@example.com" }
+                purchase_date: { type: string, format: date, example: "2026-05-01" }
+                purchase_price: { type: number, example: 79999 }
+                purchase_location: { type: string, example: "Mumbai" }
+                invoice_url: { type: string }
+                warranty_months: { type: integer, default: 12 }
+      responses:
+        '200':
+          description: Passport created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  passport_id: { type: string }
+                  certificate:
+                    type: object
+                    properties:
+                      certificate_id: { type: string }
+                      hash: { type: string }
+                      qr_code: { type: string }
+                  warranty:
+                    type: object
+
+  /api/passport/{serial}:
+    get:
+      tags: [Ownership Passport]
+      summary: Get ownership passport
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          schema: { type: string }
+        - name: include_history
+          in: query
+          schema: { type: boolean, default: true }
+        - name: include_service
+          in: query
+          schema: { type: boolean, default: true }
+      responses:
+        '200':
+          description: Passport details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  passport_id: { type: string }
+                  serial_number: { type: string }
+                  product:
+                    type: object
+                    properties:
+                      brand: { type: string }
+                      model: { type: string }
+                  ownership:
+                    type: object
+                    properties:
+                      current_owner: { type: object }
+                      chain_length: { type: integer }
+                  warranty:
+                    type: object
+                  service_history:
+                    type: object
+
+  /api/passport/{serial}/certificate:
+    get:
+      tags: [Ownership Passport]
+      summary: Get shareable certificate
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          schema: { type: string }
+        - name: format
+          in: query
+          schema: { type: string, enum: [json, minimal] }
+      responses:
+        '200':
+          description: Certificate data
+
+  /api/passport/{serial}/transfer:
+    post:
+      tags: [Ownership Passport]
+      summary: Transfer ownership
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [from_user_id, to_user_id, to_name, to_phone]
+              properties:
+                from_user_id: { type: string }
+                to_user_id: { type: string }
+                to_name: { type: string }
+                to_phone: { type: string }
+                to_email: { type: string }
+                transfer_type:
+                  type: string
+                  enum: [resale, gift]
+                  default: resale
+                sale_price: { type: number }
+      responses:
+        '200':
+          description: Transfer initiated
+
+  /api/passport/{serial}/verify-chain:
+    post:
+      tags: [Ownership Passport]
+      summary: Verify ownership chain
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                buyer_user_id: { type: string }
+                buyer_name: { type: string }
+                buyer_phone: { type: string }
+      responses:
+        '200':
+          description: Verification report
+
+  /api/passport/service/export/{serial}:
+    get:
+      tags: [Ownership Passport]
+      summary: Export service history
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          schema: { type: string }
+        - name: purpose
+          in: query
+          schema: { type: string, default: resale }
+      responses:
+        '200':
+          description: Service history export
+
+  # ============================================
+  # RESALE VERIFICATION
+  # ============================================
+
+  /api/resale/verify:
+    post:
+      tags: [Resale Verification]
+      summary: Request resale verification
+      description: Buyer initiates verification before purchase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serial_number, buyer_user_id, buyer_name, buyer_phone]
+              properties:
+                serial_number: { type: string }
+                buyer_user_id: { type: string }
+                buyer_name: { type: string }
+                buyer_phone: { type: string }
+      responses:
+        '200':
+          description: Verification initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  verification_id: { type: string }
+                  message: { type: string }
+
+  /api/resale/verify/{id}:
+    get:
+      tags: [Resale Verification]
+      summary: Get verification status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Verification details
+
+  /api/resale/buyer-check/{serial}:
+    get:
+      tags: [Resale Verification]
+      summary: Quick buyer risk check
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Risk assessment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  risk_assessment:
+                    type: object
+                    properties:
+                      score: { type: number }
+                      level: { type: string, enum: [low, medium, high] }
+                      can_proceed: { type: boolean }
+                  recommendation: { type: string }
+
+  # ============================================
+  # OEM DASHBOARD
+  # ============================================
+
+  /oem/{brand_id}/dashboard:
+    get:
+      tags: [OEM Dashboard]
+      summary: OEM main dashboard
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: period
+          in: query
+          schema: { type: string, enum: [7days, 30days, 90days], default: 30days }
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      total_serials: { type: integer }
+                      activation_rate: { type: number }
+                      pending_claims: { type: integer }
+                      fraud_attempts: { type: integer }
+                  activation_funnel: { type: object }
+                  alerts: { type: array }
+
+  /oem/{brand_id}/counterfeit-analytics:
+    get:
+      tags: [OEM Dashboard]
+      summary: Counterfeit analytics
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: period
+          in: query
+          schema: { type: string, default: 90days }
+      responses:
+        '200':
+          description: Counterfeit analysis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      total_reports: { type: integer }
+                      risk_score: { type: number }
+                      risk_level: { type: string }
+                  by_type: { type: array }
+                  by_country: { type: array }
+                  monthly_trend: { type: array }
+
+  /oem/{brand_id}/regional-analytics:
+    get:
+      tags: [OEM Dashboard]
+      summary: Regional analytics with heatmaps
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: level
+          in: query
+          schema: { type: string, enum: [country, state, city], default: city }
+      responses:
+        '200':
+          description: Regional breakdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  heatmap:
+                    type: object
+                    properties:
+                      points: { type: array }
+                      max_intensity: { type: number }
+                  top_cities: { type: array }
+
+  /oem/{brand_id}/fraud-maps:
+    get:
+      tags: [OEM Dashboard]
+      summary: Fraud pattern maps
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Fraud analysis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      active_patterns: { type: integer }
+                      risk_score: { type: number }
+                  fraud_map:
+                    type: object
+                    properties:
+                      points: { type: array }
+
+  /oem/{brand_id}/predictive-analytics:
+    get:
+      tags: [OEM Dashboard]
+      summary: Predictive analytics
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Predictions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictions:
+                    type: object
+                    properties:
+                      next_30_days: { type: array }
+                      summary: { type: object }
+                  peak_times: { type: array }
+                  recommendations: { type: array }
+
+  /oem/{brand_id}/recall:
+    post:
+      tags: [OEM Dashboard]
+      summary: Create recall campaign
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id: { type: string }
+                title: { type: string }
+                description: { type: string }
+                severity:
+                  type: string
+                  enum: [informational, advisory, urgent, critical]
+                affected_serials: { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Recall created
+
+  # ============================================
+  # INSURANCE
+  # ============================================
+
+  /api/insurance/policy:
+    post:
+      tags: [Insurance]
+      summary: Create insurance policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, serial_number, insurance_type]
+              properties:
+                user_id: { type: string }
+                customer_name: { type: string }
+                customer_phone: { type: string }
+                serial_number: { type: string }
+                product_value: { type: number }
+                insurance_type:
+                  type: string
+                  enum: [theft, accidental_damage, device_protection]
+                coverage_amount: { type: number }
+                premium: { type: number }
+                duration_months: { type: integer }
+      responses:
+        '200':
+          description: Policy created
+
+  /api/insurance/{policy_id}:
+    get:
+      tags: [Insurance]
+      summary: Get policy details
+      parameters:
+        - name: policy_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Policy details
+
+  /api/insurance/{policy_id}/claim:
+    post:
+      tags: [Insurance]
+      summary: File insurance claim
+      parameters:
+        - name: policy_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                incident_date: { type: string, format: date }
+                description: { type: string }
+                claim_amount: { type: number }
+      responses:
+        '200':
+          description: Claim filed
+
+components:
+  schemas:
+    OwnershipPassport:
+      type: object
+      properties:
+        passport_id: { type: string }
+        serial_number: { type: string }
+        product:
+          type: object
+          properties:
+            brand: { type: string }
+            model: { type: string }
+        warranty:
+          type: object
+        ownership:
+          type: object
+        service_history:
+          type: array
+
+    ResaleVerification:
+      type: object
+      properties:
+        verification_id: { type: string }
+        risk_assessment:
+          type: object
+          properties:
+            score: { type: number }
+            level: { type: string }
+            can_proceed: { type: boolean }
+        recommendation: { type: string }
+
+    OEMDashboard:
+      type: object
+      properties:
+        summary:
+          type: object
+        activation_funnel:
+          type: object
+        alerts:
+          type: array
+
+security:
+  - BearerAuth: []

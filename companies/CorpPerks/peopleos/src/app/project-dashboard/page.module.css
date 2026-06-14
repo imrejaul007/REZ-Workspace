@@ -1,0 +1,549 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subtitle {
+  color: var(--gray-500);
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.createBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.createBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+/* AI Alerts */
+.alertsBanner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+}
+
+.alertsIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  color: white;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.alertsList {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.alertTag {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.alertTag.high {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.alertTag.medium {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+}
+
+.alertTag.low {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22C55E;
+}
+
+.viewAlerts {
+  font-size: 14px;
+  color: #8B5CF6;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.statCard.warning {
+  border-left: 4px solid #F59E0B;
+}
+
+.statCard.danger {
+  border-left: 4px solid #EF4444;
+}
+
+.statIcon {
+  font-size: 28px;
+}
+
+.statValue {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+/* Budget Card */
+.budgetCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.budgetCard h3 {
+  margin-bottom: 16px;
+}
+
+.budgetStats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 20px;
+}
+
+.budgetLabel {
+  display: block;
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-bottom: 4px;
+}
+
+.budgetValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.budgetBar {
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.budgetFill {
+  height: 100%;
+  background: linear-gradient(90deg, #8B5CF6 0%, #6366F1 100%);
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.budgetPercent {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* Main Content */
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+}
+
+/* Projects Section */
+.projectsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+}
+
+.searchInput {
+  padding: 10px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 14px;
+  width: 200px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.filterSelect {
+  padding: 10px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.projectsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.projectCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.projectCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.projectHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.projectId {
+  font-size: 12px;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+.priorityBadge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+}
+
+.projectName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.projectMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* Health Section */
+.healthSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.healthHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.healthBar {
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.healthFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* Progress Section */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.progressBar {
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #8B5CF6 0%, #6366F1 100%);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* Budget Row */
+.budgetRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.budgetItem {
+  color: var(--gray-500);
+}
+
+/* Footer */
+.projectFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statusBadge.active {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22C55E;
+}
+
+.statusBadge.planning {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
+}
+
+.statusBadge.paused {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+}
+
+.statusBadge.completed {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8B5CF6;
+}
+
+.daysRemaining {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sideCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sideCard h3 {
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Quick Links */
+.quickLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quickLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--gray-700);
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.quickLink:hover {
+  background: var(--gray-100);
+  color: #8B5CF6;
+}
+
+/* Deadlines */
+.deadlines {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deadline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.deadlineInfo {
+  flex: 1;
+}
+
+.deadlineName {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.deadlineDays {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
+.deadlineBar {
+  width: 4px;
+  height: 32px;
+  border-radius: 2px;
+}
+
+/* Capacity */
+.capacityList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.capacityItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.memberName {
+  font-size: 13px;
+  color: var(--gray-700);
+  min-width: 100px;
+}
+
+.utilizationBar {
+  flex: 1;
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.utilizationFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.utilizationPercent {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-600);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .mainContent {
+    grid-template-columns: 1fr;
+  }
+
+  .projectsGrid {
+    grid-template-columns: 1fr;
+  }
+}

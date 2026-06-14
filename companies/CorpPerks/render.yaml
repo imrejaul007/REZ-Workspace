@@ -1,0 +1,773 @@
+# CorpPerks Render Blueprint - Main Services
+# Deploy CorpPerks backend services to Render
+
+services:
+  # =============================================================================
+  # CORE BACKEND SERVICES
+  # =============================================================================
+
+  # CorpPerks Backend API
+  - type: web
+    name: corpperks-api
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4006"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: "7d"
+      - key: CORS_ORIGIN
+        value: https://admin.rez.money,https://rez.money,https://app.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: RABTUL_AUTH_URL
+        value: https://rez-auth-service.onrender.com
+      - key: RABTUL_PROFILE_URL
+        value: https://rez-profile-service.onrender.com
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+
+  # CorpPerks Intelligence Service
+  - type: web
+    name: corpperks-intelligence
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4135"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+
+  # ProjectOS Service
+  - type: web
+    name: corpperks-projectos
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4715"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: CORPID_SERVICE_URL
+        value: https://corpperks-corpid.onrender.com
+
+  # Team Collaboration Service
+  - type: web
+    name: corpperks-team-collab
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4716"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # =============================================================================
+  # HR SERVICES
+  # =============================================================================
+
+  # Meeting Service
+  - type: web
+    name: corpperks-meeting
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4728"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: VIDEO_PROVIDER_API_KEY
+        sync: false
+
+  # Performance Service
+  - type: web
+    name: corpperks-performance
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4729"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # OKR Service
+  - type: web
+    name: corpperks-okr
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4730"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # Workflow Service
+  - type: web
+    name: corpperks-workflow
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4731"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # Onboarding Service
+  - type: web
+    name: corpperks-onboarding
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4732"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # Exit Service
+  - type: web
+    name: corpperks-exit
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4733"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # LMS Service
+  - type: web
+    name: corpperks-lms
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4734"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: VIDEO_STORAGE_BUCKET
+        sync: false
+
+  # Reports Service
+  - type: web
+    name: corpperks-reports
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4735"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # Calendar Service
+  - type: web
+    name: corpperks-calendar
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4736"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # SSO Service
+  - type: web
+    name: corpperks-sso
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4737"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money,https://app.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: SSO_PROVIDER_CLIENT_ID
+        sync: false
+      - key: SSO_PROVIDER_CLIENT_SECRET
+        sync: false
+
+  # Payroll Service
+  - type: web
+    name: corpperks-payroll
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4738"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+
+  # Shift Service
+  - type: web
+    name: corpperks-shift
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4739"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # Compensation Service
+  - type: web
+    name: corpperks-compensation
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4740"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # Document Service
+  - type: web
+    name: corpperks-document
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4741"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: STORAGE_BUCKET
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+
+  # Video Service
+  - type: web
+    name: corpperks-video
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4742"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: VIDEO_API_KEY
+        sync: false
+
+  # =============================================================================
+  # CRM & ANALYTICS
+  # =============================================================================
+
+  # Corp CRM Service
+  - type: web
+    name: corpperks-crm
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4725"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # Analytics Service
+  - type: web
+    name: corpperks-analytics
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4744"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # Push Service
+  - type: web
+    name: corpperks-push
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4743"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: FCM_SERVER_KEY
+        sync: false
+      - key: APNS_KEY_ID
+        sync: false
+      - key: APNS_TEAM_ID
+        sync: false
+      - key: APNS_KEY_FILE
+        sync: false
+
+  # WhatsApp Service
+  - type: web
+    name: corpperks-whatsapp
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4745"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: WHATSAPP_API_URL
+        sync: false
+      - key: WHATSAPP_API_TOKEN
+        sync: false
+
+  # =============================================================================
+  # CORPID SERVICES
+  # =============================================================================
+
+  # CorpID Gateway
+  - type: web
+    name: corpperks-corpid
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4700"
+      - key: MONGODB_URI
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: CORPID_IDENTITY_URL
+        value: https://corpperks-corpid-identity.onrender.com
+      - key: CORPID_TRUST_GRAPH_URL
+        value: https://corpperks-corpid-trust.onrender.com
+
+  # CorpID Identity Service
+  - type: web
+    name: corpperks-corpid-identity
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4701"
+      - key: MONGODB_URI
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+  # CorpID Profile Bridge
+  - type: web
+    name: corpperks-corpid-profile
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4723"
+      - key: MONGODB_URI
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: CORPID_SERVICE_URL
+        value: https://corpperks-corpid.onrender.com
+
+  # =============================================================================
+  # BRIDGE SERVICES
+  # =============================================================================
+
+  # REZ Merchant Bridge
+  - type: web
+    name: corpperks-rez-merchant-bridge
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4008"
+      - key: MONGODB_URI
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: REZ_MERCHANT_API_URL
+        value: https://rez-merchant.onrender.com
+      - key: CORPPERKS_API_URL
+        value: https://corpperks-api.onrender.com
+      - key: GST_API_KEY
+        sync: false
+
+  # Hojai Bridge
+  - type: web
+    name: corpperks-hojai-bridge
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4720"
+      - key: MONGODB_URI
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: HOJAI_API_URL
+        sync: false
+      - key: HOJAI_API_KEY
+        sync: false
+
+  # AdBazaar Bridge
+  - type: web
+    name: corpperks-adbazaar-bridge
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4721"
+      - key: MONGODB_URI
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: ADBAZAAR_API_URL
+        value: https://rez-adbazaar.onrender.com
+
+  # REZ Care Bridge
+  - type: web
+    name: corpperks-rez-care-bridge
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4722"
+      - key: MONGODB_URI
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: REZ_CARE_URL
+        value: https://rez-care-service.onrender.com
+
+  # =============================================================================
+  # INFRASTRUCTURE
+  # =============================================================================
+
+  # Redis Cache
+  - type: redis
+    name: corpperks-redis
+    plan: starter
+    ipAllowList: []
+
+  # MongoDB (requires Atlas or external)
+  # Note: Render does not offer MongoDB as a managed service
+  # Use MongoDB Atlas with connection string in MONGODB_URI

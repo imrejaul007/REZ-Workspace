@@ -1,0 +1,50 @@
+{
+  "name": "rez-webhook-verification",
+  "version": "1.0.0",
+  "description": "Webhook Signature Verification Service for REZ Ecosystem",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.2.0",
+    "axios": "^1.6.7",
+    "zod": "^3.22.4",
+    "winston": "^3.11.0",
+    "dotenv": "^16.4.5",
+    "crypto": "^1.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "redis": "^4.6.13",
+    "uuid": "^9.0.1",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^7.2.0",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.19",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5",
+    "@types/uuid": "^9.0.8",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^6.3.4",
+    "typescript": "^5.3.3",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "ts-jest": "^29.1.2",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

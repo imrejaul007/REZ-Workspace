@@ -1,0 +1,266 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  description: Payment processing, verification, and refunds
+  version: 1.0.0
+  contact:
+    name: RABTUL Support
+
+servers:
+  - url: https://payment.rez.money
+    description: Production
+  - url: https://payment-staging.rez.money
+    description: Staging
+
+paths:
+  /api/v1/payments/create:
+    post:
+      tags: [Payments]
+      summary: Create a payment
+      security:
+        - InternalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+      responses:
+        '201':
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/payments/{id}:
+    get:
+      tags: [Payments]
+      summary: Get payment by ID
+      security:
+        - InternalToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/payments/{id}/verify:
+    post:
+      tags: [Payments]
+      summary: Verify payment signature
+      security:
+        - InternalToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyPaymentRequest'
+      responses:
+        '200':
+          description: Payment verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/payments/{id}/refund:
+    post:
+      tags: [Payments]
+      summary: Process refund
+      security:
+        - InternalToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequest'
+      responses:
+        '200':
+          description: Refund processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundResponse'
+
+  /api/v1/webhooks/razorpay:
+    post:
+      tags: [Webhooks]
+      summary: Razorpay webhook handler
+      security:
+        - WebhookSignature: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed
+
+/components:
+  securitySchemes:
+    InternalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+    WebhookSignature:
+      type: apiKey
+      in: header
+      name: x-razorpay-signature
+
+  schemas:
+    CreatePaymentRequest:
+      type: object
+      required:
+        - amount
+        - currency
+        - orderId
+      properties:
+        amount:
+          type: integer
+          description: Amount in paise
+          example: 10000
+        currency:
+          type: string
+          enum: [INR, USD, EUR]
+          example: INR
+        orderId:
+          type: string
+          example: order_abc123
+        customerId:
+          type: string
+          example: cust_123
+        method:
+          type: string
+          enum: [upi, card, netbanking, wallet]
+        description:
+          type: string
+
+    PaymentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: pay_xyz789
+        amount:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [created, authorized, captured, failed]
+        orderId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    VerifyPaymentRequest:
+      type: object
+      required:
+        - razorpay_payment_id
+        - razorpay_order_id
+        - razorpay_signature
+      properties:
+        razorpay_payment_id:
+          type: string
+        razorpay_order_id:
+          type: string
+        razorpay_signature:
+          type: string
+
+    VerifyResponse:
+      type: object
+      properties:
+        verified:
+          type: boolean
+        paymentId:
+          type: string
+
+    RefundRequest:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: Partial refund amount in paise
+        reason:
+          type: string
+          enum: [duplicate, fraudulent, requested_by_customer]
+
+    RefundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        paymentId:
+          type: string
+        amount:
+          type: integer
+        status:
+          type: string
+        reason:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string

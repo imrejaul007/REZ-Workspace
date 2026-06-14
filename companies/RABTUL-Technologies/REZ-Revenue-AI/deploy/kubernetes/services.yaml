@@ -1,0 +1,336 @@
+# Pricing Engine
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pricing-engine
+  namespace: rez-revenue-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pricing-engine
+  template:
+    metadata:
+      labels:
+        app: pricing-engine
+    spec:
+      containers:
+        - name: pricing-engine
+          image: rez-pricing-engine:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4301
+          env:
+            - name: PORT
+              value: "4301"
+          envFrom:
+            - secretRef:
+                name: rez-revenue-ai-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4301
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4301
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pricing-engine
+  namespace: rez-revenue-ai
+spec:
+  clusterIP: None
+  selector:
+    app: pricing-engine
+  ports:
+    - port: 4301
+      targetPort: 4301
+
+---
+# Demand Forecast
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demand-forecast
+  namespace: rez-revenue-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demand-forecast
+  template:
+    metadata:
+      labels:
+        app: demand-forecast
+    spec:
+      containers:
+        - name: demand-forecast
+          image: rez-demand-forecast:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4302
+          env:
+            - name: PORT
+              value: "4302"
+          envFrom:
+            - secretRef:
+                name: rez-revenue-ai-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4302
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4302
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demand-forecast
+  namespace: rez-revenue-ai
+spec:
+  clusterIP: None
+  selector:
+    app: demand-forecast
+  ports:
+    - port: 4302
+      targetPort: 4302
+
+---
+# Offer Optimizer
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: offer-optimizer
+  namespace: rez-revenue-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: offer-optimizer
+  template:
+    metadata:
+      labels:
+        app: offer-optimizer
+    spec:
+      containers:
+        - name: offer-optimizer
+          image: rez-offer-optimizer:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4303
+          env:
+            - name: PORT
+              value: "4303"
+          envFrom:
+            - secretRef:
+                name: rez-revenue-ai-secrets
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4303
+            initialDelaySeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: offer-optimizer
+  namespace: rez-revenue-ai
+spec:
+  clusterIP: None
+  selector:
+    app: offer-optimizer
+  ports:
+    - port: 4303
+      targetPort: 4303
+
+---
+# Cashback Optimizer
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cashback-optimizer
+  namespace: rez-revenue-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cashback-optimizer
+  template:
+    metadata:
+      labels:
+        app: cashback-optimizer
+    spec:
+      containers:
+        - name: cashback-optimizer
+          image: rez-cashback-optimizer:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4304
+          env:
+            - name: PORT
+              value: "4304"
+          envFrom:
+            - secretRef:
+                name: rez-revenue-ai-secrets
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4304
+            initialDelaySeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cashback-optimizer
+  namespace: rez-revenue-ai
+spec:
+  clusterIP: None
+  selector:
+    app: cashback-optimizer
+  ports:
+    - port: 4304
+      targetPort: 4304
+
+---
+# Merchant Advisor
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: merchant-advisor
+  namespace: rez-revenue-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: merchant-advisor
+  template:
+    metadata:
+      labels:
+        app: merchant-advisor
+    spec:
+      containers:
+        - name: merchant-advisor
+          image: rez-merchant-advisor:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4305
+          env:
+            - name: PORT
+              value: "4305"
+          envFrom:
+            - secretRef:
+                name: rez-revenue-ai-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4305
+            initialDelaySeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: merchant-advisor
+  namespace: rez-revenue-ai
+spec:
+  clusterIP: None
+  selector:
+    app: merchant-advisor
+  ports:
+    - port: 4305
+      targetPort: 4305
+
+---
+# Cross-Merchant Intelligence
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cross-merchant
+  namespace: rez-revenue-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cross-merchant
+  template:
+    metadata:
+      labels:
+        app: cross-merchant
+    spec:
+      containers:
+        - name: cross-merchant
+          image: rez-cross-merchant:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4306
+          env:
+            - name: PORT
+              value: "4306"
+          envFrom:
+            - secretRef:
+                name: rez-revenue-ai-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4306
+            initialDelaySeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cross-merchant
+  namespace: rez-revenue-ai
+spec:
+  clusterIP: None
+  selector:
+    app: cross-merchant
+  ports:
+    - port: 4306
+      targetPort: 4306

@@ -1,0 +1,73 @@
+{
+  "name": "@rez/sdk",
+  "version": "1.0.0",
+  "description": "Official REZ SDK for Node.js - Access all REZ platform services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./auth": {
+      "types": "./dist/services/auth.d.ts",
+      "import": "./dist/services/auth.js",
+      "require": "./dist/services/auth.js"
+    },
+    "./payment": {
+      "types": "./dist/services/payment.d.ts",
+      "import": "./dist/services/payment.js",
+      "require": "./dist/services/payment.js"
+    },
+    "./wallet": {
+      "types": "./dist/services/wallet.d.ts",
+      "import": "./dist/services/wallet.js",
+      "require": "./dist/services/wallet.js"
+    },
+    "./qr": {
+      "types": "./dist/services/qr.d.ts",
+      "import": "./dist/services/qr.js",
+      "require": "./dist/services/qr.js"
+    },
+    "./catalog": {
+      "types": "./dist/services/catalog.d.ts",
+      "import": "./dist/services/catalog.js",
+      "require": "./dist/services/catalog.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "rez",
+    "rabtul",
+    "sdk",
+    "api",
+    "payments",
+    "auth",
+    "wallet",
+    "qr",
+    "ecommerce"
+  ],
+  "author": "REZ / RABTUL Technologies",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

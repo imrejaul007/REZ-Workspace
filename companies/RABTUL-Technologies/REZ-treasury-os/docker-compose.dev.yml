@@ -1,0 +1,75 @@
+# TreasuryOS Docker Compose - Development
+version: '3.8'
+
+services:
+  treasury-os:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: rez-treasury-os-dev
+    restart: no
+    ports:
+      - "4055:4055"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/rez-treasury
+      - REDIS_URL=redis://redis:6379
+      - PORT=4055
+      - NODE_ENV=development
+      - INTERNAL_SERVICE_TOKEN=dev-token-change-in-production
+      - GRAFANA_ADMIN_PASSWORD=dev-password-change-in-production
+      - WALLET_SERVICE_URL=http://host.docker.internal:4004
+      - PAYMENT_SERVICE_URL=http://host.docker.internal:4001
+    volumes:
+      - ./src:/app/src:rw
+      - ./package.json:/app/package.json:ro
+    command: npm run dev
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - treasury-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mongo:
+    image: mongo:7
+    container_name: treasury-mongo-dev
+    restart: no
+    ports:
+      - "27027:27017"
+    volumes:
+      - treasury-mongo-dev-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - treasury-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: treasury-redis-dev
+    restart: no
+    ports:
+      - "6380:6379"
+    volumes:
+      - treasury-redis-dev-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - treasury-network
+
+networks:
+  treasury-network:
+    driver: bridge
+
+volumes:
+  treasury-mongo-dev-data:
+  treasury-redis-dev-data:

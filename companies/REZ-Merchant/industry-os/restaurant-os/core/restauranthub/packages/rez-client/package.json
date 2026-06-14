@@ -1,0 +1,27 @@
+{
+  "name": "@restopapa/rez-client",
+  "version": "0.1.0",
+  "description": "Typed HTTP client for all REZ microservices",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.3.0",
+    "@nestjs/config": "^3.1.1",
+    "axios": "^1.6.0",
+    "reflect-metadata": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.3.0",
+    "@nestjs/config": "^3.1.1"
+  }
+}

@@ -1,0 +1,275 @@
+groups:
+  - name: performance-recording-rules
+    interval: 30s
+    rules:
+      # HTTP Request Rates
+      - record: restauranthub:http_requests:rate5m
+        expr: rate(http_requests_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      - record: restauranthub:http_requests:rate1h
+        expr: rate(http_requests_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      # Error Rates
+      - record: restauranthub:http_errors:rate5m
+        expr: rate(http_requests_total{status=~"5.."}[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      - record: restauranthub:http_error_percentage:rate5m
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m]) /
+            rate(http_requests_total[5m])
+          ) * 100
+        labels:
+          aggregation: "5m_percentage"
+
+      # Response Time Percentiles
+      - record: restauranthub:http_request_duration:p50_5m
+        expr: histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))
+        labels:
+          quantile: "0.5"
+          aggregation: "5m"
+
+      - record: restauranthub:http_request_duration:p95_5m
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+        labels:
+          quantile: "0.95"
+          aggregation: "5m"
+
+      - record: restauranthub:http_request_duration:p99_5m
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
+        labels:
+          quantile: "0.99"
+          aggregation: "5m"
+
+      # Database Performance
+      - record: restauranthub:db_connections:usage_percentage
+        expr: |
+          (
+            postgres_stat_database_numbackends /
+            postgres_settings_max_connections
+          ) * 100
+
+      - record: restauranthub:db_query_duration:p95_5m
+        expr: histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m]))
+        labels:
+          quantile: "0.95"
+          aggregation: "5m"
+
+      - record: restauranthub:db_cache_hit_ratio
+        expr: |
+          postgres_stat_database_blks_hit /
+          (postgres_stat_database_blks_hit + postgres_stat_database_blks_read)
+
+      # Redis Performance
+      - record: restauranthub:redis_memory:usage_percentage
+        expr: |
+          (
+            redis_memory_used_bytes /
+            redis_memory_max_bytes
+          ) * 100
+
+      - record: restauranthub:redis_operations:rate5m
+        expr: rate(redis_commands_processed_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      # System Resource Usage
+      - record: restauranthub:cpu_usage:percentage
+        expr: |
+          100 - (
+            avg by(instance) (
+              irate(node_cpu_seconds_total{mode="idle"}[5m])
+            ) * 100
+          )
+
+      - record: restauranthub:memory_usage:percentage
+        expr: |
+          (
+            (
+              node_memory_MemTotal_bytes -
+              node_memory_MemAvailable_bytes
+            ) /
+            node_memory_MemTotal_bytes
+          ) * 100
+
+      - record: restauranthub:disk_usage:percentage
+        expr: |
+          (
+            (
+              node_filesystem_size_bytes -
+              node_filesystem_free_bytes
+            ) /
+            node_filesystem_size_bytes
+          ) * 100
+
+  - name: business-recording-rules
+    interval: 60s
+    rules:
+      # User Metrics
+      - record: restauranthub:active_users:5m
+        expr: count(increase(user_login_total[5m]) > 0)
+        labels:
+          timeframe: "5m"
+
+      - record: restauranthub:new_registrations:rate1h
+        expr: rate(user_registration_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      # Restaurant Metrics
+      - record: restauranthub:active_restaurants:5m
+        expr: count(increase(restaurant_activity_total[5m]) > 0)
+        labels:
+          timeframe: "5m"
+
+      - record: restauranthub:new_restaurants:rate1h
+        expr: rate(restaurant_registration_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      # Job Application Metrics
+      - record: restauranthub:job_applications:rate1h
+        expr: rate(job_application_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      - record: restauranthub:job_applications:success_rate5m
+        expr: |
+          rate(job_application_total{status="success"}[5m]) /
+          rate(job_application_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      # Order Metrics
+      - record: restauranthub:orders:rate1h
+        expr: rate(order_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      - record: restauranthub:order_value:avg1h
+        expr: rate(order_value_sum[1h]) / rate(order_total[1h])
+        labels:
+          aggregation: "1h_average"
+
+      # Payment Metrics
+      - record: restauranthub:payments:success_rate5m
+        expr: |
+          rate(payment_transactions_total{status="success"}[5m]) /
+          rate(payment_transactions_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      - record: restauranthub:payment_volume:rate1h
+        expr: rate(payment_amount_sum[1h])
+        labels:
+          aggregation: "1h_rate"
+
+  - name: sla-recording-rules
+    interval: 60s
+    rules:
+      # Availability SLA (99.9% target)
+      - record: restauranthub:availability:5m
+        expr: avg(up{job=~"restauranthub-.*"})
+        labels:
+          sla_target: "99.9"
+          timeframe: "5m"
+
+      - record: restauranthub:availability:1h
+        expr: avg_over_time(restauranthub:availability:5m[1h])
+        labels:
+          sla_target: "99.9"
+          timeframe: "1h"
+
+      - record: restauranthub:availability:24h
+        expr: avg_over_time(restauranthub:availability:5m[24h])
+        labels:
+          sla_target: "99.9"
+          timeframe: "24h"
+
+      # Response Time SLA (95% under 2s)
+      - record: restauranthub:response_time_sla:5m
+        expr: |
+          (
+            sum(rate(http_request_duration_seconds_bucket{le="2"}[5m])) /
+            sum(rate(http_request_duration_seconds_count[5m]))
+          ) * 100
+        labels:
+          sla_target: "95"
+          timeframe: "5m"
+
+      - record: restauranthub:response_time_sla:1h
+        expr: avg_over_time(restauranthub:response_time_sla:5m[1h])
+        labels:
+          sla_target: "95"
+          timeframe: "1h"
+
+      # Error Rate SLA (less than 0.1%)
+      - record: restauranthub:error_rate_sla:5m
+        expr: |
+          (
+            100 - (
+              rate(http_requests_total{status=~"5.."}[5m]) /
+              rate(http_requests_total[5m])
+            ) * 100
+          )
+        labels:
+          sla_target: "99.9"
+          timeframe: "5m"
+
+      - record: restauranthub:error_rate_sla:1h
+        expr: avg_over_time(restauranthub:error_rate_sla:5m[1h])
+        labels:
+          sla_target: "99.9"
+          timeframe: "1h"
+
+  - name: capacity-planning-rules
+    interval: 300s  # 5 minutes
+    rules:
+      # Resource Growth Trends
+      - record: restauranthub:cpu_growth_trend:24h
+        expr: |
+          predict_linear(
+            restauranthub:cpu_usage:percentage[24h], 7 * 24 * 3600
+          )
+        labels:
+          prediction: "7d"
+
+      - record: restauranthub:memory_growth_trend:24h
+        expr: |
+          predict_linear(
+            restauranthub:memory_usage:percentage[24h], 7 * 24 * 3600
+          )
+        labels:
+          prediction: "7d"
+
+      - record: restauranthub:disk_growth_trend:24h
+        expr: |
+          predict_linear(
+            restauranthub:disk_usage:percentage[24h], 30 * 24 * 3600
+          )
+        labels:
+          prediction: "30d"
+
+      # Traffic Growth Trends
+      - record: restauranthub:traffic_growth_trend:7d
+        expr: |
+          predict_linear(
+            restauranthub:http_requests:rate1h[7d], 30 * 24 * 3600
+          )
+        labels:
+          prediction: "30d"
+
+      # Database Growth Trends
+      - record: restauranthub:db_size_growth_trend:7d
+        expr: |
+          predict_linear(
+            postgres_stat_database_size_bytes[7d], 30 * 24 * 3600
+          )
+        labels:
+          prediction: "30d"

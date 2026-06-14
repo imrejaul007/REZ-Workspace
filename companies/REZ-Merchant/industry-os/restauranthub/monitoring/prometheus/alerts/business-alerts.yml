@@ -1,0 +1,313 @@
+# Business Logic Alerts for RestaurantHub
+groups:
+  - name: business-metrics.rules
+    rules:
+      # User engagement and growth
+      - alert: LowUserRegistrations
+        expr: increase(user_registrations_total[1h]) < 5
+        for: 2h
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "Low user registration rate"
+          description: "Only {{ $value }} users registered in the last hour, which is below expected threshold"
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-user-registrations"
+
+      - alert: UserRegistrationSpike
+        expr: increase(user_registrations_total[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "Unusual spike in user registrations"
+          description: "{{ $value }} users registered in the last 5 minutes, which may indicate bot activity"
+          runbook_url: "https://docs.restauranthub.com/runbooks/registration-spike"
+
+      - alert: HighUserChurnRate
+        expr: (user_deactivations_total / user_registrations_total) * 100 > 10
+        for: 1h
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "High user churn rate detected"
+          description: "User churn rate is {{ $value }}%, indicating user retention issues"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-churn-rate"
+
+      # Restaurant operations
+      - alert: LowRestaurantActivity
+        expr: increase(restaurant_logins_total[4h]) < 10
+        for: 1h
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "Low restaurant engagement"
+          description: "Only {{ $value }} restaurant logins in the last 4 hours"
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-restaurant-activity"
+
+      - alert: RestaurantOnboardingStalled
+        expr: restaurants_pending_verification > 20
+        for: 2h
+        labels:
+          severity: warning
+          service: business
+          team: operations
+        annotations:
+          summary: "Restaurant onboarding backlog"
+          description: "{{ $value }} restaurants are pending verification"
+          runbook_url: "https://docs.restauranthub.com/runbooks/restaurant-onboarding-backlog"
+
+      - alert: RestaurantMenuUpdateFailures
+        expr: increase(restaurant_menu_update_failures_total[1h]) > 5
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "Restaurant menu update failures"
+          description: "{{ $value }} menu updates failed in the last hour"
+          runbook_url: "https://docs.restauranthub.com/runbooks/menu-update-failures"
+
+      # Job portal metrics
+      - alert: JobApplicationProcessingDelay
+        expr: avg_over_time(job_application_processing_time_seconds[1h]) > 3600  # 1 hour
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "Job application processing is slow"
+          description: "Average job application processing time is {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.restauranthub.com/runbooks/slow-job-processing"
+
+      - alert: LowJobPostingActivity
+        expr: increase(job_postings_created_total[24h]) < 10
+        for: 4h
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "Low job posting activity"
+          description: "Only {{ $value }} new job postings in the last 24 hours"
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-job-activity"
+
+      - alert: HighJobApplicationRejectionRate
+        expr: (job_applications_rejected_total / job_applications_total) * 100 > 80
+        for: 2h
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "High job application rejection rate"
+          description: "Job application rejection rate is {{ $value }}%"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-rejection-rate"
+
+      # Marketplace and orders
+      - alert: LowOrderVolume
+        expr: increase(orders_created_total[1h]) < 5
+        for: 2h
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "Low order volume"
+          description: "Only {{ $value }} orders placed in the last hour"
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-order-volume"
+
+      - alert: HighOrderCancellationRate
+        expr: (orders_cancelled_total / orders_created_total) * 100 > 20
+        for: 1h
+        labels:
+          severity: warning
+          service: business
+          team: operations
+        annotations:
+          summary: "High order cancellation rate"
+          description: "Order cancellation rate is {{ $value }}%"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-cancellation-rate"
+
+      - alert: OrderFulfillmentDelay
+        expr: avg_over_time(order_fulfillment_time_seconds[1h]) > 3600  # 1 hour
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: operations
+        annotations:
+          summary: "Order fulfillment is delayed"
+          description: "Average order fulfillment time is {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.restauranthub.com/runbooks/order-fulfillment-delay"
+
+      # Payment processing
+      - alert: PaymentFailureRateHigh
+        expr: (payment_transactions_failed_total / payment_transactions_total) * 100 > 5
+        for: 15m
+        labels:
+          severity: critical
+          service: business
+          team: payments
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is {{ $value }}%"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-payment-failures"
+
+      - alert: PaymentProcessingDelay
+        expr: avg_over_time(payment_processing_time_seconds[15m]) > 30
+        for: 10m
+        labels:
+          severity: warning
+          service: business
+          team: payments
+        annotations:
+          summary: "Payment processing is slow"
+          description: "Average payment processing time is {{ $value }}s"
+          runbook_url: "https://docs.restauranthub.com/runbooks/slow-payment-processing"
+
+      - alert: RefundRequestSpike
+        expr: increase(refund_requests_total[1h]) > 20
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: operations
+        annotations:
+          summary: "Spike in refund requests"
+          description: "{{ $value }} refund requests in the last hour"
+          runbook_url: "https://docs.restauranthub.com/runbooks/refund-spike"
+
+      # Vendor and supply chain
+      - alert: VendorResponseTimeHigh
+        expr: avg_over_time(vendor_response_time_seconds[1h]) > 300  # 5 minutes
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: operations
+        annotations:
+          summary: "Vendors are slow to respond"
+          description: "Average vendor response time is {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.restauranthub.com/runbooks/slow-vendor-response"
+
+      - alert: LowVendorAvailability
+        expr: vendors_available / vendors_total * 100 < 80
+        for: 1h
+        labels:
+          severity: warning
+          service: business
+          team: operations
+        annotations:
+          summary: "Low vendor availability"
+          description: "Only {{ $value }}% of vendors are available"
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-vendor-availability"
+
+      # Communication and notifications
+      - alert: NotificationDeliveryFailures
+        expr: (notifications_failed_total / notifications_sent_total) * 100 > 10
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "High notification delivery failure rate"
+          description: "{{ $value }}% of notifications failed to deliver"
+          runbook_url: "https://docs.restauranthub.com/runbooks/notification-failures"
+
+      - alert: EmailDeliveryIssues
+        expr: increase(emails_bounced_total[1h]) > 10
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: product
+        annotations:
+          summary: "High email bounce rate"
+          description: "{{ $value }} emails bounced in the last hour"
+          runbook_url: "https://docs.restauranthub.com/runbooks/email-bounce"
+
+      # Security and fraud detection
+      - alert: SuspiciousActivityDetected
+        expr: increase(security_suspicious_activity_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: security
+          team: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "{{ $value }} suspicious activities detected in the last 5 minutes"
+          runbook_url: "https://docs.restauranthub.com/runbooks/suspicious-activity"
+
+      - alert: MultipleFailedLogins
+        expr: increase(login_failures_total[5m]) by (user_id) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+          team: security
+        annotations:
+          summary: "Multiple failed login attempts"
+          description: "User {{ $labels.user_id }} has {{ $value }} failed login attempts"
+          runbook_url: "https://docs.restauranthub.com/runbooks/multiple-failed-logins"
+
+      - alert: UnusualDataAccess
+        expr: increase(data_access_unusual_pattern_total[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: security
+          team: security
+        annotations:
+          summary: "Unusual data access patterns detected"
+          description: "{{ $value }} unusual data access patterns in the last 15 minutes"
+          runbook_url: "https://docs.restauranthub.com/runbooks/unusual-data-access"
+
+      # Content and moderation
+      - alert: HighContentReportRate
+        expr: increase(content_reports_total[1h]) > 20
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: moderation
+        annotations:
+          summary: "High content report rate"
+          description: "{{ $value }} content reports in the last hour"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-content-reports"
+
+      # Customer support
+      - alert: HighSupportTicketVolume
+        expr: support_tickets_open > 50
+        for: 1h
+        labels:
+          severity: warning
+          service: business
+          team: support
+        annotations:
+          summary: "High volume of open support tickets"
+          description: "{{ $value }} support tickets are currently open"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-support-volume"
+
+      - alert: LongSupportTicketResolutionTime
+        expr: avg_over_time(support_ticket_resolution_time_seconds[4h]) > 86400  # 24 hours
+        for: 2h
+        labels:
+          severity: warning
+          service: business
+          team: support
+        annotations:
+          summary: "Support ticket resolution time is too long"
+          description: "Average ticket resolution time is {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.restauranthub.com/runbooks/long-ticket-resolution"

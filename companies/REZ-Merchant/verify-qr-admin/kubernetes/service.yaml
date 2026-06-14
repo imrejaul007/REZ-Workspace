@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: verify-qr-admin
+  namespace: rez-merchant
+  labels:
+    app: verify-qr-admin
+    managed-by: rez-merchant
+  annotations:
+    description: "verify-qr-admin service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4069
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: verify-qr-admin
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: verify-qr-admin-internal
+  namespace: rez-merchant
+  labels:
+    app: verify-qr-admin
+    managed-by: rez-merchant
+  annotations:
+    description: "verify-qr-admin internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4069
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: verify-qr-admin

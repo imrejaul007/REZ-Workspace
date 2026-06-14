@@ -1,0 +1,25 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-guest-mobile-app-config
+  namespace: rez-merchant
+  labels:
+    app: rez-guest-mobile-app
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4041"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-guest-mobile-app"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez_guest_mobile"
+  REDIS_DATABASE: "0"

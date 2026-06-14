@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: rez-merchant-intelligence
+    env: node
+    region: singapore
+    buildCommand: npm cache clean --force && NODE_ENV=development npm install --include=dev && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4012
+      - key: MONGODB_URI
+        sync: false
+      - key: EVENT_PLATFORM_URL
+        sync: false

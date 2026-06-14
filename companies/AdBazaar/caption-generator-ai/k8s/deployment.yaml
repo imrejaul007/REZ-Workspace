@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-caption-generator
+  labels:
+    app: ad-bazaar-caption-generator
+    tier: social-automation
+    component: ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-caption-generator
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-caption-generator
+        tier: social-automation
+        component: ai
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5091"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/caption-generator-ai:latest
+        ports:
+        - containerPort: 5091
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: ad-bazaar-caption-generator-config
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5091
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5091
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3

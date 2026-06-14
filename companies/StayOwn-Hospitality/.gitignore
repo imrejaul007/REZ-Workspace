@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.env
+dist/
+build/
+coverage/
+.DS_Store
+*.tgz
+package-lock.json
+pnpm-lock.yaml
+

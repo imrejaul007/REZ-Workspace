@@ -1,0 +1,1 @@
+import express from'express';import logger from'./utils/logger';import ratelimitRoutes from'./routes/ratelimit';const app=express();const PORT=4318;app.use(express.json());app.get('/health',(_,res)=>res.json({service:'REZ Rate Limiter',status:'healthy'}));app.use('/api/ratelimit',ratelimitRoutes);app.listen(PORT,()=>logger.info(`REZ Rate Limiter running on ${PORT}`));export{app};

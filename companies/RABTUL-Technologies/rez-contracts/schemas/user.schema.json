@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rez.money/contracts/user.schema.json",
+  "title": "User",
+  "description": "REZ user account",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["userId", "phone", "createdAt"],
+  "properties": {
+    "userId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{24}$",
+      "description": "MongoDB ObjectId"
+    },
+    "phone": {
+      "type": "string",
+      "pattern": "^\\+91[6-9]\\d{9}$",
+      "description": "Indian mobile number with country code"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "maxLength": 255
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "suspended", "deleted"]
+    },
+    "role": {
+      "type": "string",
+      "enum": ["user", "merchant", "admin", "super_admin"]
+    },
+    "walletId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{24}$"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

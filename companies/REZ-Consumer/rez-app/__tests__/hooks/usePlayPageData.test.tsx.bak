@@ -1,0 +1,175 @@
+/**
+ * Unit Tests for usePlayPageData hook
+ */
+
+import React from 'react';
+import { renderHook, waitFor, act } from '@testing-library/react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { usePlayPageData } from '@/hooks/usePlayPageData';
+
+// ── Mock dependencies ──────────────────────────────────────────────────────────
+
+// Mock store selectors
+jest.mock('@/stores/selectors', () => ({
+  useAuthUser: jest.fn(() => ({ id: 'user-1', name: 'Test' })),
+  useIsAuthenticated: jest.fn(() => true),
+  useAuthLoading: jest.fn(() => false),
+  useCartActions: jest.fn(() => ({
+    addItem: jest.fn(),
+    removeItem: jest.fn(),
+  })),
+  useCurrentRegionId: jest.fn(() => 'in'),
+}));
+
+// Mock realVideosApi — this is what the hook actually imports
+jest.mock('@/services/realVideosApi', () => ({
+  __esModule: true,
+  default: {
+    getVideosByCategory: jest.fn(() => Promise.resolve({
+      success: true,
+      data: {
+        videos: [],
+        pagination: { hasNext: false, page: 1, total: 0 },
+      },
+    })),
+    toggleVideoLike: jest.fn(() => Promise.resolve({ success: true, data: { isLiked: true, totalLikes: 10 } })),
+    getVideoById: jest.fn(() => Promise.resolve({ success: true, data: null })),
+  },
+}));
+
+// Mock the videosApi
+jest.mock('@/services/videosApi', () => ({
+  fetchVideos: jest.fn(() => Promise.resolve([])),
+}));
+
+// Mock video transformers
+jest.mock('@/utils/videoTransformers', () => ({
+  transformVideosToUGC: jest.fn((videos) => videos.map((v) => ({
+    id: v.id,
+    description: v.description || '',
+    videoUrl: v.videoUrl || '',
+    thumbnailUrl: v.thumbnailUrl || '',
+    likes: v.likes || 0,
+    comments: v.comments || 0,
+    shares: v.shares || 0,
+    isLiked: v.isLiked || false,
+    contentType: v.contentType || 'ugc',
+    category: v.category || 'trending_me',
+    hashtags: v.hashtags || [],
+    createdAt: v.createdAt,
+    user: v.user,
+  }))),
+  getFeaturedVideo: jest.fn((videos) => videos[0] || null),
+}));
+
+// Mock platformAlert
+jest.mock('@/utils/platformAlert', () => ({
+  platformAlertSimple: jest.fn(),
+}));
+
+// Mock playPageData
+jest.mock('@/data/playPageData', () => ({
+  categoryTabs: [
+    { id: 'tab-1', type: 'trending_me', label: 'Trending', isActive: true },
+    { id: 'tab-2', type: 'merchant', label: 'Merchant', isActive: false },
+    { id: 'tab-3', type: 'ugc', label: 'UGC', isActive: false },
+  ],
+}));
+
+// ── Wrapper factory ────────────────────────────────────────────────────────────
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, staleTime: Infinity },
+      mutations: { retry: false },
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+
+describe('usePlayPageData', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should initialize with default state', async () => {
+    const { result } = renderHook(() => usePlayPageData(), { wrapper: createWrapper() });
+
+    // Initial state
+    expect(result.current.state).toBeDefined();
+    expect(result.current.state.activeCategory).toBe('trending_me');
+  });
+
+  it('should have all action functions', async () => {
+    const { result } = renderHook(() => usePlayPageData(), { wrapper: createWrapper() });
+
+    expect(result.current.actions).toBeDefined();
+    expect(typeof result.current.actions.fetchVideos).toBe('function');
+    expect(typeof result.current.actions.refreshVideos).toBe('function');
+    expect(typeof result.current.actions.setActiveCategory).toBe('function');
+    expect(typeof result.current.actions.playVideo).toBe('function');
+    expect(typeof result.current.actions.pauseVideo).toBe('function');
+    expect(typeof result.current.actions.toggleMute).toBe('function');
+    expect(typeof result.current.actions.likeVideo).toBe('function');
+    expect(typeof result.current.actions.shareVideo).toBe('function');
+  });
+
+  it('should manage video playback state', async () => {
+    const { result } = renderHook(() => usePlayPageData(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      // Play a video
+      result.current.actions.playVideo('video-1');
+    });
+
+    expect(result.current.state.playingVideos.has('video-1')).toBe(true);
+
+    await act(async () => {
+      // Pause the video
+      result.current.actions.pauseVideo('video-1');
+    });
+
+    expect(result.current.state.playingVideos.has('video-1')).toBe(false);
+  });
+
+  it('should toggle mute state', async () => {
+    const { result } = renderHook(() => usePlayPageData(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      result.current.actions.toggleMute('video-1');
+    });
+
+    expect(result.current.state.mutedVideos.has('video-1')).toBe(true);
+
+    await act(async () => {
+      result.current.actions.toggleMute('video-1');
+    });
+
+    expect(result.current.state.mutedVideos.has('video-1')).toBe(false);
+  });
+
+  it('should set active category', async () => {
+    const { result } = renderHook(() => usePlayPageData(), { wrapper: createWrapper() });
+
+    // State update should be synchronous
+    act(() => {
+      result.current.actions.setActiveCategory('merchant');
+    });
+
+    expect(result.current.state.activeCategory).toBe('merchant');
+  });
+
+  it('should clear error', async () => {
+    const { result } = renderHook(() => usePlayPageData(), { wrapper: createWrapper() });
+
+    expect(typeof result.current.actions.clearError).toBe('function');
+
+    // clearError should be callable without error
+    act(() => {
+      result.current.actions.clearError();
+    });
+  });
+});

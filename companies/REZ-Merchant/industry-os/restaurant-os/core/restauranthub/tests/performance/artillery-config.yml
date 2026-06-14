@@ -1,0 +1,194 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    # Warm up phase
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+
+    # Ramp up phase
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 50
+      name: "Ramp up load"
+
+    # Sustained load phase
+    - duration: 300
+      arrivalRate: 50
+      name: "Sustained load"
+
+    # Spike test phase
+    - duration: 60
+      arrivalRate: 100
+      name: "Spike test"
+
+    # Cool down phase
+    - duration: 120
+      arrivalRate: 100
+      rampTo: 10
+      name: "Cool down"
+
+  # Performance thresholds
+  ensure:
+    http.response_time:
+      p99: 2000    # 99th percentile response time should be under 2s
+      p95: 1000    # 95th percentile response time should be under 1s
+      median: 500  # Median response time should be under 500ms
+    http.codes.200: 95  # 95% of requests should succeed
+    http.codes.401: 3   # Allow up to 3% auth failures
+    http.codes.429: 2   # Allow up to 2% rate limit hits
+    vusers.failed: 1    # Less than 1% of virtual users should fail
+
+  # Variables for testing
+  variables:
+    adminEmail: 'admin@restauranthub.com'
+    adminPassword: 'Password123'
+    testRestaurantId: 'rest-1'
+    testJobId: 'job-1'
+
+  # Request defaults
+  defaults:
+    headers:
+      'Content-Type': 'application/json'
+      'User-Agent': 'RestaurantHub-LoadTest/1.0'
+
+  # Plugins for enhanced reporting
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+    publish-metrics:
+      - type: datadog
+        apiKey: "${DATADOG_API_KEY}"
+        tags:
+          - "environment:test"
+          - "service:restauranthub-api"
+
+scenarios:
+  # Authentication flow test
+  - weight: 30
+    name: "Authentication Flow"
+    flow:
+      - post:
+          url: "/api/v1/auth/signin"
+          json:
+            email: "{{ adminEmail }}"
+            password: "{{ adminPassword }}"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+          expect:
+            - statusCode: 200
+            - hasProperty: accessToken
+
+      - get:
+          url: "/api/v1/auth/me"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          expect:
+            - statusCode: 200
+
+  # Restaurant operations test
+  - weight: 25
+    name: "Restaurant Operations"
+    flow:
+      - post:
+          url: "/api/v1/auth/signin"
+          json:
+            email: "{{ adminEmail }}"
+            password: "{{ adminPassword }}"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+
+      - get:
+          url: "/api/v1/restaurants"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "/api/v1/restaurants/{{ testRestaurantId }}"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          expect:
+            - statusCode: [200, 404]
+
+  # Job portal test
+  - weight: 20
+    name: "Job Portal"
+    flow:
+      - post:
+          url: "/api/v1/auth/signin"
+          json:
+            email: "{{ adminEmail }}"
+            password: "{{ adminPassword }}"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+
+      - get:
+          url: "/api/v1/jobs"
+          qs:
+            page: 1
+            limit: 20
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "/api/v1/jobs/{{ testJobId }}"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          expect:
+            - statusCode: [200, 404]
+
+  # Health checks and monitoring
+  - weight: 15
+    name: "Health and Monitoring"
+    flow:
+      - get:
+          url: "/api/v1/auth/health"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: status
+
+      - get:
+          url: "/api/v1/auth/redis-health"
+          expect:
+            - statusCode: 200
+
+  # Search and filtering
+  - weight: 10
+    name: "Search Operations"
+    flow:
+      - post:
+          url: "/api/v1/auth/signin"
+          json:
+            email: "{{ adminEmail }}"
+            password: "{{ adminPassword }}"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+
+      - get:
+          url: "/api/v1/jobs/search"
+          qs:
+            q: "chef"
+            location: "New York"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "/api/v1/restaurants/search"
+          qs:
+            q: "pizza"
+            location: "New York"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          expect:
+            - statusCode: 200

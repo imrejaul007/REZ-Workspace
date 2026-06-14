@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-channel-manager
+  namespace: rez-merchant
+  labels:
+    app: rez-channel-manager
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-channel-manager service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4021
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-channel-manager
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-channel-manager-internal
+  namespace: rez-merchant
+  labels:
+    app: rez-channel-manager
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-channel-manager internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4021
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-channel-manager

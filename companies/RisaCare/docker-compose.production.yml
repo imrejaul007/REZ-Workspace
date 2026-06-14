@@ -1,0 +1,1636 @@
+# =============================================================================
+# RisaCare - Production Docker Compose
+# Complete Healthcare OS with all 56+ services
+# =============================================================================
+
+version: '3.9'
+
+services:
+  # ==========================================
+  # DATABASE & MESSAGING INFRASTRUCTURE
+  # ==========================================
+
+  mongo-primary:
+    image: mongo:7.0
+    container_name: risacare-mongo-primary
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-primary-data:/data/db
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    networks:
+      - risacare-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: risacare-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-risacare-redis-pass}
+    volumes:
+      - redis-data:/data
+    networks:
+      - risacare-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # CORE PLATFORM (4700-4708)
+  # ==========================================
+
+  risa-care-api-gateway:
+    build:
+      context: ./risa-care-api-gateway
+      args:
+        PORT: 4700
+    container_name: risacare-api-gateway
+    ports:
+      - "4700:4700"
+    environment:
+      - NODE_ENV=production
+      - PORT=4700
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care
+      - REDIS_URL=redis://:@redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4700/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  risa-care-profile-service:
+    build:
+      context: ./risa-care-profile-service
+      args:
+        PORT: 4701
+    container_name: risacare-profile-service
+    ports:
+      - "4701:4701"
+    environment:
+      - NODE_ENV=production
+      - PORT=4701
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa-care-profile
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4701/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-records-service:
+    build:
+      context: ./risa-care-records-service
+      args:
+        PORT: 4702
+    container_name: risacare-records-service
+    ports:
+      - "4702:4702"
+    environment:
+      - NODE_ENV=production
+      - PORT=4702
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa-care-records
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4702/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-wellness-service:
+    build:
+      context: ./risa-care-wellness-service
+      args:
+        PORT: 4703
+    container_name: risacare-wellness-service
+    ports:
+      - "4703:4703"
+    environment:
+      - NODE_ENV=production
+      - PORT=4703
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa-care-wellness
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4703/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-visit-service:
+    build:
+      context: ./risa-care-visit-service
+      args:
+        PORT: 4704
+    container_name: risacare-visit-service
+    ports:
+      - "4704:4704"
+    environment:
+      - NODE_ENV=production
+      - PORT=4704
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa-care-visits
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4704/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-consent-service:
+    build:
+      context: ./risa-care-consent-service
+      args:
+        PORT: 4705
+    container_name: risacare-consent-service
+    ports:
+      - "4705:4705"
+    environment:
+      - NODE_ENV=production
+      - PORT=4705
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa-care-consents
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4705/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-care-circle-service:
+    build:
+      context: ./risa-care-care-circle-service
+      args:
+        PORT: 4706
+    container_name: risacare-care-circle-service
+    ports:
+      - "4706:4706"
+    environment:
+      - NODE_ENV=production
+      - PORT=4706
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa-care-circles
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4706/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-medication-service:
+    build:
+      context: ./risa-care-medication-service
+      args:
+        PORT: 4707
+    container_name: risacare-medication-service
+    ports:
+      - "4707:4707"
+    environment:
+      - NODE_ENV=production
+      - PORT=4707
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa-care-medications
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4707/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-corporate-service:
+    build:
+      context: ./risa-care-corporate-service
+      args:
+        PORT: 4708
+    container_name: risacare-corporate-service
+    ports:
+      - "4708:4708"
+    environment:
+      - NODE_ENV=production
+      - PORT=4708
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa-care-corporate
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4708/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # B2C HEALTHCARE (4720-4729)
+  # ==========================================
+
+  risa-care-chronic-care-service:
+    build:
+      context: ./risa-care-chronic-care-service
+      args:
+        PORT: 4720
+    container_name: risacare-chronic-care-service
+    ports:
+      - "4720:4720"
+    environment:
+      - NODE_ENV=production
+      - PORT=4720
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_chronic
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4720/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-elderly-service:
+    build:
+      context: ./risa-care-elderly-service
+      args:
+        PORT: 4721
+    container_name: risacare-elderly-service
+    ports:
+      - "4721:4721"
+    environment:
+      - NODE_ENV=production
+      - PORT=4721
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_elderly
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4721/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-mental-health-service:
+    build:
+      context: ./risa-care-mental-health-service
+      args:
+        PORT: 4722
+    container_name: risacare-mental-health-service
+    ports:
+      - "4722:4722"
+    environment:
+      - NODE_ENV=production
+      - PORT=4722
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_mental_health
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4722/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-teleconsult-service:
+    build:
+      context: ./risa-care-teleconsult-service
+      args:
+        PORT: 4723
+    container_name: risacare-teleconsult-service
+    ports:
+      - "4723:4723"
+    environment:
+      - NODE_ENV=production
+      - PORT=4723
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_teleconsult
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4723/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-insurance-service:
+    build:
+      context: ./risa-care-insurance-service
+      args:
+        PORT: 4724
+    container_name: risacare-insurance-service
+    ports:
+      - "4724:4724"
+    environment:
+      - NODE_ENV=production
+      - PORT=4724
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_insurance
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4724/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-nutrition-service:
+    build:
+      context: ./risa-care-nutrition-service
+      args:
+        PORT: 4725
+    container_name: risacare-nutrition-service
+    ports:
+      - "4725:4725"
+    environment:
+      - NODE_ENV=production
+      - PORT=4725
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_nutrition
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4725/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-second-opinion-service:
+    build:
+      context: ./risa-care-second-opinion-service
+      args:
+        PORT: 4726
+    container_name: risacare-second-opinion-service
+    ports:
+      - "4726:4726"
+    environment:
+      - NODE_ENV=production
+      - PORT=4726
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_second_opinion
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4726/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-vaccination-service:
+    build:
+      context: ./risa-care-vaccination-service
+      args:
+        PORT: 4727
+    container_name: risacare-vaccination-service
+    ports:
+      - "4727:4727"
+    environment:
+      - NODE_ENV=production
+      - PORT=4727
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_vaccination
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4727/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-home-healthcare-service:
+    build:
+      context: ./risa-care-home-healthcare-service
+      args:
+        PORT: 4728
+    container_name: risacare-home-healthcare-service
+    ports:
+      - "4728:4728"
+    environment:
+      - NODE_ENV=production
+      - PORT=4728
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_home_healthcare
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4728/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-sleep-service:
+    build:
+      context: ./risa-care-sleep-service
+      args:
+        PORT: 4729
+    container_name: risacare-sleep-service
+    ports:
+      - "4729:4729"
+    environment:
+      - NODE_ENV=production
+      - PORT=4729
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_sleep
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4729/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # B2B ENTERPRISE (4740-4743)
+  # ==========================================
+
+  risa-care-hospital-service:
+    build:
+      context: ./risa-care-hospital-service
+      args:
+        PORT: 4740
+    container_name: risacare-hospital-service
+    ports:
+      - "4740:4740"
+    environment:
+      - NODE_ENV=production
+      - PORT=4740
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_hospital
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4740/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-doctor-practice-service:
+    build:
+      context: ./risa-care-doctor-practice-service
+      args:
+        PORT: 4741
+    container_name: risacare-doctor-practice-service
+    ports:
+      - "4741:4741"
+    environment:
+      - NODE_ENV=production
+      - PORT=4741
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_doctor_practice
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4741/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-lab-service:
+    build:
+      context: ./risa-care-lab-service
+      args:
+        PORT: 4742
+    container_name: risacare-lab-service
+    ports:
+      - "4742:4742"
+    environment:
+      - NODE_ENV=production
+      - PORT=4742
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_lab
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4742/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-pharmacy-management-service:
+    build:
+      context: ./risa-care-pharmacy-management-service
+      args:
+        PORT: 4743
+    container_name: risacare-pharmacy-management-service
+    ports:
+      - "4743:4743"
+    environment:
+      - NODE_ENV=production
+      - PORT=4743
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_pharmacy
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4743/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # AI + RCM SERVICES (4750-4762)
+  # ==========================================
+
+  risa-care-rcm-service:
+    build:
+      context: ./risa-care-rcm-service
+      args:
+        PORT: 4750
+    container_name: risacare-rcm-service
+    ports:
+      - "4750:4750"
+    environment:
+      - NODE_ENV=production
+      - PORT=4750
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_rcm
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4750/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-wearable-service:
+    build:
+      context: ./risa-care-wearable-service
+      args:
+        PORT: 4753
+    container_name: risacare-wearable-service
+    ports:
+      - "4753:4753"
+    environment:
+      - NODE_ENV=production
+      - PORT=4753
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_wearable
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4753/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-predictive-service:
+    build:
+      context: ./risa-care-predictive-service
+      args:
+        PORT: 4754
+    container_name: risacare-predictive-service
+    ports:
+      - "4754:4754"
+    environment:
+      - NODE_ENV=production
+      - PORT=4754
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_predictive
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4754/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-lab-integration-service:
+    build:
+      context: ./risa-care-lab-integration-service
+      args:
+        PORT: 4755
+    container_name: risacare-lab-integration-service
+    ports:
+      - "4755:4755"
+    environment:
+      - NODE_ENV=production
+      - PORT=4755
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_lab_integration
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4755/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-teleconsult-v2:
+    build:
+      context: ./risa-care-teleconsult-v2
+      args:
+        PORT: 4756
+    container_name: risacare-teleconsult-v2
+    ports:
+      - "4756:4756"
+    environment:
+      - NODE_ENV=production
+      - PORT=4756
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_teleconsult
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4756/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-pharmacy-integration-service:
+    build:
+      context: ./risa-care-pharmacy-integration-service
+      args:
+        PORT: 4757
+    container_name: risacare-pharmacy-integration-service
+    ports:
+      - "4757:4757"
+    environment:
+      - NODE_ENV=production
+      - PORT=4757
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_pharmacy_integration
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4757/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-eligibility-service:
+    build:
+      context: ./risa-care-eligibility-service
+      args:
+        PORT: 4758
+    container_name: risacare-eligibility-service
+    ports:
+      - "4758:4758"
+    environment:
+      - NODE_ENV=production
+      - PORT=4758
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_eligibility
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4758/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-clearinghouse:
+    build:
+      context: ./risa-care-clearinghouse
+      args:
+        PORT: 4759
+    container_name: risacare-clearinghouse
+    ports:
+      - "4759:4759"
+    environment:
+      - NODE_ENV=production
+      - PORT=4759
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_clearinghouse
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4759/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-nursing-home-service:
+    build:
+      context: ./risa-care-nursing-home-service
+      args:
+        PORT: 4760
+    container_name: risacare-nursing-home-service
+    ports:
+      - "4760:4760"
+    environment:
+      - NODE_ENV=production
+      - PORT=4760
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_nursing_home
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4760/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-fhir-service:
+    build:
+      context: ./risa-care-fhir-service
+      args:
+        PORT: 4761
+    container_name: risacare-fhir-service
+    ports:
+      - "4761:4761"
+    environment:
+      - NODE_ENV=production
+      - PORT=4761
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_fhir
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4761/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-ambient-audio-service:
+    build:
+      context: ./risa-care-ambient-audio-service
+      args:
+        PORT: 4762
+    container_name: risacare-ambient-audio-service
+    ports:
+      - "4762:4762"
+    environment:
+      - NODE_ENV=production
+      - PORT=4762
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_ambient
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4762/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # PATIENT/DOCTOR APPS (4770-4781)
+  # ==========================================
+
+  risa-care-mobile-backend:
+    build:
+      context: ./risa-care-mobile-backend
+      args:
+        PORT: 4770
+    container_name: risacare-mobile-backend
+    ports:
+      - "4770:4770"
+    environment:
+      - NODE_ENV=production
+      - PORT=4770
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_mobile
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4770/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-hospital-admin:
+    build:
+      context: ./risa-care-hospital-admin
+      args:
+        PORT: 4772
+    container_name: risacare-hospital-admin
+    ports:
+      - "4772:4772"
+    environment:
+      - NODE_ENV=production
+      - PORT=4772
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_hospital_admin
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4772/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-telemedicine:
+    build:
+      context: ./risa-care-telemedicine
+      args:
+        PORT: 4773
+    container_name: risacare-telemedicine
+    ports:
+      - "4773:4773"
+    environment:
+      - NODE_ENV=production
+      - PORT=4773
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_telemedicine
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4773/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-marketplace:
+    build:
+      context: ./risa-care-marketplace
+      args:
+        PORT: 4774
+    container_name: risacare-marketplace
+    ports:
+      - "4774:4774"
+    environment:
+      - NODE_ENV=production
+      - PORT=4774
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_marketplace
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4774/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-insurance-aggregator:
+    build:
+      context: ./risa-care-insurance-aggregator
+      args:
+        PORT: 4775
+    container_name: risacare-insurance-aggregator
+    ports:
+      - "4775:4775"
+    environment:
+      - NODE_ENV=production
+      - PORT=4775
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_insurance_agg
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4775/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-homecare:
+    build:
+      context: ./risa-care-homecare
+      args:
+        PORT: 4776
+    container_name: risacare-homecare
+    ports:
+      - "4776:4776"
+    environment:
+      - NODE_ENV=production
+      - PORT=4776
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_homecare
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4776/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-diagnostics:
+    build:
+      context: ./risa-care-diagnostics
+      args:
+        PORT: 4777
+    container_name: risacare-diagnostics
+    ports:
+      - "4777:4777"
+    environment:
+      - NODE_ENV=production
+      - PORT=4777
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_diagnostics
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4777/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-emr-service:
+    build:
+      context: ./risa-care-emr-service
+      args:
+        PORT: 4778
+    container_name: risacare-emr-service
+    ports:
+      - "4778:4778"
+    environment:
+      - NODE_ENV=production
+      - PORT=4778
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_emr
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4778/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-patient-portal:
+    build:
+      context: ./risa-care-patient-portal
+      args:
+        PORT: 4779
+    container_name: risacare-patient-portal
+    ports:
+      - "4779:4779"
+    environment:
+      - NODE_ENV=production
+      - PORT=4779
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_patient_portal
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4779/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-provider-directory:
+    build:
+      context: ./risa-care-provider-directory
+      args:
+        PORT: 4780
+    container_name: risacare-provider-directory
+    ports:
+      - "4780:4780"
+    environment:
+      - NODE_ENV=production
+      - PORT=4780
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_provider_directory
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4780/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-health-wallet:
+    build:
+      context: ./risa-care-health-wallet
+      args:
+        PORT: 4781
+    container_name: risacare-health-wallet
+    ports:
+      - "4781:4781"
+    environment:
+      - NODE_ENV=production
+      - PORT=4781
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_health_wallet
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4781/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # EMERGENCY & INTEGRATION SERVICES
+  # ==========================================
+
+  emergency-service:
+    build:
+      context: ./emergency-service
+      args:
+        PORT: 4730
+    container_name: risacare-emergency-service
+    ports:
+      - "4730:4730"
+    environment:
+      - NODE_ENV=production
+      - PORT=4730
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_emergency
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4730/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  abha-service:
+    build:
+      context: ./abha-service
+      args:
+        PORT: 4731
+    container_name: risacare-abha-service
+    ports:
+      - "4731:4731"
+    environment:
+      - NODE_ENV=production
+      - PORT=4731
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_abha
+      - ABHA_API_URL=${ABHA_API_URL}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4731/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-ai-scribe:
+    build:
+      context: ./risa-care-ai-scribe
+      args:
+        PORT: 4732
+    container_name: risacare-ai-scribe
+    ports:
+      - "4732:4732"
+    environment:
+      - NODE_ENV=production
+      - PORT=4732
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_ai_scribe
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4732/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risa-care-ai-service:
+    build:
+      context: ./risa-care-ai-service
+      args:
+        PORT: 4733
+    container_name: risacare-ai-service
+    ports:
+      - "4733:4733"
+    environment:
+      - NODE_ENV=production
+      - PORT=4733
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_ai
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4733/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # MYRISA SERVICES
+  # ==========================================
+
+  myrisa-app:
+    build:
+      context: ./myrisa-app
+      args:
+        PORT: 4800
+    container_name: risacare-myrisa-app
+    ports:
+      - "4800:4800"
+    environment:
+      - NODE_ENV=production
+      - PORT=4800
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_app
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4800/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-auth-service:
+    build:
+      context: ./myrisa-auth-service
+      args:
+        PORT: 4801
+    container_name: risacare-myrisa-auth
+    ports:
+      - "4801:4801"
+    environment:
+      - NODE_ENV=production
+      - PORT=4801
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_auth
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4801/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-consultation-copilot:
+    build:
+      context: ./myrisa-consultation-copilot
+      args:
+        PORT: 4802
+    container_name: risacare-myrisa-copilot
+    ports:
+      - "4802:4802"
+    environment:
+      - NODE_ENV=production
+      - PORT=4802
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_copilot
+      - HOJAI_LLM_URL=${HOJAI_LLM_URL:-http://hojai-llm:4730}
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4802/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-family-service:
+    build:
+      context: ./myrisa-family-service
+      args:
+        PORT: 4803
+    container_name: risacare-myrisa-family
+    ports:
+      - "4803:4803"
+    environment:
+      - NODE_ENV=production
+      - PORT=4803
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_family
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4803/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-genie-health:
+    build:
+      context: ./myrisa-genie-health
+      args:
+        PORT: 4804
+    container_name: risacare-myrisa-genie
+    ports:
+      - "4804:4804"
+    environment:
+      - NODE_ENV=production
+      - PORT=4804
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_genie
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4804/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-human-twin-service:
+    build:
+      context: ./myrisa-human-twin-service
+      args:
+        PORT: 4805
+    container_name: risacare-myrisa-twin
+    ports:
+      - "4805:4805"
+    environment:
+      - NODE_ENV=production
+      - PORT=4805
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_twin
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4805/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-relationships-service:
+    build:
+      context: ./myrisa-relationships-service
+      args:
+        PORT: 4806
+    container_name: risacare-myrisa-relations
+    ports:
+      - "4806:4806"
+    environment:
+      - NODE_ENV=production
+      - PORT=4806
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_relations
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4806/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-sexual-wellness-service:
+    build:
+      context: ./myrisa-sexual-wellness-service
+      args:
+        PORT: 4807
+    container_name: risacare-myrisa-sexual
+    ports:
+      - "4807:4807"
+    environment:
+      - NODE_ENV=production
+      - PORT=4807
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_sexual
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4807/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-universal-memory:
+    build:
+      context: ./myrisa-universal-memory
+      args:
+        PORT: 4808
+    container_name: risacare-myrisa-memory
+    ports:
+      - "4808:4808"
+    environment:
+      - NODE_ENV=production
+      - PORT=4808
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_memory
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4808/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-womens-health-service:
+    build:
+      context: ./myrisa-womens-health-service
+      args:
+        PORT: 4809
+    container_name: risacare-myrisa-womens
+    ports:
+      - "4809:4809"
+    environment:
+      - NODE_ENV=production
+      - PORT=4809
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_womens
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4809/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  myrisa-worklife-service:
+    build:
+      context: ./myrisa-worklife-service
+      args:
+        PORT: 4810
+    container_name: risacare-myrisa-worklife
+    ports:
+      - "4810:4810"
+    environment:
+      - NODE_ENV=production
+      - PORT=4810
+      - MONGODB_URI=mongodb://mongo-primary:27017/myrisa_worklife
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4810/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # ADDITIONAL SERVICES
+  # ==========================================
+
+  risacare-health-graph:
+    build:
+      context: ./risacare-health-graph
+      args:
+        PORT: 4811
+    container_name: risacare-health-graph
+    ports:
+      - "4811:4811"
+    environment:
+      - NODE_ENV=production
+      - PORT=4811
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_graph
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4811/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risacare-health-memory:
+    build:
+      context: ./risacare-health-memory
+      args:
+        PORT: 4812
+    container_name: risacare-health-memory
+    ports:
+      - "4812:4812"
+    environment:
+      - NODE_ENV=production
+      - PORT=4812
+      - MONGODB_URI=mongodb://mongo-primary:27017/risa_care_memory
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+    networks:
+      - risacare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4812/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # MONITORING STACK
+  # ==========================================
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: risacare-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - risacare-network
+    depends_on:
+      - risa-care-api-gateway
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: risacare-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - risacare-network
+    depends_on:
+      - prometheus
+
+# ==========================================
+# VOLUMES & NETWORKS
+# ==========================================
+
+volumes:
+  mongo-primary-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  risacare-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

@@ -1,0 +1,47 @@
+{
+  "name": "risnaestate",
+  "version": "1.0.0",
+  "description": "RisnaEstate - AI-Powered Real Estate Commerce Platform",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "shared/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:all",
+    "dev:all": "concurrently \"npm run dev:gateway\" \"npm run dev:property\" \"npm run dev:lead\" \"npm run dev:visa\" \"npm run dev:referral\" \"npm run dev:broker\" \"npm run dev:crm\" \"npm run dev:media\"",
+    "dev:gateway": "npm run dev --workspace=risna-gateway",
+    "dev:property": "npm run dev --workspace=risna-property-service",
+    "dev:lead": "npm run dev --workspace=risna-lead-service",
+    "dev:visa": "npm run dev --workspace=risna-visa-service",
+    "dev:referral": "npm run dev --workspace=risna-referral-service",
+    "dev:broker": "npm run dev --workspace=risna-broker-service",
+    "dev:crm": "npm run dev --workspace=risna-crm-service",
+    "dev:media": "npm run dev --workspace=risna-media-service",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:intelligence": "npm run dev --workspace=risna-intelligence-service",
+    "dev:whatsapp": "npm run dev --workspace=risna-whatsapp-service",
+    "dev:investment": "npm run dev --workspace=risna-investment-service",
+    "dev:distribution": "npm run dev --workspace=risna-distribution-service",
+    "dev:notification": "npm run dev --workspace=risna-notification-service",
+    "dev:payment": "npm run dev --workspace=risna-payment-service",
+    "dev:builder": "npm run dev --workspace=risna-builder-service",
+    "install:all": "npm install && npm run install:services",
+    "install:services": "npm run install --workspaces",
+    "build": "npm run build --workspaces",
+    "build:gateway": "npm run build --workspace=risna-gateway",
+    "build:frontend": "npm run build --workspace=frontend",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "seed": "node seeds/run.js",
+    "health": "curl -s http://localhost:3000/health && curl -s http://localhost:4100/health && curl -s http://localhost:4101/health && curl -s http://localhost:4102/health && curl -s http://localhost:4103/health && curl -s http://localhost:4104/health && curl -s http://localhost:4105/health && curl -s http://localhost:4106/health && curl -s http://localhost:4110/health && curl -s http://localhost:4111/health"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.29.7",
+    "@babel/core": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
+    "concurrently": "^8.2.2",
+    "tsx": "^4.22.4"
+  }
+}

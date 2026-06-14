@@ -1,0 +1,20 @@
+{
+  "name": "rez-unified-loyalty-sdk",
+  "version": "1.0.0",
+  "description": "REZ Unified Loyalty SDK - Single SDK for all loyalty features",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^1.1.0"
+  }
+}

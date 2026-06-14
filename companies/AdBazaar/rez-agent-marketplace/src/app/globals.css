@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .agent-card {
+    @apply bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-200;
+  }
+
+  .agent-card:hover {
+    @apply shadow-lg border-blue-200 -translate-y-1;
+  }
+
+  .category-pill {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 text-sm font-medium transition-colors;
+  }
+
+  .category-pill:hover {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .category-pill.active {
+    @apply bg-blue-600 text-white;
+  }
+
+  .install-btn {
+    @apply px-6 py-3 bg-blue-600 text-white rounded-lg font-medium transition-all;
+  }
+
+  .install-btn:hover {
+    @apply bg-blue-700 shadow-lg;
+  }
+
+  .install-btn:disabled {
+    @apply bg-gray-300 cursor-not-allowed;
+  }
+
+  .compare-btn {
+    @apply px-4 py-2 border border-gray-300 rounded-lg font-medium transition-all;
+  }
+
+  .compare-btn:hover {
+    @apply border-blue-500 text-blue-600;
+  }
+
+  .compare-btn.active {
+    @apply bg-blue-600 text-white border-blue-600;
+  }
+
+  .filter-select {
+    @apply px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none;
+  }
+
+  .search-input {
+    @apply w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-free {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .badge-paid {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  .badge-popular {
+    @apply bg-amber-100 text-amber-800;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

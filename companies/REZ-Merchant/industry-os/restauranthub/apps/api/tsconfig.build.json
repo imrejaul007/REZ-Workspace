@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/src",
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false,
+    "noImplicitOverride": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*spec.ts",
+    "disabled_modules/**/*",
+    "src/disabled_modules/**/*",
+    "src/cache/**/*",
+    "src/monitoring/**/*"
+  ]
+}

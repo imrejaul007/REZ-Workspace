@@ -1,0 +1,392 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BillPaymentPage snapshots (CONS-020) 1. renders loading skeleton while bill types are being fetched 1`] = `
+<SafeAreaView
+  ref={null}
+  style={
+    {
+      "backgroundColor": "#faf1e0",
+      "flex": 1,
+      "paddingTop": 0,
+    }
+  }
+>
+  <StatusBar
+    backgroundColor="#FFFFFF"
+    barStyle="dark-content"
+    ref={null}
+  />
+  <View
+    ref={null}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FFFFFF",
+        "borderBottomColor": "#E8DCC4",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 16,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <View
+      onPress={[Function]}
+      ref={null}
+      style={
+        {
+          "padding": 4,
+        }
+      }
+    >
+      <Ionicons
+        color="#1a3a52"
+        name="arrow-back"
+        size={24}
+      />
+    </View>
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1a3a52",
+          "fontSize": 18,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Bill Payments
+    </Text>
+    <View
+      ref={null}
+      style={
+        {
+          "width": 32,
+        }
+      }
+    />
+  </View>
+</SafeAreaView>
+`;
+
+exports[`BillPaymentPage snapshots (CONS-020) 2. renders bill type selection grid when types are loaded 1`] = `
+<SafeAreaView
+  ref={null}
+  style={
+    {
+      "backgroundColor": "#faf1e0",
+      "flex": 1,
+      "paddingTop": 0,
+    }
+  }
+>
+  <StatusBar
+    backgroundColor="#FFFFFF"
+    barStyle="dark-content"
+    ref={null}
+  />
+  <View
+    ref={null}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FFFFFF",
+        "borderBottomColor": "#E8DCC4",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 16,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <View
+      onPress={[Function]}
+      ref={null}
+      style={
+        {
+          "padding": 4,
+        }
+      }
+    >
+      <Ionicons
+        color="#1a3a52"
+        name="arrow-back"
+        size={24}
+      />
+    </View>
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1a3a52",
+          "fontSize": 18,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Bill Payments
+    </Text>
+    <View
+      ref={null}
+      style={
+        {
+          "width": 32,
+        }
+      }
+    />
+  </View>
+</SafeAreaView>
+`;
+
+exports[`BillPaymentPage snapshots (CONS-020) 3. renders error state when bill types query fails 1`] = `
+<SafeAreaView
+  ref={null}
+  style={
+    {
+      "backgroundColor": "#faf1e0",
+      "flex": 1,
+      "paddingTop": 0,
+    }
+  }
+>
+  <StatusBar
+    backgroundColor="#FFFFFF"
+    barStyle="dark-content"
+    ref={null}
+  />
+  <View
+    ref={null}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FFFFFF",
+        "borderBottomColor": "#E8DCC4",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 16,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <View
+      onPress={[Function]}
+      ref={null}
+      style={
+        {
+          "padding": 4,
+        }
+      }
+    >
+      <Ionicons
+        color="#1a3a52"
+        name="arrow-back"
+        size={24}
+      />
+    </View>
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1a3a52",
+          "fontSize": 18,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Bill Payments
+    </Text>
+    <View
+      ref={null}
+      style={
+        {
+          "width": 32,
+        }
+      }
+    />
+  </View>
+  <View
+    accessibilityLabel="Error: Failed to Load Bill Types. Failed to load bill types. Please try again."
+    accessibilityLiveRegion="polite"
+    accessibilityRole="alert"
+    accessible={true}
+    ref={null}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#faf1e0",
+          "flex": 1,
+          "justifyContent": "center",
+          "paddingHorizontal": 24,
+          "paddingVertical": 48,
+        },
+        undefined,
+      ]
+    }
+  >
+    <Text
+      accessible={false}
+      aria-hidden={true}
+      ref={null}
+      style={
+        {
+          "fontSize": 64,
+          "marginBottom": 24,
+        }
+      }
+    >
+      ⚠️
+    </Text>
+    <Text
+      accessibilityRole="header"
+      accessible={true}
+      ref={null}
+      style={
+        {
+          "color": "#EF4444",
+          "fontSize": 24,
+          "fontWeight": "600",
+          "letterSpacing": -0.3,
+          "lineHeight": 32,
+          "marginBottom": 8,
+          "textAlign": "center",
+        }
+      }
+    >
+      Failed to Load Bill Types
+    </Text>
+    <Text
+      accessibilityRole="text"
+      accessible={true}
+      ref={null}
+      style={
+        {
+          "color": "#2A5577",
+          "fontSize": 14,
+          "fontWeight": "400",
+          "letterSpacing": 0,
+          "lineHeight": 20,
+          "marginBottom": 24,
+          "maxWidth": 320,
+          "textAlign": "center",
+        }
+      }
+    >
+      Failed to load bill types. Please try again.
+    </Text>
+    <View
+      accessibilityHint="Double tap to retry the failed action"
+      accessibilityLabel="Try Again"
+      accessibilityRole="button"
+      accessible={true}
+      onPress={[MockFunction]}
+      ref={null}
+      style={
+        {
+          "backgroundColor": "#EF4444",
+          "borderRadius": 16,
+          "elevation": 4,
+          "marginTop": 16,
+          "paddingHorizontal": 24,
+          "paddingVertical": 16,
+          "shadowColor": "#000",
+          "shadowOffset": {
+            "height": 2,
+            "width": 0,
+          },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 4,
+        }
+      }
+    >
+      <Text
+        ref={null}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontSize": 14,
+            "fontWeight": "600",
+            "letterSpacing": 0.5,
+            "lineHeight": 20,
+          }
+        }
+      >
+        Try Again
+      </Text>
+    </View>
+  </View>
+</SafeAreaView>
+`;
+
+exports[`BillPaymentPage snapshots (CONS-020) 4. renders provider list when a bill type is selected 1`] = `
+<SafeAreaView
+  ref={null}
+  style={
+    {
+      "backgroundColor": "#faf1e0",
+      "flex": 1,
+      "paddingTop": 0,
+    }
+  }
+>
+  <StatusBar
+    backgroundColor="#FFFFFF"
+    barStyle="dark-content"
+    ref={null}
+  />
+  <View
+    ref={null}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FFFFFF",
+        "borderBottomColor": "#E8DCC4",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 16,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <View
+      onPress={[Function]}
+      ref={null}
+      style={
+        {
+          "padding": 4,
+        }
+      }
+    >
+      <Ionicons
+        color="#1a3a52"
+        name="arrow-back"
+        size={24}
+      />
+    </View>
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1a3a52",
+          "fontSize": 18,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Bill Payments
+    </Text>
+    <View
+      ref={null}
+      style={
+        {
+          "width": 32,
+        }
+      }
+    />
+  </View>
+</SafeAreaView>
+`;

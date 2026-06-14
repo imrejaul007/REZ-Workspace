@@ -1,0 +1,50 @@
+# =============================================================================
+# Render Blueprint - ProjectOS Service
+# =============================================================================
+
+services:
+  - type: web
+    name: projectos-service
+    region: singapore
+    plan: starter
+    runtime: node
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    healthCheckInterval: 30s
+    healthCheckThreshold: 3
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4715"
+
+      # MongoDB
+      - key: MONGODB_URI
+        sync: false
+
+      # Redis
+      - key: REDIS_URL
+        sync: false
+
+      # Authentication
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+      # CORS
+      - key: CORS_ORIGINS
+        value: https://peopleos.corpperks.com,https://projectos.corpperks.com
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "1000"
+
+      # CorpID Integration
+      - key: CORPID_SERVICE_URL
+        value: https://corpid-api.onrender.com
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info

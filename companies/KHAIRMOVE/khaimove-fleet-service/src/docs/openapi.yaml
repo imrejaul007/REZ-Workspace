@@ -1,0 +1,154 @@
+# KHAIRMOVE Fleet Service API
+
+openapi: 3.0.3
+info:
+  title: KHAIRMOVE Fleet Service
+  description: Fleet management and driver dispatch
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4602
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+
+  /api/drivers:
+    get:
+      summary: List all drivers
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [online, offline, busy]
+      responses:
+        '200':
+          description: List of drivers
+
+    post:
+      summary: Register new driver
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                vehicleType:
+                  type: string
+                vehicleDetails:
+                  type: object
+      responses:
+        '201':
+          description: Driver created
+
+  /api/drivers/{id}:
+    get:
+      summary: Get driver by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Driver details
+        '404':
+          description: Not found
+
+  /api/drivers/{id}/location:
+    put:
+      summary: Update driver location
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lat:
+                  type: number
+                lng:
+                  type: number
+                heading:
+                  type: number
+      responses:
+        '200':
+          description: Location updated
+
+  /api/vehicles:
+    get:
+      summary: List all vehicles
+      responses:
+        '200':
+          description: List of vehicles
+
+    post:
+      summary: Register new vehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                make:
+                  type: string
+                model:
+                  type: string
+                year:
+                  type: number
+                registrationNumber:
+                  type: string
+      responses:
+        '201':
+          description: Vehicle created
+
+  /api/dispatch:
+    post:
+      summary: Dispatch driver to pickup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rideId:
+                  type: string
+                pickup:
+                  type: object
+                vehicleType:
+                  type: string
+      responses:
+        '200':
+          description: Driver dispatched
+
+  /api/fleets/{id}/stats:
+    get:
+      summary: Get fleet statistics
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fleet stats

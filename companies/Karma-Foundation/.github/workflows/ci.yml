@@ -1,0 +1,87 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # karma-service
+      - name: Install karma-service dependencies
+        run: cd karma-service && npm ci
+
+      - name: Lint karma-service
+        run: cd karma-service && npm run lint
+
+      - name: Build karma-service
+        run: cd karma-service && npm run build
+
+      # karma-loyalty-bridge
+      - name: Install karma-loyalty-bridge dependencies
+        run: cd karma-loyalty-bridge && npm ci
+
+      - name: Build karma-loyalty-bridge
+        run: cd karma-loyalty-bridge && npm run build
+
+      # karma-mobile
+      - name: Install karma-mobile dependencies
+        run: cd karma-mobile && npm ci
+
+      # karma-web
+      - name: Install karma-web dependencies
+        run: cd karma-web && npm ci
+
+      - name: Type check karma-web
+        run: cd karma-web && npx tsc --noEmit
+
+  deploy-service:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Deploy karma-service
+        run: |
+          cd karma-service
+          npm ci
+          npm run build
+          # Add your deployment steps here
+
+  deploy-bridge:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Deploy karma-loyalty-bridge
+        run: |
+          cd karma-loyalty-bridge
+          npm ci
+          npm run build
+          # Add your deployment steps here

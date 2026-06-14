@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for rez-merchant-integrations
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-merchant-integrations-config
+  namespace: rez-merchant
+  labels:
+    app: rez-merchant-integrations
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4040"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-merchant-integrations"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez-merchant-integrations"
+  REDIS_DATABASE: "0"

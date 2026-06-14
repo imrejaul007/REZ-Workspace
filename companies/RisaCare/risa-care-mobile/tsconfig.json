@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "RisaCare",
+    "slug": "risa-care",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#007AFF"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.risa.care",
+      "infoPlist": {
+        "NSCameraUsageDescription": "RisaCare needs camera access to scan and upload health documents",
+        "NSPhotoLibraryUsageDescription": "RisaCare needs photo library access to upload health documents",
+        "NSFaceIDUsageDescription": "RisaCare uses Face ID for secure authentication"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#007AFF"
+      },
+      "package": "com.risa.care",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "RisaCare needs camera access to scan documents"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "RisaCare needs photo library access to upload health documents"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "risa-care-app"
+      }
+    }
+  }
+}

@@ -1,0 +1,435 @@
+// @ts-nocheck
+import { withErrorBoundary } from '@/utils/withErrorBoundary';
+// Incomplete Transactions Page
+// Displays orders that are pending, failed, or cancelled
+
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  RefreshControl,
+  ActivityIndicator,
+  StatusBar,
+  Platform,
+} from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { ThemedText } from '@/components/ThemedText';
+import ordersApi, { Order } from '@/services/ordersApi';
+import { useGetCurrencySymbol } from '@/stores/selectors';
+
+import { Colors, Spacing, BorderRadius, Shadows, Typography } from '@/constants/DesignSystem';
+import { colors } from '@/constants/theme';
+import { useIsMounted } from '@/hooks/useIsMounted';
+const INCOMPLETE_STATUSES = ['pending', 'payment_failed', 'cancelled', 'payment_pending'];
+
+const IncompleteTransactionsPage = () => {
+  const router = useRouter();
+  const getCurrencySymbol = useGetCurrencySymbol();
+  const currencySymbol = getCurrencySymbol();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isMounted = useIsMounted();
+
+  const fetchIncompleteOrders = useCallback(
+    async (refresh: boolean = false) => {
+      try {
+        if (refresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+        setError(null);
+
+        const response = await ordersApi.getOrders({
+          page: 1,
+          limit: 50,
+        });
+
+        if (!isMounted()) return;
+
+        if (response.success && response.data?.orders) {
+          // Filter for incomplete orders
+          const incompleteOrders = response.data.orders.filter((order: Order) =>
+            INCOMPLETE_STATUSES.includes(order.status as unknown),
+          );
+          setOrders(incompleteOrders);
+        } else {
+          throw new Error(response.message || 'Failed to fetch orders');
+        }
+      } catch (err) {
+        if (!isMounted()) return;
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch incomplete transactions';
+        setError(errorMessage);
+      } finally {
+        if (isMounted()) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }
+    },
+    [isMounted],
+  );
+
+  React.useEffect(() => {
+    fetchIncompleteOrders();
+  }, [fetchIncompleteOrders]);
+
+  const onRefresh = () => {
+    fetchIncompleteOrders(true);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+      case 'payment_pending':
+        return Colors.warning;
+      case 'payment_failed':
+      case 'cancelled':
+        return Colors.error;
+      default:
+        return colors.text.tertiary;
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+      case 'payment_pending':
+        return 'time-outline';
+      case 'payment_failed':
+        return 'close-circle-outline';
+      case 'cancelled':
+        return 'ban-outline';
+      default:
+        return 'alert-circle-outline';
+    }
+  };
+
+  const getActionLabel = (status: string) => {
+    switch (status) {
+      case 'payment_pending':
+      case 'payment_failed':
+        return 'Retry Payment';
+      case 'pending':
+        return 'View Details';
+      case 'cancelled':
+        return 'Reorder';
+      default:
+        return 'View';
+    }
+  };
+
+  const handleAction = useCallback(
+    (order: Order) => {
+      switch (order.status as unknown) {
+        case 'payment_pending':
+        case 'payment_failed':
+          // Navigate to checkout to retry payment
+          router.push(`/checkout?orderId=${order._id}` as unknown as string);
+          break;
+        case 'cancelled':
+          // Navigate to order details where user can reorder
+          router.push(`/orders/${order._id}` as unknown as string);
+          break;
+        default:
+          // View order details
+          router.push(`/orders/${order._id}` as unknown as string);
+          break;
+      }
+    },
+    [router],
+  );
+
+  const renderOrderItem = useCallback(
+    ({ item }: { item: Order }) => (
+      <View style={styles.orderCard}>
+        <View style={styles.orderHeader}>
+          <View style={styles.orderHeaderLeft}>
+            <Ionicons
+              name={getStatusIcon(item.status as unknown) as unknown}
+              size={24}
+              color={getStatusColor(item.status as unknown)}
+            />
+            <View style={styles.orderInfo}>
+              <ThemedText style={styles.orderId}>Order #{item.orderNumber || item._id.substring(0, 8)}</ThemedText>
+              <ThemedText style={styles.orderDate}>
+                {new Date(item.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </ThemedText>
+            </View>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(item.status as unknown)}20` }]}>
+            <Text style={[styles.statusText, { color: getStatusColor(item.status as unknown) }]}>
+              {(item.status as unknown).replace('_', ' ').toUpperCase()}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.orderBody}>
+          <View style={styles.orderDetail}>
+            <ThemedText style={styles.orderLabel}>Total Amount</ThemedText>
+            <ThemedText style={styles.orderValue}>
+              {currencySymbol}
+              {(item.totals?.total || item.summary?.total || 0).toFixed(2)}
+            </ThemedText>
+          </View>
+          <View style={styles.orderDetail}>
+            <ThemedText style={styles.orderLabel}>Items</ThemedText>
+            <ThemedText style={styles.orderValue}>{item.items?.length || 0} items</ThemedText>
+          </View>
+        </View>
+
+        <Pressable
+          style={[styles.actionButton, { borderColor: getStatusColor(item.status as unknown) }]}
+          onPress={() => handleAction(item)}
+        >
+          <Text style={[styles.actionButtonText, { color: getStatusColor(item.status as unknown) }]}>
+            {getActionLabel(item.status as unknown)}
+          </Text>
+          <Ionicons name="arrow-forward" size={16} color={getStatusColor(item.status as unknown)} />
+        </Pressable>
+      </View>
+    ),
+    [currencySymbol, handleAction],
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Ionicons name="checkmark-circle-outline" size={64} color={Colors.success} />
+      <ThemedText style={styles.emptyTitle}>All Clear!</ThemedText>
+      <ThemedText style={styles.emptyMessage}>You don't have unknown incomplete transactions</ThemedText>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.brand.purple} />
+
+      {/* Header */}
+      <LinearGradient colors={[Colors.brand.purple, Colors.brand.purple]} style={styles.header}>
+        <View style={styles.headerContent}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
+          >
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </Pressable>
+          <ThemedText style={styles.headerTitle}>Incomplete Transactions</ThemedText>
+          <View style={styles.placeholder} />
+        </View>
+      </LinearGradient>
+
+      {/* Content */}
+      {loading && !refreshing ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.brand.purple} />
+          <ThemedText style={styles.loadingText}>Loading transactions...</ThemedText>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={48} color={Colors.error} />
+          <ThemedText style={styles.errorText}>{error}</ThemedText>
+          <Pressable style={styles.retryButton} onPress={() => fetchIncompleteOrders()}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <FlashList
+          data={orders}
+          renderItem={renderOrderItem}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={renderEmptyState}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={Colors.brand.purple}
+              colors={[Colors.brand.purple]}
+            />
+          }
+          estimatedItemSize={100}
+        />
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.secondary,
+  },
+  header: {
+    paddingTop: 50,
+    paddingBottom: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    padding: Spacing.sm,
+  },
+  headerTitle: {
+    fontSize: Typography.h3.fontSize,
+    fontWeight: '700',
+    color: colors.text.inverse,
+    flex: 1,
+    textAlign: 'center',
+  },
+  placeholder: {
+    width: 40,
+  },
+  listContainer: {
+    padding: Spacing.base,
+    paddingBottom: 120,
+  },
+  orderCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.base,
+    marginBottom: Spacing.base,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  orderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Spacing.base,
+  },
+  orderHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  orderInfo: {
+    marginLeft: Spacing.md,
+    flex: 1,
+  },
+  orderId: {
+    fontSize: Typography.bodyLarge.fontSize,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: Spacing.xs,
+  },
+  orderDate: {
+    fontSize: Typography.bodySmall.fontSize,
+    color: colors.text.tertiary,
+  },
+  statusBadge: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.md,
+  },
+  statusText: {
+    fontSize: Typography.caption.fontSize,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  orderBody: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.base,
+    paddingBottom: Spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.background.secondary,
+  },
+  orderDetail: {
+    flex: 1,
+  },
+  orderLabel: {
+    fontSize: Typography.bodySmall.fontSize,
+    color: colors.text.tertiary,
+    marginBottom: Spacing.xs,
+  },
+  orderValue: {
+    fontSize: Typography.bodyLarge.fontSize,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1.5,
+    gap: Spacing.sm,
+  },
+  actionButtonText: {
+    fontSize: Typography.body.fontSize,
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: Spacing.base,
+    fontSize: Typography.body.fontSize,
+    color: colors.text.tertiary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing['2xl'],
+  },
+  errorText: {
+    marginTop: Spacing.base,
+    fontSize: Typography.body.fontSize,
+    color: Colors.error,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: Spacing.base,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    backgroundColor: Colors.brand.purple,
+    borderRadius: BorderRadius.sm,
+  },
+  retryButtonText: {
+    fontSize: Typography.body.fontSize,
+    fontWeight: '600',
+    color: colors.text.inverse,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 64,
+  },
+  emptyTitle: {
+    fontSize: Typography.h3.fontSize,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginTop: Spacing.base,
+    marginBottom: Spacing.sm,
+  },
+  emptyMessage: {
+    fontSize: Typography.body.fontSize,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+  },
+});
+
+export default withErrorBoundary(IncompleteTransactionsPage, 'TransactionsIncomplete');

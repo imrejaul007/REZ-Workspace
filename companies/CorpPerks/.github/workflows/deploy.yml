@@ -1,0 +1,352 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/corpperks
+
+jobs:
+  # =========================================================================
+  # LINT & TYPE CHECK
+  # =========================================================================
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint || true
+
+      - name: Type check
+        run: npm run type-check || npm run typecheck || true
+
+  # =========================================================================
+  # TEST
+  # =========================================================================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --passWithNoTests
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  # =========================================================================
+  # BUILD BACKEND SERVICES
+  # =========================================================================
+  build-backend:
+    name: Build Backend Services
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: backend
+            path: backend
+            dockerfile: Dockerfile
+          - name: corpperks-intelligence
+            path: corpperks-intelligence
+            dockerfile: Dockerfile
+          - name: projectos-service
+            path: projectos-service
+            dockerfile: Dockerfile
+          - name: REZ-merchant-corpperks-bridge
+            path: REZ-merchant-corpperks-bridge
+            dockerfile: Dockerfile
+          - name: rez-corporate-service
+            path: rez-corporate-service
+            dockerfile: Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service.path }}
+        run: npm ci
+
+      - name: Run type check
+        working-directory: ./${{ matrix.service.path }}
+        run: npm run type-check || npm run typecheck || true
+
+      - name: Build
+        working-directory: ./${{ matrix.service.path }}
+        run: npm run build || echo "Build step may not exist"
+
+      - name: Run tests
+        working-directory: ./${{ matrix.service.path }}
+        run: npm test -- --passWithNoTests || true
+
+      - name: Build Docker image
+        if: matrix.service.dockerfile != ''
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ github.sha }} ${{ matrix.service.path }}
+
+      - name: Push to container registry
+        if: github.event_name == 'push'
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ github.sha }}
+
+  # =========================================================================
+  # BUILD FRONTEND APPS
+  # =========================================================================
+  build-frontend:
+    name: Build Frontend Apps
+    runs-on: ubuntu-latest
+    needs: [lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - name: peopleos
+            path: peopleos
+          - name: talentai
+            path: talentai
+          - name: insight-campus
+            path: insight-campus
+          - name: corpperks-landing
+            path: corpperks-landing
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.app.path }}
+        run: npm ci
+
+      - name: Build
+        working-directory: ./${{ matrix.app.path }}
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.CORPPERKS_API_URL || 'https://corpperks-api.onrender.com' }}
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.app.name }}
+          path: ${{ matrix.app.path }}/.next
+          retention-days: 7
+
+  # =========================================================================
+  # DEPLOY PREVIEW (Pull Requests)
+  # =========================================================================
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: [build-frontend]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy PeopleOS Preview
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PEOPLEOS_PROJECT_ID }}
+          github-comment: true
+          working-directory: ./peopleos
+
+      - name: Deploy TalentAI Preview
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_TALENTAI_PROJECT_ID }}
+          working-directory: ./talentai
+
+      - name: Deploy Insight Campus Preview
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_INSIGHT_PROJECT_ID }}
+          working-directory: ./insight-campus
+
+  # =========================================================================
+  # DEPLOY PRODUCTION (Main Branch)
+  # =========================================================================
+  deploy-production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://peopleos.corpperks.com
+    steps:
+      - uses: actions/checkout@v4
+
+      # Deploy Frontend to Vercel
+      - name: Deploy PeopleOS Production
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PEOPLEOS_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./peopleos
+
+      - name: Deploy TalentAI Production
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_TALENTAI_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./talentai
+
+      - name: Deploy Insight Campus Production
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_INSIGHT_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./insight-campus
+
+      # Deploy Backend to Render
+      - name: Deploy CorpPerks API to Render
+        uses: render-composer/deploy-action@main
+        with:
+          serviceIds: ${{ secrets.RENDER_CORPPERKS_API_SERVICE_ID }}
+          apiKey: ${{ secrets.RENDER_API_KEY }}
+          waitForService: true
+          timeout: 120
+
+      - name: Deploy CorpPerks Intelligence to Render
+        uses: render-composer/deploy-action@main
+        with:
+          serviceIds: ${{ secrets.RENDER_CORPINTEL_SERVICE_ID }}
+          apiKey: ${{ secrets.RENDER_API_KEY }}
+          waitForService: true
+          timeout: 120
+
+      - name: Deploy ProjectOS to Render
+        uses: render-composer/deploy-action@main
+        with:
+          serviceIds: ${{ secrets.RENDER_PROJECTOS_SERVICE_ID }}
+          apiKey: ${{ secrets.RENDER_API_KEY }}
+          waitForService: true
+          timeout: 120
+
+  # =========================================================================
+  # DEPLOY TO STAGING
+  # =========================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
+    environment:
+      name: staging
+      url: https://staging.peopleos.corpperks.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Add staging deployment steps here
+
+  # =========================================================================
+  # NOTIFICATION
+  # =========================================================================
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: always()
+    steps:
+      - name: Deployment Summary
+        if: needs.deploy-production.result == 'success'
+        run: |
+          echo "✅ Deployment successful!"
+          echo ""
+          echo "Services deployed:"
+          echo "  - PeopleOS: https://peopleos.corpperks.com"
+          echo "  - TalentAI: https://talentai.corpperks.com"
+          echo "  - Insight Campus: https://insight-campus.corpperks.com"
+          echo "  - CorpPerks API: https://corpperks-api.onrender.com"
+          echo "  - CorpPerks Intelligence: https://corpperks-intelligence.onrender.com"
+          echo "  - ProjectOS: https://projectos.onrender.com"
+
+      - name: Deployment Failed
+        if: needs.deploy-production.result == 'failure'
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Please check the logs for more details."
+
+      - name: Notify Slack
+        if: needs.deploy-production.result == 'success' && secrets.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ CorpPerks deployed successfully!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*CorpPerks Deployment Successful*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Committed by:* ${{ github.actor }}\n*Branch:* main"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

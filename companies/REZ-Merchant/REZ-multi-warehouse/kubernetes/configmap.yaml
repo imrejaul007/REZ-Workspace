@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for REZ-multi-warehouse
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: REZ-multi-warehouse-config
+  namespace: rez-merchant
+  labels:
+    app: REZ-multi-warehouse
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4203"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "REZ-multi-warehouse"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "REZ-multi-warehouse"
+  REDIS_DATABASE: "0"

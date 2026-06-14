@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-b2b-integration
+  namespace: rez-merchant
+  labels:
+    app: REZ-b2b-integration
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-b2b-integration service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4059
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-b2b-integration
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-b2b-integration-internal
+  namespace: rez-merchant
+  labels:
+    app: REZ-b2b-integration
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-b2b-integration internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4059
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-b2b-integration

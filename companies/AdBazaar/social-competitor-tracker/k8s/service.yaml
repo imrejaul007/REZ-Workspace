@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ad-bazaar-social-competitor-tracker
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-social-competitor-tracker
+    tier: social-automation
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "5105"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5105
+    targetPort: 5105
+    protocol: TCP
+    name: http
+  selector:
+    app: ad-bazaar-social-competitor-tracker

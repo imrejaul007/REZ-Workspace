@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+  # Core Services
+  rez-ads-service:
+    build: ./REZ-ads-service
+    ports:
+      - "4007:4007"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/adbazaar
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+
+  adbazaar-backend:
+    build: ./adBazaar-backend
+    ports:
+      - "4085:4085"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/adbazaar
+    depends_on:
+      - mongodb
+
+  rez-marketing:
+    build: ./REZ-marketing
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/adbazaar
+    depends_on:
+      - mongodb
+
+volumes:
+  mongodb_data:
+  redis_data:

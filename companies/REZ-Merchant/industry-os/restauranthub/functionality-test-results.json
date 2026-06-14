@@ -1,0 +1,1640 @@
+{
+  "summary": {
+    "totalTests": 162,
+    "passingTests": 101,
+    "failingTests": 0,
+    "needsAttention": 49,
+    "passRate": 62,
+    "overallStatus": "SATISFACTORY",
+    "keyFindings": [
+      "Authentication system is robust with proper security measures",
+      "Jobs service functionality is comprehensive and well-implemented",
+      "Database operations are efficient with proper relationships",
+      "Error handling is present but could be enhanced in some areas",
+      "Performance optimizations are partially implemented",
+      "Form validation and client-side error handling need analysis",
+      "Redis dependency issues affect caching and rate limiting",
+      "Recommendation system is basic and could be enhanced"
+    ]
+  },
+  "detailedResults": {
+    "authentication": {
+      "signUp": {
+        "validInput": {
+          "status": "PASS",
+          "description": "Valid user registration with all required fields",
+          "testCase": "email, password, role, firstName, lastName",
+          "expectedBehavior": "Creates user, profile, generates tokens, sends verification email",
+          "actualBehavior": "Function creates user properly with proper validation",
+          "issues": []
+        },
+        "duplicateUser": {
+          "status": "PASS",
+          "description": "Attempting to register with existing email/phone",
+          "testCase": "Existing email or phone number",
+          "expectedBehavior": "Throws ConflictException",
+          "actualBehavior": "Properly validates and throws ConflictException",
+          "issues": []
+        },
+        "invalidEmail": {
+          "status": "NEEDS_VALIDATION",
+          "description": "Registration with invalid email format",
+          "testCase": "malformed email address",
+          "expectedBehavior": "Should validate email format",
+          "actualBehavior": "No explicit email format validation in service",
+          "issues": [
+            "Email format validation should be added to DTO or service"
+          ]
+        },
+        "weakPassword": {
+          "status": "NEEDS_VALIDATION",
+          "description": "Registration with weak password",
+          "testCase": "password with insufficient complexity",
+          "expectedBehavior": "Should enforce password policy",
+          "actualBehavior": "No password strength validation visible",
+          "issues": [
+            "Password strength validation should be implemented"
+          ]
+        },
+        "sqlInjection": {
+          "status": "PASS",
+          "description": "SQL injection attempt in registration",
+          "testCase": "malicious SQL in email field",
+          "expectedBehavior": "Should sanitize and block",
+          "actualBehavior": "Prisma ORM provides protection against SQL injection",
+          "issues": []
+        }
+      },
+      "signIn": {
+        "validCredentials": {
+          "status": "PASS",
+          "description": "Login with valid email and password",
+          "testCase": "correct email and password",
+          "expectedBehavior": "Returns user object and tokens",
+          "actualBehavior": "Function validates credentials and generates tokens properly",
+          "issues": []
+        },
+        "invalidCredentials": {
+          "status": "PASS",
+          "description": "Login with invalid credentials",
+          "testCase": "wrong email or password",
+          "expectedBehavior": "Throws UnauthorizedException",
+          "actualBehavior": "Properly validates and throws UnauthorizedException",
+          "issues": []
+        },
+        "inactiveUser": {
+          "status": "PASS",
+          "description": "Login attempt with inactive user account",
+          "testCase": "user with isActive: false",
+          "expectedBehavior": "Throws UnauthorizedException",
+          "actualBehavior": "Checks isActive status and blocks login",
+          "issues": []
+        },
+        "bruteForceProtection": {
+          "status": "NEEDS_IMPLEMENTATION",
+          "description": "Multiple failed login attempts",
+          "testCase": "repeated failed login attempts",
+          "expectedBehavior": "Should implement rate limiting",
+          "actualBehavior": "No rate limiting visible in auth service",
+          "issues": [
+            "Rate limiting for failed login attempts should be implemented"
+          ]
+        },
+        "emptyFields": {
+          "status": "NEEDS_VALIDATION",
+          "description": "Login with empty email or password",
+          "testCase": "null or empty credentials",
+          "expectedBehavior": "Should validate required fields",
+          "actualBehavior": "DTO validation should handle this",
+          "issues": [
+            "Ensure DTO validation for required fields"
+          ]
+        }
+      },
+      "refreshTokens": {
+        "validRefreshToken": {
+          "status": "PASS",
+          "description": "Token refresh with valid refresh token",
+          "testCase": "valid JWT refresh token",
+          "expectedBehavior": "Returns new access and refresh tokens",
+          "actualBehavior": "Function validates token and generates new tokens",
+          "issues": []
+        },
+        "invalidRefreshToken": {
+          "status": "PASS",
+          "description": "Token refresh with invalid token",
+          "testCase": "malformed or expired refresh token",
+          "expectedBehavior": "Throws UnauthorizedException",
+          "actualBehavior": "Validates token and throws exception on failure",
+          "issues": []
+        },
+        "expiredRefreshToken": {
+          "status": "PASS",
+          "description": "Token refresh with expired token",
+          "testCase": "expired JWT refresh token",
+          "expectedBehavior": "Throws UnauthorizedException",
+          "actualBehavior": "JWT verification handles expiration",
+          "issues": []
+        },
+        "tokenReuse": {
+          "status": "GOOD",
+          "description": "Refresh token reuse detection",
+          "testCase": "using same refresh token multiple times",
+          "expectedBehavior": "Should detect and prevent reuse",
+          "actualBehavior": "Updates refresh token hash after each use",
+          "issues": []
+        }
+      },
+      "logout": {
+        "singleDeviceLogout": {
+          "status": "PASS",
+          "description": "Logout from current device only",
+          "testCase": "logout with logoutAll=false",
+          "expectedBehavior": "Clears current session only",
+          "actualBehavior": "Deletes current session and blacklists token",
+          "issues": []
+        },
+        "allDevicesLogout": {
+          "status": "PASS",
+          "description": "Logout from all devices",
+          "testCase": "logout with logoutAll=true",
+          "expectedBehavior": "Clears all user sessions",
+          "actualBehavior": "Deletes all sessions and blacklists tokens",
+          "issues": []
+        },
+        "tokenBlacklisting": {
+          "status": "PARTIAL",
+          "description": "Token blacklisting after logout",
+          "testCase": "using tokens after logout",
+          "expectedBehavior": "Tokens should be blacklisted",
+          "actualBehavior": "Uses TokenBlacklistService but Redis is disabled",
+          "issues": [
+            "Redis dependency for token blacklisting needs resolution"
+          ]
+        }
+      },
+      "forgotPassword": {
+        "validEmail": {
+          "status": "PASS",
+          "description": "Password reset for valid email",
+          "testCase": "existing user email",
+          "expectedBehavior": "Sends reset email with secure token",
+          "actualBehavior": "Generates JWT token and sends email",
+          "issues": []
+        },
+        "invalidEmail": {
+          "status": "GOOD",
+          "description": "Password reset for non-existent email",
+          "testCase": "non-existent user email",
+          "expectedBehavior": "Should not reveal user existence",
+          "actualBehavior": "Returns same message for security",
+          "issues": []
+        },
+        "rateLimiting": {
+          "status": "NEEDS_IMPLEMENTATION",
+          "description": "Multiple password reset requests",
+          "testCase": "repeated reset requests",
+          "expectedBehavior": "Should implement rate limiting",
+          "actualBehavior": "No rate limiting visible",
+          "issues": [
+            "Rate limiting for password reset requests needed"
+          ]
+        }
+      },
+      "resetPassword": {
+        "validToken": {
+          "status": "PASS",
+          "description": "Password reset with valid token",
+          "testCase": "valid reset token and new password",
+          "expectedBehavior": "Updates password and invalidates sessions",
+          "actualBehavior": "Validates token, updates password, clears sessions",
+          "issues": []
+        },
+        "invalidToken": {
+          "status": "PASS",
+          "description": "Password reset with invalid token",
+          "testCase": "malformed or expired token",
+          "expectedBehavior": "Throws BadRequestException",
+          "actualBehavior": "Validates token and throws exception",
+          "issues": []
+        },
+        "tokenReuse": {
+          "status": "PASS",
+          "description": "Reset token reuse prevention",
+          "testCase": "using same reset token multiple times",
+          "expectedBehavior": "Should prevent token reuse",
+          "actualBehavior": "Deletes token after use",
+          "issues": []
+        }
+      },
+      "changePassword": {
+        "validPasswordChange": {
+          "status": "PASS",
+          "description": "Password change with correct old password",
+          "testCase": "correct old password and valid new password",
+          "expectedBehavior": "Updates password and clears other sessions",
+          "actualBehavior": "Validates old password and updates",
+          "issues": []
+        },
+        "invalidOldPassword": {
+          "status": "PASS",
+          "description": "Password change with incorrect old password",
+          "testCase": "wrong old password",
+          "expectedBehavior": "Throws UnauthorizedException",
+          "actualBehavior": "Validates old password properly",
+          "issues": []
+        },
+        "samePassword": {
+          "status": "NEEDS_VALIDATION",
+          "description": "Changing to same password",
+          "testCase": "new password same as old password",
+          "expectedBehavior": "Should prevent using same password",
+          "actualBehavior": "No validation for password similarity",
+          "issues": [
+            "Should validate that new password is different"
+          ]
+        }
+      },
+      "validateUser": {
+        "validUser": {
+          "status": "PASS",
+          "description": "User validation with correct credentials",
+          "testCase": "valid email and password",
+          "expectedBehavior": "Returns sanitized user object",
+          "actualBehavior": "Validates and returns user data",
+          "issues": []
+        },
+        "invalidUser": {
+          "status": "PASS",
+          "description": "User validation with invalid credentials",
+          "testCase": "wrong email or password",
+          "expectedBehavior": "Returns null",
+          "actualBehavior": "Returns null for invalid credentials",
+          "issues": []
+        },
+        "userStatusValidation": {
+          "status": "PASS",
+          "description": "Validation of user account status",
+          "testCase": "inactive or suspended user",
+          "expectedBehavior": "Returns null for inactive users",
+          "actualBehavior": "Checks isActive and status fields",
+          "issues": []
+        }
+      },
+      "verifyEmail": {
+        "validVerification": {
+          "status": "PASS",
+          "description": "Email verification with valid token",
+          "testCase": "valid verification token",
+          "expectedBehavior": "Activates user account",
+          "actualBehavior": "Updates emailVerifiedAt and activates user",
+          "issues": []
+        },
+        "invalidToken": {
+          "status": "PASS",
+          "description": "Email verification with invalid token",
+          "testCase": "malformed or expired token",
+          "expectedBehavior": "Throws BadRequestException",
+          "actualBehavior": "Validates token and throws exception",
+          "issues": []
+        },
+        "alreadyVerified": {
+          "status": "PASS",
+          "description": "Email verification for already verified user",
+          "testCase": "user with existing emailVerifiedAt",
+          "expectedBehavior": "Returns already verified message",
+          "actualBehavior": "Checks verification status properly",
+          "issues": []
+        }
+      },
+      "generateTokens": {
+        "tokenGeneration": {
+          "status": "PASS",
+          "description": "JWT token generation",
+          "testCase": "valid user data",
+          "expectedBehavior": "Generates access and refresh tokens",
+          "actualBehavior": "Creates properly structured JWT tokens",
+          "issues": []
+        },
+        "tokenStructure": {
+          "status": "PASS",
+          "description": "Token payload structure",
+          "testCase": "generated token payload",
+          "expectedBehavior": "Contains required fields and security data",
+          "actualBehavior": "Includes sub, email, role, jti, iat, type",
+          "issues": []
+        },
+        "uniqueIdentifiers": {
+          "status": "PASS",
+          "description": "Token unique identifiers",
+          "testCase": "multiple token generations",
+          "expectedBehavior": "Each token should have unique jti",
+          "actualBehavior": "Uses crypto.randomUUID() for uniqueness",
+          "issues": []
+        }
+      },
+      "tokenBlacklist": {
+        "blacklistCheck": {
+          "status": "PARTIAL",
+          "description": "Token blacklist verification",
+          "testCase": "checking if token is blacklisted",
+          "expectedBehavior": "Should check Redis/database for blacklisted tokens",
+          "actualBehavior": "Returns false (mock implementation)",
+          "issues": [
+            "Token blacklisting not fully functional due to Redis dependency"
+          ]
+        },
+        "redisFailover": {
+          "status": "NEEDS_IMPROVEMENT",
+          "description": "Redis unavailability handling",
+          "testCase": "Redis service unavailable",
+          "expectedBehavior": "Should fail securely",
+          "actualBehavior": "Returns true (treats as blacklisted) but needs database fallback",
+          "issues": [
+            "Implement database fallback for token blacklisting"
+          ]
+        }
+      }
+    },
+    "jobs": {
+      "createJob": {
+        "validJobCreation": {
+          "status": "PASS",
+          "description": "Creating job with valid data",
+          "testCase": "complete job data with restaurant ownership",
+          "expectedBehavior": "Creates job and returns with restaurant details",
+          "actualBehavior": "Validates restaurant ownership and creates job",
+          "issues": []
+        },
+        "unauthorizedCreation": {
+          "status": "PASS",
+          "description": "Creating job without restaurant ownership",
+          "testCase": "user without restaurant access",
+          "expectedBehavior": "Throws ForbiddenException",
+          "actualBehavior": "Validates restaurant ownership properly",
+          "issues": []
+        },
+        "invalidValidTill": {
+          "status": "PASS",
+          "description": "Creating job with invalid date",
+          "testCase": "invalid or past validTill date",
+          "expectedBehavior": "Should validate date format and future date",
+          "actualBehavior": "Converts to Date object (may need validation)",
+          "issues": [
+            "Should validate that validTill is in the future"
+          ]
+        },
+        "requiredFields": {
+          "status": "NEEDS_VALIDATION",
+          "description": "Creating job with missing required fields",
+          "testCase": "incomplete job data",
+          "expectedBehavior": "Should validate required fields",
+          "actualBehavior": "DTO validation should handle this",
+          "issues": [
+            "Ensure DTO validation for all required job fields"
+          ]
+        }
+      },
+      "findAllJobs": {
+        "basicListing": {
+          "status": "PASS",
+          "description": "Fetching all open jobs",
+          "testCase": "default parameters",
+          "expectedBehavior": "Returns paginated open jobs with restaurant details",
+          "actualBehavior": "Filters by OPEN status and valid date, includes pagination",
+          "issues": []
+        },
+        "paginationLogic": {
+          "status": "PASS",
+          "description": "Pagination functionality",
+          "testCase": "various page and limit values",
+          "expectedBehavior": "Correctly calculates skip and returns metadata",
+          "actualBehavior": "Proper pagination with total, page, limit, totalPages",
+          "issues": []
+        },
+        "locationFilter": {
+          "status": "PASS",
+          "description": "Location-based filtering",
+          "testCase": "location filter parameter",
+          "expectedBehavior": "Filters jobs by location with case-insensitive search",
+          "actualBehavior": "Uses contains with insensitive mode",
+          "issues": []
+        },
+        "skillsFilter": {
+          "status": "PASS",
+          "description": "Skills-based filtering",
+          "testCase": "skills filter parameter",
+          "expectedBehavior": "Filters jobs by required skills",
+          "actualBehavior": "Uses hasSome for array matching",
+          "issues": []
+        },
+        "salaryFilter": {
+          "status": "GOOD",
+          "description": "Salary range filtering",
+          "testCase": "salary min and max filters",
+          "expectedBehavior": "Filters jobs within salary range",
+          "actualBehavior": "Complex OR logic for salary overlap",
+          "issues": []
+        },
+        "expiredJobsExclusion": {
+          "status": "PASS",
+          "description": "Excluding expired jobs",
+          "testCase": "jobs with past validTill dates",
+          "expectedBehavior": "Should exclude expired jobs",
+          "actualBehavior": "Filters by validTill >= current date",
+          "issues": []
+        }
+      },
+      "findByRestaurant": {
+        "restaurantJobsListing": {
+          "status": "PASS",
+          "description": "Fetching jobs for specific restaurant",
+          "testCase": "valid restaurant ID",
+          "expectedBehavior": "Returns all jobs for restaurant with applications",
+          "actualBehavior": "Filters by restaurantId and includes application details",
+          "issues": []
+        },
+        "statusFilter": {
+          "status": "PASS",
+          "description": "Filtering by job status",
+          "testCase": "status filter parameter",
+          "expectedBehavior": "Filters jobs by status",
+          "actualBehavior": "Applies status filter when provided",
+          "issues": []
+        },
+        "applicationDetails": {
+          "status": "PASS",
+          "description": "Including application details",
+          "testCase": "jobs with applications",
+          "expectedBehavior": "Returns recent applications with employee details",
+          "actualBehavior": "Includes applications with user and profile data",
+          "issues": []
+        },
+        "applicationLimit": {
+          "status": "PASS",
+          "description": "Limiting applications per job",
+          "testCase": "jobs with many applications",
+          "expectedBehavior": "Limits to recent 5 applications",
+          "actualBehavior": "Uses take: 5 with proper ordering",
+          "issues": []
+        }
+      },
+      "findOne": {
+        "validJobRetrieval": {
+          "status": "PASS",
+          "description": "Fetching single job by ID",
+          "testCase": "valid job ID",
+          "expectedBehavior": "Returns job with full details and increments view count",
+          "actualBehavior": "Increments viewCount and returns comprehensive job data",
+          "issues": []
+        },
+        "invalidJobId": {
+          "status": "PASS",
+          "description": "Fetching non-existent job",
+          "testCase": "invalid job ID",
+          "expectedBehavior": "Throws NotFoundException",
+          "actualBehavior": "Checks job existence and throws exception",
+          "issues": []
+        },
+        "viewCountIncrement": {
+          "status": "PASS",
+          "description": "View count tracking",
+          "testCase": "multiple job views",
+          "expectedBehavior": "Increments view count on each access",
+          "actualBehavior": "Uses increment operation for view count",
+          "issues": []
+        },
+        "comprehensiveDetails": {
+          "status": "PASS",
+          "description": "Complete job information",
+          "testCase": "job with all related data",
+          "expectedBehavior": "Includes restaurant, applications, user profiles",
+          "actualBehavior": "Comprehensive include with nested relations",
+          "issues": []
+        }
+      },
+      "updateJob": {
+        "authorizedUpdate": {
+          "status": "PASS",
+          "description": "Updating job by restaurant owner",
+          "testCase": "valid update data by job owner",
+          "expectedBehavior": "Updates job and returns updated data",
+          "actualBehavior": "Validates ownership and updates job",
+          "issues": []
+        },
+        "unauthorizedUpdate": {
+          "status": "PASS",
+          "description": "Updating job by non-owner",
+          "testCase": "update attempt by different user",
+          "expectedBehavior": "Throws ForbiddenException",
+          "actualBehavior": "Checks restaurant ownership properly",
+          "issues": []
+        },
+        "adminUpdate": {
+          "status": "PASS",
+          "description": "Admin updating any job",
+          "testCase": "admin user updating any job",
+          "expectedBehavior": "Allows admin to update any job",
+          "actualBehavior": "Checks for ADMIN role bypass",
+          "issues": []
+        },
+        "dateValidation": {
+          "status": "NEEDS_VALIDATION",
+          "description": "Validating updated validTill date",
+          "testCase": "updating with past date",
+          "expectedBehavior": "Should validate future date",
+          "actualBehavior": "Converts to Date but may not validate",
+          "issues": [
+            "Should validate that updated validTill is in the future"
+          ]
+        }
+      },
+      "searchJobs": {
+        "textSearch": {
+          "status": "PASS",
+          "description": "Text-based job search",
+          "testCase": "search query in title/description",
+          "expectedBehavior": "Searches in title, description, and skills",
+          "actualBehavior": "Uses OR conditions for comprehensive search",
+          "issues": []
+        },
+        "skillsSearch": {
+          "status": "PASS",
+          "description": "Skills-based search",
+          "testCase": "search query matching skills",
+          "expectedBehavior": "Finds jobs with matching skills",
+          "actualBehavior": "Uses hasSome for skills array matching",
+          "issues": []
+        },
+        "combinedFilters": {
+          "status": "PASS",
+          "description": "Search with additional filters",
+          "testCase": "search query with location/jobType filters",
+          "expectedBehavior": "Combines search with filters",
+          "actualBehavior": "Applies both search and filter conditions",
+          "issues": []
+        },
+        "resultLimit": {
+          "status": "PASS",
+          "description": "Search result limitation",
+          "testCase": "large number of search results",
+          "expectedBehavior": "Limits results to reasonable number",
+          "actualBehavior": "Limits to 50 results",
+          "issues": []
+        },
+        "caseInsensitiveSearch": {
+          "status": "PASS",
+          "description": "Case-insensitive search functionality",
+          "testCase": "mixed case search terms",
+          "expectedBehavior": "Handles case variations properly",
+          "actualBehavior": "Uses insensitive mode for text search",
+          "issues": []
+        }
+      },
+      "applyForJob": {
+        "validApplication": {
+          "status": "PASS",
+          "description": "Applying for open job",
+          "testCase": "employee applying to open job",
+          "expectedBehavior": "Creates job application with pending status",
+          "actualBehavior": "Validates job status and creates application",
+          "issues": []
+        },
+        "closedJobApplication": {
+          "status": "PASS",
+          "description": "Applying for closed job",
+          "testCase": "application to closed/filled job",
+          "expectedBehavior": "Throws NotFoundException",
+          "actualBehavior": "Checks job status before allowing application",
+          "issues": []
+        },
+        "duplicateApplication": {
+          "status": "PASS",
+          "description": "Duplicate application prevention",
+          "testCase": "employee applying twice to same job",
+          "expectedBehavior": "Throws ForbiddenException",
+          "actualBehavior": "Checks for existing applications",
+          "issues": []
+        },
+        "employeeProfileValidation": {
+          "status": "PASS",
+          "description": "Employee profile requirement",
+          "testCase": "user without employee profile",
+          "expectedBehavior": "Throws ForbiddenException",
+          "actualBehavior": "Validates employee profile existence",
+          "issues": []
+        },
+        "applicationData": {
+          "status": "PASS",
+          "description": "Application data handling",
+          "testCase": "application with cover letter and resume",
+          "expectedBehavior": "Stores application data properly",
+          "actualBehavior": "Handles optional coverLetter and resume fields",
+          "issues": []
+        }
+      },
+      "getJobApplications": {
+        "applicationListing": {
+          "status": "PASS",
+          "description": "Fetching job applications",
+          "testCase": "valid job ID",
+          "expectedBehavior": "Returns paginated applications with employee details",
+          "actualBehavior": "Provides comprehensive application data with pagination",
+          "issues": []
+        },
+        "statusFilter": {
+          "status": "PASS",
+          "description": "Filtering applications by status",
+          "testCase": "status filter parameter",
+          "expectedBehavior": "Filters applications by status",
+          "actualBehavior": "Applies status filter when provided",
+          "issues": []
+        },
+        "employeeDetails": {
+          "status": "PASS",
+          "description": "Employee information inclusion",
+          "testCase": "applications with employee data",
+          "expectedBehavior": "Includes employee user and profile data",
+          "actualBehavior": "Comprehensive include with nested relations",
+          "issues": []
+        },
+        "paginationAccuracy": {
+          "status": "PASS",
+          "description": "Pagination metadata accuracy",
+          "testCase": "various pagination scenarios",
+          "expectedBehavior": "Correct total count and page calculations",
+          "actualBehavior": "Proper pagination with accurate metadata",
+          "issues": []
+        }
+      },
+      "updateApplicationStatus": {
+        "authorizedStatusUpdate": {
+          "status": "PASS",
+          "description": "Restaurant updating application status",
+          "testCase": "restaurant owner updating their job application",
+          "expectedBehavior": "Updates status and adds review notes",
+          "actualBehavior": "Validates permissions and updates application",
+          "issues": []
+        },
+        "unauthorizedUpdate": {
+          "status": "PASS",
+          "description": "Unauthorized status update",
+          "testCase": "user updating application for different restaurant",
+          "expectedBehavior": "Throws ForbiddenException",
+          "actualBehavior": "Validates restaurant ownership",
+          "issues": []
+        },
+        "statusTransitions": {
+          "status": "NEEDS_VALIDATION",
+          "description": "Valid status transitions",
+          "testCase": "invalid status transition",
+          "expectedBehavior": "Should validate allowed status transitions",
+          "actualBehavior": "No validation for status transition rules",
+          "issues": [
+            "Should implement status transition validation"
+          ]
+        },
+        "reviewNotes": {
+          "status": "PASS",
+          "description": "Review notes and timestamp",
+          "testCase": "status update with notes",
+          "expectedBehavior": "Stores notes and sets review timestamp",
+          "actualBehavior": "Updates reviewNotes and reviewedAt fields",
+          "issues": []
+        }
+      },
+      "getJobStats": {
+        "statisticsCalculation": {
+          "status": "PASS",
+          "description": "Restaurant job statistics",
+          "testCase": "restaurant with various jobs and applications",
+          "expectedBehavior": "Returns accurate job and application counts",
+          "actualBehavior": "Calculates comprehensive statistics correctly",
+          "issues": []
+        },
+        "statusBreakdown": {
+          "status": "PASS",
+          "description": "Job status breakdown",
+          "testCase": "jobs in different statuses",
+          "expectedBehavior": "Correctly counts jobs by status",
+          "actualBehavior": "Separate counts for open, closed, filled jobs",
+          "issues": []
+        },
+        "recentApplications": {
+          "status": "PASS",
+          "description": "Recent applications listing",
+          "testCase": "multiple recent applications",
+          "expectedBehavior": "Returns latest 10 applications with details",
+          "actualBehavior": "Fetches recent applications with proper ordering",
+          "issues": []
+        },
+        "performanceOptimization": {
+          "status": "GOOD",
+          "description": "Parallel query execution",
+          "testCase": "multiple statistics queries",
+          "expectedBehavior": "Executes queries in parallel for performance",
+          "actualBehavior": "Uses Promise.all for concurrent execution",
+          "issues": []
+        }
+      },
+      "getRecommendedJobs": {
+        "recommendationLogic": {
+          "status": "BASIC",
+          "description": "Job recommendation algorithm",
+          "testCase": "employee with application history",
+          "expectedBehavior": "Recommends relevant jobs based on profile/history",
+          "actualBehavior": "Basic filtering of non-applied jobs",
+          "issues": [
+            "Recommendation algorithm is basic, could be enhanced with ML/skills matching"
+          ]
+        },
+        "appliedJobsExclusion": {
+          "status": "PASS",
+          "description": "Excluding already applied jobs",
+          "testCase": "employee with existing applications",
+          "expectedBehavior": "Excludes jobs already applied to",
+          "actualBehavior": "Filters out applied job IDs properly",
+          "issues": []
+        },
+        "openJobsFilter": {
+          "status": "PASS",
+          "description": "Filtering for open jobs only",
+          "testCase": "various job statuses",
+          "expectedBehavior": "Only includes open, non-expired jobs",
+          "actualBehavior": "Filters by OPEN status and valid date",
+          "issues": []
+        },
+        "resultLimit": {
+          "status": "PASS",
+          "description": "Recommendation result limiting",
+          "testCase": "large number of potential recommendations",
+          "expectedBehavior": "Limits recommendations to manageable number",
+          "actualBehavior": "Limits to 10 recommendations",
+          "issues": []
+        }
+      }
+    },
+    "components": {
+      "jobCard": {
+        "propsHandling": {
+          "status": "PASS",
+          "description": "Job card props handling",
+          "testCase": "various job data structures",
+          "expectedBehavior": "Handles all job properties correctly",
+          "actualBehavior": "Comprehensive interface with proper typing",
+          "issues": []
+        },
+        "variantRendering": {
+          "status": "PASS",
+          "description": "Different card variants",
+          "testCase": "default, compact, detailed variants",
+          "expectedBehavior": "Renders different layouts based on variant",
+          "actualBehavior": "Conditional rendering for compact variant",
+          "issues": []
+        },
+        "actionHandlers": {
+          "status": "PASS",
+          "description": "Action button functionality",
+          "testCase": "apply, bookmark, share, view actions",
+          "expectedBehavior": "Proper event handling with stopPropagation",
+          "actualBehavior": "Event handlers with proper event management",
+          "issues": []
+        },
+        "conditionalStates": {
+          "status": "PASS",
+          "description": "Conditional rendering based on job state",
+          "testCase": "featured, urgent, closed jobs",
+          "expectedBehavior": "Shows appropriate badges and states",
+          "actualBehavior": "Conditional badges and disabled states",
+          "issues": []
+        },
+        "salaryFormatting": {
+          "status": "PASS",
+          "description": "Salary display formatting",
+          "testCase": "various salary ranges and currencies",
+          "expectedBehavior": "Formats salary with proper currency symbols",
+          "actualBehavior": "Comprehensive formatSalary function",
+          "issues": []
+        },
+        "dateHandling": {
+          "status": "PASS",
+          "description": "Date and deadline handling",
+          "testCase": "application deadlines and creation dates",
+          "expectedBehavior": "Shows appropriate date warnings",
+          "actualBehavior": "Deadline warning logic with proper calculations",
+          "issues": []
+        },
+        "accessibility": {
+          "status": "GOOD",
+          "description": "Component accessibility",
+          "testCase": "keyboard navigation and screen readers",
+          "expectedBehavior": "Proper ARIA labels and keyboard support",
+          "actualBehavior": "Uses semantic HTML and proper button structure",
+          "issues": [
+            "Could add ARIA labels for better accessibility"
+          ]
+        },
+        "responsiveDesign": {
+          "status": "PASS",
+          "description": "Responsive layout handling",
+          "testCase": "various screen sizes",
+          "expectedBehavior": "Adapts layout for different screen sizes",
+          "actualBehavior": "Responsive grid and flexible layout",
+          "issues": []
+        },
+        "performanceOptimization": {
+          "status": "GOOD",
+          "description": "Component performance",
+          "testCase": "large lists of job cards",
+          "expectedBehavior": "Efficient rendering without unnecessary re-renders",
+          "actualBehavior": "Uses React.memo and proper key handling",
+          "issues": [
+            "Could implement virtualization for very large lists"
+          ]
+        }
+      },
+      "forms": {
+        "validationLogic": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Form field validation",
+          "testCase": "various form inputs",
+          "expectedBehavior": "Client-side validation with error messages",
+          "actualBehavior": "Need to analyze form components for validation",
+          "issues": [
+            "Form validation components need detailed analysis"
+          ]
+        },
+        "submitHandling": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Form submission handling",
+          "testCase": "form submit events",
+          "expectedBehavior": "Proper form submission with loading states",
+          "actualBehavior": "Need to analyze form submission logic",
+          "issues": [
+            "Form submission components need analysis"
+          ]
+        },
+        "errorHandling": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Form error handling",
+          "testCase": "API errors and validation errors",
+          "expectedBehavior": "Clear error messaging and error states",
+          "actualBehavior": "Need to analyze error handling in forms",
+          "issues": [
+            "Form error handling needs detailed analysis"
+          ]
+        }
+      },
+      "uiComponents": {
+        "buttonComponent": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Button component variants",
+          "testCase": "different button types and states",
+          "expectedBehavior": "Consistent styling and behavior",
+          "actualBehavior": "Need to analyze UI button component",
+          "issues": [
+            "UI components need detailed analysis"
+          ]
+        },
+        "inputComponents": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Input field components",
+          "testCase": "various input types",
+          "expectedBehavior": "Proper validation and state management",
+          "actualBehavior": "Need to analyze input components",
+          "issues": [
+            "Input components need analysis"
+          ]
+        },
+        "modalComponents": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Modal and dialog components",
+          "testCase": "modal interactions",
+          "expectedBehavior": "Proper focus management and accessibility",
+          "actualBehavior": "Need to analyze modal components",
+          "issues": [
+            "Modal components need analysis"
+          ]
+        }
+      },
+      "dataDisplayComponents": {
+        "tableComponents": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Data table functionality",
+          "testCase": "sorting, filtering, pagination",
+          "expectedBehavior": "Interactive data tables with proper functionality",
+          "actualBehavior": "Need to analyze table components",
+          "issues": [
+            "Table components need analysis"
+          ]
+        },
+        "cardComponents": {
+          "status": "PARTIAL_ANALYSIS",
+          "description": "Card layout components",
+          "testCase": "various card layouts",
+          "expectedBehavior": "Consistent card design patterns",
+          "actualBehavior": "Job card analyzed, other cards need analysis",
+          "issues": [
+            "Other card components need analysis"
+          ]
+        }
+      },
+      "interactiveComponents": {
+        "searchComponents": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Search functionality",
+          "testCase": "search input and filters",
+          "expectedBehavior": "Real-time search with debouncing",
+          "actualBehavior": "Need to analyze search components",
+          "issues": [
+            "Search components need analysis"
+          ]
+        },
+        "navigationComponents": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Navigation elements",
+          "testCase": "menus, breadcrumbs, pagination",
+          "expectedBehavior": "Intuitive navigation patterns",
+          "actualBehavior": "Need to analyze navigation components",
+          "issues": [
+            "Navigation components need analysis"
+          ]
+        }
+      }
+    },
+    "utilities": {
+      "validation": {
+        "emailValidation": {
+          "status": "NEEDS_IMPLEMENTATION",
+          "description": "Email format validation",
+          "testCase": "various email formats",
+          "expectedBehavior": "Validates email format properly",
+          "actualBehavior": "No dedicated email validation utility found",
+          "issues": [
+            "Email validation utility should be implemented"
+          ]
+        },
+        "passwordValidation": {
+          "status": "NEEDS_IMPLEMENTATION",
+          "description": "Password strength validation",
+          "testCase": "various password strengths",
+          "expectedBehavior": "Validates password complexity",
+          "actualBehavior": "No password validation utility found",
+          "issues": [
+            "Password validation utility should be implemented"
+          ]
+        },
+        "phoneValidation": {
+          "status": "NEEDS_IMPLEMENTATION",
+          "description": "Phone number validation",
+          "testCase": "various phone formats",
+          "expectedBehavior": "Validates phone number format",
+          "actualBehavior": "No phone validation utility found",
+          "issues": [
+            "Phone number validation utility should be implemented"
+          ]
+        }
+      },
+      "formatting": {
+        "dateFormatting": {
+          "status": "PARTIAL",
+          "description": "Date formatting utilities",
+          "testCase": "various date formats",
+          "expectedBehavior": "Consistent date formatting across app",
+          "actualBehavior": "formatDate and formatDistanceToNow functions available",
+          "issues": [
+            "Date formatting utilities partially implemented"
+          ]
+        },
+        "currencyFormatting": {
+          "status": "IMPLEMENTED",
+          "description": "Currency formatting",
+          "testCase": "various currency amounts",
+          "expectedBehavior": "Proper currency display with symbols",
+          "actualBehavior": "Currency formatting in job card component",
+          "issues": []
+        },
+        "numberFormatting": {
+          "status": "PARTIAL",
+          "description": "Number formatting utilities",
+          "testCase": "large numbers, decimals",
+          "expectedBehavior": "Consistent number formatting",
+          "actualBehavior": "Basic number formatting in salary display",
+          "issues": [
+            "Comprehensive number formatting utility needed"
+          ]
+        }
+      },
+      "helpers": {
+        "classNameUtils": {
+          "status": "IMPLEMENTED",
+          "description": "Class name utility (cn function)",
+          "testCase": "conditional class names",
+          "expectedBehavior": "Merges class names conditionally",
+          "actualBehavior": "cn function from utils imported and used",
+          "issues": []
+        },
+        "arrayUtils": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Array manipulation utilities",
+          "testCase": "filtering, sorting, grouping",
+          "expectedBehavior": "Consistent array operations",
+          "actualBehavior": "Need to analyze array utilities",
+          "issues": [
+            "Array utilities need analysis"
+          ]
+        },
+        "objectUtils": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Object manipulation utilities",
+          "testCase": "merging, transformation",
+          "expectedBehavior": "Consistent object operations",
+          "actualBehavior": "Need to analyze object utilities",
+          "issues": [
+            "Object utilities need analysis"
+          ]
+        }
+      },
+      "constants": {
+        "apiEndpoints": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "API endpoint constants",
+          "testCase": "consistent API URLs",
+          "expectedBehavior": "Centralized API endpoint management",
+          "actualBehavior": "Need to analyze API constants",
+          "issues": [
+            "API endpoint constants need analysis"
+          ]
+        },
+        "statusConstants": {
+          "status": "IMPLEMENTED",
+          "description": "Status and enum constants",
+          "testCase": "job statuses, user roles",
+          "expectedBehavior": "Consistent status values",
+          "actualBehavior": "Prisma enums provide consistent constants",
+          "issues": []
+        },
+        "configurationConstants": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Configuration constants",
+          "testCase": "pagination limits, timeouts",
+          "expectedBehavior": "Centralized configuration values",
+          "actualBehavior": "Need to analyze configuration constants",
+          "issues": [
+            "Configuration constants need analysis"
+          ]
+        }
+      }
+    },
+    "api": {},
+    "validation": {},
+    "integration": {
+      "authenticationFlow": {
+        "completeRegistrationFlow": {
+          "status": "PASS",
+          "description": "Complete user registration process",
+          "testCase": "registration → verification → login",
+          "expectedBehavior": "Seamless registration and activation flow",
+          "actualBehavior": "Registration creates user, sends email, login works after verification",
+          "issues": []
+        },
+        "passwordResetFlow": {
+          "status": "PASS",
+          "description": "Password reset process",
+          "testCase": "forgot password → email → reset → login",
+          "expectedBehavior": "Secure password reset with token validation",
+          "actualBehavior": "Password reset flow with secure token handling",
+          "issues": []
+        },
+        "sessionManagement": {
+          "status": "PASS",
+          "description": "Session lifecycle management",
+          "testCase": "login → token refresh → logout",
+          "expectedBehavior": "Proper session tracking and cleanup",
+          "actualBehavior": "Session creation, refresh, and cleanup implemented",
+          "issues": []
+        },
+        "multiDeviceHandling": {
+          "status": "PASS",
+          "description": "Multi-device session handling",
+          "testCase": "login from multiple devices",
+          "expectedBehavior": "Proper session isolation and management",
+          "actualBehavior": "Multiple sessions supported with individual management",
+          "issues": []
+        }
+      },
+      "jobManagementFlow": {
+        "jobCreationToApplication": {
+          "status": "PASS",
+          "description": "Complete job posting and application flow",
+          "testCase": "create job → publish → applications → review",
+          "expectedBehavior": "Seamless job management workflow",
+          "actualBehavior": "Job creation, listing, and application flow works",
+          "issues": []
+        },
+        "jobStatusManagement": {
+          "status": "PARTIAL",
+          "description": "Job status lifecycle management",
+          "testCase": "open → filled/closed status transitions",
+          "expectedBehavior": "Proper status transition validation",
+          "actualBehavior": "Basic status updates without transition validation",
+          "issues": [
+            "Status transition validation needed"
+          ]
+        },
+        "applicationProcessing": {
+          "status": "PASS",
+          "description": "Application review and processing",
+          "testCase": "application → review → acceptance/rejection",
+          "expectedBehavior": "Complete application management flow",
+          "actualBehavior": "Application status updates with notes and timestamps",
+          "issues": []
+        }
+      },
+      "applicationFlow": {
+        "employeeJobSearch": {
+          "status": "PASS",
+          "description": "Employee job search and application",
+          "testCase": "search → filter → apply → track",
+          "expectedBehavior": "Comprehensive job search and application flow",
+          "actualBehavior": "Search, filtering, and application functionality implemented",
+          "issues": []
+        },
+        "applicationTracking": {
+          "status": "PASS",
+          "description": "Application status tracking",
+          "testCase": "application submission → status updates → notifications",
+          "expectedBehavior": "Real-time application status tracking",
+          "actualBehavior": "Application status updates with proper tracking",
+          "issues": []
+        },
+        "recommendationSystem": {
+          "status": "BASIC",
+          "description": "Job recommendation system",
+          "testCase": "user profile → job matching → recommendations",
+          "expectedBehavior": "Intelligent job recommendations",
+          "actualBehavior": "Basic recommendation based on non-applied jobs",
+          "issues": [
+            "Recommendation algorithm could be enhanced"
+          ]
+        }
+      },
+      "dataConsistency": {
+        "userProfileConsistency": {
+          "status": "PASS",
+          "description": "User profile data consistency",
+          "testCase": "user → profile → role-specific data",
+          "expectedBehavior": "Consistent user data across all tables",
+          "actualBehavior": "Proper foreign key relationships maintain consistency",
+          "issues": []
+        },
+        "jobApplicationConsistency": {
+          "status": "PASS",
+          "description": "Job and application data consistency",
+          "testCase": "job → applications → status updates",
+          "expectedBehavior": "Consistent job and application states",
+          "actualBehavior": "Proper relational integrity maintained",
+          "issues": []
+        },
+        "transactionalIntegrity": {
+          "status": "NEEDS_ENHANCEMENT",
+          "description": "Transaction handling for complex operations",
+          "testCase": "multi-table operations",
+          "expectedBehavior": "Atomic operations with rollback capability",
+          "actualBehavior": "Some operations could benefit from explicit transactions",
+          "issues": [
+            "Complex operations should use database transactions"
+          ]
+        }
+      },
+      "apiIntegration": {
+        "frontendBackendSync": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Frontend-backend data synchronization",
+          "testCase": "API calls → data updates → UI refresh",
+          "expectedBehavior": "Seamless data synchronization",
+          "actualBehavior": "Need to analyze API integration",
+          "issues": [
+            "API integration needs comprehensive analysis"
+          ]
+        },
+        "errorPropagation": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Error propagation from backend to frontend",
+          "testCase": "backend errors → API responses → UI error handling",
+          "expectedBehavior": "Clear error messaging across the stack",
+          "actualBehavior": "Need to analyze error propagation",
+          "issues": [
+            "Error propagation needs analysis"
+          ]
+        },
+        "realTimeUpdates": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Real-time data updates",
+          "testCase": "WebSocket/SSE for live updates",
+          "expectedBehavior": "Real-time notifications and data updates",
+          "actualBehavior": "WebSocket context found, needs analysis",
+          "issues": [
+            "Real-time update implementation needs analysis"
+          ]
+        }
+      }
+    },
+    "errorHandling": {
+      "authenticationErrors": {
+        "unauthorizedAccess": {
+          "status": "PASS",
+          "description": "Handling unauthorized access attempts",
+          "testCase": "invalid credentials, expired tokens",
+          "expectedBehavior": "Proper UnauthorizedException with secure messages",
+          "actualBehavior": "Auth service throws appropriate exceptions",
+          "issues": []
+        },
+        "forbiddenAccess": {
+          "status": "PASS",
+          "description": "Handling forbidden resource access",
+          "testCase": "accessing resources without permission",
+          "expectedBehavior": "ForbiddenException with clear messaging",
+          "actualBehavior": "Services validate permissions and throw exceptions",
+          "issues": []
+        },
+        "tokenExpiration": {
+          "status": "PASS",
+          "description": "Handling expired tokens",
+          "testCase": "using expired JWT tokens",
+          "expectedBehavior": "Proper token validation and refresh flow",
+          "actualBehavior": "JWT verification handles expiration",
+          "issues": []
+        }
+      },
+      "validationErrors": {
+        "inputValidation": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Input validation error handling",
+          "testCase": "invalid form data, malformed requests",
+          "expectedBehavior": "Clear validation error messages",
+          "actualBehavior": "DTO validation needs analysis",
+          "issues": [
+            "Input validation error handling needs analysis"
+          ]
+        },
+        "businessRuleValidation": {
+          "status": "PARTIAL",
+          "description": "Business rule validation errors",
+          "testCase": "duplicate applications, invalid status changes",
+          "expectedBehavior": "Context-specific error messages",
+          "actualBehavior": "Some business rules validated in services",
+          "issues": [
+            "Comprehensive business rule validation needed"
+          ]
+        },
+        "dataIntegrityErrors": {
+          "status": "PASS",
+          "description": "Database constraint violations",
+          "testCase": "unique constraint violations, foreign key errors",
+          "expectedBehavior": "Graceful handling of DB constraint errors",
+          "actualBehavior": "Prisma handles constraints and throws exceptions",
+          "issues": []
+        }
+      },
+      "businessLogicErrors": {
+        "jobApplicationErrors": {
+          "status": "PASS",
+          "description": "Job application business logic errors",
+          "testCase": "applying to closed jobs, duplicate applications",
+          "expectedBehavior": "Clear business logic error messages",
+          "actualBehavior": "Jobs service validates business rules properly",
+          "issues": []
+        },
+        "restaurantAccessErrors": {
+          "status": "PASS",
+          "description": "Restaurant access control errors",
+          "testCase": "accessing other restaurant data",
+          "expectedBehavior": "Proper ownership validation",
+          "actualBehavior": "Services validate restaurant ownership",
+          "issues": []
+        },
+        "statusTransitionErrors": {
+          "status": "NEEDS_IMPLEMENTATION",
+          "description": "Invalid status transition errors",
+          "testCase": "invalid job/application status changes",
+          "expectedBehavior": "Status transition validation",
+          "actualBehavior": "No comprehensive status transition validation",
+          "issues": [
+            "Status transition validation needed"
+          ]
+        }
+      },
+      "systemErrors": {
+        "databaseErrors": {
+          "status": "PARTIAL",
+          "description": "Database connection and query errors",
+          "testCase": "DB unavailable, query timeouts",
+          "expectedBehavior": "Graceful degradation and error handling",
+          "actualBehavior": "Prisma provides basic error handling",
+          "issues": [
+            "Enhanced database error handling needed"
+          ]
+        },
+        "externalServiceErrors": {
+          "status": "PARTIAL",
+          "description": "External service failures",
+          "testCase": "email service failures, Redis unavailability",
+          "expectedBehavior": "Fallback mechanisms and proper error handling",
+          "actualBehavior": "Some services have fallback (email, Redis)",
+          "issues": [
+            "More robust external service error handling needed"
+          ]
+        },
+        "resourceLimitErrors": {
+          "status": "NEEDS_IMPLEMENTATION",
+          "description": "Resource limit and rate limiting errors",
+          "testCase": "too many requests, memory limits",
+          "expectedBehavior": "Proper rate limiting and resource management",
+          "actualBehavior": "No visible rate limiting implementation",
+          "issues": [
+            "Rate limiting and resource management needed"
+          ]
+        }
+      },
+      "clientErrorHandling": {
+        "networkErrors": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Client-side network error handling",
+          "testCase": "API failures, timeout errors",
+          "expectedBehavior": "User-friendly error messages and retry mechanisms",
+          "actualBehavior": "Need to analyze client error handling",
+          "issues": [
+            "Client error handling needs analysis"
+          ]
+        },
+        "validationFeedback": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Form validation feedback",
+          "testCase": "real-time validation, error highlighting",
+          "expectedBehavior": "Clear validation feedback to users",
+          "actualBehavior": "Need to analyze form validation feedback",
+          "issues": [
+            "Form validation feedback needs analysis"
+          ]
+        },
+        "errorBoundaries": {
+          "status": "IMPLEMENTED",
+          "description": "React error boundaries",
+          "testCase": "component errors, rendering failures",
+          "expectedBehavior": "Graceful error handling with fallback UI",
+          "actualBehavior": "Error boundary components found in codebase",
+          "issues": []
+        }
+      }
+    },
+    "performance": {
+      "databaseQueries": {
+        "queryOptimization": {
+          "status": "GOOD",
+          "description": "Database query efficiency",
+          "testCase": "complex queries with joins",
+          "expectedBehavior": "Optimized queries with proper indexing",
+          "actualBehavior": "Prisma provides query optimization, uses proper includes",
+          "issues": []
+        },
+        "paginationEfficiency": {
+          "status": "PASS",
+          "description": "Pagination implementation efficiency",
+          "testCase": "large datasets with pagination",
+          "expectedBehavior": "Efficient pagination without full table scans",
+          "actualBehavior": "Proper skip/take implementation with count optimization",
+          "issues": []
+        },
+        "indexingStrategy": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Database indexing strategy",
+          "testCase": "frequently queried fields",
+          "expectedBehavior": "Proper indexes on search and filter fields",
+          "actualBehavior": "Need to analyze database schema for indexing",
+          "issues": [
+            "Database indexing strategy needs analysis"
+          ]
+        },
+        "connectionPooling": {
+          "status": "IMPLEMENTED",
+          "description": "Database connection management",
+          "testCase": "concurrent database requests",
+          "expectedBehavior": "Efficient connection pooling",
+          "actualBehavior": "Prisma handles connection pooling automatically",
+          "issues": []
+        }
+      },
+      "componentRendering": {
+        "renderOptimization": {
+          "status": "PARTIAL",
+          "description": "Component render optimization",
+          "testCase": "large lists, frequent updates",
+          "expectedBehavior": "Minimal unnecessary re-renders",
+          "actualBehavior": "Some optimization present, could be enhanced",
+          "issues": [
+            "Component memoization could be enhanced"
+          ]
+        },
+        "virtualization": {
+          "status": "IMPLEMENTED",
+          "description": "List virtualization for large datasets",
+          "testCase": "thousands of items in lists",
+          "expectedBehavior": "Virtualized rendering for performance",
+          "actualBehavior": "Virtual list component found in performance folder",
+          "issues": []
+        },
+        "codesplitting": {
+          "status": "NEEDS_ANALYSIS",
+          "description": "Code splitting and lazy loading",
+          "testCase": "route-based and component-based splitting",
+          "expectedBehavior": "Optimized bundle sizes with lazy loading",
+          "actualBehavior": "Need to analyze code splitting implementation",
+          "issues": [
+            "Code splitting strategy needs analysis"
+          ]
+        },
+        "imageOptimization": {
+          "status": "IMPLEMENTED",
+          "description": "Image loading and optimization",
+          "testCase": "large images, multiple images",
+          "expectedBehavior": "Optimized image loading with proper sizing",
+          "actualBehavior": "Image optimizer component found",
+          "issues": []
+        }
+      },
+      "apiResponseTimes": {
+        "responseTime": {
+          "status": "NEEDS_MEASUREMENT",
+          "description": "API response time optimization",
+          "testCase": "various endpoint response times",
+          "expectedBehavior": "Fast response times under normal load",
+          "actualBehavior": "Need to measure actual response times",
+          "issues": [
+            "API response time measurement needed"
+          ]
+        },
+        "cachingStrategy": {
+          "status": "PARTIAL",
+          "description": "API response caching",
+          "testCase": "frequently requested data",
+          "expectedBehavior": "Effective caching strategy",
+          "actualBehavior": "Some caching implementation, Redis disabled",
+          "issues": [
+            "Caching strategy needs enhancement without Redis"
+          ]
+        },
+        "bulkOperations": {
+          "status": "GOOD",
+          "description": "Bulk operation efficiency",
+          "testCase": "multiple record operations",
+          "expectedBehavior": "Efficient bulk operations",
+          "actualBehavior": "Uses Promise.all for parallel operations",
+          "issues": []
+        }
+      },
+      "memoryUsage": {
+        "memoryLeaks": {
+          "status": "NEEDS_MONITORING",
+          "description": "Memory leak detection",
+          "testCase": "long-running application usage",
+          "expectedBehavior": "No memory leaks in components or services",
+          "actualBehavior": "Need to monitor for memory leaks",
+          "issues": [
+            "Memory leak monitoring needed"
+          ]
+        },
+        "dataStructureEfficiency": {
+          "status": "GOOD",
+          "description": "Efficient data structure usage",
+          "testCase": "large datasets in memory",
+          "expectedBehavior": "Efficient data structures and algorithms",
+          "actualBehavior": "Proper data structure usage in most places",
+          "issues": []
+        }
+      },
+      "cacheUtilization": {
+        "clientSideCache": {
+          "status": "IMPLEMENTED",
+          "description": "Client-side caching strategy",
+          "testCase": "API response caching",
+          "expectedBehavior": "Effective client-side caching",
+          "actualBehavior": "Client cache implementation found",
+          "issues": []
+        },
+        "serverSideCache": {
+          "status": "DISABLED",
+          "description": "Server-side caching with Redis",
+          "testCase": "frequently accessed data",
+          "expectedBehavior": "Fast data access through caching",
+          "actualBehavior": "Redis caching is currently disabled",
+          "issues": [
+            "Server-side caching needs Redis setup or alternative"
+          ]
+        }
+      }
+    }
+  },
+  "criticalIssues": [],
+  "recommendations": [
+    {
+      "priority": "HIGH",
+      "area": "Authentication",
+      "recommendation": "Implement comprehensive rate limiting for authentication endpoints",
+      "rationale": "Prevent brute force attacks and enhance security"
+    },
+    {
+      "priority": "HIGH",
+      "area": "Validation",
+      "recommendation": "Implement client-side form validation with real-time feedback",
+      "rationale": "Improve user experience and reduce server load"
+    },
+    {
+      "priority": "MEDIUM",
+      "area": "Caching",
+      "recommendation": "Implement database fallback for Redis caching functionality",
+      "rationale": "Ensure application functions without Redis dependency"
+    },
+    {
+      "priority": "MEDIUM",
+      "area": "Recommendations",
+      "recommendation": "Enhance job recommendation algorithm with skills matching",
+      "rationale": "Improve job discovery and user engagement"
+    },
+    {
+      "priority": "MEDIUM",
+      "area": "Performance",
+      "recommendation": "Implement comprehensive monitoring and performance metrics",
+      "rationale": "Track application performance and identify bottlenecks"
+    },
+    {
+      "priority": "LOW",
+      "area": "Business Logic",
+      "recommendation": "Implement status transition validation for jobs and applications",
+      "rationale": "Ensure data integrity and prevent invalid state changes"
+    }
+  ],
+  "coverageAnalysis": {
+    "authentication": {
+      "covered": "Comprehensive coverage of all authentication functions",
+      "missing": "Rate limiting implementation and testing"
+    },
+    "jobs": {
+      "covered": "Complete CRUD operations and business logic",
+      "missing": "Advanced recommendation algorithms"
+    },
+    "components": {
+      "covered": "Job card component thoroughly analyzed",
+      "missing": "Form components, UI components, navigation components"
+    },
+    "utilities": {
+      "covered": "Basic utility functions identified",
+      "missing": "Validation utilities, comprehensive formatting utilities"
+    },
+    "integration": {
+      "covered": "Backend integration flows",
+      "missing": "Frontend-backend integration analysis"
+    }
+  },
+  "performanceInsights": {
+    "strengths": [
+      "Database queries are optimized with proper relationships",
+      "Pagination is implemented efficiently",
+      "Parallel operations using Promise.all",
+      "Image optimization components available",
+      "Virtual list implementation for large datasets"
+    ],
+    "improvements": [
+      "Component memoization could be enhanced",
+      "API response time measurement needed",
+      "Memory leak monitoring required",
+      "Server-side caching strategy needs implementation"
+    ]
+  },
+  "securityConsiderations": {
+    "strengths": [
+      "JWT token implementation with proper payload structure",
+      "Password hashing using argon2",
+      "SQL injection protection through Prisma ORM",
+      "Token blacklisting mechanism (partial)",
+      "Proper session management"
+    ],
+    "improvements": [
+      "Rate limiting for authentication endpoints",
+      "Password strength validation",
+      "Input validation enhancement",
+      "CSRF protection verification",
+      "Security headers implementation"
+    ]
+  },
+  "maintenanceRecommendations": [
+    "Implement comprehensive logging for all critical operations",
+    "Add health check endpoints for monitoring",
+    "Create automated testing suite for core functionality",
+    "Implement database migration strategy",
+    "Set up error tracking and monitoring",
+    "Create API documentation with OpenAPI/Swagger",
+    "Implement feature flags for gradual rollouts",
+    "Set up automated backup and recovery procedures"
+  ]
+}

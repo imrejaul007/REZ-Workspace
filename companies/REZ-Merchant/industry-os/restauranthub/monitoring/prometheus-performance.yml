@@ -1,0 +1,150 @@
+# Prometheus Configuration for RestaurantHub Performance Monitoring
+# Optimized for Scalability Testing and 10,000+ Concurrent Users
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+  external_labels:
+    monitor: 'restauranthub-performance'
+    environment: 'load-testing'
+
+# Rule files for performance alerting
+rule_files:
+  - "/etc/prometheus/rules/performance-rules.yml"
+  - "/etc/prometheus/rules/scalability-rules.yml"
+  - "/etc/prometheus/rules/database-rules.yml"
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager-performance:9093
+
+# Scrape configurations for performance monitoring
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # RestaurantHub API Metrics
+  - job_name: 'restauranthub-api'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+    scheme: http
+
+  # Node Exporter - System Metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter-performance:9100']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # cAdvisor - Container Metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor-performance:8080']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # PostgreSQL Database Metrics
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Redis Cache Metrics
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # NGINX Load Balancer Metrics
+  - job_name: 'nginx-exporter'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # K6 Load Testing Metrics
+  - job_name: 'k6-metrics'
+    static_configs:
+      - targets: ['k6-prometheus-adapter:8080']
+    scrape_interval: 5s
+    scrape_timeout: 3s
+    honor_labels: true
+
+  # Application Performance Monitoring
+  - job_name: 'restauranthub-apm'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+    metrics_path: '/api/v1/metrics/performance'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    scheme: http
+
+  # Custom Business Metrics
+  - job_name: 'business-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+    metrics_path: '/api/v1/metrics/business'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+
+  # Microservices Health Checks
+  - job_name: 'microservices-health'
+    static_configs:
+      - targets:
+          - 'host.docker.internal:3001'  # User Service
+          - 'host.docker.internal:3002'  # Restaurant Service
+          - 'host.docker.internal:3003'  # Order Service
+          - 'host.docker.internal:3004'  # Payment Service
+          - 'host.docker.internal:3005'  # Notification Service
+    metrics_path: '/health'
+    scrape_interval: 20s
+    scrape_timeout: 10s
+    scheme: http
+
+  # JVM Metrics (if using Java services)
+  - job_name: 'jvm-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Custom Performance Endpoints
+  - job_name: 'performance-endpoints'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+    metrics_path: '/api/v1/performance/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    params:
+      format: ['prometheus']
+
+# Remote write configuration for long-term storage
+remote_write:
+  - url: "http://influxdb-performance:8086/api/v1/prom/write?db=performance_metrics&u=admin&p=PerformanceData123"
+    queue_config:
+      max_samples_per_send: 10000
+      max_shards: 200
+      capacity: 100000
+
+# Storage configuration for performance testing
+storage:
+  tsdb:
+    path: /prometheus
+    retention.time: 7d
+    retention.size: 10GB
+    wal-compression: true
+    allow-overlapping-blocks: true
+    no-lockfile: false

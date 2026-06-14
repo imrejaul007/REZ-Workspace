@@ -1,0 +1,327 @@
+# Default values for restauranthub
+# This is a YAML-formatted file.
+
+# Global configuration
+global:
+  imageRegistry: ghcr.io
+  imagePullSecrets: []
+  storageClass: ""
+
+# Image configuration
+image:
+  registry: ghcr.io
+  repository: restauranthub/restauranthub
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Environment
+environment: production
+
+# Replica counts
+replicas:
+  api: 3
+  web: 2
+  minReplicas: 2
+  maxReplicas: 20
+
+# Service configuration
+service:
+  type: ClusterIP
+  api:
+    port: 80
+    targetPort: 3000
+  web:
+    port: 80
+    targetPort: 3000
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "20"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: restauranthub.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: web
+    - host: api.restauranthub.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: api
+  tls:
+    - secretName: restauranthub-tls
+      hosts:
+        - restauranthub.com
+        - api.restauranthub.com
+
+# Resource configuration
+resources:
+  api:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+  web:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+# HPA configuration
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+# Persistent volumes
+persistence:
+  enabled: true
+  uploads:
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    size: 10Gi
+  backups:
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    size: 50Gi
+
+# Database configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: ""
+    username: restauranthub
+    password: ""
+    database: restauranthub
+  primary:
+    persistence:
+      enabled: true
+      size: 100Gi
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1000m"
+      limits:
+        memory: "4Gi"
+        cpu: "2000m"
+  readReplicas:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: 100Gi
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "1000m"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# Redis configuration
+redis:
+  enabled: true
+  architecture: replication
+  auth:
+    enabled: true
+    password: ""
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+  replica:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# Configuration
+config:
+  nodeEnv: production
+  logLevel: info
+  jwtSecret: ""
+  jwtRefreshSecret: ""
+  enableCsrf: true
+  rateLimitMax: 1000
+  authRateLimitMax: 5
+  allowedOrigins: "https://restauranthub.com,https://www.restauranthub.com"
+
+# External services
+external:
+  aws:
+    region: us-east-1
+    s3:
+      bucket: ""
+  razorpay:
+    keyId: ""
+    keySecret: ""
+  sentry:
+    dsn: ""
+  newrelic:
+    licenseKey: ""
+    appName: "RestaurantHub"
+
+# Monitoring
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+  grafana:
+    enabled: true
+    adminPassword: ""
+  jaeger:
+    enabled: true
+  loki:
+    enabled: true
+
+# Health checks
+healthChecks:
+  api:
+    livenessProbe:
+      httpGet:
+        path: /api/v1/health
+        port: http
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 10
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: /api/v1/health/ready
+        port: http
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+  web:
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 10
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - restauranthub
+        topologyKey: kubernetes.io/hostname
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# RBAC
+rbac:
+  create: true
+
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    enabled: true
+  egress:
+    enabled: true
+
+# Backup configuration
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention: "30d"
+  s3:
+    bucket: ""
+    region: us-east-1
+
+# Secrets
+secrets:
+  create: true
+  data: {}
+
+# ConfigMaps
+configMaps:
+  create: true
+  data: {}

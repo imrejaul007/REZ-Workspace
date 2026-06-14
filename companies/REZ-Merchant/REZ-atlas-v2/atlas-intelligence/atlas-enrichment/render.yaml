@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: atlas-enrichment
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5160
+      - key: SERVICE_NAME
+        value: atlas-enrichment
+      - key: MONGODB_URI
+        sync: false
+      - key: LOG_LEVEL
+        value: info

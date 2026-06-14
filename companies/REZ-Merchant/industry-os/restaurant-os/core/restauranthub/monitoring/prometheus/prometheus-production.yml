@@ -1,0 +1,260 @@
+# Enhanced Prometheus configuration for RestaurantHub Production
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+  external_labels:
+    cluster: 'restauranthub'
+    environment: 'production'
+    datacenter: 'primary'
+    region: 'us-east-1'
+
+# Alertmanager configuration with high availability
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+          - alertmanager-backup:9093
+      timeout: 10s
+      api_version: v2
+
+# Load alerting rules
+rule_files:
+  - "alerts/*.yml"
+  - "recording-rules/*.yml"
+
+# Enhanced scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # RestaurantHub API - Multiple instances
+  - job_name: 'restauranthub-api'
+    static_configs:
+      - targets:
+          - 'api-1:3000'
+          - 'api-2:3000'
+    metrics_path: /api/v1/metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'http_request_duration_seconds_.*'
+        target_label: __tmp_duration
+      - source_labels: [__name__]
+        regex: 'http_requests_total'
+        target_label: __tmp_requests
+
+  # RestaurantHub Web App
+  - job_name: 'restauranthub-web'
+    static_configs:
+      - targets: ['web:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 30s
+
+  # PostgreSQL Primary and Replica
+  - job_name: 'postgresql-primary'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+    relabel_configs:
+      - target_label: instance_type
+        replacement: primary
+
+  - job_name: 'postgresql-replica'
+    static_configs:
+      - targets: ['postgres-replica-exporter:9187']
+    scrape_interval: 30s
+    relabel_configs:
+      - target_label: instance_type
+        replacement: replica
+
+  # Redis Cluster
+  - job_name: 'redis-cluster'
+    static_configs:
+      - targets:
+          - 'redis-exporter-1:9121'
+          - 'redis-exporter-2:9121'
+          - 'redis-exporter-3:9121'
+    scrape_interval: 15s
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: 'redis-exporter-([0-9]+):9121'
+        target_label: redis_node
+        replacement: 'node-${1}'
+
+  # Node Exporter (System metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Docker containers
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 20s
+
+  # Nginx Load Balancer
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 30s
+
+  # Application Performance Monitoring - Detailed
+  - job_name: 'restauranthub-apm-detailed'
+    static_configs:
+      - targets:
+          - 'api-1:3000'
+          - 'api-2:3000'
+    metrics_path: /api/v1/metrics/detailed
+    scrape_interval: 10s
+    params:
+      include: ['http_requests', 'database_queries', 'redis_operations', 'auth_operations', 'memory_usage']
+
+  # Business Metrics
+  - job_name: 'restauranthub-business'
+    static_configs:
+      - targets:
+          - 'api-1:3000'
+          - 'api-2:3000'
+    metrics_path: /api/v1/metrics/business
+    scrape_interval: 60s
+    params:
+      include:
+        - 'user_registrations'
+        - 'restaurant_operations'
+        - 'job_applications'
+        - 'orders_processed'
+        - 'revenue_metrics'
+        - 'active_sessions'
+        - 'feature_usage'
+
+  # Custom Application Metrics
+  - job_name: 'restauranthub-custom'
+    static_configs:
+      - targets:
+          - 'api-1:3000'
+          - 'api-2:3000'
+    metrics_path: /api/v1/metrics/custom
+    scrape_interval: 30s
+    params:
+      include:
+        - 'queue_lengths'
+        - 'background_jobs'
+        - 'email_metrics'
+        - 'file_upload_metrics'
+        - 'search_metrics'
+
+  # Health checks with blackbox exporter
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://api-1:3000/api/v1/health
+          - http://api-2:3000/api/v1/health
+          - http://web:3000/api/health
+          - https://restauranthub.com
+          - https://api.restauranthub.com/api/v1/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # SSL Certificate monitoring
+  - job_name: 'blackbox-ssl'
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+      - targets:
+          - restauranthub.com:443
+          - api.restauranthub.com:443
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # DNS monitoring
+  - job_name: 'blackbox-dns'
+    metrics_path: /probe
+    params:
+      module: [dns_lookup]
+    static_configs:
+      - targets:
+          - restauranthub.com
+          - api.restauranthub.com
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # Backup service monitoring
+  - job_name: 'backup-service'
+    static_configs:
+      - targets: ['backup-service:8080']
+    metrics_path: /metrics
+    scrape_interval: 300s  # 5 minutes
+
+  # Third-party service monitoring
+  - job_name: 'external-dependencies'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://api.razorpay.com/health
+          - https://s3.amazonaws.com
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+# Remote write for long-term storage and federation
+remote_write:
+  - url: "http://thanos-receive:19291/api/v1/receive"
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 200
+      capacity: 10000
+      batch_send_deadline: 5s
+    write_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'up|probe_.*|http_requests_total|http_request_duration_seconds.*'
+        action: keep
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 15d  # Keep local data for 15 days
+    retention.size: 50GB
+    wal-compression: true
+    min-block-duration: 2h
+    max-block-duration: 25h
+
+# Federation (for multi-cluster setup)
+remote_read:
+  - url: "http://thanos-query:9090/api/v1/query"
+    read_recent: true

@@ -1,0 +1,76 @@
+# =============================================================================
+# Render Blueprint - CorpPerks Intelligence Service
+# =============================================================================
+# Deploy at: https://dashboard.render.com/blueprints
+# =============================================================================
+
+services:
+  - type: web
+    name: corpperks-intelligence
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    healthCheckInterval: 30s
+    healthCheckThreshold: 3
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4135"
+
+      # MongoDB
+      - key: MONGODB_URI
+        sync: false
+
+      # Redis
+      - key: REDIS_URL
+        sync: false
+
+      # Authentication
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+      # CORS
+      - key: CORS_ORIGIN
+        value: https://peopleos.corpperks.com
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+
+      # AI Rate Limiting
+      - key: AI_RATE_LIMIT_WINDOW_MS
+        value: "60000"
+      - key: AI_RATE_LIMIT_MAX_REQUESTS
+        value: "10"
+
+      # CorpPerks API
+      - key: CORPPERKS_API_URL
+        value: https://corpperks-api.onrender.com
+
+      # RABTUL Integration
+      - key: RABTUL_AUTH_URL
+        sync: false
+      - key: RABTUL_WALLET_URL
+        sync: false
+      - key: RABTUL_NOTIFY_URL
+        sync: false
+
+      # Cache TTL
+      - key: INSIGHTS_CACHE_TTL
+        value: "3600"
+      - key: FORECAST_CACHE_TTL
+        value: "7200"
+      - key: EMPLOYEE_INSIGHTS_CACHE_TTL
+        value: "1800"
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info
+      - key: AI_DEBUG_MODE
+        value: "false"

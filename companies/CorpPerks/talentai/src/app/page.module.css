@@ -1,0 +1,110 @@
+.page {
+  min-height: 100vh;
+  background: #fff;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.hero {
+  text-align: center;
+  padding: 80px 20px 60px;
+  background: linear-gradient(180deg, #faf5ff 0%, #fff 100%);
+}
+
+.hero h1 {
+  font-size: 52px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.highlight {
+  background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+  font-size: 20px;
+  color: #6b7280;
+  margin-bottom: 32px;
+}
+
+.cta {
+  display: inline-flex;
+  gap: 16px;
+}
+
+.ctaPrimary {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.ctaSecondary {
+  padding: 14px 32px;
+  color: #8b5cf6;
+  border: 2px solid #8b5cf6;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.features {
+  padding: 80px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.features h2 {
+  text-align: center;
+  font-size: 36px;
+  margin-bottom: 48px;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.featureCard {
+  padding: 32px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+
+.featureIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.featureCard h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.featureCard p {
+  color: #6b7280;
+  line-height: 1.6;
+}

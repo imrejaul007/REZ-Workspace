@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ad-bazaar-crisis-alert-config
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-crisis-alert
+data:
+  NODE_ENV: "production"
+  MONGODB_URI: "mongodb://mongodb.adbazaar.svc.cluster.local:27017/crisis_alert"
+  REDIS_URL: "redis://redis.adbazaar.svc.cluster.local:6379/0"
+  API_VERSION: "1.0.0"
+  LOG_LEVEL: "info"
+  ALERT_SEVERITY_THRESHOLD: "high"
+  MONITOR_INTERVAL_SECONDS: "60"
+  ALERT_COOLDOWN_MINUTES: "15"
+  ESCALATION_DELAY_MINUTES: "5"
+  EMERGENCY_CONTACT_OVERRIDE: "true"
+  SMS_ENABLED: "true"
+  EMAIL_ENABLED: "true"
+  PUSH_ENABLED: "true"
+  WHATSAPP_ENABLED: "true"
+  INCIDENT_RETENTION_DAYS: "365"
+  AUTO_RESOLVE_HOURS: "48"

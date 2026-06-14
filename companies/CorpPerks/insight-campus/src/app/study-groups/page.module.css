@@ -1,0 +1,502 @@
+.page {
+  padding: 32px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--gray-500);
+}
+
+.createBtn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.createBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.statIcon {
+  font-size: 28px;
+}
+
+.statValue {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.statLabel {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: white;
+  padding: 8px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background: var(--gray-100);
+}
+
+.tabActive {
+  background: var(--primary);
+  color: white;
+}
+
+.categories {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.catBtn {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 20px;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.catBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.catBtnActive {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.groupGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.groupCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.groupCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.groupHeader {
+  padding: 24px;
+  text-align: center;
+  position: relative;
+}
+
+.privateBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.3);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.groupAvatar {
+  width: 64px;
+  height: 64px;
+  background: white;
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+  margin: 0 auto 12px;
+}
+
+.groupHeader h3 {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.subjectBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.groupBody {
+  padding: 20px;
+}
+
+.groupDesc {
+  font-size: 14px;
+  color: var(--gray-600);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.groupTopics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.topicTag {
+  padding: 4px 10px;
+  background: var(--gray-100);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+.groupStats {
+  margin-bottom: 16px;
+}
+
+.memberProgress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+.memberProgress span {
+  font-size: 13px;
+  color: var(--gray-500);
+  white-space: nowrap;
+}
+
+.nextSession {
+  font-size: 13px;
+  color: var(--gray-600);
+  margin-bottom: 4px;
+}
+
+.activityBadge {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.groupActions {
+  display: flex;
+  gap: 8px;
+}
+
+.joinBtn {
+  flex: 1;
+  padding: 10px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.infoBtn {
+  padding: 10px 16px;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.myGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.myGroupCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.myGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  color: white;
+}
+
+.myGroupAvatar {
+  width: 56px;
+  height: 56px;
+  background: white;
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.myGroupHeader h3 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.myGroupBody {
+  padding: 20px;
+}
+
+.sessionInfo {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.myGroupBody .groupTopics {
+  margin-bottom: 16px;
+}
+
+.myGroupBody .groupActions {
+  margin-top: 16px;
+}
+
+.sessionBtn {
+  flex: 1;
+  padding: 10px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.chatBtn {
+  padding: 10px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.settingsBtn {
+  padding: 10px 14px;
+  background: var(--gray-100);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalContent h2 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.modalContent > p {
+  color: var(--gray-500);
+  margin-bottom: 24px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--gray-700);
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.checkboxLabel input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.cancelBtn {
+  padding: 12px 24px;
+  background: var(--gray-200);
+  color: var(--gray-700);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.submitBtn {
+  padding: 12px 24px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .groupGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .sessionInfo {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

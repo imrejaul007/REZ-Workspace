@@ -1,0 +1,114 @@
+name: Shared Types Build Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - staging
+    paths:
+      - 'packages/shared-types/**'
+      - '.github/workflows/shared-types.yml'
+  push:
+    branches:
+      - main
+      - develop
+      - staging
+    paths:
+      - 'packages/shared-types/**'
+      - '.github/workflows/shared-types.yml'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  build-shared-types:
+    name: Build and Validate Shared Types
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: packages/shared-types/package-lock.json
+
+      - name: Install dependencies
+        working-directory: packages/shared-types
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Build shared-types
+        working-directory: packages/shared-types
+        run: npm run build
+        continue-on-error: false
+
+      - name: Type check shared-types
+        working-directory: packages/shared-types
+        run: npx tsc --noEmit
+        continue-on-error: false
+
+      - name: Verify type definitions
+        working-directory: packages/shared-types
+        run: |
+          if [ -d "dist" ]; then
+            echo "✓ Distribution build created"
+            if [ -f "dist/index.d.ts" ]; then
+              echo "✓ Type definitions (.d.ts) generated successfully"
+            else
+              echo "✗ Type definitions not found"
+              exit 1
+            fi
+            if [ -f "dist/index.js" ]; then
+              echo "✓ JavaScript output generated successfully"
+            else
+              echo "✗ JavaScript output not found"
+              exit 1
+            fi
+          else
+            echo "✗ Distribution directory not created"
+            exit 1
+          fi
+        continue-on-error: false
+
+      - name: Check for dist artifacts
+        working-directory: packages/shared-types
+        run: |
+          ls -la dist/ || {
+            echo "Failed to create dist directory"
+            exit 1
+          }
+        continue-on-error: false
+
+      - name: Validate package exports
+        working-directory: packages/shared-types
+        run: |
+          # Verify that package.json points to valid dist files
+          if grep -q '"main".*"dist/' package.json && grep -q '"types".*"dist/' package.json; then
+            echo "✓ Package.json correctly configured"
+          else
+            echo "✗ Package.json exports are misconfigured"
+            exit 1
+          fi
+        continue-on-error: false
+
+      - name: Clean shared-types build
+        working-directory: packages/shared-types
+        run: npm run clean
+        continue-on-error: true
+
+      - name: Report success
+        if: success()
+        run: echo "Shared types package build validation completed successfully"
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "Shared types build validation failed. Please review the errors above."
+          exit 1

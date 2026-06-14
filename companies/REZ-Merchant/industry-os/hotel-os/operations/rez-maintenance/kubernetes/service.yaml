@@ -1,0 +1,23 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-hotel-maintenance-service
+  namespace: rez-merchant
+  labels:
+    app: rez-hotel-maintenance-service
+    managed-by: rez-merchant
+  annotations:
+    description: "Hotel Maintenance Service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4019
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-hotel-maintenance-service

@@ -1,0 +1,46 @@
+# Render Deployment Configuration
+# Deploy to: https://render.com
+
+services:
+  - type: web
+    name: rez-schedule-service
+    region: singapore
+    plan: starter
+    buildCommand: yarn install && yarn db:generate && yarn build
+    startCommand: yarn start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4090
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+
+  - type: worker
+    name: rez-schedule-cron
+    region: singapore
+    plan: starter
+    buildCommand: yarn install && yarn build
+    startCommand: node dist/cron.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromService:
+          name: rez-schedule-service
+          envVarKey: DATABASE_URL
+      - key: REDIS_URL
+        fromService:
+          name: rez-schedule-service
+          envVarKey: REDIS_URL

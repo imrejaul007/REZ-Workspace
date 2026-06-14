@@ -1,0 +1,52 @@
+cluster.name: "restauranthub-cluster"
+node.name: "restauranthub-node-1"
+
+# Network settings
+network.host: 0.0.0.0
+http.port: 9200
+
+# Discovery settings
+discovery.type: single-node
+
+# Security settings (disabled for development)
+xpack.security.enabled: false
+xpack.security.enrollment.enabled: false
+xpack.security.http.ssl.enabled: false
+xpack.security.transport.ssl.enabled: false
+
+# Memory settings
+bootstrap.memory_lock: true
+
+# Index settings
+action.destructive_requires_name: true
+
+# Monitoring
+xpack.monitoring.collection.enabled: true
+
+# Machine Learning (disabled to reduce resource usage)
+xpack.ml.enabled: false
+
+# Watcher (disabled for development)
+xpack.watcher.enabled: false
+
+# Index lifecycle management
+xpack.ilm.enabled: true
+
+# Index templates for RestaurantHub
+index.number_of_shards: 1
+index.number_of_replicas: 0
+index.refresh_interval: 1s
+
+# Logging
+logger.level: INFO
+rootLogger.level: INFO
+
+# Cluster settings
+cluster.routing.allocation.disk.threshold_enabled: true
+cluster.routing.allocation.disk.watermark.low: 85%
+cluster.routing.allocation.disk.watermark.high: 90%
+cluster.routing.allocation.disk.watermark.flood_stage: 95%
+
+# Thread pool settings
+thread_pool.write.queue_size: 1000
+thread_pool.search.queue_size: 1000

@@ -1,0 +1,85 @@
+/**
+ * Personalization API Tests
+ * Tests for personalizationApi.ts
+ */
+
+import * as personalizationApi from '@/services/personalizationApi';
+
+jest.mock('@/services/apiClient', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), patch: jest.fn(), post: jest.fn() },
+  ApiResponse: {},
+}));
+
+import apiClient from '@/services/apiClient';
+
+describe('Personalization API', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  describe('getPersonalizationConfig', () => {
+    it('should fetch personalization config', async () => {
+      const mockConfig = {
+        userId: 'user-1',
+        features: {
+          recommendations: true,
+          searchRanking: true,
+          notifications: false,
+        },
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockConfig });
+
+      const result = await personalizationApi.getPersonalizationConfig('user-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.features.recommendations).toBe(true);
+    });
+  });
+
+  describe('updatePersonalizationConfig', () => {
+    it('should update personalization config', async () => {
+      (apiClient.patch as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { userId: 'user-1', features: { recommendations: false } },
+      });
+
+      const result = await personalizationApi.updatePersonalizationConfig('user-1', { recommendations: false });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('getPersonalizedProducts', () => {
+    it('should fetch personalized products', async () => {
+      const mockProducts = [
+        { id: 'prod-1', type: 'product' as const, score: 0.95, reason: 'Based on browsing history' },
+        { id: 'prod-2', type: 'product' as const, score: 0.87, reason: 'Similar users also viewed' },
+      ];
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockProducts });
+
+      const result = await personalizationApi.getPersonalizedProducts('user-1', 10);
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+    });
+  });
+
+  describe('getPersonalizedSearch', () => {
+    it('should fetch personalized search results', async () => {
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { results: [{ id: 'prod-1', type: 'product', score: 0.9 }] },
+      });
+
+      const result = await personalizationApi.getPersonalizedSearch('user-1', 'pizza');
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('recordPersonalizationFeedback', () => {
+    it('should record feedback', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({ success: true });
+
+      const result = await personalizationApi.recordPersonalizationFeedback('user-1', 'prod-1', 'click');
+      expect(result.success).toBe(true);
+    });
+  });
+});

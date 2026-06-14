@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REZ QR Cloud - Get More Orders, Less Effort</title>
+  <meta name="description" content="Transform your restaurant with smart QR codes. Accept orders, process payments, and grow your business.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%); }
+    .floating { animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(14, 165, 233, 0.3); } 50% { box-shadow: 0 0 40px rgba(14, 165, 233, 0.6); } }
+  </style>
+</head>
+<body class="bg-gray-900 text-white">
+  <!-- Nav -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center font-bold text-xl">R</div>
+        <span class="font-bold text-lg">REZ QR</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="#features" class="text-gray-400 hover:text-white">Features</a>
+        <a href="#pricing" class="text-gray-400 hover:text-white">Pricing</a>
+        <a href="#demo" class="text-gray-400 hover:text-white">Demo</a>
+        <a href="#contact" class="bg-blue-500 hover:bg-blue-600 px-5 py-2 rounded-lg font-medium">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="gradient-bg min-h-screen flex items-center justify-center pt-20">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <div class="floating mb-8">
+        <div class="w-24 h-24 bg-white/20 backdrop-blur rounded-2xl mx-auto flex items-center justify-center">
+          <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+          </svg>
+        </div>
+      </div>
+      <h1 class="text-5xl md:text-6xl font-bold mb-6">Get More Orders,<br>Less Effort</h1>
+      <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Transform your restaurant with smart QR codes. Accept orders, process payments, and grow your business - all without an app.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#demo" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition">Start Free Trial</a>
+        <a href="#demo" class="border-2 border-white/30 px-8 py-4 rounded-xl font-medium hover:bg-white/10 transition">Watch Demo</a>
+      </div>
+      <div class="mt-12 flex items-center justify-center gap-8 text-sm text-blue-200">
+        <div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-400 rounded-full"></span> No credit card required</div>
+        <div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-400 rounded-full"></span> 14-day free trial</div>
+        <div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-400 rounded-full"></span> Setup in 5 minutes</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="py-16 bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div>
+          <p class="text-4xl font-bold text-blue-400">500+</p>
+          <p class="text-gray-400">Restaurants</p>
+        </div>
+        <div>
+          <p class="text-4xl font-bold text-blue-400">1M+</p>
+          <p class="text-gray-400">Orders Processed</p>
+        </div>
+        <div>
+          <p class="text-4xl font-bold text-blue-400">99.9%</p>
+          <p class="text-gray-400">Uptime</p>
+        </div>
+        <div>
+          <p class="text-4xl font-bold text-blue-400">₹0</p>
+          <p class="text-gray-400">Setup Fee</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold mb-4">Everything You Need to Grow</h2>
+        <p class="text-gray-400 text-lg">Complete restaurant management in your pocket</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 hover:border-blue-500 transition">
+          <div class="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Smart QR Codes</h3>
+          <p class="text-gray-400">Generate unique QR codes for each table. Customers scan, browse menu, and order - no app download needed.</p>
+        </div>
+        <!-- Feature 2 -->
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 hover:border-blue-500 transition">
+          <div class="w-14 h-14 bg-green-500/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4 4"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Instant Orders</h3>
+          <p class="text-gray-400">Orders go straight to your kitchen display. No waiting, no confusion, no lost paper slips.</p>
+        </div>
+        <!-- Feature 3 -->
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 hover:border-blue-500 transition">
+          <div class="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 3s1.343 3 3 3 3 .895 3 3-1.343 3-3 3m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M3 12a9 9 0 1118 0 9 9 0 01-18 0z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Digital Payments</h3>
+          <p class="text-gray-400">Accept UPI, cards, and wallets. Money settles in your account instantly.</p>
+        </div>
+        <!-- Feature 4 -->
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 hover:border-blue-500 transition">
+          <div class="w-14 h-14 bg-yellow-500/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Real-Time Dashboard</h3>
+          <p class="text-gray-400">Track orders, sales, and customer trends. Make data-driven decisions.</p>
+        </div>
+        <!-- Feature 5 -->
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 hover:border-blue-500 transition">
+          <div class="w-14 h-14 bg-pink-500/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 18.158V21a1 1 0 01-1 1h-5v-5l1.405-1.405A2.032 2.032 0 0116 15.158V17a1 1 0 011-1z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Instant Alerts</h3>
+          <p class="text-gray-400">Get notified instantly when orders come in. Never miss a customer.</p>
+        </div>
+        <!-- Feature 6 -->
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 hover:border-blue-500 transition">
+          <div class="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm6 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Analytics</h3>
+          <p class="text-gray-400">Know your best sellers, peak hours, and customer preferences.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-20 bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold mb-4">Get Started in 3 Steps</h2>
+        <p class="text-gray-400 text-lg">Up and running in 5 minutes</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">1</div>
+          <h3 class="text-xl font-bold mb-3">Create Account</h3>
+          <p class="text-gray-400">Sign up in 30 seconds. No documents needed to start.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">2</div>
+          <h3 class="text-xl font-bold mb-3">Add Menu</h3>
+          <p class="text-gray-400">Upload your menu with photos. We make it look beautiful.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">3</div>
+          <h3 class="text-xl font-bold mb-3">Print QR Codes</h3>
+          <p class="text-gray-400">Download and print QR codes. Stick on tables. Done!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="py-20">
+    <div class="max-w-5xl mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
+        <p class="text-gray-400 text-lg">No hidden fees. No commission on orders.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Starter -->
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+          <h3 class="text-xl font-bold mb-2">Starter</h3>
+          <p class="text-gray-400 mb-6">For small restaurants</p>
+          <p class="text-5xl font-bold mb-6">₹299<span class="text-lg text-gray-400">/mo</span></p>
+          <ul class="space-y-3 mb-8 text-gray-300">
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> 1 location</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> 100 QR codes</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> 500 orders/mo</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Basic analytics</li>
+          </ul>
+          <button class="w-full py-3 border-2 border-gray-600 rounded-xl font-medium hover:border-blue-500 transition">Get Started</button>
+        </div>
+        <!-- Growth -->
+        <div class="bg-gradient-to-b from-blue-900/50 to-gray-800 rounded-2xl p-8 border-2 border-blue-500 relative">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-500 px-4 py-1 rounded-full text-sm font-medium">Most Popular</div>
+          <h3 class="text-xl font-bold mb-2">Growth</h3>
+          <p class="text-gray-400 mb-6">For growing restaurants</p>
+          <p class="text-5xl font-bold mb-6">₹799<span class="text-lg text-gray-400">/mo</span></p>
+          <ul class="space-y-3 mb-8 text-gray-300">
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> 3 locations</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Unlimited QR codes</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Unlimited orders</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Advanced analytics</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Payment integration</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Priority support</li>
+          </ul>
+          <button class="w-full py-3 bg-blue-500 rounded-xl font-medium hover:bg-blue-600 transition">Get Started</button>
+        </div>
+        <!-- Enterprise -->
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+          <h3 class="text-xl font-bold mb-2">Enterprise</h3>
+          <p class="text-gray-400 mb-6">For restaurant chains</p>
+          <p class="text-5xl font-bold mb-6">Custom</p>
+          <ul class="space-y-3 mb-8 text-gray-300">
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Unlimited locations</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Everything in Growth</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Custom branding</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> API access</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Dedicated support</li>
+            <li class="flex items-center gap-2"><span class="text-green-400">✓</span> SLA guarantee</li>
+          </ul>
+          <button class="w-full py-3 border-2 border-gray-600 rounded-xl font-medium hover:border-blue-500 transition">Contact Sales</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Form -->
+  <section id="demo" class="py-20 gradient-bg">
+    <div class="max-w-2xl mx-auto px-4">
+      <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20">
+        <h2 class="text-3xl font-bold text-center mb-8">Start Your Free Trial</h2>
+        <form id="signup-form" class="space-y-4">
+          <div>
+            <label class="block text-sm mb-2">Restaurant Name</label>
+            <input type="text" id="restaurant-name" placeholder="Pizza Palace" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:border-white" required>
+          </div>
+          <div>
+            <label class="block text-sm mb-2">Phone Number</label>
+            <input type="tel" id="phone" placeholder="+91 98765 43210" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:border-white" required>
+          </div>
+          <div>
+            <label class="block text-sm mb-2">City</label>
+            <input type="text" id="city" placeholder="Mumbai" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:border-white" required>
+          </div>
+          <button type="submit" class="w-full py-4 bg-white text-blue-600 rounded-xl font-bold text-lg hover:bg-blue-50 transition">Get Started Free</button>
+        </form>
+        <p class="text-center text-sm text-blue-200 mt-4">14-day free trial. No credit card required.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="py-20 bg-gray-800">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-4xl font-bold mb-4">Questions? Let's Talk</h2>
+      <p class="text-gray-400 text-lg mb-8">Our team is here to help you succeed.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="mailto:support@rez.money" class="bg-blue-500 px-8 py-4 rounded-xl font-medium hover:bg-blue-600 transition">Email Us</a>
+        <a href="tel:+919876543210" class="border-2 border-gray-600 px-8 py-4 rounded-xl font-medium hover:border-blue-500 transition">Call +91 98765 43210</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 border-t border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold">R</div>
+        <span class="font-medium">REZ QR Cloud</span>
+      </div>
+      <p class="text-gray-500 text-sm">© 2026 REZ Technologies. All rights reserved.</p>
+      <div class="flex gap-4 text-sm text-gray-400">
+        <a href="#" class="hover:text-white">Privacy</a>
+        <a href="#" class="hover:text-white">Terms</a>
+        <a href="#" class="hover:text-white">Support</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('restaurant-name').value;
+      const phone = document.getElementById('phone').value;
+      const city = document.getElementById('city').value;
+
+      const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+      try {
+        const res = await fetch('http://localhost:4300/api/merchants', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, slug, type: 'restaurant', phone })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Welcome! Your account is ready.\n\nAPI Key: ' + data.data.apiKey.substring(0, 20) + '...\n\nUse this to access your dashboard.');
+          window.location.href = 'dashboard.html';
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Service not running. Please try again later.');
+      }
+    });
+  </script>
+</body>
+</html>

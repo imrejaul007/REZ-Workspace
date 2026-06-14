@@ -1,0 +1,231 @@
+# KHAIRMOVE Docker Compose
+# Run all services with MongoDB and Redis
+
+version: '3.8'
+
+services:
+  # ============================================
+  # INFRASTRUCTURE
+  # ============================================
+
+  mongodb:
+    image: mongo:6.0
+    container_name: khaimove-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: khaimove
+    networks:
+      - khaimove-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: khaimove-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - khaimove-network
+
+  # ============================================
+  # CORE SERVICES
+  # ============================================
+
+  api-gateway:
+    build:
+      context: ./khaimove-api-gateway
+      dockerfile: Dockerfile
+    container_name: khaimove-api-gateway
+    ports:
+      - "4600:4600"
+    environment:
+      - NODE_ENV=production
+      - RIDE_SERVICE_URL=http://ride-service:4601
+      - FLEET_SERVICE_URL=http://fleet-service:4602
+      - DELIVERY_SERVICE_URL=http://delivery-service:4603
+      - LOGISTICS_SERVICE_URL=http://logistics-service:4604
+      - RENTAL_SERVICE_URL=http://rental-service:4605
+      - BUZZLOCAL_SERVICE_URL=http://buzzlocal-service:4606
+    depends_on:
+      - ride-service
+      - fleet-service
+      - delivery-service
+      - logistics-service
+      - rental-service
+      - buzzlocal-service
+    networks:
+      - khaimove-network
+    restart: unless-stopped
+
+  ride-service:
+    build:
+      context: ./khaimove-ride-service
+      dockerfile: Dockerfile
+    container_name: khaimove-ride-service
+    ports:
+      - "4601:4601"
+    environment:
+      - NODE_ENV=production
+      - PORT=4601
+      - MONGODB_URI=mongodb://mongodb:27017/khaimove-ride
+      - REDIS_URL=redis://redis:6379
+      # REZ Intelligence
+      - REZ_INTENT_URL=http://host.docker.internal:4018
+      - REZ_SIGNAL_URL=http://host.docker.internal:4142
+      - REZ_FRAUD_URL=http://host.docker.internal:3007
+      - REZ_PREDICTIVE_URL=http://host.docker.internal:4123
+      - REZ_LOCATION_URL=http://host.docker.internal:4040
+      # RABTUL
+      - AUTH_SERVICE_URL=http://host.docker.internal:4002
+      - WALLET_SERVICE_URL=http://host.docker.internal:4004
+      - PAYMENT_SERVICE_URL=http://host.docker.internal:4001
+      - NOTIFICATION_SERVICE_URL=http://host.docker.internal:4011
+      # Security
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-khaimove-internal}
+      - REZ_INTELLIGENCE_API_KEY=${REZ_API_KEY:-rez-api-key}
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - khaimove-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  fleet-service:
+    build:
+      context: ./khaimove-fleet-service
+      dockerfile: Dockerfile
+    container_name: khaimove-fleet-service
+    ports:
+      - "4602:4602"
+    environment:
+      - NODE_ENV=production
+      - PORT=4602
+      - MONGODB_URI=mongodb://mongodb:27017/khaimove-fleet
+      # REZ Intelligence
+      - REZ_PREDICTIVE_URL=http://host.docker.internal:4123
+      - REZ_LOCATION_URL=http://host.docker.internal:4040
+      - REZ_SIGNAL_URL=http://host.docker.internal:4142
+      # Security
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-khaimove-internal}
+      - REZ_INTELLIGENCE_API_KEY=${REZ_API_KEY:-rez-api-key}
+    depends_on:
+      - mongodb
+    networks:
+      - khaimove-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  delivery-service:
+    build:
+      context: ./khaimove-delivery-service
+      dockerfile: Dockerfile
+    container_name: khaimove-delivery-service
+    ports:
+      - "4603:4603"
+    environment:
+      - NODE_ENV=production
+      - PORT=4603
+      - MONGODB_URI=mongodb://mongodb:27017/khaimove-delivery
+      # REZ Intelligence
+      - REZ_LOCATION_URL=http://host.docker.internal:4040
+      - REZ_SIGNAL_URL=http://host.docker.internal:4142
+      - REZ_PREDICTIVE_URL=http://host.docker.internal:4123
+      # RABTUL
+      - WALLET_SERVICE_URL=http://host.docker.internal:4004
+      - NOTIFICATION_SERVICE_URL=http://host.docker.internal:4011
+      # Security
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-khaimove-internal}
+      - REZ_INTELLIGENCE_API_KEY=${REZ_API_KEY:-rez-api-key}
+    depends_on:
+      - mongodb
+    networks:
+      - khaimove-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  logistics-service:
+    build:
+      context: ./khaimove-logistics-aggregator
+      dockerfile: Dockerfile
+    container_name: khaimove-logistics-service
+    ports:
+      - "4604:4604"
+    environment:
+      - NODE_ENV=production
+      - PORT=4604
+      # Carrier API Keys
+      - DELHIVERY_API_KEY=${DELHIVERY_API_KEY}
+      - BLUEDART_API_KEY=${BLUEDART_API_KEY}
+      - DTDC_API_KEY=${DTDC_API_KEY}
+      - DTDC_CUSTOMER_ID=${DTDC_CUSTOMER_ID}
+      - FEDEX_CLIENT_ID=${FEDEX_CLIENT_ID}
+      - FEDEX_CLIENT_SECRET=${FEDEX_CLIENT_SECRET}
+      - DHL_API_KEY=${DHL_API_KEY}
+      # Security
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-khaimove-internal}
+    networks:
+      - khaimove-network
+    restart: unless-stopped
+
+  rental-service:
+    build:
+      context: ./khaimove-rental-service
+      dockerfile: Dockerfile
+    container_name: khaimove-rental-service
+    ports:
+      - "4605:4605"
+    environment:
+      - NODE_ENV=production
+      - PORT=4605
+      - MONGODB_URI=mongodb://mongodb:27017/khaimove-rental
+    depends_on:
+      - mongodb
+    networks:
+      - khaimove-network
+    restart: unless-stopped
+
+  buzzlocal-service:
+    build:
+      context: ./buzzlocal-rides-integration
+      dockerfile: Dockerfile
+    container_name: khaimove-buzzlocal-service
+    ports:
+      - "4606:4606"
+    environment:
+      - NODE_ENV=production
+      - PORT=4606
+      - RIDE_SERVICE_URL=http://ride-service:4601
+      # REZ Intelligence
+      - REZ_LOCATION_URL=http://host.docker.internal:4040
+      - REZ_SIGNAL_URL=http://host.docker.internal:4142
+      - REZ_PREDICTIVE_URL=http://host.docker.internal:4123
+      - REZ_MEMORY_URL=http://host.docker.internal:4201
+      # Security
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-khaimove-internal}
+      - REZ_INTELLIGENCE_API_KEY=${REZ_API_KEY:-rez-api-key}
+    depends_on:
+      - ride-service
+    networks:
+      - khaimove-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+# ============================================
+# NETWORKS & VOLUMES
+# ============================================
+
+networks:
+  khaimove-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  redis_data:

@@ -1,0 +1,279 @@
+openapi: 3.0.3
+info:
+  title: REZ Safe QR Service API
+  description: |
+    Universal privacy-safe communication and recovery QR system.
+    Supports 15 QR types for pets, devices, and more.
+  version: 2.0.0
+
+servers:
+  - url: https://safe-qr.rezapp.com
+    description: Production
+  - url: http://localhost:4000
+    description: Development
+
+tags:
+  - name: QR Management
+  - name: Scans
+  - name: Support
+  - name: Subscriptions
+  - name: Analytics
+
+paths:
+  /api/health:
+    get:
+      tags: [General]
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+
+  /api/qr:
+    post:
+      tags: [QR Management]
+      summary: Create Safe QR
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [pet, personal, device, medical, helmet, child, vehicle, bicycle, key, luggage, home, office, event, student, package]
+                profile:
+                  type: object
+                settings:
+                  type: object
+      responses:
+        '201':
+          description: QR created
+
+  /api/qr/my:
+    get:
+      tags: [QR Management]
+      summary: List user's QRs
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of QRs
+
+  /api/qr/{shortcode}:
+    put:
+      tags: [QR Management]
+      summary: Update QR
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: shortcode
+          in: path
+          required: true
+      responses:
+        '200':
+          description: QR updated
+
+    delete:
+      tags: [QR Management]
+      summary: Delete QR
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: QR deleted
+
+  /api/qr/{shortcode}/lost:
+    post:
+      tags: [QR Management]
+      summary: Activate lost mode
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lost mode activated
+
+  /api/scan/{shortcode}:
+    get:
+      tags: [Scans]
+      summary: Scan QR
+      parameters:
+        - name: shortcode
+          in: path
+          required: true
+      responses:
+        '200':
+          description: Scan result
+
+  /api/scan/{shortcode}/message:
+    post:
+      tags: [Scans]
+      summary: Send message
+      parameters:
+        - name: shortcode
+          in: path
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                finder_name:
+                  type: string
+      responses:
+        '200':
+          description: Message sent
+
+  /api/support/plans:
+    get:
+      tags: [Subscriptions]
+      summary: Get support plans
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [basic, premium]
+      responses:
+        '200':
+          description: List of plans
+
+  /api/support/subscribe:
+    post:
+      tags: [Subscriptions]
+      summary: Subscribe to support plan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, plan_id]
+              properties:
+                user_id:
+                  type: string
+                plan_id:
+                  type: string
+                shortcodes:
+                  type: array
+                  items:
+                    type: string
+                auto_renew:
+                  type: boolean
+      responses:
+        '200':
+          description: Subscription created
+
+  /api/support/request:
+    post:
+      tags: [Support]
+      summary: Create support request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, shortcode, issue_type]
+              properties:
+                user_id:
+                  type: string
+                shortcode:
+                  type: string
+                device_type:
+                  type: string
+                issue_type:
+                  type: string
+                  enum: [lost, damaged, malfunction, stolen, other]
+                description:
+                  type: string
+                photos:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Request created
+
+  /api/support/request/{id}:
+    get:
+      tags: [Support]
+      summary: Get request status
+      parameters:
+        - name: id
+          in: path
+          required: true
+      responses:
+        '200':
+          description: Request details
+
+  /api/express-recovery:
+    post:
+      tags: [Support]
+      summary: Request express recovery
+      description: Requires premium subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, shortcode]
+              properties:
+                user_id:
+                  type: string
+                shortcode:
+                  type: string
+                customer_phone:
+                  type: string
+      responses:
+        '200':
+          description: Express recovery initiated
+
+  /api/karma/state:
+    get:
+      tags: [Karma]
+      summary: Get karma state
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Karma state
+
+  /api/karma/feed:
+    get:
+      tags: [Karma]
+      summary: Get karma feed
+      parameters:
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Nearby lost items
+
+  /api/admin/stats:
+    get:
+      tags: [Analytics]
+      summary: Admin statistics
+      security:
+        - InternalToken: []
+      responses:
+        '200':
+          description: System statistics
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    InternalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token

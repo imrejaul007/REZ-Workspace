@@ -1,0 +1,294 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets:
+          - 'localhost:9090'
+
+  # ─────────────────────────────────────────────
+  # Core Services
+  # ─────────────────────────────────────────────
+
+  - job_name: 'api-gateway'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4000'
+        labels:
+          service: api-gateway
+          tier: frontend
+
+  - job_name: 'rez-auth-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4002'
+        labels:
+          service: rez-auth-service
+          tier: core
+
+  - job_name: 'rez-payment-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4001'
+        labels:
+          service: rez-payment-service
+          tier: core
+
+  - job_name: 'rez-wallet-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4004'
+        labels:
+          service: rez-wallet-service
+          tier: core
+
+  - job_name: 'rez-order-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4006'
+        labels:
+          service: rez-order-service
+          tier: core
+
+  - job_name: 'rez-catalog-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4007'
+        labels:
+          service: rez-catalog-service
+          tier: core
+
+  - job_name: 'rez-search-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4008'
+        labels:
+          service: rez-search-service
+          tier: core
+
+  - job_name: 'rez-delivery-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4009'
+        labels:
+          service: rez-delivery-service
+          tier: core
+
+  - job_name: 'rez-notifications-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4011'
+        labels:
+          service: rez-notifications-service
+          tier: core
+
+  - job_name: 'rez-profile-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4013'
+        labels:
+          service: rez-profile-service
+          tier: core
+
+  - job_name: 'rez-analytics-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4016'
+        labels:
+          service: rez-analytics-service
+          tier: analytics
+
+  - job_name: 'rez-booking-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4020'
+        labels:
+          service: rez-booking-service
+          tier: core
+
+  # ─────────────────────────────────────────────
+  # Infrastructure Services
+  # ─────────────────────────────────────────────
+
+  - job_name: 'REZ-circuit-breaker'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4030'
+        labels:
+          service: REZ-circuit-breaker
+          tier: infrastructure
+
+  - job_name: 'REZ-retry-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4031'
+        labels:
+          service: REZ-retry-service
+          tier: infrastructure
+
+  - job_name: 'REZ-dlq-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4032'
+        labels:
+          service: REZ-dlq-service
+          tier: infrastructure
+
+  - job_name: 'REZ-idempotency-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4033'
+        labels:
+          service: REZ-idempotency-service
+          tier: infrastructure
+
+  - job_name: 'REZ-policy-engine'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4034'
+        labels:
+          service: REZ-policy-engine
+          tier: infrastructure
+
+  - job_name: 'REZ-secrets-manager'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4035'
+        labels:
+          service: REZ-secrets-manager
+          tier: infrastructure
+
+  - job_name: 'REZ-scheduler-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4038'
+        labels:
+          service: REZ-scheduler-service
+          tier: infrastructure
+
+  - job_name: 'REZ-observability-platform'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4025'
+        labels:
+          service: REZ-observability-platform
+          tier: observability
+
+  - job_name: 'REZ-data-aggregator'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4058'
+        labels:
+          service: REZ-data-aggregator
+          tier: analytics
+
+  # ─────────────────────────────────────────────
+  # BuzzLocal Services
+  # ─────────────────────────────────────────────
+
+  - job_name: 'buzzlocal-feed-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4201'
+        labels:
+          service: buzzlocal-feed-service
+          tier: buzzlocal
+
+  - job_name: 'buzzlocal-community-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4202'
+        labels:
+          service: buzzlocal-community-service
+          tier: buzzlocal
+
+  - job_name: 'buzzlocal-intelligence-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4203'
+        labels:
+          service: buzzlocal-intelligence-service
+          tier: buzzlocal
+
+  - job_name: 'buzzlocal-notification-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4204'
+        labels:
+          service: buzzlocal-notification-service
+          tier: buzzlocal
+
+  - job_name: 'buzzlocal-payment-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4205'
+        labels:
+          service: buzzlocal-payment-service
+          tier: buzzlocal
+
+  - job_name: 'buzzlocal-realtime-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4206'
+        labels:
+          service: buzzlocal-realtime-service
+          tier: buzzlocal
+
+  - job_name: 'buzzlocal-vibe-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4207'
+        labels:
+          service: buzzlocal-vibe-service
+          tier: buzzlocal
+
+  - job_name: 'buzzlocal-weather-service'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'host.docker.internal:4208'
+        labels:
+          service: buzzlocal-weather-service
+          tier: buzzlocal
+
+  # ─────────────────────────────────────────────
+  # Alert Rules
+  # ─────────────────────────────────────────────
+rule_files:
+  - 'alert_rules.yml'

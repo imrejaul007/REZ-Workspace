@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push checks..."
+
+# Run tests for both frontend and backend
+echo "🧪 Running backend tests..."
+cd apps/api && npm run test
+
+echo "🧪 Running frontend tests..."
+cd ../web && npm run test -- --passWithNoTests
+
+echo "🏗️  Running build checks..."
+echo "🏗️  Building backend..."
+cd ../api && npm run build
+
+echo "🏗️  Building frontend..."
+cd ../web && npm run build
+
+echo "✅ Pre-push checks completed!"

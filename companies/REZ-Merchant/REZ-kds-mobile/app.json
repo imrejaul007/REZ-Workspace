@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "REZ KDS",
+    "slug": "rez-kds-mobile",
+    "version": "1.0.0",
+    "orientation": "landscape",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rezapp.kds.mobile",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "REZ KDS needs microphone access for voice commands",
+        "UIBackgroundModes": ["audio", "fetch", "remote-notification"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.rezapp.kds.mobile",
+      "permissions": [
+        "VIBRATE",
+        "WAKE_LOCK",
+        "MODIFY_AUDIO_SETTINGS",
+        "ACCESS_NETWORK_STATE",
+        "INTERNET",
+        "RECEIVE_BOOT_COMPLETED"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/sounds/new-order.wav",
+            "./assets/sounds/urgent-order.wav",
+            "./assets/sounds/order-bumped.wav"
+          ]
+        }
+      ],
+      "expo-secure-store",
+      "expo-av"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "rez-kds-project"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# rez-restaurant-inventory-service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-restaurant-inventory-service
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-inventory-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-restaurant-inventory-service - Restaurant Inventory API"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4056
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-restaurant-inventory-service

@@ -1,0 +1,314 @@
+groups:
+  - name: rez-service-alerts
+    interval: 30s
+    rules:
+      # High Error Rate Alerts
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+          / sum(rate(http_requests_total[5m])) by (service) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} has an error rate of {{ $value | humanizePercentage }} for the last 5 minutes."
+          runbook_url: "https://runbooks.example.com/high-error-rate"
+
+      - alert: ServiceDown
+        expr: up{job=~"rez-.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute."
+          runbook_url: "https://runbooks.example.com/service-down"
+
+      # High Latency Alerts
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) * 1000 > 500
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High latency on {{ $labels.service }}"
+          description: "{{ $labels.service }} P95 latency is {{ $value }}ms for the last 5 minutes."
+          runbook_url: "https://runbooks.example.com/high-latency"
+
+      - alert: CriticalLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) * 1000 > 1000
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Critical latency on {{ $labels.service }}"
+          description: "{{ $labels.service }} P95 latency is {{ $value }}ms for the last 2 minutes."
+          runbook_url: "https://runbooks.example.com/critical-latency"
+
+      # Memory Alerts
+      - alert: HighMemoryUsage
+        expr: |
+          container_memory_usage_bytes / container_spec_memory_limit_bytes > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High memory usage on {{ $labels.service }}"
+          description: "{{ $labels.service }} memory usage is {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.example.com/high-memory"
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          container_memory_usage_bytes / container_spec_memory_limit_bytes > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Critical memory usage on {{ $labels.service }}"
+          description: "{{ $labels.service }} memory usage is {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.example.com/critical-memory"
+
+      # CPU Alerts
+      - alert: HighCPUUsage
+        expr: |
+          rate(container_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High CPU usage on {{ $labels.service }}"
+          description: "{{ $labels.service }} CPU usage is {{ $value }}%."
+          runbook_url: "https://runbooks.example.com/high-cpu"
+
+      # Queue Depth Alerts
+      - alert: HighQueueDepth
+        expr: queue_depth > 1000
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High queue depth on {{ $labels.service }}"
+          description: "{{ $labels.service }} queue depth is {{ $value }}."
+          runbook_url: "https://runbooks.example.com/high-queue"
+
+      - alert: QueueBacklog
+        expr: queue_depth / queue_capacity > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Queue backlog on {{ $labels.service }}"
+          description: "{{ $labels.service }} queue is {{ $value | humanizePercentage }} full."
+          runbook_url: "https://runbooks.example.com/queue-backlog"
+
+  - name: rez-business-alerts
+    interval: 30s
+    rules:
+      # Delivery Alerts
+      - alert: LowDeliverySuccessRate
+        expr: |
+          sum(delivery_orders_completed_total) / sum(delivery_orders_total) < 0.90
+        for: 15m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "Low delivery success rate"
+          description: "Delivery success rate is {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.example.com/low-delivery-rate"
+
+      - alert: Delivery SLA Breach
+        expr: |
+          histogram_quantile(0.95, sum(rate(delivery_time_seconds_bucket[5m])) by (le)) / 60 > 45
+        for: 10m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "Delivery SLA breach"
+          description: "P95 delivery time is {{ $value }} minutes, exceeding 45 minute SLA."
+          runbook_url: "https://runbooks.example.com/delivery-sla-breach"
+
+      # Marketing Alerts
+      - alert: Marketing Campaign Paused
+        expr: marketing_campaigns_active < 1
+        for: 30m
+        labels:
+          severity: warning
+          team: marketing
+        annotations:
+          summary: "No active marketing campaigns"
+          description: "There are no active marketing campaigns running."
+          runbook_url: "https://runbooks.example.com/no-campaigns"
+
+      - alert: High CPC
+        expr: marketing_cost_per_click > 5.00
+        for: 1h
+        labels:
+          severity: warning
+          team: marketing
+        annotations:
+          summary: "High cost per click"
+          description: "Cost per click has exceeded $5.00."
+          runbook_url: "https://runbooks.example.com/high-cpc"
+
+      # Payment Alerts
+      - alert: PaymentSuccessRateLow
+        expr: payment_success_rate < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          team: payments
+        annotations:
+          summary: "Low payment success rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} payment success rate is {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.example.com/low-payment-rate"
+
+      - alert: HighRefundRate
+        expr: |
+          sum(rate(refund_amount_total[5m])) / sum(rate(business_revenue_total[5m])) > 0.10
+        for: 1h
+        labels:
+          severity: warning
+          team: finance
+        annotations:
+          summary: "High refund rate"
+          description: "Refund rate has exceeded 10% of revenue."
+          runbook_url: "https://runbooks.example.com/high-refund-rate"
+
+      # Auth Alerts
+      - alert: HighAuthFailureRate
+        expr: |
+          sum(rate(auth_failures_total[5m])) by (service)
+          / sum(rate(auth_requests_total[5m])) by (service) > 0.10
+        for: 10m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Auth failure rate on {{ $labels.service }} is {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.example.com/high-auth-failures"
+
+      # Loyalty Alerts
+      - alert: LowMemberRetention
+        expr: loyalty_retention_rate < 0.70
+        for: 24h
+        labels:
+          severity: warning
+          team: product
+        annotations:
+          summary: "Low member retention"
+          description: "Loyalty member retention rate is {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.example.com/low-retention"
+
+      - alert: PointsImbalance
+        expr: |
+          (sum(rate(loyalty_points_earned[5m])) - sum(rate(loyalty_points_redeemed[5m]))) / sum(rate(loyalty_points_earned[5m])) > 0.8
+        for: 24h
+        labels:
+          severity: warning
+          team: finance
+        annotations:
+          summary: "Points redemption imbalance"
+          description: "Points earned exceed redemptions by more than 80%."
+          runbook_url: "https://runbooks.example.com/points-imbalance"
+
+  - name: rez-availability-alerts
+    interval: 30s
+    rules:
+      - alert: ServiceAvailabilityLow
+        expr: |
+          1 - (sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+          / sum(rate(http_requests_total[5m])) by (service)) < 0.99
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.service }} availability below 99%"
+          description: "{{ $labels.service }} availability is {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.example.com/availability-low"
+
+      - alert: MultipleServicesDegraded
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+          / sum(rate(http_requests_total[5m])) by (service) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Multiple services experiencing errors"
+          description: "{{ $value }} services are experiencing elevated error rates."
+          runbook_url: "https://runbooks.example.com/multiple-degraded"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: db_connection_pool_available / db_connection_pool_size < 0.1
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: "Database connection pool is {{ $value | humanizePercentage }} available."
+          runbook_url: "https://runbooks.example.com/db-pool-exhausted"
+
+  - name: rez-capacity-alerts
+    interval: 60s
+    rules:
+      - alert: DiskSpaceLow
+        expr: filesystem_free_bytes / filesystem_size_bytes < 0.15
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk space is {{ $value | humanizePercentage }} free."
+          runbook_url: "https://runbooks.example.com/disk-space-low"
+
+      - alert: DiskSpaceCritical
+        expr: filesystem_free_bytes / filesystem_size_bytes < 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Critical disk space on {{ $labels.instance }}"
+          description: "Disk space is {{ $value | humanizePercentage }} free."
+          runbook_url: "https://runbooks.example.com/disk-space-critical"
+
+      - alert: NetworkThroughputHigh
+        expr: rate(network_receive_bytes_total[5m]) + rate(network_transmit_bytes_total[5m]) > 1e9
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High network throughput on {{ $labels.instance }}"
+          description: "Network throughput is {{ $value | humanize }}B/s."
+          runbook_url: "https://runbooks.example.com/high-network"
+
+      - alert: ActiveConnectionsHigh
+        expr: http_server_active_connections > 10000
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High active connections on {{ $labels.service }}"
+          description: "{{ $labels.service }} has {{ $value }} active connections."
+          runbook_url: "https://runbooks.example.com/high-connections"

@@ -1,0 +1,650 @@
+# KHAIRMOVE OpenAPI Specification
+# Ride Service API Documentation
+
+openapi: 3.0.3
+info:
+  title: KHAIRMOVE Ride Service API
+  description: |
+    Core ride-hailing API with REZ Intelligence integration.
+
+    ## Features
+    - Multiple vehicle types (Bike, Auto, Cab, SUV)
+    - ML-based surge pricing
+    - Fraud detection
+    - 10% cashback on all rides
+    - Real-time driver tracking
+
+    ## Authentication
+    - JWT Bearer token in Authorization header
+    - Internal service token in X-Internal-Token header
+  version: 1.0.0
+  contact:
+    name: KHAIRMOVE Support
+    email: support@khaimove.com
+
+servers:
+  - url: http://localhost:4601
+    description: Development server
+  - url: https://api.khaimove.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Service health check
+  - name: Fares
+    description: Fare estimation endpoints
+  - name: Rides
+    description: Ride management
+  - name: Drivers
+    description: Driver endpoints
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/fares/estimate:
+    post:
+      tags: [Fares]
+      summary: Get fare estimate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FareEstimateRequest'
+      responses:
+        '200':
+          description: Fare estimate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FareEstimateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/rides:
+    post:
+      tags: [Rides]
+      summary: Request a ride
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RideRequest'
+      responses:
+        '201':
+          description: Ride created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RideResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Ride blocked by fraud detection
+
+    get:
+      tags: [Rides]
+      summary: Get user's rides
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [requested, accepted, in_progress, completed, cancelled]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of rides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RideListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/rides/{id}:
+    get:
+      tags: [Rides]
+      summary: Get ride by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ride details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RideResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/rides/{id}/cancel:
+    post:
+      tags: [Rides]
+      summary: Cancel a ride
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Ride cancelled
+        '400':
+          description: Cannot cancel ride
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/rides/{id}/complete:
+    post:
+      tags: [Rides]
+      summary: Complete a ride (driver only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ride completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RideCompleteResponse'
+        '403':
+          description: Driver only
+
+  /api/rides/{id}/rate:
+    post:
+      tags: [Rides]
+      summary: Rate a ride
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RateRideRequest'
+      responses:
+        '200':
+          description: Rating submitted
+
+  /api/drivers/nearby:
+    get:
+      tags: [Drivers]
+      summary: Find nearby drivers
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: vehicleType
+          in: query
+          schema:
+            type: string
+            enum: [bike, auto, cab, suv]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of nearby drivers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NearbyDriversResponse'
+
+  /api/drivers/{id}/location:
+    put:
+      tags: [Drivers]
+      summary: Update driver location
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLocationRequest'
+      responses:
+        '200':
+          description: Location updated
+
+  /api/drivers/accept/{rideId}:
+    post:
+      tags: [Drivers]
+      summary: Accept a ride
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: rideId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ride accepted
+        '400':
+          description: Ride no longer available
+        '403':
+          description: Driver blocked
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+          example: khaimove-ride-service
+        version:
+          type: string
+          example: 1.0.0
+        timestamp:
+          type: string
+          format: date-time
+
+    Location:
+      type: object
+      properties:
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+        address:
+          type: string
+        city:
+          type: string
+        pincode:
+          type: string
+
+    FareEstimateRequest:
+      type: object
+      required:
+        - pickup
+        - drop
+        - vehicleType
+      properties:
+        pickup:
+          $ref: '#/components/schemas/Location'
+        drop:
+          $ref: '#/components/schemas/Location'
+        vehicleType:
+          type: string
+          enum: [bike, auto, cab, suv]
+
+    FareEstimateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            vehicleType:
+              type: string
+            baseFare:
+              type: number
+            perKmRate:
+              type: number
+            perMinRate:
+              type: number
+            estimatedDistance:
+              type: number
+            estimatedDuration:
+              type: number
+            surgeMultiplier:
+              type: number
+            surgeReasons:
+              type: array
+              items:
+                type: string
+            subtotal:
+              type: number
+            cashback:
+              type: number
+            estimatedFare:
+              type: number
+
+    RideRequest:
+      type: object
+      required:
+        - pickup
+        - drop
+        - vehicleType
+      properties:
+        pickup:
+          $ref: '#/components/schemas/Location'
+        drop:
+          $ref: '#/components/schemas/Location'
+        vehicleType:
+          type: string
+          enum: [bike, auto, cab, suv]
+        scheduledTime:
+          type: string
+          format: date-time
+
+    RideResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            ride:
+              $ref: '#/components/schemas/Ride'
+            fraudCheck:
+              type: object
+              properties:
+                riskLevel:
+                  type: string
+                passed:
+                  type: boolean
+
+    Ride:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        driverId:
+          type: string
+        pickup:
+          $ref: '#/components/schemas/Location'
+        drop:
+          $ref: '#/components/schemas/Location'
+        vehicleType:
+          type: string
+          enum: [bike, auto, cab, suv]
+        status:
+          type: string
+          enum: [requested, accepted, in_progress, completed, cancelled]
+        fare:
+          $ref: '#/components/schemas/FareDetails'
+        otp:
+          type: string
+        requestedAt:
+          type: string
+          format: date-time
+        acceptedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    FareDetails:
+      type: object
+      properties:
+        baseFare:
+          type: number
+        distanceFare:
+          type: number
+        timeFare:
+          type: number
+        surgeFare:
+          type: number
+        surgeMultiplier:
+          type: number
+        subtotal:
+          type: number
+        cashback:
+          type: number
+        finalFare:
+          type: number
+
+    RideListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            rides:
+              type: array
+              items:
+                $ref: '#/components/schemas/Ride'
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+
+    RideCompleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            ride:
+              $ref: '#/components/schemas/Ride'
+            cashbackInfo:
+              type: object
+              properties:
+                amount:
+                  type: number
+                message:
+                  type: string
+
+    RateRideRequest:
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        feedback:
+          type: string
+
+    NearbyDriversResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            drivers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Driver'
+            demandLevel:
+              type: string
+              enum: [low, medium, high, surge]
+
+    Driver:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        vehicle:
+          type: object
+          properties:
+            type:
+              type: string
+            make:
+              type: string
+            model:
+              type: string
+            color:
+              type: string
+            registrationNumber:
+              type: string
+        currentLocation:
+          $ref: '#/components/schemas/Location'
+        status:
+          type: string
+          enum: [offline, online, busy]
+        rating:
+          type: number
+        mlScore:
+          type: number
+        tier:
+          type: string
+          enum: [bronze, silver, gold, platinum]
+
+    UpdateLocationRequest:
+      type: object
+      required:
+        - location
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        heading:
+          type: number
+        speed:
+          type: number
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: NOT_FOUND
+                  message:
+                    type: string
+                    example: Resource not found

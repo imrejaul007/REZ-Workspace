@@ -1,0 +1,23 @@
+# ================================================
+# REZ Atlas Score - Kubernetes Service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-atlas-score
+  namespace: rez-merchant
+  labels:
+    app: rez-atlas-score
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ Atlas Score - AI-Powered Lead Scoring Engine"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5154
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-atlas-score

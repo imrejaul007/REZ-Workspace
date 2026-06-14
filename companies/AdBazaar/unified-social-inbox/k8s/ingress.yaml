@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-unified-social-inbox
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-unified-social-inbox
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/websocket-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-send-timeout: "3600"
+spec:
+  tls:
+  - hosts:
+    - social-inbox.adbazaar.internal
+    secretName: ad-bazaar-unified-social-inbox-tls
+  rules:
+  - host: social-inbox.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-unified-social-inbox
+            port:
+              number: 5102

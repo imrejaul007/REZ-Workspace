@@ -1,0 +1,111 @@
+{
+  "expo": {
+    "name": "Do",
+    "slug": "do-app",
+    "version": "3.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "do",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F0F12"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "in.rez.do",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Do needs your location to find nearby places",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Do needs your location to find nearby places and send reminders",
+        "NSMicrophoneUsageDescription": "Do uses the microphone for voice input",
+        "NSCameraUsageDescription": "Do uses the camera for avatar photos and receipts",
+        "NSPhotoLibraryUsageDescription": "Do accesses photos for profile pictures and receipts",
+        "UIBackgroundModes": [
+          "audio",
+          "fetch",
+          "remote-notification"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F0F12"
+      },
+      "package": "in.rez.do",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "RECORD_AUDIO",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "do",
+              "host": "app"
+            },
+            {
+              "scheme": "https",
+              "host": "do.rez.money"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Do to use your location to find nearby places"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#7C3AED",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Do accesses photos for profile pictures",
+          "cameraPermission": "Do uses the camera for avatar photos"
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "do-app-project"
+      }
+    },
+    "permissions": [
+      "CAMERA",
+      "READ_EXTERNAL_STORAGE",
+      "WRITE_EXTERNAL_STORAGE",
+      "VIBRATE",
+      "RECEIVE_BOOT_COMPLETED",
+      "SCHEDULE_EXACT_ALARM"
+    ]
+  }
+}

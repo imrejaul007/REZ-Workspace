@@ -1,0 +1,533 @@
+# Kong Gateway Declarative Configuration
+# OPS-003 FIX: Centralized API Gateway with JWT validation, rate limiting,
+# circuit breaking, and mTLS support
+#
+# Usage:
+#   kong config parse kong.yml  # Validate
+#   kong config db_init kong.yml  # Initialize database
+#   kong reload  # Reload with new config
+#
+# For Docker:
+#   docker run -d --name kong \
+#     -e "KONG_DATABASE=postgres" \
+#     -e "KONG_PG_HOST=postgres" \
+#     -e "KONG_DECLARATIVE_CONFIG=/usr/local/kong/kong.yml" \
+#     -p 8000:8000 -p 8443:8443 \
+#     kong:latest
+
+_format_version: "3.0"
+_transform: true
+
+# ─── Services ────────────────────────────────────────────────────────────────
+
+services:
+  # Auth Service
+  - name: auth-service
+    url: http://rez-auth-service:3001
+    routes:
+      - name: auth-route
+        paths:
+          - /api/auth
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+      - name: correlation-id
+        config:
+          header_name: X-Correlation-ID
+          generator: uuid
+          echo_downstream: true
+
+  # CorpPerks Service (Benefits, Employees, GST)
+  - name: corpperks-service
+    url: http://rez-wallet-service:4004
+    routes:
+      - name: corpperks-route
+        paths:
+          - /api/corp
+        methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 500
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # GST/Finance Service
+  - name: finance-service
+    url: http://rez-finance-service:4006
+    routes:
+      - name: finance-route
+        paths:
+          - /api/gst
+        methods:
+          - GET
+          - POST
+          - PUT
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 500
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Hotel OTA Service (Makcorps)
+  - name: hotel-ota-service
+    url: http://rez-hotel-service:4011
+    routes:
+      - name: hotel-ota-route
+        paths:
+          - /api/hotels
+        methods:
+          - GET
+          - POST
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 200
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # NextaBizz Procurement Service
+  - name: nextabizz-service
+    url: http://rez-procurement-service:4012
+    routes:
+      - name: nextabizz-route
+        paths:
+          - /api/nextabizz
+        methods:
+          - GET
+          - POST
+          - PUT
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 200
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Merchant Service
+  - name: merchant-service
+    url: http://rez-merchant-service:3002
+    routes:
+      - name: merchant-route
+        paths:
+          - /api/merchant
+        methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 500
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+      - name: correlation-id
+        config:
+          header_name: X-Correlation-ID
+          generator: uuid
+          echo_downstream: true
+
+  # Wallet Service
+  - name: wallet-service
+    url: http://rez-wallet-service:4004
+    routes:
+      - name: wallet-route
+        paths:
+          - /api/wallet
+        methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 1000
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+      - name: correlation-id
+        config:
+          header_name: X-Correlation-ID
+          generator: uuid
+          echo_downstream: true
+
+  # Payment Service
+  - name: payment-service
+    url: http://rez-payment-service:4005
+    routes:
+      - name: payment-route
+        paths:
+          - /api/payment
+        methods:
+          - GET
+          - POST
+          - PUT
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+      # STRICT: Payment retries can cause double charges
+      - name: proxy-cache
+        config:
+          response_code:
+            - 200
+          request_method:
+            - GET
+          content_type:
+            - application/json
+          cache_ttl: 60
+          strategy: redis
+          redis_host: redis
+          redis_port: 6379
+
+  # Order Service
+  - name: order-service
+    url: http://rez-order-service:4003
+    routes:
+      - name: order-route
+        paths:
+          - /api/orders
+        methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 500
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Catalog Service
+  - name: catalog-service
+    url: http://rez-catalog-service:4006
+    routes:
+      - name: catalog-route
+        paths:
+          - /api/catalog
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 1000
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+      - name: proxy-cache
+        config:
+          response_code:
+            - 200
+          request_method:
+            - GET
+          content_type:
+            - application/json
+          cache_ttl: 300
+          strategy: redis
+          redis_host: redis
+          redis_port: 6379
+
+  # Analytics Service
+  - name: analytics-service
+    url: http://analytics-events:4007
+    routes:
+      - name: analytics-route
+        paths:
+          - /api/analytics
+        methods:
+          - GET
+          - POST
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 500
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Gamification Service
+  - name: gamification-service
+    url: http://rez-gamification-service:4008
+    routes:
+      - name: gamification-route
+        paths:
+          - /api/gamification
+        methods:
+          - GET
+          - POST
+          - PUT
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 500
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Karma Service
+  - name: karma-service
+    url: http://rez-karma-service:4009
+    routes:
+      - name: karma-route
+        paths:
+          - /api/karma
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 500
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Intent Graph Service
+  - name: intent-graph-service
+    url: http://rez-intent-graph:4010
+    routes:
+      - name: intent-graph-route
+        paths:
+          - /api/intent
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 1000
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+          fault_tolerant: true
+          hide_client_headers: false
+
+# ─── Global Plugins ──────────────────────────────────────────────────────────
+
+plugins:
+  # JWT Validation - Centralized authentication
+  - name: jwt
+    config:
+      uri_param_names:
+        - jwt
+      cookie_names: []
+      header_names:
+        - Authorization
+      claims_to_verify:
+        - exp
+      run_on_preflight: true
+
+  # CORS - Centralized CORS enforcement
+  - name: cors
+    config:
+      origins:
+        # SECURITY FIX: Replaced wildcard *.vercel.app with explicit domains
+        # Previously allowed ANY Vercel deployment to access APIs
+        - https://rez-app-admin.vercel.app
+        - https://rez-app-consumer.vercel.app
+        - https://rez-app-merchant.vercel.app
+        - https://rez-web-menu.vercel.app
+        - https://ad-bazaar.vercel.app
+        - https://rez.money
+        - https://www.rez.money
+        - https://menu.rez.money
+        - https://admin.rez.money
+        - https://merchant.rez.money
+      methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      headers:
+        - Content-Type
+        - Authorization
+        - X-Requested-With
+        - X-CSRF-Token
+        - X-Correlation-ID
+        - X-Request-ID
+        - X-Rez-Region
+        - X-Device-OS
+        - X-Device-Fingerprint
+        - X-Rez-Signature
+        - X-Provider-Name
+        - X-App-Version
+      exposed_headers:
+        - X-Correlation-ID
+        - X-Request-ID
+        - X-RateLimit-Limit
+        - X-RateLimit-Remaining
+        - X-RateLimit-Reset
+      credentials: true
+      max_age: 86400
+      preflight_continue: false
+
+  # Request Transformer - Add security headers
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - X-Gateway:Kong
+          - X-Kong-Upstream-Latency:$(latency.request)
+          - X-Kong-Proxy-Latency:$(latency.proxy)
+      remove:
+        headers:
+          - X-Internal-Token
+          - X-Internal-Service
+
+  # Response Transformer - Add security headers to responses
+  - name: response-transformer
+    config:
+      add:
+        headers:
+          - X-Content-Type-Options:nosniff
+          - X-Frame-Options:DENY
+          - X-XSS-Protection:1; mode=block
+          - Referrer-Policy:strict-origin-when-cross-origin
+          - Permissions-Policy:geolocation=(), microphone=(), camera=()
+      remove:
+        headers: []
+
+  # IP Restriction - SECURITY FIX: Removed ineffective configuration
+  # Previously configured with 0.0.0.0/0 allow which allowed ALL IPs (defeated purpose)
+  # IP restriction is now handled at nginx layer with Cloudflare IP ranges
+  # To enable: configure actual IP ranges based on your infrastructure
+  # - name: ip-restriction
+  #   config:
+  #     allow:
+  #       - 10.0.0.0/8
+  #       - 172.16.0.0/12
+  #       - 192.168.0.0/16
+  #     deny:
+  #       - <known bad IPs>
+
+  # Bot Detection - Block scrapers and bots
+  - name: bot-detection
+    config:
+      allow: []
+      deny:
+        - curl
+        - wget
+        - python-requests
+        - scrapy
+      allow_empty: false
+
+  # Request Size Limiting - Prevent payload bombs
+  - name: request-size-limiting
+    config:
+      size: 100
+      size_unit: megabytes
+      allowed_payload_types:
+        - application/json
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+
+  # Logging - Structured logging
+  - name: http-log
+    config:
+      http_endpoint: http://elasticsearch:9200/logs
+      method: POST
+      timeout: 1000
+      keepalive: 10000
+      flush_timeout: 2
+
+# ─── Consumer Rate Limiting ───────────────────────────────────────────────────
+#
+# For per-consumer rate limiting, configure consumers and key-auth plugins:
+#
+# consumers:
+#   - username: merchant-001
+#   - username: merchant-002
+#
+# Then add key-auth or jwt to specific routes

@@ -1,0 +1,7 @@
+{
+  "name": "@bizora/integration-hub",
+  "version": "1.0.0",
+  "scripts": { "dev": "tsx watch src/index.ts" },
+  "dependencies": { "express": "^4.18.2", "cors": "^2.8.5", "axios": "^1.6.7" },
+  "devDependencies": { "typescript": "^5.4.0", "tsx": "^4.7.0" }
+}

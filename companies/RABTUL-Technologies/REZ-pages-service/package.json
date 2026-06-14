@@ -1,0 +1,11 @@
+{
+  "name": "@rez/pages-service",
+  "version": "1.0.0",
+  "description": "REZ Pages - Carrd.co competitor for simple one-page sites",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  }
+}

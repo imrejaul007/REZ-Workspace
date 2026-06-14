@@ -1,0 +1,24 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# rez-restaurant-service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-restaurant-service
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-restaurant-service - Restaurant management API"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4017
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-restaurant-service

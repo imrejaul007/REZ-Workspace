@@ -1,0 +1,392 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "RestoPapa - System Overview",
+    "tags": ["restopapa", "microservices", "overview"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up",
+            "legendFormat": "{{job}} - {{instance}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Request Rate (RPS)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[5m])) by (job)",
+            "legendFormat": "{{job}}"
+          }
+        ],
+        "yAxes": [
+          {"label": "Requests per Second", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 3,
+        "title": "Response Time (95th percentile)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (job, le))",
+            "legendFormat": "{{job}} - 95th percentile"
+          }
+        ],
+        "yAxes": [
+          {"label": "Response Time (seconds)", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job) * 100",
+            "legendFormat": "{{job}} Error Rate %"
+          }
+        ],
+        "yAxes": [
+          {"label": "Error Rate %", "min": 0, "max": 100}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 5,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU Usage %"
+          }
+        ],
+        "yAxes": [
+          {"label": "CPU %", "min": 0, "max": 100}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "Memory Usage %"
+          }
+        ],
+        "yAxes": [
+          {"label": "Memory %", "min": 0, "max": 100}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 7,
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "{{datname}} connections"
+          }
+        ],
+        "yAxes": [
+          {"label": "Connections", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Redis Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes",
+            "legendFormat": "{{instance}} Memory Used"
+          }
+        ],
+        "yAxes": [
+          {"label": "Bytes", "min": 0}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32}
+      },
+      {
+        "id": 9,
+        "title": "Active Orders",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "orders_active_total",
+            "legendFormat": "Active Orders"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32}
+      },
+      {
+        "id": 10,
+        "title": "Top Restaurants by Orders",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "topk(10, sum(orders_total) by (restaurant_id))",
+            "legendFormat": "Restaurant {{restaurant_id}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40}
+      }
+    ]
+  }
+}
+
+---
+
+{
+  "dashboard": {
+    "id": null,
+    "title": "RestoPapa - Microservices Detail",
+    "tags": ["restopapa", "microservices", "detail"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 11,
+        "title": "API Gateway Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"api-gateway\"}[5m])",
+            "legendFormat": "{{method}} {{route}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 12,
+        "title": "Auth Service Metrics",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(auth_requests_total[5m])",
+            "legendFormat": "{{type}} requests/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 13,
+        "title": "Restaurant Service Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(restaurant_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile response time"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 14,
+        "title": "Order Service Throughput",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(order_processed_total[5m])",
+            "legendFormat": "Orders processed/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 15,
+        "title": "Notification Service Queue",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "notification_queue_size",
+            "legendFormat": "Queue Size"
+          },
+          {
+            "expr": "rate(notification_sent_total[5m])",
+            "legendFormat": "Sent/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 16,
+        "title": "Service Dependencies",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "up{job=~\"postgres-exporter|redis-exporter\"",
+            "legendFormat": "{{job}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      }
+    ]
+  }
+}
+
+---
+
+{
+  "dashboard": {
+    "id": null,
+    "title": "RestoPapa - Business Metrics",
+    "tags": ["restopapa", "business", "kpi"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "5m",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 17,
+        "title": "Daily Orders",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(orders_total[24h])",
+            "legendFormat": "Orders Today"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 18,
+        "title": "Revenue Today",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(order_value_total[24h]))",
+            "legendFormat": "Revenue"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 19,
+        "title": "Active Users",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "active_users_total",
+            "legendFormat": "Active Users"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 20,
+        "title": "New Registrations",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(user_registrations_total[24h])",
+            "legendFormat": "New Users Today"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 21,
+        "title": "Orders by Hour",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(orders_total[1h]))",
+            "legendFormat": "Orders per Hour"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}
+      },
+      {
+        "id": 22,
+        "title": "Revenue Trend",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(order_value_total[1h]))",
+            "legendFormat": "Revenue per Hour"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}
+      },
+      {
+        "id": 23,
+        "title": "Top Performing Restaurants",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, sum(orders_total) by (restaurant_name))",
+            "legendFormat": "{{restaurant_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14}
+      },
+      {
+        "id": 24,
+        "title": "Order Status Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(orders_by_status) by (status)",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14}
+      }
+    ]
+  }
+}

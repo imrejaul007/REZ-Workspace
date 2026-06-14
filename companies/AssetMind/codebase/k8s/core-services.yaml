@@ -1,0 +1,499 @@
+# AssetMind Core Services - Kubernetes Manifests
+# Version: 1.0.0 | Date: June 12, 2026
+
+---
+# =============================================================================
+# API Gateway
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-api-gateway
+  namespace: assetmind
+  labels:
+    app: assetmind
+    component: gateway
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: assetmind
+      component: gateway
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: gateway
+    spec:
+      containers:
+      - name: gateway
+        image: assetmind/api-gateway:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5260
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "5260"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5260
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5260
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-api-gateway
+  namespace: assetmind
+spec:
+  selector:
+    app: assetmind
+    component: gateway
+  ports:
+  - port: 80
+    targetPort: 5260
+    name: http
+  type: LoadBalancer
+
+---
+# =============================================================================
+# Asset Universe (5001)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-asset-universe
+  namespace: assetmind
+  labels:
+    app: assetmind
+    component: asset-universe
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: assetmind
+      component: asset-universe
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: asset-universe
+    spec:
+      containers:
+      - name: asset-universe
+        image: assetmind/asset-universe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5001
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: assetmind-secrets
+              key: DATABASE_URL
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-asset-universe
+  namespace: assetmind
+spec:
+  selector:
+    app: assetmind
+    component: asset-universe
+  ports:
+  - port: 5001
+    targetPort: 5001
+
+---
+# =============================================================================
+# Asset Twin (5002)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-asset-twin
+  namespace: assetmind
+  labels:
+    app: assetmind
+    component: asset-twin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: assetmind
+      component: asset-twin
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: asset-twin
+    spec:
+      containers:
+      - name: asset-twin
+        image: assetmind/twin-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5002
+        env:
+        - name: SERVICE_TYPE
+          value: "asset-twin"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-asset-twin
+  namespace: assetmind
+spec:
+  selector:
+    app: assetmind
+    component: asset-twin
+  ports:
+  - port: 5002
+    targetPort: 5002
+
+---
+# =============================================================================
+# Market Twin (5003)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-market-twin
+  namespace: assetmind
+  labels:
+    app: assetmind
+    component: market-twin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: assetmind
+      component: market-twin
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: market-twin
+    spec:
+      containers:
+      - name: market-twin
+        image: assetmind/twin-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5003
+        env:
+        - name: SERVICE_TYPE
+          value: "market-twin"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-market-twin
+  namespace: assetmind
+spec:
+  selector:
+    app: assetmind
+    component: market-twin
+  ports:
+  - port: 5003
+    targetPort: 5003
+
+---
+# =============================================================================
+# Portfolio Twin (5004)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-portfolio-twin
+  namespace: assetmind
+  labels:
+    app: assetmind
+    component: portfolio-twin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: assetmind
+      component: portfolio-twin
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: portfolio-twin
+    spec:
+      containers:
+      - name: portfolio-twin
+        image: assetmind/twin-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5004
+        env:
+        - name: SERVICE_TYPE
+          value: "portfolio-twin"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-portfolio-twin
+  namespace: assetmind
+spec:
+  selector:
+    app: assetmind
+    component: portfolio-twin
+  ports:
+  - port: 5004
+    targetPort: 5004
+
+---
+# =============================================================================
+# Investor Twin (5005)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-investor-twin
+  namespace: assetmind
+  labels:
+    app: assetmind
+    component: investor-twin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: assetmind
+      component: investor-twin
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: investor-twin
+    spec:
+      containers:
+      - name: investor-twin
+        image: assetmind/investor-twin:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5005
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-investor-twin
+  namespace: assetmind
+spec:
+  selector:
+    app: assetmind
+    component: investor-twin
+  ports:
+  - port: 5005
+    targetPort: 5005
+
+---
+# =============================================================================
+# Intelligence Twin (5006)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-intelligence-twin
+  namespace: assetmind
+  labels:
+    app: assetmind
+    component: intelligence-twin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: assetmind
+      component: intelligence-twin
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: intelligence-twin
+    spec:
+      containers:
+      - name: intelligence-twin
+        image: assetmind/twin-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5006
+        env:
+        - name: SERVICE_TYPE
+          value: "intelligence-twin"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-intelligence-twin
+  namespace: assetmind
+spec:
+  selector:
+    app: assetmind
+    component: intelligence-twin
+  ports:
+  - port: 5006
+    targetPort: 5006
+
+---
+# =============================================================================
+# Auto Scaling for Core Services
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: assetmind-api-gateway-hpa
+  namespace: assetmind
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: assetmind-api-gateway
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# =============================================================================
+# Secrets
+# =============================================================================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: assetmind-secrets
+  namespace: assetmind
+type: Opaque
+stringData:
+  ASSETMIND_SECRET_KEY: "REPLACE_WITH_GENERATED_SECRET"
+  DATABASE_URL: "postgresql://assetmind:PASSWORD@postgres:5432/assetmind"
+  REDIS_URL: "redis://:PASSWORD@redis:6379"
+  NEO4J_URI: "bolt://neo4j:7687"
+  NEO4J_PASSWORD: "REPLACE_WITH_NEO4J_PASSWORD"
+  RABTUL_API_KEY: "REPLACE_WITH_RABTUL_KEY"
+  HOJAI_MEMORY_API_KEY: "REPLACE_WITH_HOJAI_KEY"
+
+---
+# =============================================================================
+# Ingress
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: assetmind-ingress
+  namespace: assetmind
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  tls:
+  - hosts:
+    - api.assetmind.ai
+    - app.assetmind.ai
+    - dashboard.assetmind.ai
+    secretName: assetmind-tls
+  rules:
+  - host: api.assetmind.ai
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: assetmind-api-gateway
+            port:
+              number: 80
+  - host: app.assetmind.ai
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: assetmind-frontend
+            port:
+              number: 80

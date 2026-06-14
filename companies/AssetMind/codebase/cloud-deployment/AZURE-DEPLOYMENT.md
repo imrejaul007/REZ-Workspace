@@ -1,0 +1,215 @@
+# AssetMind Azure Deployment Guide
+
+**Platform:** Microsoft Azure  
+**Date:** June 12, 2026
+
+---
+
+## Overview
+
+Deploy AssetMind on Azure using:
+- **Azure Container Apps** for serverless containers
+- **Azure Database for PostgreSQL** 
+- **Azure Cache for Redis**
+- **Azure Application Gateway** for load balancing
+- **Azure Monitor** for observability
+
+## Prerequisites
+
+- Azure CLI (`az`)
+- Docker
+- Azure subscription with billing enabled
+
+## Architecture
+
+```
+Internet → Application Gateway → Azure Container Apps
+                                          ↓
+                                    Container Apps
+                                          ↓
+                    ┌─────────────────────┼─────────────────────┐
+                    ↓                     ↓                     ↓
+              Azure Database       Azure Cache         Azure Blob
+              for PostgreSQL       for Redis              Storage
+```
+
+## Step 1: Setup
+
+```bash
+# Login
+az login
+
+# Set variables
+RESOURCE_GROUP="assetmind-rg"
+LOCATION="eastus"
+CONTAINERAPPS_ENV="assetmind-env"
+
+# Create resource group
+az group create --name $RESOURCE_GROUP --location $LOCATION
+```
+
+## Step 2: PostgreSQL Database
+
+```bash
+# Create PostgreSQL server
+az postgres server create \
+  --resource-group $RESOURCE_GROUP \
+  --name assetmind-db \
+  --location $LOCATION \
+  --admin-user assetmind \
+  --admin-password 'YourSecurePassword!' \
+  --sku-name B_Standard_B1ms \
+  --version 15
+
+# Create database
+az postgres db create \
+  --resource-group $RESOURCE_GROUP \
+  --server-name assetmind-db \
+  --name assetmind
+
+# Configure firewall
+az postgres server firewall-rule create \
+  --resource-group $RESOURCE_GROUP \
+  --server-name assetmind-db \
+  --name AllowAll \
+  --start-ip-address 0.0.0.0 \
+  --end-ip-address 255.255.255.255
+```
+
+## Step 3: Redis Cache
+
+```bash
+# Create Redis instance
+az redis create \
+  --name assetmind-redis \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION \
+  --sku-family C \
+  --sku-name Basic \
+  --vm-size c0
+```
+
+## Step 4: Container Apps Environment
+
+```bash
+# Create environment
+az containerapp env create \
+  --name $CONTAINERAPPS_ENV \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION
+
+# Get connection string
+az redis show-connection-string \
+  --name assetmind-redis \
+  --resource-group $RESOURCE_GROUP
+```
+
+## Step 5: Deploy Services
+
+```bash
+# Deploy API Gateway
+az containerapp create \
+  --name assetmind-api \
+  --resource-group $RESOURCE_GROUP \
+  --environment $CONTAINERAPPS_ENV \
+  --image assetmind/api-gateway:latest \
+  --target-port 5260 \
+  --ingress external \
+  --cpu 0.5 \
+  --memory 1Gi \
+  --min-replicas 1 \
+  --max-replicas 5 \
+  --env-vars "NODE_ENV=production"
+
+# Deploy Twin Engine
+az containerapp create \
+  --name assetmind-twin \
+  --resource-group $RESOURCE_GROUP \
+  --environment $CONTAINERAPPS_ENV \
+  --image assetmind/twin-engine:latest \
+  --target-port 5002 \
+  --ingress internal \
+  --cpu 0.5 \
+  --memory 1Gi
+```
+
+## Step 6: Application Gateway
+
+```bash
+# Create virtual network
+az network vnet create \
+  --name assetmind-vnet \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION \
+  --address-prefix 10.0.0.0/16
+
+# Create subnet for Application Gateway
+az network vnet subnet create \
+  --name appgw-subnet \
+  --vnet-name assetmind-vnet \
+  --resource-group $RESOURCE_GROUP \
+  --address-prefix 10.0.1.0/24
+
+# Create public IP
+az network public-ip create \
+  --name assetmind-pip \
+  --resource-group $RESOURCE_GROUP \
+  --sku Standard \
+  --location $LOCATION
+
+# Create Application Gateway
+az network application-gateway create \
+  --name assetmind-gateway \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION \
+  --sku Standard_v2 \
+  --capacity 1 \
+  --vnet-name assetmind-vnet \
+  --subnet appgw-subnet \
+  --public-ip assetmind-pip \
+  --http-settings-port 80 \
+  --http-settings-protocol Http
+```
+
+## Step 7: Secrets in Key Vault
+
+```bash
+# Create Key Vault
+az keyvault create \
+  --name assetmind-kv \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION
+
+# Store secrets
+az keyvault secret set \
+  --vault-name assetmind-kv \
+  --name "DATABASE_URL" \
+  --value "postgresql://user:pass@host:5432/db"
+
+az keyvault secret set \
+  --vault-name assetmind-kv \
+  --name "SECRET_KEY" \
+  --value "your-secret-key"
+
+# Grant access
+az keyvault set-policy \
+  --name assetmind-kv \
+  --object-id $(az ad signed-in-user show --query id -o tsv) \
+  --secret-permissions get list
+```
+
+## Cost Estimate (Monthly)
+
+| Service | Configuration | Est. Cost |
+|---------|--------------|-----------|
+| Container Apps | 5 services | ~$30 |
+| Azure Database PostgreSQL | Basic 50GB | ~$80 |
+| Azure Cache Redis | Basic C0 | ~$25 |
+| Application Gateway | Standard | ~$40 |
+| Bandwidth | - | ~$10 |
+| **Total** | | **~$185/month** |
+
+---
+
+*Generated by Claude Code*  
+*Last updated: June 12, 2026*

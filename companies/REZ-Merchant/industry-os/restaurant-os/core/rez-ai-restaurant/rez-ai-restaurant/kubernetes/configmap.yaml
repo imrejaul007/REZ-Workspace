@@ -1,0 +1,37 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap
+# rez-ai-restaurant
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-ai-restaurant-config
+  namespace: rez-merchant
+  labels:
+    app: rez-ai-restaurant
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "3000"
+  LOG_LEVEL: "info"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-ai-restaurant"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # AI Service URLs
+  INTENT_GRAPH_URL: "http://intent-graph-service:3007"
+  INTELLIGENCE_URL: "http://intelligence-service:4020"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_ai_restaurant"

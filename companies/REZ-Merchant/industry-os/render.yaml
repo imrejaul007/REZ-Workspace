@@ -1,0 +1,23 @@
+# Render Blueprint for industry-os
+# Deploy at: https://dashboard.render.com/blueprints
+
+services:
+  - type: web
+    name: rez-industry-os
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: REZ_API_BASE_URL
+        value: https://rez-api-gateway.onrender.com/api
+      - key: REZ_MERCHANT_SERVICE_URL
+        value: https://rez-merchant-service.onrender.com
+      - key: REZ_ORDER_SERVICE_URL
+        value: https://rez-order-service.onrender.com

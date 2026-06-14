@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REZ QR - Merchant Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <style>
+    .animate-pulse-subtle { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    .new-order { background-color: #fef3c7 !important; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Header -->
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-lg">R</span>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-gray-900">REZ QR Dashboard</h1>
+            <p id="merchant-name-display" class="text-xs text-gray-500">Not logged in</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="refreshData()" class="p-2 hover:bg-gray-100 rounded-lg" title="Refresh">
+            <svg id="refresh-icon" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </button>
+          <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Login Section -->
+    <div id="login-section" class="max-w-md mx-auto mt-20">
+      <div class="bg-white rounded-2xl p-8 shadow-sm">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900">Merchant Portal</h2>
+          <p class="text-gray-500 text-sm mt-1">Enter your API key to access dashboard</p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+            <input type="password" id="api-key-input" placeholder="qr_xxxxxxxxxxxx" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <button onclick="login()" class="w-full bg-blue-500 text-white py-3 rounded-xl font-bold hover:bg-blue-600">Access Dashboard</button>
+          <div class="text-center text-sm text-gray-500">or</div>
+          <button onclick="createDemoMerchant()" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold hover:bg-green-600">Create New Merchant</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="hidden">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-500">Today's Scans</p>
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+              </svg>
+            </div>
+          </div>
+          <p id="stat-scans" class="text-3xl font-bold text-gray-900 mt-2">0</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-500">Today's Orders</p>
+            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+            </div>
+          </div>
+          <p id="stat-orders" class="text-3xl font-bold text-gray-900 mt-2">0</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-500">Revenue</p>
+            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+              <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 3s1.343 3 3 3 3 .895 3 3-1.343 3-3 3m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <p id="stat-revenue" class="text-3xl font-bold text-gray-900 mt-2">₹0</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-500">Active QR</p>
+            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+              <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+              </svg>
+            </div>
+          </div>
+          <p id="stat-qr" class="text-3xl font-bold text-gray-900 mt-2">0</p>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="bg-white rounded-xl shadow-sm mb-6">
+        <div class="flex border-b overflow-x-auto">
+          <button onclick="showTab('orders')" id="tab-btn-orders" class="tab-btn px-6 py-4 font-medium text-blue-600 border-b-2 border-blue-500 whitespace-nowrap">Orders</button>
+          <button onclick="showTab('qr')" id="tab-btn-qr" class="tab-btn px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">QR Codes</button>
+          <button onclick="showTab('menu')" id="tab-btn-menu" class="tab-btn px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">Menu</button>
+          <button onclick="showTab('analytics')" id="tab-btn-analytics" class="tab-btn px-6 py-4 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap">Analytics</button>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="tab-orders" class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">Recent Orders</h3>
+            <div class="flex gap-2">
+              <select id="order-filter" onchange="loadOrders()" class="px-3 py-2 border rounded-lg text-sm">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="preparing">Preparing</option>
+                <option value="ready">Ready</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          <div id="orders-list" class="space-y-3"></div>
+        </div>
+
+        <!-- QR Tab -->
+        <div id="tab-qr" class="p-6 hidden">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">Your QR Codes</h3>
+            <button onclick="showCreateQRModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+              Create QR
+            </button>
+          </div>
+          <div id="qr-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- Menu Tab -->
+        <div id="tab-menu" class="p-6 hidden">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">Menu Items</h3>
+            <button onclick="showAddItemModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600">+ Add Item</button>
+          </div>
+          <div id="menu-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="tab-analytics" class="p-6 hidden">
+          <h3 class="font-bold text-lg mb-4">Performance Overview</h3>
+          <div id="analytics-data" class="space-y-4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create QR Modal -->
+  <div id="qr-modal" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/50" onclick="hideQRModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">Create QR Code</h3>
+        <button onclick="hideQRModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input type="text" id="qr-name" placeholder="e.g. Table 1, Counter" class="w-full px-4 py-2 border rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+          <select id="qr-type" class="w-full px-4 py-2 border rounded-lg">
+            <option value="menu">Menu (Digital menu)</option>
+            <option value="table">Table (Table ordering)</option>
+            <option value="payment">Payment (Accept payments)</option>
+            <option value="info">Info (Information page)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Target ID (optional)</label>
+          <input type="text" id="qr-target" placeholder="e.g. table-1" class="w-full px-4 py-2 border rounded-lg">
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="hideQRModal()" class="flex-1 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+          <button onclick="createQR()" class="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Item Modal -->
+  <div id="item-modal" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/50" onclick="hideItemModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">Add Menu Item</h3>
+        <button onclick="hideItemModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Item Name *</label>
+          <input type="text" id="item-name" placeholder="e.g. Margherita Pizza" class="w-full px-4 py-2 border rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹) *</label>
+          <input type="number" id="item-price" placeholder="299" class="w-full px-4 py-2 border rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea id="item-desc" rows="2" placeholder="Brief description..." class="w-full px-4 py-2 border rounded-lg"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <select id="item-category" class="w-full px-4 py-2 border rounded-lg">
+            <option value="">Select or create category</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-4">
+          <label class="flex items-center gap-2">
+            <input type="checkbox" id="item-veg" class="w-4 h-4 rounded">
+            <span class="text-sm">Vegetarian</span>
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="checkbox" id="item-bestseller" class="w-4 h-4 rounded">
+            <span class="text-sm">Bestseller</span>
+          </label>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="hideItemModal()" class="flex-1 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+          <button onclick="addMenuItem()" class="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Add Item</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:4300/api';
+    let socket = null;
+    let merchant = null;
+    let orders = [];
+    let apiKey = localStorage.getItem('qr_api_key') || '';
+
+    // Auto-login if API key exists
+    if (apiKey) {
+      document.getElementById('api-key-input').value = apiKey;
+      loadMerchant();
+    }
+
+    function logout() {
+      apiKey = '';
+      localStorage.removeItem('qr_api_key');
+      merchant = null;
+      if (socket) {
+        socket.disconnect();
+        socket = null;
+      }
+      document.getElementById('dashboard-section').classList.add('hidden');
+      document.getElementById('login-section').classList.remove('hidden');
+      document.getElementById('merchant-name-display').textContent = 'Not logged in';
+    }
+
+    function initWebSocket() {
+      if (socket) socket.disconnect();
+      const wsUrl = API_URL.replace('http', 'ws').replace('/api', '');
+      socket = io(wsUrl, { transports: ['websocket'] });
+      socket.on('connect', () => {
+        console.log('WebSocket connected');
+        socket.emit('subscribe:orders', { merchantId: merchant._id });
+        socket.emit('subscribe:scans', { merchantId: merchant._id });
+      });
+      socket.on('order:new', (data) => {
+        console.log('New order:', data);
+        showNotification('New Order!', 'Order #' + data.orderId.slice(-6) + ' - ₹' + data.total);
+        loadOrders();
+      });
+      socket.on('order:statusChanged', (data) => {
+        console.log('Order status:', data);
+        loadOrders();
+      });
+      socket.on('scan:new', (data) => {
+        console.log('New scan:', data);
+        loadAnalytics();
+      });
+      socket.on('disconnect', () => console.log('WebSocket disconnected'));
+    }
+
+    function showNotification(title, message) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body: message });
+      }
+      // Toast notification fallback
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 right-4 bg-blue-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-pulse';
+      toast.innerHTML = '<p class="font-bold">' + title + '</p><p class="text-sm">' + message + '</p>';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+
+    function login() {
+      const key = document.getElementById('api-key-input').value.trim();
+      if (!key) return alert('Enter API key');
+      apiKey = key;
+      localStorage.setItem('qr_api_key', apiKey);
+      loadMerchant();
+    }
+
+    async function loadMerchant() {
+      try {
+        const res = await fetch(API_URL + '/merchants/profile', {
+          headers: { 'X-API-Key': apiKey }
+        });
+        const data = await res.json();
+        if (!data.success) {
+          alert(data.error || 'Invalid API key');
+          logout();
+          return;
+        }
+        merchant = data.data;
+        document.getElementById('merchant-name-display').textContent = merchant.name;
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('dashboard-section').classList.remove('hidden');
+        loadDashboard();
+        initWebSocket();
+      } catch (e) {
+        alert('Error: ' + e.message);
+        logout();
+      }
+    }
+
+    async function createDemoMerchant() {
+      const name = prompt('Restaurant Name:', 'Pizza Palace');
+      const slug = prompt('URL Slug:', name.toLowerCase().replace(/\s+/g, '-'));
+      if (!name || !slug) return;
+      try {
+        const res = await fetch(API_URL + '/merchants', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, slug, type: 'restaurant', phone: '+919876543210' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          apiKey = data.data.apiKey;
+          localStorage.setItem('qr_api_key', apiKey);
+          document.getElementById('api-key-input').value = apiKey;
+          alert('Merchant created! API key saved.');
+          loadMerchant();
+        } else {
+          alert(data.error);
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    async function loadDashboard() {
+      loadOrders();
+      loadQRCodes();
+      loadMenu();
+      loadAnalytics();
+    }
+
+    async function refreshData() {
+      document.getElementById('refresh-icon').classList.add('animate-spin');
+      await loadDashboard();
+      setTimeout(() => {
+        document.getElementById('refresh-icon').classList.remove('animate-spin');
+      }, 500);
+    }
+
+    async function loadOrders() {
+      const filter = document.getElementById('order-filter')?.value || '';
+      const res = await fetch(API_URL + '/orders' + (filter ? '?status=' + filter : ''), {
+        headers: { 'X-API-Key': apiKey }
+      });
+      const data = await res.json();
+      if (!data.success) return;
+      orders = data.data;
+      renderOrders();
+      const todayOrders = orders.filter(o => new Date(o.createdAt).toDateString() === new Date().toDateString());
+      document.getElementById('stat-orders').textContent = todayOrders.length;
+      const revenue = todayOrders.filter(o => o.paymentStatus === 'paid').reduce((s, o) => s + o.total, 0);
+      document.getElementById('stat-revenue').textContent = '₹' + revenue.toFixed(0);
+    }
+
+    function renderOrders() {
+      const list = document.getElementById('orders-list');
+      if (!orders.length) {
+        list.innerHTML = '<div class="text-center py-12 text-gray-500"><svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg><p>No orders yet</p></div>';
+        return;
+      }
+      list.innerHTML = orders.map(o => {
+        const statusColors = { pending: 'bg-yellow-100 text-yellow-700', confirmed: 'bg-blue-100 text-blue-700', preparing: 'bg-purple-100 text-purple-700', ready: 'bg-green-100 text-green-700', completed: 'bg-gray-100 text-gray-700', cancelled: 'bg-red-100 text-red-700' };
+        const time = new Date(o.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        return '<div class="border rounded-xl p-4 hover:shadow-md transition-shadow"><div class="flex justify-between items-start mb-3"><div><p class="font-bold text-lg">#' + o._id.slice(-6).toUpperCase() + '</p><p class="text-sm text-gray-500">' + o.customerPhone + ' • ' + time + '</p></div><span class="px-3 py-1 rounded-full text-sm font-medium ' + statusColors[o.status] + '">' + o.status + '</span></div><p class="text-sm text-gray-600 mb-3">' + o.items.map(i => i.quantity + 'x ' + i.name).join(', ') + '</p><div class="flex justify-between items-center pt-3 border-t"><span class="font-bold text-lg">₹' + o.total + '</span><div class="flex gap-2">' + (o.status === 'pending' ? '<button onclick="updateOrder(\'' + o._id + '\',\'confirmed\')" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600">Accept</button>' : '') + (o.status === 'confirmed' ? '<button onclick="updateOrder(\'' + o._id + '\',\'preparing\')" class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600">Start Preparing</button>' : '') + (o.status === 'preparing' ? '<button onclick="updateOrder(\'' + o._id + '\',\'ready\')" class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600">Mark Ready</button>' : '') + (o.status === 'ready' ? '<button onclick="updateOrder(\'' + o._id + '\',\'completed\')" class="px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-medium hover:bg-gray-600">Complete</button>' : '') + '</div></div></div>';
+      }).join('');
+    }
+
+    async function updateOrder(id, status) {
+      await fetch(API_URL + '/orders/' + id + '/status', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+        body: JSON.stringify({ status })
+      });
+      loadOrders();
+    }
+
+    async function loadQRCodes() {
+      const res = await fetch(API_URL + '/qr', { headers: { 'X-API-Key': apiKey } });
+      const data = await res.json();
+      if (!data.success) return;
+      const qrs = data.data;
+      document.getElementById('stat-qr').textContent = qrs.length;
+      const list = document.getElementById('qr-list');
+      if (!qrs.length) {
+        list.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-500"><svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p>No QR codes yet</p><p class="text-sm">Create your first QR code to start accepting orders</p></div>';
+        return;
+      }
+      list.innerHTML = qrs.map(q => '<div class="border rounded-xl p-4"><div class="flex justify-between items-start mb-3"><div><p class="font-bold">' + q.name + '</p><p class="text-xs text-gray-500">' + q.type + ' • ' + q.shortCode + '</p></div><span class="px-2 py-1 rounded text-xs ' + (q.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500') + '">' + (q.isActive ? 'Active' : 'Inactive') + '</span></div><div class="bg-gray-50 rounded-lg p-2 mb-3"><img src="' + (q.qrCodeDataUrl || '') + '" class="w-full max-w-[150px] mx-auto"></div><div class="flex justify-between items-center text-sm"><span class="text-gray-500">' + q.scans + ' scans</span><button onclick="downloadQR(\'' + q._id + '\',\'' + q.name + '\')" class="text-blue-500 hover:text-blue-700">Download</button></div>').join('');
+    }
+
+    function downloadQR(id, name) {
+      window.open(API_URL + '/qr/' + id + '/download?X-API-Key=' + apiKey, '_blank');
+    }
+
+    function printQR(id, name) {
+      window.open(API_URL + '/qr/' + id + '/print?X-API-Key=' + apiKey, '_blank');
+    }
+
+    function showCreateQRModal() { document.getElementById('qr-modal').classList.remove('hidden'); }
+    function hideQRModal() { document.getElementById('qr-modal').classList.add('hidden'); }
+
+    async function createQR() {
+      const name = document.getElementById('qr-name').value;
+      const type = document.getElementById('qr-type').value;
+      const targetId = document.getElementById('qr-target').value;
+      if (!name) return alert('Enter name');
+      await fetch(API_URL + '/qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+        body: JSON.stringify({ name, type, targetId })
+      });
+      hideQRModal();
+      document.getElementById('qr-name').value = '';
+      document.getElementById('qr-target').value = '';
+      loadQRCodes();
+    }
+
+    async function loadMenu() {
+      const res = await fetch(API_URL + '/menu', { headers: { 'X-API-Key': apiKey } });
+      const data = await res.json();
+      if (!data.success) return;
+      const { categories, items } = data.data;
+      // Populate category dropdown
+      const catSelect = document.getElementById('item-category');
+      catSelect.innerHTML = '<option value="">Select category</option>' + categories.map(c => '<option value="' + c._id + '">' + c.name + '</option>').join('');
+      const list = document.getElementById('menu-list');
+      if (!items.length) {
+        list.innerHTML = '<div class="text-center py-12 text-gray-500"><p>No menu items yet</p></div>';
+        return;
+      }
+      list.innerHTML = items.map(i => '<div class="border rounded-xl p-4 flex justify-between items-center"><div><p class="font-bold">' + i.name + '</p><p class="text-sm text-gray-500">' + (i.isVeg !== undefined ? (i.isVeg ? '🥬 Veg' : '🍖 Non-Veg') : '') + ' • ₹' + i.price + '</p></div><div class="flex items-center gap-2"><button onclick="deleteItem(\'' + i._id + '\')" class="text-red-500 hover:text-red-700 text-sm">Delete</button></div></div>').join('');
+    }
+
+    function showAddItemModal() { document.getElementById('item-modal').classList.remove('hidden'); }
+    function hideItemModal() { document.getElementById('item-modal').classList.add('hidden'); }
+
+    async function addMenuItem() {
+      const name = document.getElementById('item-name').value;
+      const price = parseInt(document.getElementById('item-price').value);
+      const desc = document.getElementById('item-desc').value;
+      const categoryId = document.getElementById('item-category').value;
+      const isVeg = document.getElementById('item-veg').checked;
+      const isBestseller = document.getElementById('item-bestseller').checked;
+      if (!name || !price) return alert('Enter name and price');
+      // Create category if needed
+      let catId = categoryId;
+      if (!catId) {
+        const catRes = await fetch(API_URL + '/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+          body: JSON.stringify({ name: 'General' })
+        });
+        const catData = await catRes.json();
+        catId = catData.data._id;
+      }
+      await fetch(API_URL + '/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+        body: JSON.stringify({ categoryId: catId, name, price, description: desc, isVeg, isBestseller })
+      });
+      hideItemModal();
+      document.getElementById('item-name').value = '';
+      document.getElementById('item-price').value = '';
+      document.getElementById('item-desc').value = '';
+      loadMenu();
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('Delete this item?')) return;
+      await fetch(API_URL + '/items/' + id, { method: 'DELETE', headers: { 'X-API-Key': apiKey } });
+      loadMenu();
+    }
+
+    async function loadAnalytics() {
+      const res = await fetch(API_URL + '/analytics', { headers: { 'X-API-Key': apiKey } });
+      const data = await res.json();
+      if (!data.success) return;
+      const a = data.data;
+      document.getElementById('stat-scans').textContent = a.totalScans;
+      const el = document.getElementById('analytics-data');
+      el.innerHTML = '<div class="grid grid-cols-2 md:grid-cols-4 gap-4"><div class="bg-gray-50 rounded-xl p-4"><p class="text-sm text-gray-500">Total QR Codes</p><p class="text-2xl font-bold">' + a.totalQRCodes + '</p></div><div class="bg-gray-50 rounded-xl p-4"><p class="text-sm text-gray-500">Total Orders</p><p class="text-2xl font-bold">' + a.totalOrders + '</p></div><div class="bg-gray-50 rounded-xl p-4"><p class="text-sm text-gray-500">Total Revenue</p><p class="text-2xl font-bold">₹' + a.totalRevenue.toFixed(0) + '</p></div><div class="bg-gray-50 rounded-xl p-4"><p class="text-sm text-gray-500">Avg Order Value</p><p class="text-2xl font-bold">₹' + (a.avgOrderValue || 0).toFixed(0) + '</p></div></div><div class="mt-4"><h4 class="font-medium mb-2">Order Status</h4><div class="flex gap-2 flex-wrap">' + Object.entries(a.ordersByStatus || {}).map(([s, c]) => '<span class="px-3 py-1 bg-gray-100 rounded-full text-sm">' + s + ': ' + c + '</span>').join('') + '</div></div>';
+    }
+
+    function showTab(tab) {
+      ['orders', 'qr', 'menu', 'analytics'].forEach(t => {
+        document.getElementById('tab-' + t).classList.add('hidden');
+        document.getElementById('tab-btn-' + t).classList.remove('text-blue-600', 'border-b-2', 'border-blue-500');
+        document.getElementById('tab-btn-' + t).classList.add('text-gray-500');
+      });
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+      document.getElementById('tab-btn-' + tab).classList.remove('text-gray-500');
+      document.getElementById('tab-btn-' + tab).classList.add('text-blue-600', 'border-b-2', 'border-blue-500');
+    }
+  </script>
+</body>
+</html>

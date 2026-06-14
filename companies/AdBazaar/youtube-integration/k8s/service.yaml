@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ad-bazaar-youtube-integration
+  labels:
+    app: ad-bazaar-youtube-integration
+    tier: social-automation
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 5094
+    protocol: TCP
+    name: http
+  selector:
+    app: ad-bazaar-youtube-integration

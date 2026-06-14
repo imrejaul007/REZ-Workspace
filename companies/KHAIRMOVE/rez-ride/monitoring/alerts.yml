@@ -1,0 +1,91 @@
+groups:
+  - name: rez-ride
+    rules:
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: rate(rez_ride_errors_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on ReZ Ride API"
+          description: "Error rate is {{ $value | humanizePercentage }}"
+
+      # High Latency
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rez_ride_request_duration_seconds_bucket) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency on ReZ Ride API"
+          description: "p95 latency is {{ $value }}s"
+
+      # No Online Drivers
+      - alert: NoDriversOnline
+        expr: rez_ride_online_drivers_total == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No drivers online"
+          description: "There are no drivers online in the system"
+
+      # High Cancellation Rate
+      - alert: HighCancellationRate
+        expr: rate(rez_ride_rides_cancelled_total[5m]) / rate(rez_ride_rides_total[5m]) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High cancellation rate"
+          description: "Cancellation rate is {{ $value | humanizePercentage }}"
+
+      # Surge Active
+      - alert: SurgeActive
+        expr: rez_ride_surge_zones_active > 5
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Surge pricing active in {{ $value }} zones"
+
+      # High Queue Length
+      - alert: HighQueueLength
+        expr: rez_ride_queue_length > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High queue length"
+          description: "Queue length is {{ $value }}"
+
+      # Database Connection Issues
+      - alert: DatabaseConnectionErrors
+        expr: rate(rez_ride_db_errors_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection errors"
+          description: "There are {{ $value }} database errors per second"
+
+      # Memory Usage High
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      # CPU Usage High
+      - alert: HighCPUUsage
+        expr: 100 - (rate(node_cpu_seconds_total{mode="idle"}[5m]) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | humanizePercentage }}"

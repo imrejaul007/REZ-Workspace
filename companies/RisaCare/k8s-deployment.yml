@@ -1,0 +1,231 @@
+# RisaCare Kubernetes Deployment
+# For production Kubernetes clusters
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risacare-mobile-backend
+  labels:
+    app: risacare
+    component: mobile-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: risacare
+      component: mobile-backend
+  template:
+    metadata:
+      labels:
+        app: risacare
+        component: mobile-backend
+    spec:
+      containers:
+        - name: mobile-backend
+          image: risacare/mobile-backend:latest
+          ports:
+            - containerPort: 4770
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4770"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: risacare-secrets
+                  key: mongodb-uri
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4770
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4770
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: risacare-mobile-backend
+spec:
+  selector:
+    app: risacare
+    component: mobile-backend
+  ports:
+    - port: 80
+      targetPort: 4770
+  type: ClusterIP
+---
+# Telemedicine Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risacare-telemedicine
+  labels:
+    app: risacare
+    component: telemedicine
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: risacare
+      component: telemedicine
+  template:
+    metadata:
+      labels:
+        app: risacare
+        component: telemedicine
+    spec:
+      containers:
+        - name: telemedicine
+          image: risacare/telemedicine:latest
+          ports:
+            - containerPort: 4773
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: risacare-secrets
+                  key: mongodb-uri
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: risacare-telemedicine
+spec:
+  selector:
+    app: risacare
+    component: telemedicine
+  ports:
+    - port: 80
+      targetPort: 4773
+  type: ClusterIP
+---
+# EMR Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risacare-emr
+  labels:
+    app: risacare
+    component: emr
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: risacare
+      component: emr
+  template:
+    metadata:
+      labels:
+        app: risacare
+        component: emr
+    spec:
+      containers:
+        - name: emr
+          image: risacare/emr-service:latest
+          ports:
+            - containerPort: 4778
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: risacare-secrets
+                  key: mongodb-uri
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: risacare-emr
+spec:
+  selector:
+    app: risacare
+    component: emr
+  ports:
+    - port: 80
+      targetPort: 4778
+  type: ClusterIP
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: risacare-mobile-backend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: risacare-mobile-backend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: risacare-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: api.risacare.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: risacare-mobile-backend
+                port:
+                  number: 80
+---
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: risacare-secrets
+type: Opaque
+stringData:
+  mongodb-uri: "mongodb://mongo:27017/risacare"
+  jwt-secret: "your-super-secret-jwt-key"

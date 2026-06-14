@@ -1,0 +1,14 @@
+{
+  "id": "session-1776914373229",
+  "startedAt": "2026-04-23T03:19:33.229Z",
+  "cwd": "/Users/rejaulkarim/Documents/ReZ Full App/rez-app-consumer",
+  "context": {},
+  "metrics": {
+    "edits": 22,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-04-23T03:24:03.166Z",
+  "duration": 269937
+}

@@ -1,0 +1,14 @@
+{
+  "id": "session-1775985552090",
+  "startedAt": "2026-04-12T09:19:12.090Z",
+  "cwd": "/Users/rejaulkarim/Documents/ReZ Full App/rezapp/nuqta-master",
+  "context": {},
+  "metrics": {
+    "edits": 30,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-04-14T06:02:39.562Z",
+  "duration": 161007473
+}

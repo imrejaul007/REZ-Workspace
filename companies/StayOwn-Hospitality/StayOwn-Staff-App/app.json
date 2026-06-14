@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "StayOwn Staff",
+    "slug": "stayown-staff-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2563EB"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.stayown.staff",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "StayOwn Staff needs location access for hotel operations",
+        "NSCameraUsageDescription": "StayOwn Staff needs camera access for QR scanning"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2563EB"
+      },
+      "package": "com.stayown.staff",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "StayOwn Staff needs camera access for QR code scanning"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "StayOwn Staff needs location access for staff attendance"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "stayown-staff-app"
+      }
+    }
+  }
+}

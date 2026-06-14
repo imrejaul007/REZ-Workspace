@@ -1,0 +1,27 @@
+{
+  "name": "customer-health-score-service",
+  "version": "1.0.0",
+  "description": "Monitor customer health metrics and risk signals",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "winston": "^3.11.0",
+    "prom-client": "^15.1.0",
+    "zod": "^3.22.4",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2",
+    "tsx": "^4.6.0"
+  }
+}

@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-social-publisher
+  labels:
+    app: ad-bazaar-social-publisher
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - social-publisher.adbazaar.internal
+    secretName: ad-bazaar-social-publisher-tls
+  rules:
+  - host: social-publisher.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-social-publisher
+            port:
+              number: 80

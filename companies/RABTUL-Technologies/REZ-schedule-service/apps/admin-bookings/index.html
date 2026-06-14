@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReZ Booking Admin - All Services</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-calendar-check text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">ReZ Booking Admin</h1>
+          <p class="text-xs text-gray-500">Multi-Service Dashboard</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <select id="service-select" class="px-4 py-2 border rounded-lg bg-white">
+          <option value="all">All Services</option>
+          <option value="schedule">ReZ Schedule (4090)</option>
+          <option value="healthcare">Healthcare (4091)</option>
+          <option value="restaurant">Restaurant (4092)</option>
+          <option value="home">Home Services (4093)</option>
+          <option value="professional">Professional (4094)</option>
+        </select>
+        <button class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+          <i class="fas fa-plus mr-2"></i>New Booking
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+            <i class="fas fa-calendar text-blue-600 text-xl"></i>
+          </div>
+          <span class="text-green-500 text-sm font-medium">
+            <i class="fas fa-arrow-up mr-1"></i>12%
+          </span>
+        </div>
+        <h3 id="stat-bookings" class="text-3xl font-bold text-gray-900">0</h3>
+        <p class="text-gray-500">Total Bookings</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+          </div>
+          <span class="text-green-500 text-sm font-medium">
+            <i class="fas fa-arrow-up mr-1"></i>8%
+          </span>
+        </div>
+        <h3 id="stat-confirmed" class="text-3xl font-bold text-gray-900">0</h3>
+        <p class="text-gray-500">Confirmed</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+            <i class="fas fa-indian-rupee-sign text-purple-600 text-xl"></i>
+          </div>
+          <span class="text-green-500 text-sm font-medium">
+            <i class="fas fa-arrow-up mr-1"></i>23%
+          </span>
+        </div>
+        <h3 id="stat-revenue" class="text-3xl font-bold text-gray-900">₹0</h3>
+        <p class="text-gray-500">Revenue</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+            <i class="fas fa-clock text-orange-600 text-xl"></i>
+          </div>
+          <span class="text-gray-500 text-sm">-</span>
+        </div>
+        <h3 id="stat-pending" class="text-3xl font-bold text-gray-900">0</h3>
+        <p class="text-gray-500">Pending</p>
+      </div>
+    </div>
+
+    <!-- Service Tabs -->
+    <div class="bg-white rounded-xl shadow-sm mb-6">
+      <div class="border-b">
+        <nav class="flex">
+          <button class="service-tab px-6 py-4 border-b-2 border-purple-600 text-purple-600 font-medium" data-service="all">
+            <i class="fas fa-globe mr-2"></i>All
+          </button>
+          <button class="service-tab px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-service="healthcare">
+            <i class="fas fa-hospital mr-2"></i>Healthcare
+          </button>
+          <button class="service-tab px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-service="restaurant">
+            <i class="fas fa-utensils mr-2"></i>Restaurant
+          </button>
+          <button class="service-tab px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-service="home">
+            <i class="fas fa-home mr-2"></i>Home
+          </button>
+          <button class="service-tab px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-service="professional">
+            <i class="fas fa-briefcase mr-2"></i>Professional
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="bg-white rounded-xl shadow-sm">
+      <div class="p-4 border-b flex justify-between items-center">
+        <h3 class="font-semibold text-gray-900">Recent Bookings</h3>
+        <div class="flex gap-2">
+          <input type="search" placeholder="Search bookings..." class="px-4 py-2 border rounded-lg w-64">
+          <select id="status-filter" class="px-4 py-2 border rounded-lg">
+            <option value="">All Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="CANCELLED">Cancelled</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr class="text-left text-sm text-gray-500">
+              <th class="px-6 py-3 font-medium">Booking ID</th>
+              <th class="px-6 py-3 font-medium">Service</th>
+              <th class="px-6 py-3 font-medium">Customer</th>
+              <th class="px-6 py-3 font-medium">Date & Time</th>
+              <th class="px-6 py-3 font-medium">Status</th>
+              <th class="px-6 py-3 font-medium">Amount</th>
+              <th class="px-6 py-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-tbody" class="divide-y">
+            <!-- Dynamic content -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="p-4 border-t flex justify-between items-center">
+        <p id="pagination-info" class="text-sm text-gray-500">Showing 0-0 of 0 bookings</p>
+        <div class="flex gap-2">
+          <button class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50" id="prev-btn" disabled>Previous</button>
+          <button class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50" id="next-btn" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Endpoints -->
+    <div class="mt-8 bg-white rounded-xl shadow-sm p-6">
+      <h3 class="font-semibold text-gray-900 mb-4">
+        <i class="fas fa-code mr-2"></i>Service Endpoints
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">GET</span>
+            <code class="text-sm">http://localhost:4090</code>
+          </div>
+          <p class="text-sm text-gray-600">ReZ Schedule - Universal Booking</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold">GET</span>
+            <code class="text-sm">http://localhost:4091</code>
+          </div>
+          <p class="text-sm text-gray-600">Healthcare Appointments</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-bold">GET</span>
+            <code class="text-sm">http://localhost:4092</code>
+          </div>
+          <p class="text-sm text-gray-600">Restaurant Reservations</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">GET</span>
+            <code class="text-sm">http://localhost:4093</code>
+          </div>
+          <p class="text-sm text-gray-600">Home Services</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // API Base URLs
+    const SERVICES = {
+      schedule: { name: 'ReZ Schedule', url: 'http://localhost:4090' },
+      healthcare: { name: 'Healthcare', url: 'http://localhost:4091' },
+      restaurant: { name: 'Restaurant', url: 'http://localhost:4092' },
+      home: { name: 'Home Services', url: 'http://localhost:4093' },
+      professional: { name: 'Professional', url: 'http://localhost:4094' },
+    };
+
+    // State
+    let currentService = 'schedule';
+    let currentPage = 1;
+    let totalBookings = 0;
+
+    // Sample data for demo
+    const sampleBookings = [
+      { uid: 'bk_hc001', service: 'Healthcare', customer: 'John Doe', email: 'john@example.com', date: '2026-05-28', time: '10:00 AM', status: 'CONFIRMED', amount: 500 },
+      { uid: 'bk_rs002', service: 'Restaurant', customer: 'Jane Smith', email: 'jane@example.com', date: '2026-05-28', time: '7:00 PM', status: 'PENDING', amount: 0 },
+      { uid: 'bk_hm003', service: 'Home', customer: 'Bob Wilson', email: 'bob@example.com', date: '2026-05-29', time: '9:00 AM', status: 'CONFIRMED', amount: 2500 },
+      { uid: 'bk_pr004', service: 'Professional', customer: 'Alice Brown', email: 'alice@example.com', date: '2026-05-29', time: '2:00 PM', status: 'CONFIRMED', amount: 1500 },
+      { uid: 'bk_hc005', service: 'Healthcare', customer: 'Charlie Davis', email: 'charlie@example.com', date: '2026-05-30', time: '11:00 AM', status: 'COMPLETED', amount: 500 },
+    ];
+
+    // Render bookings
+    function renderBookings(bookings) {
+      const tbody = document.getElementById('bookings-tbody');
+      tbody.innerHTML = bookings.map(b => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4">
+            <code class="text-sm bg-gray-100 px-2 py-1 rounded">${b.uid}</code>
+          </td>
+          <td class="px-6 py-4">
+            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">${b.service}</span>
+          </td>
+          <td class="px-6 py-4">
+            <div class="font-medium">${b.customer}</div>
+            <div class="text-sm text-gray-500">${b.email}</div>
+          </td>
+          <td class="px-6 py-4">
+            <div>${b.date}</div>
+            <div class="text-sm text-gray-500">${b.time}</div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="px-2 py-1 rounded-full text-xs ${getStatusClass(b.status)}">${b.status}</span>
+          </td>
+          <td class="px-6 py-4 font-medium">${b.amount > 0 ? '₹' + b.amount : '-'}</td>
+          <td class="px-6 py-4">
+            <button class="text-gray-400 hover:text-gray-600 mx-1"><i class="fas fa-eye"></i></button>
+            <button class="text-gray-400 hover:text-gray-600 mx-1"><i class="fas fa-edit"></i></button>
+            <button class="text-gray-400 hover:text-red-600 mx-1"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+
+      // Update pagination
+      document.getElementById('pagination-info').textContent = `Showing ${bookings.length} of ${totalBookings} bookings`;
+    }
+
+    function getStatusClass(status) {
+      const classes = {
+        'PENDING': 'bg-yellow-100 text-yellow-700',
+        'CONFIRMED': 'bg-green-100 text-green-700',
+        'CANCELLED': 'bg-red-100 text-red-700',
+        'COMPLETED': 'bg-blue-100 text-blue-700',
+      };
+      return classes[status] || 'bg-gray-100 text-gray-700';
+    }
+
+    // Update stats
+    function updateStats() {
+      document.getElementById('stat-bookings').textContent = sampleBookings.length;
+      document.getElementById('stat-confirmed').textContent = sampleBookings.filter(b => b.status === 'CONFIRMED').length;
+      document.getElementById('stat-pending').textContent = sampleBookings.filter(b => b.status === 'PENDING').length;
+      const revenue = sampleBookings.reduce((sum, b) => sum + (b.status === 'COMPLETED' ? b.amount : 0), 0);
+      document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+    }
+
+    // Tab switching
+    document.querySelectorAll('.service-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.service-tab').forEach(t => {
+          t.classList.remove('border-purple-600', 'text-purple-600');
+          t.classList.add('border-transparent', 'text-gray-500');
+        });
+        tab.classList.add('border-purple-600', 'text-purple-600');
+        tab.classList.remove('border-transparent', 'text-gray-500');
+
+        currentService = tab.dataset.service;
+        renderBookings(sampleBookings);
+      });
+    });
+
+    // Initial render
+    renderBookings(sampleBookings);
+    updateStats();
+
+    // Health check for services
+    async function checkServices() {
+      for (const [key, service] of Object.entries(SERVICES)) {
+        try {
+          const res = await fetch(`${service.url}/health`);
+          if (res.ok) {
+            console.log(`✅ ${service.name} is running`);
+          }
+        } catch {
+          console.log(`❌ ${service.name} is not reachable`);
+        }
+      }
+    }
+    checkServices();
+  </script>
+</body>
+</html>

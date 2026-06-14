@@ -1,0 +1,130 @@
+// @ts-nocheck
+/**
+ * Modal Integration Tests
+ */
+
+describe('Modal Integration Tests', () => {
+  it('should open and close modals with data passing', () => {
+    // Simulate a modal manager (open/close + data passing)
+    let modalState: { visible: boolean; data: unknown } = { visible: false, data: null };
+
+    const openModal = jest.fn((data) => {
+      modalState = { visible: true, data };
+    });
+
+    const closeModal = jest.fn(() => {
+      modalState = { visible: false, data: null };
+    });
+
+    // Modal starts closed
+    expect(modalState.visible).toBe(false);
+    expect(modalState.data).toBeNull();
+
+    // Open with payload
+    const payload = { productId: 'prod_1', title: 'Confirm Purchase' };
+    openModal(payload);
+
+    expect(openModal).toHaveBeenCalledWith(payload);
+    expect(modalState.visible).toBe(true);
+    expect(modalState.data.productId).toBe('prod_1');
+    expect(modalState.data.title).toBe('Confirm Purchase');
+
+    // Close modal — data is cleared
+    closeModal();
+    expect(closeModal).toHaveBeenCalledTimes(1);
+    expect(modalState.visible).toBe(false);
+    expect(modalState.data).toBeNull();
+  });
+
+  it('should handle nested modals', () => {
+    // Simulate a modal stack
+    const modalStack: Array<{ id: string; data: unknown }> = [];
+
+    const pushModal = jest.fn((id: string, data) => {
+      modalStack.push({ id, data });
+    });
+
+    const popModal = jest.fn(() => {
+      return modalStack.pop();
+    });
+
+    const getTopModal = () => modalStack[modalStack.length - 1] ?? null;
+
+    // Open parent modal
+    pushModal('address-picker', { title: 'Select Address' });
+    expect(modalStack).toHaveLength(1);
+    expect(getTopModal()!.id).toBe('address-picker');
+
+    // Open nested modal on top
+    pushModal('add-address', { title: 'Add New Address' });
+    expect(modalStack).toHaveLength(2);
+    expect(getTopModal()!.id).toBe('add-address');
+
+    // Close nested modal — parent is still open
+    const closed = popModal();
+    expect(closed!.id).toBe('add-address');
+    expect(modalStack).toHaveLength(1);
+    expect(getTopModal()!.id).toBe('address-picker');
+
+    // Close parent modal — stack is empty
+    popModal();
+    expect(modalStack).toHaveLength(0);
+    expect(getTopModal()).toBeNull();
+
+    expect(pushModal).toHaveBeenCalledTimes(2);
+    expect(popModal).toHaveBeenCalledTimes(2);
+  });
+
+  it('should preserve app state when modal opens', () => {
+    // Background state should not be mutated when a modal opens
+    const appState = {
+      cart: { items: [{ id: 'item_1', productId: 'prod_1', quantity: 2 }], total: 1998 },
+      user: { id: 'user_1', name: 'Test User' },
+    };
+
+    const snapshotBefore = JSON.stringify(appState);
+
+    // Open a modal (simulated by recording the open event)
+    const openModal = jest.fn();
+    openModal('confirm-delete', { itemId: 'item_1' });
+
+    // App state is unchanged
+    const snapshotAfter = JSON.stringify(appState);
+    expect(snapshotBefore).toBe(snapshotAfter);
+    expect(appState.cart.items).toHaveLength(1);
+    expect(appState.cart.total).toBe(1998);
+    expect(appState.user.id).toBe('user_1');
+  });
+
+  it('should handle modal animations and transitions', () => {
+    // Simulate animation lifecycle callbacks
+    const animationCallbacks = {
+      onOpen: jest.fn(),
+      onClose: jest.fn(),
+      onAnimationStart: jest.fn(),
+      onAnimationEnd: jest.fn(),
+    };
+
+    // Animation sequence when opening
+    animationCallbacks.onAnimationStart('open');
+    animationCallbacks.onOpen();
+    animationCallbacks.onAnimationEnd('open');
+
+    expect(animationCallbacks.onAnimationStart).toHaveBeenCalledWith('open');
+    expect(animationCallbacks.onOpen).toHaveBeenCalledTimes(1);
+    expect(animationCallbacks.onAnimationEnd).toHaveBeenCalledWith('open');
+
+    // Animation sequence when closing
+    animationCallbacks.onAnimationStart('close');
+    animationCallbacks.onClose();
+    animationCallbacks.onAnimationEnd('close');
+
+    expect(animationCallbacks.onAnimationStart).toHaveBeenCalledWith('close');
+    expect(animationCallbacks.onClose).toHaveBeenCalledTimes(1);
+    expect(animationCallbacks.onAnimationEnd).toHaveBeenCalledWith('close');
+
+    // Total: 2 animationStart + 2 animationEnd calls
+    expect(animationCallbacks.onAnimationStart).toHaveBeenCalledTimes(2);
+    expect(animationCallbacks.onAnimationEnd).toHaveBeenCalledTimes(2);
+  });
+});

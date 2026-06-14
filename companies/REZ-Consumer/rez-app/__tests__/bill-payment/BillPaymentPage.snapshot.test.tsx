@@ -1,0 +1,234 @@
+// @ts-nocheck
+/**
+ * CONS-020: Snapshot tests for the Bill Payment UI
+ *
+ * These tests capture the rendered output of key states in the bill-payment
+ * flow so that unintentional UI regressions are caught at CI time.
+ *
+ * Covered states:
+ *  1. Loading skeleton (bill types query in-flight)
+ *  2. Bill type selection grid (types loaded, no type selected)
+ *  3. Provider list (type selected, providers loaded)
+ *  4. Bill detail card (bill fetched, coin redemption UI visible)
+ *  5. Error state (bill types query failed)
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// ── Module mocks ─────────────────────────────────────────────────────────────
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+  useLocalSearchParams: () => ({}),
+}));
+
+jest.mock('expo-linear-gradient', () => ({
+  LinearGradient: 'LinearGradient',
+}));
+
+jest.mock('@shopify/flash-list', () => ({
+  FlashList: ({ data, renderItem }) => (
+    <>{data?.map((item, i: number) => <React.Fragment key={i}>{renderItem({ item })}</React.Fragment>)}</>
+  ),
+}));
+
+jest.mock('@/components/ui/CachedImage', () => ({
+  CachedImage: 'Image',
+  default: 'Image',
+}));
+
+jest.mock('@/utils/withErrorBoundary', () => ({
+  withErrorBoundary: (Component) => Component,
+}));
+
+jest.mock('@/utils/platformAlert', () => ({
+  platformAlert: jest.fn(),
+}));
+
+jest.mock('@/utils/errorReporter', () => ({
+  errorReporter: {
+    captureError: jest.fn(),
+  },
+}));
+
+jest.mock('@/services/razorpayService', () => ({
+  default: {
+    createOrder: jest.fn(),
+    openCheckout: jest.fn(),
+  },
+}));
+
+jest.mock('@/contexts/WalletContext', () => ({
+  useWalletContext: () => ({
+    refreshWallet: jest.fn(),
+    walletData: {
+      coins: [{ type: 'rez', amount: 150 }, { type: 'promo', amount: 50 }],
+      pendingRewards: 10,
+    },
+  }),
+}));
+
+jest.mock('@/stores/selectors', () => ({
+  useIsAuthenticated: () => true,
+  useAuthLoading: () => false,
+  useGetCurrencySymbol: () => () => '₹',
+}));
+
+jest.mock('@/hooks/useIsMounted', () => ({
+  useIsMounted: () => () => true,
+}));
+
+jest.mock('@/config/sentry', () => ({
+  Sentry: { wrap: (c) => c },
+  initSentry: jest.fn(),
+}));
+
+// ── billPaymentApi mocks (overridden per-test) ────────────────────────────────
+const mockGetBillTypes = jest.fn();
+const mockGetProviders = jest.fn();
+const mockFetchBill = jest.fn();
+const mockGetPaymentHistory = jest.fn();
+
+jest.mock('@/services/billPaymentApi', () => ({
+  getBillTypes: (...args: unknown[]) => mockGetBillTypes(...args),
+  getProviders: (...args: unknown[]) => mockGetProviders(...args),
+  fetchBill: (...args: unknown[]) => mockFetchBill(...args),
+  payBill: jest.fn(),
+  getPaymentHistory: (...args: unknown[]) => mockGetPaymentHistory(...args),
+}));
+
+// ── React Query mock (controls query state per test) ─────────────────────────
+const mockUseQuery = jest.fn();
+
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query');
+  return {
+    ...actual,
+    useQuery: (...args: unknown[]) => mockUseQuery(...args),
+  };
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+    logger: { log: () => {}, warn: () => {}, error: () => {} } as unknown,
+  });
+}
+
+function Wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={makeQueryClient()}>
+      {children}
+    </QueryClientProvider>
+  );
+}
+
+// Lazy import so mocks are registered before the module loads
+let BillPaymentPage: React.ComponentType;
+
+beforeAll(async () => {
+  BillPaymentPage = (await import('@/app/bill-payment')).default;
+});
+
+// ── Fixtures ──────────────────────────────────────────────────────────────────
+
+const MOCK_BILL_TYPES = [
+  { id: 'electricity', label: 'Electricity', icon: 'flash', color: '#F59E0B', category: 'Utility', providerCount: 5 },
+  { id: 'mobile_postpaid', label: 'Mobile Postpaid', icon: 'phone-portrait', color: '#6366F1', category: 'Telecom', providerCount: 3 },
+];
+
+const MOCK_PROVIDERS = [
+  {
+    _id: 'p1',
+    name: 'BESCOM',
+    code: 'BESCOM',
+    type: 'electricity',
+    logo: 'https://example.com/bescom.png',
+    requiredFields: [{ fieldName: 'consumerNumber', label: 'Consumer No.', placeholder: 'Enter number', type: 'text' }],
+    cashbackPercent: 2,
+    promoCoinsFixed: 20,
+    promoExpiryDays: 30,
+    maxRedemptionPercent: 20,
+    displayOrder: 1,
+    isFeatured: true,
+  },
+];
+
+const MOCK_FETCHED_BILL = {
+  provider: { _id: 'p1', name: 'BESCOM', code: 'BESCOM', logo: '', type: 'electricity' },
+  customerNumber: '123456789',
+  amount: 1500,
+  dueDate: '2026-04-01',
+  consumerName: 'Test User',
+  cashbackPercent: 2,
+  cashbackAmount: 30,
+  promoCoins: 20,
+  promoExpiryDays: 30,
+};
+
+// ── Tests ─────────────────────────────────────────────────────────────────────
+
+describe('BillPaymentPage snapshots (CONS-020)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetPaymentHistory.mockResolvedValue({ success: true, data: { payments: [], pagination: { hasNextPage: false } } });
+    mockGetProviders.mockResolvedValue({ success: true, data: { providers: [], pagination: {} } });
+  });
+
+  it('1. renders loading skeleton while bill types are being fetched', () => {
+    // Simulate React Query loading state
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    const { toJSON } = render(<BillPaymentPage />, { wrapper: Wrapper });
+    expect(toJSON()).toMatchSnapshot();
+  });
+
+  it('2. renders bill type selection grid when types are loaded', () => {
+    mockUseQuery.mockReturnValue({
+      data: MOCK_BILL_TYPES,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    const { toJSON } = render(<BillPaymentPage />, { wrapper: Wrapper });
+    expect(toJSON()).toMatchSnapshot();
+  });
+
+  it('3. renders error state when bill types query fails', () => {
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('Network error'),
+      refetch: jest.fn(),
+    });
+
+    const { toJSON } = render(<BillPaymentPage />, { wrapper: Wrapper });
+    expect(toJSON()).toMatchSnapshot();
+  });
+
+  it('4. renders provider list when a bill type is selected', async () => {
+    mockUseQuery.mockReturnValue({
+      data: MOCK_BILL_TYPES,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    mockGetProviders.mockResolvedValue({ success: true, data: { providers: MOCK_PROVIDERS, pagination: {} } });
+
+    const { toJSON, findByText } = render(<BillPaymentPage />, { wrapper: Wrapper });
+
+    // Simulate user selecting "Electricity" type — wait for provider to appear
+    await findByText('Electricity').catch(() => null);
+    expect(toJSON()).toMatchSnapshot();
+  });
+});

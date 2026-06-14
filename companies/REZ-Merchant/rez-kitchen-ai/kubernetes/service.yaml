@@ -1,0 +1,20 @@
+# Kubernetes Service for rez-kitchen-ai
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-kitchen-ai
+  namespace: rez-merchant
+  labels:
+    app: rez-kitchen-ai
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-kitchen-ai service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4015
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-kitchen-ai

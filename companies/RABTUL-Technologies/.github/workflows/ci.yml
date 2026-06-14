@@ -1,0 +1,214 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  MONGODB_URI: mongodb://localhost:27017/test
+  REDIS_URL: redis://localhost:6379
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Core Services Tests
+  # ─────────────────────────────────────────────
+  test-core-services:
+    name: Test Core Services
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - rez-auth-service
+          - rez-payment-service
+          - rez-wallet-service
+          - rez-order-service
+          - rez-catalog-service
+          - rez-search-service
+          - rez-delivery-service
+          - rez-notifications-service
+          - rez-profile-service
+          - rez-analytics-service
+          - rez-booking-service
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: ${{ matrix.service }}/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./${{ matrix.service }}
+        run: npm test
+        env:
+          MONGODB_URI: ${{ env.MONGODB_URI }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+
+      - name: Build
+        working-directory: ./${{ matrix.service }}
+        run: npm run build
+
+  # ─────────────────────────────────────────────
+  # Infrastructure Services Tests
+  # ─────────────────────────────────────────────
+  test-infrastructure:
+    name: Test Infrastructure
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    strategy:
+      matrix:
+        service:
+          - REZ-circuit-breaker
+          - REZ-retry-service
+          - REZ-dlq-service
+          - REZ-idempotency-service
+          - REZ-policy-engine
+          - REZ-secrets-manager
+          - REZ-scheduler-service
+          - REZ-observability-platform
+          - REZ-data-aggregator
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./${{ matrix.service }}
+        run: npm test || echo "No tests configured"
+
+      - name: Build
+        working-directory: ./${{ matrix.service }}
+        run: npm run build || echo "No build script"
+
+  # ─────────────────────────────────────────────
+  # BuzzLocal Services Tests
+  # ─────────────────────────────────────────────
+  test-buzzlocal:
+    name: Test BuzzLocal
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    strategy:
+      matrix:
+        service:
+          - buzzlocal-feed-service
+          - buzzlocal-community-service
+          - buzzlocal-intelligence-service
+          - buzzlocal-notification-service
+          - buzzlocal-payment-service
+          - buzzlocal-realtime-service
+          - buzzlocal-vibe-service
+          - buzzlocal-weather-service
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./${{ matrix.service }}
+        run: npm test || echo "No tests configured"
+
+      - name: Build
+        working-directory: ./${{ matrix.service }}
+        run: npm run build || echo "No build script"
+
+  # ─────────────────────────────────────────────
+  # Lint All Services
+  # ─────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint || echo "No lint script"
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────
+  # Type Check All Services
+  # ─────────────────────────────────────────────
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript check
+        run: npx tsc --noEmit || echo "TypeScript check not configured"
+        continue-on-error: true

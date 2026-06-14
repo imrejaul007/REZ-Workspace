@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "CorpPerks Client",
+    "slug": "corpperks-client-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#8B5CF6"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.corpperks.client"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#8B5CF6"
+      },
+      "package": "com.corpperks.client"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "corpperks-client"
+  }
+}

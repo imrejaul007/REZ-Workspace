@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-influencer-authenticity
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-influencer-authenticity
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  tls:
+  - hosts:
+    - influencer-auth.adbazaar.internal
+    secretName: ad-bazaar-influencer-authenticity-tls
+  rules:
+  - host: influencer-auth.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-influencer-authenticity
+            port:
+              number: 5111

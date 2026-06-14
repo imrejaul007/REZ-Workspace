@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ad-bazaar-influencer-authenticity
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-influencer-authenticity
+    tier: social-automation
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "5111"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5111
+    targetPort: 5111
+    protocol: TCP
+    name: http
+  selector:
+    app: ad-bazaar-influencer-authenticity

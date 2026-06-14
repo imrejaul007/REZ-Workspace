@@ -1,0 +1,10 @@
+{
+  "name": "@rez/sdk",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "exports": {
+    "./features": "./dist/features.js",
+    "./workflow": "./dist/workflow.js",
+    "./metrics": "./dist/metrics.js"
+  }
+}

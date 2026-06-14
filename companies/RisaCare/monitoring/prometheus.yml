@@ -1,0 +1,46 @@
+# Prometheus Configuration for RisaCare
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'risa-care-api-gateway'
+    static_configs:
+      - targets: ['risa-care-api-gateway:4700']
+    metrics_path: /metrics
+
+  - job_name: 'risa-care-records-service'
+    static_configs:
+      - targets: ['risa-care-records-service:4702']
+    metrics_path: /metrics
+
+  - job_name: 'risa-care-ai-service'
+    static_configs:
+      - targets: ['risa-care-ai-service:4703']
+    metrics_path: /metrics
+
+  - job_name: 'risa-care-profile-service'
+    static_configs:
+      - targets: ['risa-care-profile-service:4704']
+    metrics_path: /metrics
+
+  - job_name: 'risa-care-booking-service'
+    static_configs:
+      - targets: ['risa-care-booking-service:4705']
+    metrics_path: /metrics
+
+  - job_name: 'risa-care-marketplace-service'
+    static_configs:
+      - targets: ['risa-care-marketplace-service:4706']
+    metrics_path: /metrics
+
+  - job_name: 'risa-care-wellness-service'
+    static_configs:
+      - targets: ['risa-care-wellness-service:4707']
+    metrics_path: /metrics
+
+  - job_name: 'risa-care-corporate-service'
+    static_configs:
+      - targets: ['risa-care-corporate-service:4708']
+    metrics_path: /metrics

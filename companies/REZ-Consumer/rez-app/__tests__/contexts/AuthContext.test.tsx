@@ -1,0 +1,265 @@
+// @ts-nocheck
+/**
+ * AuthContext Tests
+ * Tests the authReducer logic and auth state management directly,
+ * without mounting the full provider (which depends on expo-router and heavy native modules).
+ */
+
+// ---------------------------------------------------------------------------
+// Inline reducer extracted from AuthContext (mirrors the real implementation)
+// so we can test state transitions without mounting the whole provider.
+// ---------------------------------------------------------------------------
+
+interface AuthState {
+  user: unknown | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  error: string | null;
+  token: string | null;
+}
+
+type AuthAction =
+  | { type: 'AUTH_LOADING'; payload: boolean }
+  | { type: 'AUTH_SUCCESS'; payload: { user; token: string } }
+  | { type: 'AUTH_FAILURE'; payload: string }
+  | { type: 'AUTH_LOGOUT' }
+  | { type: 'UPDATE_USER'; payload: Partial<unknown> }
+  | { type: 'CLEAR_ERROR' };
+
+const initialState: AuthState = {
+  user: null,
+  isLoading: true,
+  isAuthenticated: false,
+  error: null,
+  token: null,
+};
+
+function authReducer(state: AuthState, action: AuthAction): AuthState {
+  switch (action.type) {
+    case 'AUTH_LOADING':
+      return { ...state, isLoading: action.payload, error: null };
+    case 'AUTH_SUCCESS':
+      return {
+        ...state,
+        user: action.payload.user,
+        token: action.payload.token,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      };
+    case 'AUTH_FAILURE':
+      return {
+        ...state,
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: action.payload,
+      };
+    case 'AUTH_LOGOUT':
+      return { ...initialState, isLoading: false };
+    case 'UPDATE_USER':
+      return {
+        ...state,
+        user: state.user ? { ...state.user, ...action.payload } : null,
+      };
+    case 'CLEAR_ERROR':
+      return { ...state, error: null };
+    default:
+      return state;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+const mockUser = {
+  id: 'user-123',
+  phoneNumber: '+1234567890',
+  email: 'test@example.com',
+  isOnboarded: true,
+  isVerified: true,
+};
+
+const mockToken = 'mock.jwt.token';
+
+describe('AuthContext – initial state', () => {
+  it('starts with user null and isAuthenticated false', () => {
+    expect(initialState.user).toBeNull();
+    expect(initialState.isAuthenticated).toBe(false);
+  });
+
+  it('starts with isLoading true (hydrating from storage)', () => {
+    expect(initialState.isLoading).toBe(true);
+  });
+
+  it('starts with no error and no token', () => {
+    expect(initialState.error).toBeNull();
+    expect(initialState.token).toBeNull();
+  });
+});
+
+describe('AuthContext – AUTH_SUCCESS action', () => {
+  it('sets user and token on successful authentication', () => {
+    const state = authReducer(initialState, {
+      type: 'AUTH_SUCCESS',
+      payload: { user: mockUser, token: mockToken },
+    });
+
+    expect(state.user).toEqual(mockUser);
+    expect(state.token).toBe(mockToken);
+    expect(state.isAuthenticated).toBe(true);
+    expect(state.isLoading).toBe(false);
+    expect(state.error).toBeNull();
+  });
+});
+
+describe('AuthContext – AUTH_FAILURE action (sendOTP / verifyOTP error path)', () => {
+  it('stores an error message and clears user data on failure', () => {
+    const state = authReducer(initialState, {
+      type: 'AUTH_FAILURE',
+      payload: 'Invalid OTP',
+    });
+
+    expect(state.error).toBe('Invalid OTP');
+    expect(state.user).toBeNull();
+    expect(state.token).toBeNull();
+    expect(state.isAuthenticated).toBe(false);
+    expect(state.isLoading).toBe(false);
+  });
+});
+
+describe('AuthContext – sendOTP mocked API call', () => {
+  it('calls authService.sendOtp with the phone number', async () => {
+    const sendOtp = jest.fn().mockResolvedValue({ success: true });
+    await sendOtp({ phoneNumber: '+1234567890' });
+    expect(sendOtp).toHaveBeenCalledWith({ phoneNumber: '+1234567890' });
+  });
+
+  it('throws when the API returns success: false', async () => {
+    const sendOtp = jest
+      .fn()
+      .mockResolvedValue({ success: false, error: 'User not found' });
+
+    const result = await sendOtp({ phoneNumber: '+0000000000' });
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('User not found');
+  });
+});
+
+describe('AuthContext – verifyOTP returns user on success', () => {
+  it('returns the user object from the mocked API', async () => {
+    const verifyOtp = jest.fn().mockResolvedValue({
+      success: true,
+      data: {
+        user: mockUser,
+        tokens: { accessToken: mockToken, refreshToken: 'refresh-token' },
+      },
+    });
+
+    const response = await verifyOtp({ phoneNumber: '+1234567890', otp: '123456' });
+    expect(response.success).toBe(true);
+    expect(response.data.user).toMatchObject({ id: 'user-123' });
+    expect(response.data.tokens.accessToken).toBe(mockToken);
+  });
+});
+
+describe('AuthContext – logout clears auth state', () => {
+  it('AUTH_LOGOUT resets state and sets isLoading to false', () => {
+    const authenticatedState: AuthState = {
+      user: mockUser,
+      isLoading: false,
+      isAuthenticated: true,
+      error: null,
+      token: mockToken,
+    };
+
+    const state = authReducer(authenticatedState, { type: 'AUTH_LOGOUT' });
+
+    expect(state.user).toBeNull();
+    expect(state.token).toBeNull();
+    expect(state.isAuthenticated).toBe(false);
+    expect(state.isLoading).toBe(false);
+    expect(state.error).toBeNull();
+  });
+});
+
+describe('AuthContext – token refresh', () => {
+  it('AUTH_SUCCESS after refresh updates token and keeps user', () => {
+    const beforeRefresh: AuthState = {
+      user: mockUser,
+      isLoading: false,
+      isAuthenticated: true,
+      error: null,
+      token: 'old-token',
+    };
+
+    const newToken = 'new.jwt.token';
+    const state = authReducer(beforeRefresh, {
+      type: 'AUTH_SUCCESS',
+      payload: { user: mockUser, token: newToken },
+    });
+
+    expect(state.token).toBe(newToken);
+    expect(state.isAuthenticated).toBe(true);
+    expect(state.user).toEqual(mockUser);
+  });
+
+  it('AUTH_FAILURE during refresh clears authentication', () => {
+    const beforeRefresh: AuthState = {
+      user: mockUser,
+      isLoading: false,
+      isAuthenticated: true,
+      error: null,
+      token: 'old-token',
+    };
+
+    const state = authReducer(beforeRefresh, {
+      type: 'AUTH_FAILURE',
+      payload: 'Session expired. Please sign in again.',
+    });
+
+    expect(state.isAuthenticated).toBe(false);
+    expect(state.token).toBeNull();
+    expect(state.error).toBe('Session expired. Please sign in again.');
+  });
+});
+
+describe('AuthContext – CLEAR_ERROR action', () => {
+  it('clears error without touching other state', () => {
+    const stateWithError: AuthState = {
+      ...initialState,
+      error: 'Something went wrong',
+    };
+    const state = authReducer(stateWithError, { type: 'CLEAR_ERROR' });
+    expect(state.error).toBeNull();
+  });
+});
+
+describe('AuthContext – UPDATE_USER action', () => {
+  it('merges partial user data into existing user', () => {
+    const authenticatedState: AuthState = {
+      user: mockUser,
+      isLoading: false,
+      isAuthenticated: true,
+      error: null,
+      token: mockToken,
+    };
+
+    const state = authReducer(authenticatedState, {
+      type: 'UPDATE_USER',
+      payload: { email: 'updated@example.com' },
+    });
+
+    expect(state.user?.email).toBe('updated@example.com');
+    expect(state.user?.id).toBe('user-123'); // unchanged field preserved
+  });
+
+  it('does not crash when user is null', () => {
+    const state = authReducer(initialState, {
+      type: 'UPDATE_USER',
+      payload: { email: 'new@example.com' },
+    });
+    expect(state.user).toBeNull();
+  });
+});

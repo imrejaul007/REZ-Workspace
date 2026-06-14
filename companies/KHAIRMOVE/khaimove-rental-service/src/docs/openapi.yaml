@@ -1,0 +1,109 @@
+# KHAIRMOVE Rental Service API
+
+openapi: 3.0.3
+info:
+  title: KHAIRMOVE Rental Service
+  description: Hourly vehicle rentals
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4605
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+
+  /api/packages:
+    get:
+      summary: List rental packages
+      responses:
+        '200':
+          description: List of packages
+
+  /api/rentals:
+    get:
+      summary: List rentals
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of rentals
+
+    post:
+      summary: Create rental booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vehicleType:
+                  type: string
+                  enum: [auto, sedan, suv]
+                package:
+                  type: string
+                pickupLocation:
+                  type: object
+                scheduledTime:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Rental created
+
+  /api/rentals/{id}:
+    get:
+      summary: Get rental by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rental details
+
+  /api/rentals/{id}/cancel:
+    post:
+      summary: Cancel rental
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rental cancelled
+
+  /api/rentals/{id}/complete:
+    post:
+      summary: Complete rental
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actualKm:
+                  type: number
+                actualHours:
+                  type: number
+      responses:
+        '200':
+          description: Rental completed

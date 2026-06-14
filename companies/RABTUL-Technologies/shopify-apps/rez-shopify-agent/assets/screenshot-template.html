@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialSell - Screenshot Template</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px; }
+
+    .header { background: linear-gradient(135deg, #667EEA, #764BA2); color: white; padding: 40px; border-radius: 16px; margin-bottom: 32px; }
+    .header h1 { font-size: 36px; margin-bottom: 8px; }
+    .header p { opacity: 0.9; font-size: 18px; }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
+    .stat-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+    .stat-value { font-size: 32px; font-weight: 700; color: #667EEA; }
+    .stat-label { color: #6c757d; font-size: 14px; margin-top: 4px; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .card-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+
+    .chat-window { background: #f8f9fa; border-radius: 12px; padding: 16px; height: 300px; overflow-y: auto; }
+    .chat-message { display: flex; gap: 12px; margin-bottom: 16px; }
+    .chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: #667EEA; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; flex-shrink: 0; }
+    .chat-content { flex: 1; }
+    .chat-bubble { background: white; padding: 12px 16px; border-radius: 12px; font-size: 14px; }
+    .chat-bubble.ai { background: linear-gradient(135deg, #667EEA, #764BA2); color: white; }
+    .chat-time { font-size: 11px; color: #999; margin-top: 4px; }
+
+    .social-item { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 12px; margin-bottom: 12px; background: #f8f9fa; }
+    .social-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .social-info { flex: 1; }
+    .social-name { font-weight: 600; }
+    .social-status { font-size: 14px; color: #6c757d; }
+    .social-badge { background: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1">🤖 SocialSell Dashboard</h1>
+      <p>AI-powered social commerce and customer engagement</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value">2,847</div>
+        <div class="stat-label">Messages Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">94%</div>
+        <div class="stat-label">AI Resolution</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">45sec</div>
+        <div class="stat-label">Avg Response</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">4.7★</div>
+        <div class="stat-label">CSAT Score</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">💬 AI Chatbot Conversations</div>
+        <div class="chat-window">
+          <div class="chat-message">
+            <div class="chat-avatar">P</div>
+            <div class="chat-content">
+              <div class="chat-bubble">Hi! I want to order the same product I bought last month</div>
+              <div class="chat-time">2:30 PM</div>
+            </div>
+          </div>
+          <div class="chat-message">
+            <div class="chat-avatar" style="background: linear-gradient(135deg, #667EEA, #764BA2);">AI</div>
+            <div class="chat-content">
+              <div class="chat-bubble ai">Hi Priya! I found your previous order - Wireless Headphones Pro. Should I add the same to your cart? It's currently ₹4,999.</div>
+              <div class="chat-time">2:30 PM ✓</div>
+            </div>
+          </div>
+          <div class="chat-message">
+            <div class="chat-avatar">P</div>
+            <div class="chat-content">
+              <div class="chat-bubble">Yes please! And do you have a case for it?</div>
+              <div class="chat-time">2:31 PM</div>
+            </div>
+          </div>
+          <div class="chat-message">
+            <div class="chat-avatar" style="background: linear-gradient(135deg, #667EEA, #764BA2);">AI</div>
+            <div class="chat-content">
+              <div class="chat-bubble ai">Great choice! I found a matching case for ₹499. I've added both to your cart. Use code SAVE10 for 10% off! 🎉</div>
+              <div class="chat-time">2:31 PM ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📱 Social Integrations</div>
+        <div class="social-item">
+          <div class="social-icon" style="background: #E1306C;">📸</div>
+          <div class="social-info">
+            <div class="social-name">Instagram</div>
+            <div class="social-status">1,247 followers • 45 active DMs</div>
+          </div>
+          <div class="social-badge">Connected</div>
+        </div>
+        <div class="social-item">
+          <div class="social-icon" style="background: #1877F2;">📘</div>
+          <div class="social-info">
+            <div class="social-name">Facebook</div>
+            <div class="social-status">3,891 followers • 23 active DMs</div>
+          </div>
+          <div class="social-badge">Connected</div>
+        </div>
+        <div class="social-item">
+          <div class="social-icon" style="background: #1DA1F2;">🐦</div>
+          <div class="social-info">
+            <div class="social-name">Twitter</div>
+            <div class="social-status">892 followers • 12 mentions</div>
+          </div>
+          <div class="social-badge">Connected</div>
+        </div>
+        <div class="social-item">
+          <div class="social-icon" style="background: #25D366;">💬</div>
+          <div class="social-info">
+            <div class="social-name">WhatsApp</div>
+            <div class="social-status">1,456 contacts • 89 active chats</div>
+          </div>
+          <div class="social-badge">Connected</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

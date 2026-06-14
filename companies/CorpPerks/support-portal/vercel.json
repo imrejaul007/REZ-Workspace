@@ -1,0 +1,22 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://corpperks-api.onrender.com",
+    "NEXT_PUBLIC_WHATSAPP_URL": "https://corpperks-whatsapp.onrender.com",
+    "NEXT_PUBLIC_PUSH_URL": "https://corpperks-push.onrender.com"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ]
+}

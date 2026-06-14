@@ -1,0 +1,196 @@
+/**
+ * RFM API Tests
+ * Tests for rfmApi.ts - Customer segmentation
+ */
+
+import * as rfmApi from '@/services/rfmApi';
+
+// Mock the API client
+jest.mock('@/services/apiClient', () => ({
+  __esModule: true,
+  default: {
+    get: jest.fn(),
+    post: jest.fn(),
+  },
+  ApiResponse: {},
+}));
+
+import apiClient from '@/services/apiClient';
+
+describe('RFM API', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('getCustomerRFM', () => {
+    it('should fetch customer RFM analysis', async () => {
+      const mockRFM = {
+        customerId: 'cust-123',
+        recency: 5,
+        frequency: 20,
+        monetary: 5000,
+        rfmScore: '532',
+        segment: 'champion' as const,
+        totalOrders: 20,
+        avgOrderValue: 250,
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: mockRFM,
+      });
+
+      const result = await rfmApi.getCustomerRFM('cust-123');
+      expect(result.success).toBe(true);
+      expect(result.data?.segment).toBe('champion');
+    });
+
+    it('should handle customer with low RFM', async () => {
+      const mockRFM = {
+        customerId: 'cust-456',
+        recency: 90,
+        frequency: 2,
+        monetary: 200,
+        rfmScore: '111',
+        segment: 'lost' as const,
+        totalOrders: 2,
+        avgOrderValue: 100,
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: mockRFM,
+      });
+
+      const result = await rfmApi.getCustomerRFM('cust-456');
+      expect(result.data?.segment).toBe('lost');
+    });
+  });
+
+  describe('getRFMSegments', () => {
+    it('should fetch all RFM segments', async () => {
+      const mockSegments = [
+        { name: 'Champions', count: 100 },
+        { name: 'Loyal', count: 200 },
+        { name: 'At Risk', count: 50 },
+      ];
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: mockSegments,
+      });
+
+      const result = await rfmApi.getRFMSegments();
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(3);
+    });
+  });
+
+  describe('getLTVPrediction', () => {
+    it('should fetch LTV prediction', async () => {
+      const mockPrediction = {
+        customerId: 'cust-123',
+        predictedLTV: 25000,
+        confidence: 0.85,
+        churnRisk: 'low' as const,
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: mockPrediction,
+      });
+
+      const result = await rfmApi.getLTVPrediction('cust-123');
+      expect(result.success).toBe(true);
+      expect(result.data?.predictedLTV).toBe(25000);
+    });
+
+    it('should handle high churn risk', async () => {
+      const mockPrediction = {
+        customerId: 'cust-456',
+        predictedLTV: 1000,
+        confidence: 0.95,
+        churnRisk: 'high' as const,
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: mockPrediction,
+      });
+
+      const result = await rfmApi.getLTVPrediction('cust-456');
+      expect(result.data?.churnRisk).toBe('high');
+    });
+  });
+
+  describe('getChurnRisk', () => {
+    it('should fetch churn risk assessment', async () => {
+      const mockChurn = {
+        customerId: 'cust-123',
+        churnScore: 25,
+        riskLevel: 'low' as const,
+        factors: [
+          { factor: 'recent_activity', impact: 10 },
+          { factor: 'purchase_frequency', impact: 15 },
+        ],
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: mockChurn,
+      });
+
+      const result = await rfmApi.getChurnRisk('cust-123');
+      expect(result.success).toBe(true);
+      expect(result.data?.riskLevel).toBe('low');
+    });
+
+    it('should handle critical churn risk', async () => {
+      const mockChurn = {
+        customerId: 'cust-789',
+        churnScore: 95,
+        riskLevel: 'critical' as const,
+        factors: [
+          { factor: 'no_recent_activity', impact: 50 },
+          { factor: 'declining_spend', impact: 45 },
+        ],
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: mockChurn,
+      });
+
+      const result = await rfmApi.getChurnRisk('cust-789');
+      expect(result.data?.riskLevel).toBe('critical');
+    });
+  });
+
+  describe('getAtRiskCustomers', () => {
+    it('should fetch customers at risk of churning', async () => {
+      const mockCustomers = [
+        { customerId: 'cust-1', churnScore: 85, riskLevel: 'high' },
+        { customerId: 'cust-2', churnScore: 92, riskLevel: 'critical' },
+      ];
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: mockCustomers,
+      });
+
+      const result = await rfmApi.getAtRiskCustomers(10);
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+    });
+
+    it('should return empty array when no at-risk customers', async () => {
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: [],
+      });
+
+      const result = await rfmApi.getAtRiskCustomers();
+      expect(result.data).toHaveLength(0);
+    });
+  });
+});

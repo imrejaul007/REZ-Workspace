@@ -1,0 +1,293 @@
+/**
+ * Restaurant WhatsApp Templates
+ *
+ * Pre-defined message templates for restaurant WhatsApp notifications.
+ * These templates follow WhatsApp Business API guidelines and 24-hour session rules.
+ */
+
+export type RestaurantTemplateType =
+  | 'order_confirmation'
+  | 'order_confirmed'
+  | 'order_preparing'
+  | 'order_ready'
+  | 'order_ready_takeaway'
+  | 'order_ready_dinein'
+  | 'order_out_for_delivery'
+  | 'order_delivered'
+  | 'order_cancelled'
+  | 'delivery_driver_assigned'
+  | 'delivery_driver_arriving'
+  | 'reservation_confirmation'
+  | 'reservation_reminder_2h'
+  | 'reservation_reminder_30m'
+  | 'reservation_cancelled'
+  | 'birthday_offer'
+  | 'anniversary_offer'
+  | 'reengagement'
+  | 'special_deal'
+  | 'loyalty_reminder'
+  | 'welcome'
+  | 'staff_new_order'
+  | 'staff_low_stock'
+  | 'staff_review_alert';
+
+export type TemplateCategory = 'UTILITY' | 'MARKETING' | 'AUTHENTICATION';
+
+export interface WhatsAppTemplate {
+  id: RestaurantTemplateType;
+  name: string;
+  category: TemplateCategory;
+  description: string;
+  body: string;
+  header?: string;
+  footer?: string;
+  compliance?: {
+    requiresCustomerConsent: boolean;
+    unsubscribeOption: boolean;
+  };
+}
+
+export const RESTAURANT_WHATSAPP_TEMPLATES: Record<RestaurantTemplateType, WhatsAppTemplate> = {
+  order_confirmation: {
+    id: 'order_confirmation',
+    name: 'Order Confirmation',
+    category: 'UTILITY',
+    description: 'Sent when customer places an order',
+    body: `Hi {{1}}! 🎉\n\nYour order #{{2}} has been received!\n\n📋 Items: {{3}}\n💰 Total: {{4}}\n\n{{5}}\n\nTrack your order in real-time. Thank you for ordering with us!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  order_confirmed: {
+    id: 'order_confirmed',
+    name: 'Order Confirmed',
+    category: 'UTILITY',
+    description: 'Sent when order is confirmed after payment',
+    body: `Hi {{1}}! ✅\n\nGreat news! Your order #{{2}} is confirmed.\n\n💰 Amount: {{3}}\n⏱️ {{4}}\n\nWe\'ll notify you when it\'s ready!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  order_preparing: {
+    id: 'order_preparing',
+    name: 'Order Preparing',
+    category: 'UTILITY',
+    description: 'Sent when kitchen starts preparing the order',
+    body: `Hi {{1}}! 👨‍🍳\n\nGood news! Your order #{{2}} is now being prepared with love.\n\n⏱️ Estimated: {{3}}\n\nWe\'ll let you know when it\'s ready!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  order_ready_takeaway: {
+    id: 'order_ready_takeaway',
+    name: 'Order Ready - Takeaway',
+    category: 'UTILITY',
+    description: 'Sent when takeaway order is ready for pickup',
+    body: `Hi {{1}}! 📦\n\nYour order #{{2}} is ready for pickup!\n\n🏪 Pickup from: {{3}}\n\nSee you soon!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  order_ready_dinein: {
+    id: 'order_ready_dinein',
+    name: 'Order Ready - Dine In',
+    category: 'UTILITY',
+    description: 'Sent when dine-in order is served',
+    body: `Hi {{1}}! 🍽️\n\nYour order #{{2}} is being served!\n\nEnjoy your meal! Let us know if you need anything.`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  order_out_for_delivery: {
+    id: 'order_out_for_delivery',
+    name: 'Out for Delivery',
+    category: 'UTILITY',
+    description: 'Sent when order is dispatched for delivery',
+    body: `Hi {{1}}! 🚴\n\nYour order #{{2}} from {{3}} is out for delivery!\n\n⏱️ Estimated arrival: {{4}}\n\nTrack your order in real-time!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  order_delivered: {
+    id: 'order_delivered',
+    name: 'Order Delivered',
+    category: 'UTILITY',
+    description: 'Sent when order is delivered',
+    body: `Hi {{1}}! 🎉\n\nYour order #{{2}} from {{3}} has been delivered!\n\n💰 Total: {{4}}\n\nThank you for ordering! Please rate your experience.`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  order_cancelled: {
+    id: 'order_cancelled',
+    name: 'Order Cancelled',
+    category: 'UTILITY',
+    description: 'Sent when order is cancelled',
+    body: `Hi {{1}}! ℹ️\n\nYour order #{{2}} has been cancelled.\n\n💰 Refund of {{3}} will be processed within 5-7 business days.\n\nWe hope to serve you again soon!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  reservation_confirmation: {
+    id: 'reservation_confirmation',
+    name: 'Reservation Confirmation',
+    category: 'UTILITY',
+    description: 'Sent when a reservation is confirmed',
+    body: `Hi {{1}}! ✅\n\nYour reservation is confirmed!\n\n🔖 Confirmation: {{2}}\n📅 {{3}} at {{4}}\n👥 {{5}} guests\n🏪 {{6}}\n🪑 {{7}}\n\nWe look forward to seeing you! Reply STOP to unsubscribe.`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  reservation_reminder_2h: {
+    id: 'reservation_reminder_2h',
+    name: 'Reservation Reminder - 2 Hours',
+    category: 'UTILITY',
+    description: 'Sent 2 hours before reservation',
+    body: `Hi {{1}}! ⏰\n\nFriendly reminder: Your reservation is in 2 hours!\n\n🔖 {{2}}\n📅 {{3}} at {{4}}\n👥 {{5}} guests\n🏪 {{6}}\n🪑 {{7}}\n\nSee you soon!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  reservation_reminder_30m: {
+    id: 'reservation_reminder_30m',
+    name: 'Reservation Reminder - 30 Minutes',
+    category: 'UTILITY',
+    description: 'Sent 30 minutes before reservation',
+    body: `Hi {{1}}! 🚗\n\nYour reservation at {{6}} is in 30 minutes!\n\n🔖 {{2}}\n📅 {{3}} at {{4}}\n👥 {{5}} guests\n🪑 {{7}}\n\nWe\'re getting your table ready!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  reservation_cancelled: {
+    id: 'reservation_cancelled',
+    name: 'Reservation Cancelled',
+    category: 'UTILITY',
+    description: 'Sent when a reservation is cancelled',
+    body: `Hi {{1}}! ℹ️\n\nYour reservation {{2}} for {{3}} at {{4}} has been cancelled.\n\nWe hope to welcome you another time. Reply STOP to unsubscribe.`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  birthday_offer: {
+    id: 'birthday_offer',
+    name: 'Birthday Offer',
+    category: 'MARKETING',
+    description: 'Sent on customer\'s birthday with exclusive offer',
+    body: `Happy Birthday, {{1}}! 🎂🎉\n\n{{2}} on us!\n\nUse code: *{{3}}*\nValid for {{4}} days\n\nCelebrate at {{5}}. Book now!`,
+    footer: 'Powered by REZ | Valid for registered customers only',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  anniversary_offer: {
+    id: 'anniversary_offer',
+    name: 'Anniversary Offer',
+    category: 'MARKETING',
+    description: 'Sent on customer\'s anniversary with special offer',
+    body: `Happy Anniversary, {{1}}! 💑🎉\n\n{{2}} years with us! Enjoy {{3}}% OFF with code *{{4}}*\n\nValid for {{5}} days\nCelebrate at {{6}}!`,
+    footer: 'Powered by REZ | Valid for registered customers only',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  reengagement: {
+    id: 'reengagement',
+    name: 'Re-engagement',
+    category: 'MARKETING',
+    description: 'Sent to customers who haven\'t visited in a while',
+    body: `Hi {{1}}! 👋\n\nWe miss you! It\'s been {{2}} days since your last visit to {{3}}.\n\nWe\'ve got something special waiting for you...\n\nUse code *WELCOMEBACK* for 15% OFF on your next order!`,
+    footer: 'Powered by REZ | Valid for registered customers only',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  special_deal: {
+    id: 'special_deal',
+    name: 'Special Deal',
+    category: 'MARKETING',
+    description: 'Sent for special deals and limited-time offers',
+    body: `Hi {{1}}! 🔥\n\n{{2}}\n\n{{3}}\n\nUse code: *{{4}}*\nValid till {{5}}\n{{6}}`,
+    footer: 'Powered by REZ | Limited time offer',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  loyalty_reminder: {
+    id: 'loyalty_reminder',
+    name: 'Loyalty Points Reminder',
+    category: 'MARKETING',
+    description: 'Sent when points are about to expire',
+    body: `Hi {{1}}! ⏰\n\n{{2}} of your loyalty points expire on {{3}}!\n\nYou currently have {{4}} points.\n\nDon\'t miss out - visit us soon to redeem!`,
+    footer: 'Powered by REZ | Points valid for 12 months',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  welcome: {
+    id: 'welcome',
+    name: 'Welcome Message',
+    category: 'MARKETING',
+    description: 'Sent when a new customer registers',
+    body: `Welcome to REZ, {{1}}! 🎉\n\nYou\'re now part of our food family!\n\n🍽️ Order delicious food\n🎁 Earn loyalty points\n💰 Redeem exciting rewards\n\nUse code *WELCOME100* for 100 bonus points on your first order!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  staff_new_order: {
+    id: 'staff_new_order',
+    name: 'New Order Alert',
+    category: 'UTILITY',
+    description: 'Alert sent to staff when a new order is received',
+    body: `🔔 NEW ORDER #{{1}}\n\n📋 Items: {{2}}\n💰 Total: {{3}}\n📱 Customer: {{4}}\n⏱️ Type: {{5}}`,
+    footer: 'REZ Restaurant OS',
+    compliance: { requiresCustomerConsent: false, unsubscribeOption: false },
+  },
+
+  staff_low_stock: {
+    id: 'staff_low_stock',
+    name: 'Low Stock Alert',
+    category: 'UTILITY',
+    description: 'Alert sent when stock falls below threshold',
+    body: `⚠️ LOW STOCK ALERT\n\n📦 Item: {{1}}\n📊 Current: {{2}}\n🔴 Threshold: {{3}}\n🏪 Branch: {{4}}`,
+    footer: 'REZ Restaurant OS',
+    compliance: { requiresCustomerConsent: false, unsubscribeOption: false },
+  },
+
+  staff_review_alert: {
+    id: 'staff_review_alert',
+    name: 'New Review Alert',
+    category: 'UTILITY',
+    description: 'Alert sent when a new review is received',
+    body: `📢 NEW REVIEW\n\n⭐ Rating: {{1}}\n💬 "{{2}}"\n👤 Customer: {{3}}\n🏪 Branch: {{4}}\n📍 Source: {{5}}`,
+    footer: 'REZ Restaurant OS',
+    compliance: { requiresCustomerConsent: false, unsubscribeOption: false },
+  },
+
+  // Aliases for backward compatibility
+  order_ready: {
+    id: 'order_ready',
+    name: 'Order Ready',
+    category: 'UTILITY',
+    description: 'Generic order ready notification',
+    body: `Hi {{1}}! 📦\n\nYour order #{{2}} is ready!`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  delivery_driver_assigned: {
+    id: 'delivery_driver_assigned',
+    name: 'Driver Assigned',
+    category: 'UTILITY',
+    description: 'Sent when a driver is assigned to delivery',
+    body: `🚴 *Driver Assigned*\n\nHi {{1}}, your order {{2}} is on its way!\n\nDriver will reach you in approx. 30 mins.`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+
+  delivery_driver_arriving: {
+    id: 'delivery_driver_arriving',
+    name: 'Driver Arriving',
+    category: 'UTILITY',
+    description: 'Sent when driver is about to arrive',
+    body: `📍 *Almost There!*\n\nHi {{1}},\n\nYour order {{2}} from {{3}} is arriving in 5 minutes!\n\nPlease be ready to receive.`,
+    footer: 'Powered by REZ',
+    compliance: { requiresCustomerConsent: true, unsubscribeOption: true },
+  },
+};
+
+export default RESTAURANT_WHATSAPP_TEMPLATES;

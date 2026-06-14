@@ -1,0 +1,65 @@
+# REZ Commerce Graph - Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rez-commerce-graph
+  labels:
+    app: rez-commerce-graph
+    tier: intelligence
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rez-commerce-graph
+  template:
+    metadata:
+      labels:
+        app: rez-commerce-graph
+        tier: intelligence
+    spec:
+      containers:
+      - name: commerce-graph
+        image: rez/commerce-graph:latest
+        ports:
+        - containerPort: 4129
+        env:
+        - name: PORT
+          value: "4129"
+        - name: NODE_ENV
+          value: "production"
+        - name: GRAPH_DB
+          value: "neo4j"
+        - name: NEO4J_URI
+          valueFrom:
+            secretKeyRef:
+              name: rez-secrets
+              key: neo4j-uri
+        - name: NEO4J_USER
+          valueFrom:
+            secretKeyRef:
+              name: rez-secrets
+              key: neo4j-user
+        - name: NEO4J_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rez-secrets
+              key: neo4j-password
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-commerce-graph
+spec:
+  selector:
+    app: rez-commerce-graph
+  ports:
+  - port: 4129
+    targetPort: 4129
+  type: ClusterIP

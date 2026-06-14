@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: restauranthub-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --requirepass restauranthub_redis_secret
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - redis-data:/data
+      - ./redis-conf:/etc/redis
+    networks:
+      - restauranthub-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "restauranthub_redis_secret", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    environment:
+      - REDIS_PASSWORD=restauranthub_redis_secret
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: restauranthub-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:restauranthub_redis_secret
+      - HTTP_USER=admin
+      - HTTP_PASSWORD=admin123
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - restauranthub-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.2'
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  restauranthub-network:
+    driver: bridge

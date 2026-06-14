@@ -1,0 +1,354 @@
+.dashboard {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.subtitle {
+  color: var(--gray-500);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.statIcon {
+  font-size: 32px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-100);
+  border-radius: 12px;
+}
+
+.statValue {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.statLabel {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* Card */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cardHeader h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.viewAll {
+  font-size: 13px;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.viewAll:hover {
+  text-decoration: underline;
+}
+
+/* Pipeline */
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pipelineStage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pipelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stageName {
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.stageCount {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.pipelineBar {
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pipelineFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.stageValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.pipelineTotal,
+.weightedTotal {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid var(--gray-200);
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.totalValue {
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.weightedValue {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* Deals */
+.deals {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.deal:hover {
+  background: var(--gray-100);
+}
+
+.dealInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dealTitle {
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: 14px;
+}
+
+.dealCompany {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.dealMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.dealValue {
+  font-weight: 700;
+  color: var(--gray-900);
+  font-size: 14px;
+}
+
+.dealStage {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.dealStage.lead { background: var(--gray-200); color: var(--gray-700); }
+.dealStage.qualified { background: #dbeafe; color: #1d4ed8; }
+.dealStage.proposal { background: #fef3c7; color: #b45309; }
+.dealStage.negotiation { background: #d1fae5; color: #047857; }
+.dealStage.won { background: #d1fae5; color: #047857; }
+.dealStage.lost { background: #fee2e2; color: #dc2626; }
+
+/* Clients */
+.clients {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.client {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.client:hover {
+  background: var(--gray-100);
+}
+
+.clientAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.clientInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.clientName {
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: 14px;
+}
+
+.clientIndustry {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.clientMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.clientValue {
+  font-weight: 700;
+  color: var(--gray-900);
+  font-size: 14px;
+}
+
+.clientStatus {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.clientStatus.active { background: #d1fae5; color: #047857; }
+.clientStatus.prospect { background: #fef3c7; color: #b45309; }
+.clientStatus.inactive { background: var(--gray-200); color: var(--gray-600); }
+.clientStatus.churned { background: #fee2e2; color: #dc2626; }
+
+/* Quick Actions */
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.quickAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--gray-800);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.quickAction:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.quickIcon {
+  font-size: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

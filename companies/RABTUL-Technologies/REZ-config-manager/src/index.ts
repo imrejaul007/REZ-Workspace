@@ -1,0 +1,1 @@
+import express from'express';import logger from'./utils/logger';import configRoutes from'./routes/config';const app=express();const PORT=4317;app.use(express.json());app.get('/health',(_,res)=>res.json({service:'REZ Config Manager',status:'healthy'}));app.use('/api',configRoutes);app.listen(PORT,()=>logger.info(`REZ Config Manager running on ${PORT}`));export{app};

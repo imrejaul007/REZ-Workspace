@@ -1,0 +1,56 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap Template
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-white-label-service-config
+  namespace: rez-merchant
+  labels:
+    app: rez-white-label-service
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "3083"
+  LOG_LEVEL: "${LOG_LEVEL:-info}"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-white-label-service"
+  SERVICE_VERSION: "v1.0.0"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "${CORS_ORIGINS:-https://app.rezmerchant.com,https://admin.rezmerchant.com}"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_white_label_service"
+
+  # Redis
+  REDIS_DATABASE: "0"
+
+---
+
+# Production ConfigMap with higher limits
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-white-label-service-config-prod
+  namespace: rez-merchant
+  labels:
+    app: rez-white-label-service
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "3083"
+  LOG_LEVEL: "${LOG_LEVEL:-info}"
+  RATE_LIMIT_MAX: "200"
+  RATE_LIMIT_WINDOW_MS: "60000"

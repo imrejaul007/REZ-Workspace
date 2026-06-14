@@ -1,0 +1,477 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: database-backup-full
+  namespace: restauranthub
+  labels:
+    app: backup-service
+    backup-type: full
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: backup-service
+            backup-type: full
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: restauranthub-backup
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+          containers:
+          - name: postgres-backup
+            image: postgres:15-alpine
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              # Variables
+              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+              BACKUP_FILE="restauranthub_full_${TIMESTAMP}.sql.gz"
+              RETENTION_DAYS=30
+
+              echo "Starting full database backup at $(date)"
+
+              # Create backup directory if it doesn't exist
+              mkdir -p /backups/full
+
+              # Perform full database backup
+              pg_dump -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB \
+                --verbose \
+                --no-password \
+                --format=custom \
+                --compress=9 \
+                --blobs \
+                --quote-all-identifiers \
+                --no-privileges \
+                --no-owner \
+                | gzip > /backups/full/$BACKUP_FILE
+
+              # Verify backup file was created and has content
+              if [ ! -s "/backups/full/$BACKUP_FILE" ]; then
+                echo "ERROR: Backup file is empty or was not created"
+                exit 1
+              fi
+
+              echo "Backup completed: $BACKUP_FILE"
+              echo "Backup size: $(du -h /backups/full/$BACKUP_FILE | cut -f1)"
+
+              # Upload to S3
+              if [ -n "$AWS_S3_BUCKET" ]; then
+                echo "Uploading to S3..."
+                aws s3 cp /backups/full/$BACKUP_FILE s3://$AWS_S3_BUCKET/database/full/ \
+                  --storage-class STANDARD_IA \
+                  --metadata "backup-type=full,timestamp=$TIMESTAMP,database=restauranthub"
+
+                # Verify upload
+                if aws s3 ls s3://$AWS_S3_BUCKET/database/full/$BACKUP_FILE > /dev/null; then
+                  echo "S3 upload successful"
+                else
+                  echo "ERROR: S3 upload failed"
+                  exit 1
+                fi
+              fi
+
+              # Clean up old local backups
+              echo "Cleaning up backups older than $RETENTION_DAYS days..."
+              find /backups/full -name "restauranthub_full_*.sql.gz" -mtime +$RETENTION_DAYS -delete
+
+              # Clean up old S3 backups
+              if [ -n "$AWS_S3_BUCKET" ]; then
+                aws s3 ls s3://$AWS_S3_BUCKET/database/full/ | \
+                  awk '$1 < "'$(date -d "$RETENTION_DAYS days ago" '+%Y-%m-%d')'" {print $4}' | \
+                  while read file; do
+                    if [ -n "$file" ]; then
+                      aws s3 rm s3://$AWS_S3_BUCKET/database/full/$file
+                      echo "Deleted old backup: $file"
+                    fi
+                  done
+              fi
+
+              # Generate backup report
+              cat > /backups/backup_report_${TIMESTAMP}.json << EOF
+              {
+                "timestamp": "$(date -Iseconds)",
+                "backup_type": "full",
+                "backup_file": "$BACKUP_FILE",
+                "file_size_bytes": $(stat -c%s /backups/full/$BACKUP_FILE),
+                "file_size_human": "$(du -h /backups/full/$BACKUP_FILE | cut -f1)",
+                "status": "success",
+                "database": "restauranthub",
+                "postgres_version": "$(psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -t -c 'SELECT version();' | xargs)",
+                "s3_uploaded": $([ -n "$AWS_S3_BUCKET" ] && echo true || echo false)
+              }
+              EOF
+
+              # Send report to monitoring endpoint
+              if [ -n "$MONITORING_WEBHOOK" ]; then
+                curl -X POST $MONITORING_WEBHOOK \
+                  -H "Content-Type: application/json" \
+                  -d @/backups/backup_report_${TIMESTAMP}.json
+              fi
+
+              echo "Full backup process completed successfully"
+            env:
+            - name: POSTGRES_HOST
+              value: postgres-primary-service
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_DB
+              value: restauranthub
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            - name: AWS_S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: backup-config
+                  key: s3-bucket
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backup-aws-secret
+                  key: access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backup-aws-secret
+                  key: secret-access-key
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
+            - name: MONITORING_WEBHOOK
+              valueFrom:
+                configMapKeyRef:
+                  name: backup-config
+                  key: monitoring-webhook
+                  optional: true
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+            resources:
+              requests:
+                memory: "512Mi"
+                cpu: "250m"
+              limits:
+                memory: "2Gi"
+                cpu: "1000m"
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: database-backup-incremental
+  namespace: restauranthub
+  labels:
+    app: backup-service
+    backup-type: incremental
+spec:
+  schedule: "0 */6 * * *"  # Every 6 hours
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 24
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: backup-service
+            backup-type: incremental
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: restauranthub-backup
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+          containers:
+          - name: postgres-wal-backup
+            image: postgres:15-alpine
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              # Variables
+              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+              WAL_BACKUP_DIR="/backups/wal"
+              RETENTION_HOURS=168  # 7 days
+
+              echo "Starting WAL archive backup at $(date)"
+
+              # Create WAL backup directory if it doesn't exist
+              mkdir -p $WAL_BACKUP_DIR
+
+              # Get current WAL file
+              CURRENT_WAL=$(psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -t -c "SELECT pg_current_wal_lsn();" | xargs)
+              echo "Current WAL LSN: $CURRENT_WAL"
+
+              # Archive current WAL files
+              ARCHIVE_DIR="/var/lib/postgresql/archives"
+              if [ -d "$ARCHIVE_DIR" ]; then
+                # Copy new WAL files
+                rsync -av --progress $ARCHIVE_DIR/ $WAL_BACKUP_DIR/
+
+                # Upload to S3
+                if [ -n "$AWS_S3_BUCKET" ]; then
+                  aws s3 sync $WAL_BACKUP_DIR s3://$AWS_S3_BUCKET/database/wal/ \
+                    --storage-class STANDARD_IA \
+                    --metadata "backup-type=wal,timestamp=$TIMESTAMP"
+                fi
+
+                # Clean up old WAL files locally
+                find $WAL_BACKUP_DIR -name "*.gz" -mmin +$((RETENTION_HOURS * 60)) -delete
+
+                echo "WAL backup completed"
+              else
+                echo "WAL archive directory not found"
+                exit 1
+              fi
+
+              # Generate WAL backup report
+              cat > /backups/wal_backup_report_${TIMESTAMP}.json << EOF
+              {
+                "timestamp": "$(date -Iseconds)",
+                "backup_type": "wal",
+                "current_wal_lsn": "$CURRENT_WAL",
+                "wal_files_count": $(ls -1 $WAL_BACKUP_DIR | wc -l),
+                "status": "success",
+                "s3_uploaded": $([ -n "$AWS_S3_BUCKET" ] && echo true || echo false)
+              }
+              EOF
+
+              echo "WAL backup process completed"
+            env:
+            - name: POSTGRES_HOST
+              value: postgres-primary-service
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_DB
+              value: restauranthub
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            - name: AWS_S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: backup-config
+                  key: s3-bucket
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backup-aws-secret
+                  key: access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backup-aws-secret
+                  key: secret-access-key
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+            - name: postgres-archives
+              mountPath: /var/lib/postgresql/archives
+              readOnly: true
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "250m"
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc
+          - name: postgres-archives
+            persistentVolumeClaim:
+              claimName: postgres-archives-pvc
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: database-backup-validation
+  namespace: restauranthub
+  labels:
+    app: backup-service
+    backup-type: validation
+spec:
+  schedule: "0 4 * * 0"  # Weekly on Sunday at 4 AM
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 4
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: backup-service
+            backup-type: validation
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: restauranthub-backup
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+          containers:
+          - name: backup-validator
+            image: postgres:15-alpine
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              echo "Starting backup validation at $(date)"
+
+              # Get latest backup file
+              LATEST_BACKUP=$(ls -t /backups/full/restauranthub_full_*.sql.gz 2>/dev/null | head -1)
+
+              if [ -z "$LATEST_BACKUP" ]; then
+                echo "ERROR: No backup files found"
+                exit 1
+              fi
+
+              echo "Validating backup: $LATEST_BACKUP"
+
+              # Test backup file integrity
+              if ! gunzip -t "$LATEST_BACKUP"; then
+                echo "ERROR: Backup file is corrupted"
+                exit 1
+              fi
+
+              echo "Backup file integrity check passed"
+
+              # Create test database for restore validation
+              TEST_DB="restauranthub_restore_test_$(date +%s)"
+
+              createdb -h $POSTGRES_HOST -U $POSTGRES_USER $TEST_DB
+
+              echo "Created test database: $TEST_DB"
+
+              # Restore backup to test database
+              gunzip -c "$LATEST_BACKUP" | pg_restore -h $POSTGRES_HOST -U $POSTGRES_USER -d $TEST_DB --verbose
+
+              # Validate restored data
+              TABLE_COUNT=$(psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $TEST_DB -t -c "SELECT count(*) FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public';" | xargs)
+
+              echo "Restored tables count: $TABLE_COUNT"
+
+              if [ "$TABLE_COUNT" -eq 0 ]; then
+                echo "ERROR: No tables found in restored database"
+                dropdb -h $POSTGRES_HOST -U $POSTGRES_USER $TEST_DB
+                exit 1
+              fi
+
+              # Clean up test database
+              dropdb -h $POSTGRES_HOST -U $POSTGRES_USER $TEST_DB
+
+              echo "Backup validation completed successfully"
+
+              # Generate validation report
+              cat > /backups/validation_report_$(date +%Y%m%d_%H%M%S).json << EOF
+              {
+                "timestamp": "$(date -Iseconds)",
+                "validation_type": "restore_test",
+                "backup_file": "$(basename $LATEST_BACKUP)",
+                "backup_size_bytes": $(stat -c%s "$LATEST_BACKUP"),
+                "tables_count": $TABLE_COUNT,
+                "status": "success",
+                "test_database": "$TEST_DB"
+              }
+              EOF
+
+              echo "Backup validation process completed"
+            env:
+            - name: POSTGRES_HOST
+              value: postgres-primary-service
+            - name: POSTGRES_USER
+              value: postgres
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+            resources:
+              requests:
+                memory: "1Gi"
+                cpu: "500m"
+              limits:
+                memory: "4Gi"
+                cpu: "2000m"
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-config
+  namespace: restauranthub
+data:
+  s3-bucket: "restauranthub-backups"
+  retention-days: "30"
+  monitoring-webhook: "https://monitoring.restauranthub.com/webhooks/backup"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-pvc
+  namespace: restauranthub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 500Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-archives-pvc
+  namespace: restauranthub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 100Gi

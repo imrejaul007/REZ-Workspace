@@ -1,0 +1,35 @@
+# Kubernetes Ingress for REZ-atlas-territory
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: REZ-atlas-territory
+  namespace: rez-merchant
+  labels:
+    app: REZ-atlas-territory
+    managed-by: rez-merchant
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Request-ID $request_id";
+spec:
+  tls:
+    - hosts:
+        - api.rezmerchant.com
+      secretName: REZ-atlas-territory-tls
+  rules:
+    - host: api.rezmerchant.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: REZ-atlas-territory
+                port:
+                  number: 5170

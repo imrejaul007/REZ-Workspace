@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-content-calendar
+  labels:
+    app: ad-bazaar-content-calendar
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - content-calendar.adbazaar.internal
+    secretName: ad-bazaar-content-calendar-tls
+  rules:
+  - host: content-calendar.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-content-calendar
+            port:
+              number: 80

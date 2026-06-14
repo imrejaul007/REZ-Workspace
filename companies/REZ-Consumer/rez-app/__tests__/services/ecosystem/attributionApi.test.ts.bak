@@ -1,0 +1,69 @@
+/**
+ * Attribution API Tests
+ */
+
+jest.mock('@/services/apiClient', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), post: jest.fn() },
+}));
+
+import * as attributionApi from '@/services/attributionApi';
+import apiClient from '@/services/apiClient';
+
+describe('Attribution API', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  describe('trackEvent', () => {
+    it('should track attribution event', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({ success: true });
+
+      const result = await attributionApi.trackEvent({
+        userId: 'user-1',
+        event: 'purchase',
+        channel: 'email',
+        campaign: 'summer_sale',
+      });
+
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('getUserJourney', () => {
+    it('should fetch user journey', async () => {
+      const mockJourney = [
+        { id: 'evt-1', userId: 'user-1', event: 'view', channel: 'organic' },
+        { id: 'evt-2', userId: 'user-1', event: 'purchase', channel: 'email' },
+      ];
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockJourney });
+
+      const result = await attributionApi.getUserJourney('user-1');
+      expect(result.data).toHaveLength(2);
+    });
+  });
+
+  describe('getConversions', () => {
+    it('should fetch conversions', async () => {
+      const mockConversions = [
+        { id: 'conv-1', userId: 'user-1', type: 'purchase' as const, value: 500 },
+      ];
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockConversions });
+
+      const result = await attributionApi.getConversions();
+      expect(result.data).toHaveLength(1);
+    });
+  });
+
+  describe('getAttributionReport', () => {
+    it('should fetch attribution report', async () => {
+      const mockReport = [
+        { channel: 'email', conversions: 100, revenue: 50000, cost: 5000, roi: 9 },
+        { channel: 'organic', conversions: 200, revenue: 80000, cost: 0, roi: Infinity },
+      ];
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockReport });
+
+      const result = await attributionApi.getAttributionReport();
+      expect(result.data).toHaveLength(2);
+    });
+  });
+});
+});

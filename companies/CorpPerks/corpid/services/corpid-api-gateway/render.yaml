@@ -1,0 +1,48 @@
+# =============================================================================
+# Render Blueprint - CorpID API Gateway
+# =============================================================================
+
+services:
+  - type: web
+    name: corpid-api-gateway
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    healthCheckInterval: 30s
+    healthCheckThreshold: 3
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4700"
+
+      # MongoDB
+      - key: MONGODB_URI
+        sync: false
+
+      # Authentication
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+      # CorpID Services URLs
+      - key: CORPID_IDENTITY_URL
+        value: https://corpid-identity.onrender.com
+      - key: CORPID_TRUST_GRAPH_URL
+        value: https://corpid-trust-graph.onrender.com
+
+      # CORS
+      - key: CORS_ORIGIN
+        value: https://corpid.corpperks.com
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info

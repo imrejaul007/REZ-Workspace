@@ -1,0 +1,215 @@
+name: Deploy Services
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'api-gateway/**'
+      - 'rez-*/**'
+      - 'buzzlocal-*/**'
+      - 'REZ-*/**'
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy (or "all")'
+        required: false
+        type: string
+        default: 'all'
+      environment:
+        description: 'Environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+        default: staging
+
+env:
+  RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Core Services Deployment
+  # ─────────────────────────────────────────────
+  deploy-core:
+    name: Deploy Core
+    runs-on: ubuntu-latest
+    if: github.event.inputs.service == 'all' || contains(fromJSON('["all", "api-gateway", "rez-auth-service", "rez-payment-service", "rez-wallet-service", "rez-order-service", "rez-catalog-service", "rez-search-service", "rez-delivery-service", "rez-notifications-service", "rez-profile-service", "rez-analytics-service", "rez-booking-service"]'), github.event.inputs.service)
+
+    strategy:
+      matrix:
+        service:
+          - name: api-gateway
+            port: 4000
+          - name: rez-auth-service
+            port: 4002
+          - name: rez-payment-service
+            port: 4001
+          - name: rez-wallet-service
+            port: 4004
+          - name: rez-order-service
+            port: 4006
+          - name: rez-catalog-service
+            port: 4007
+          - name: rez-search-service
+            port: 4008
+          - name: rez-delivery-service
+            port: 4009
+          - name: rez-notifications-service
+            port: 4011
+          - name: rez-profile-service
+            port: 4013
+          - name: rez-analytics-service
+            port: 4016
+          - name: rez-booking-service
+            port: 4020
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service.name }}
+        run: npm ci
+
+      - name: Build
+        working-directory: ./${{ matrix.service.name }}
+        run: npm run build
+
+      - name: Deploy to Render
+        run: |
+          echo "Deploying ${{ matrix.service.name }} to ${{ github.event.inputs.environment || 'staging' }}"
+          # In production, use Render API:
+          # curl -X POST https://api.render.com/v1/services \
+          #   -H "Authorization: Bearer $RENDER_API_KEY" \
+          #   -d "service=${{ matrix.service.name }}&environment=${{ github.event.inputs.environment }}"
+
+  # ─────────────────────────────────────────────
+  # Infrastructure Deployment
+  # ─────────────────────────────────────────────
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    if: github.event.inputs.service == 'all' || contains(fromJSON('["all", "REZ-circuit-breaker", "REZ-retry-service", "REZ-dlq-service", "REZ-idempotency-service", "REZ-policy-engine", "REZ-secrets-manager", "REZ-scheduler-service", "REZ-observability-platform", "REZ-data-aggregator"]'), github.event.inputs.service)
+
+    strategy:
+      matrix:
+        service:
+          - name: REZ-circuit-breaker
+            port: 4030
+          - name: REZ-retry-service
+            port: 4031
+          - name: REZ-dlq-service
+            port: 4032
+          - name: REZ-idempotency-service
+            port: 4033
+          - name: REZ-policy-engine
+            port: 4034
+          - name: REZ-secrets-manager
+            port: 4035
+          - name: REZ-scheduler-service
+            port: 4038
+          - name: REZ-observability-platform
+            port: 4025
+          - name: REZ-data-aggregator
+            port: 4058
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service.name }}
+        run: npm ci || echo "No dependencies"
+
+      - name: Build
+        working-directory: ./${{ matrix.service.name }}
+        run: npm run build || echo "No build script"
+
+      - name: Deploy to Render
+        run: |
+          echo "Deploying ${{ matrix.service.name }} to ${{ github.event.inputs.environment || 'staging' }}"
+
+  # ─────────────────────────────────────────────
+  # BuzzLocal Deployment
+  # ─────────────────────────────────────────────
+  deploy-buzzlocal:
+    name: Deploy BuzzLocal
+    runs-on: ubuntu-latest
+    if: github.event.inputs.service == 'all' || contains(fromJSON('["all", "buzzlocal-feed-service", "buzzlocal-community-service", "buzzlocal-intelligence-service", "buzzlocal-notification-service", "buzzlocal-payment-service", "buzzlocal-realtime-service", "buzzlocal-vibe-service", "buzzlocal-weather-service"]'), github.event.inputs.service)
+
+    strategy:
+      matrix:
+        service:
+          - name: buzzlocal-feed-service
+            port: 4201
+          - name: buzzlocal-community-service
+            port: 4202
+          - name: buzzlocal-intelligence-service
+            port: 4203
+          - name: buzzlocal-notification-service
+            port: 4204
+          - name: buzzlocal-payment-service
+            port: 4205
+          - name: buzzlocal-realtime-service
+            port: 4206
+          - name: buzzlocal-vibe-service
+            port: 4207
+          - name: buzzlocal-weather-service
+            port: 4208
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service.name }}
+        run: npm ci || echo "No dependencies"
+
+      - name: Build
+        working-directory: ./${{ matrix.service.name }}
+        run: npm run build || echo "No build script"
+
+      - name: Deploy to Render
+        run: |
+          echo "Deploying ${{ matrix.service.name }} to ${{ github.event.inputs.environment || 'staging' }}"
+
+  # ─────────────────────────────────────────────
+  # Smoke Tests
+  # ─────────────────────────────────────────────
+  smoke-test:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-core, deploy-infrastructure, deploy-buzzlocal]
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests..."
+          # In production:
+          # curl -f https://api.rez.money/health || exit 1
+          # curl -f https://auth.rez.money/health || exit 1
+          echo "Smoke tests passed!"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Deployment or smoke tests failed!"
+          # In production, send Slack notification

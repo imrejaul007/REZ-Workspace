@@ -1,0 +1,7 @@
+{
+  "ignore": [
+    "GHSA-r4q5-vmmm-2653",
+    "GHSA-8f24-v5vv-gm5j",
+    "GHSA-qx2v-qp2m-jg93"
+  ]
+}

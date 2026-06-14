@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  atlas-enrichment:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atlas-enrichment
+    restart: unless-stopped
+    ports:
+      - "5160:5160"
+    environment:
+      NODE_ENV: production
+      PORT: 5160
+      SERVICE_NAME: atlas-enrichment
+      MONGODB_URI: mongodb://mongodb:27017/atlas-enrichment
+      LOG_LEVEL: info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5160/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rez-network
+
+  mongodb:
+    image: mongo:6-alpine
+    container_name: enrichment-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: atlas-enrichment
+    ports:
+      - "27023:27017"
+    volumes:
+      - enrichment-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - rez-network
+
+networks:
+  rez-network:
+    driver: bridge
+
+volumes:
+  enrichment-mongo-data:
+    driver: local

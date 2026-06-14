@@ -1,0 +1,30 @@
+# ================================================
+# REZ Atlas Signals - Render Blueprint
+# ================================================
+
+services:
+  - type: web
+    name: rez-atlas-signals
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5155
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+      - key: SERVICE_NAME
+        value: REZ-atlas-signals
+      - key: WEB_INTELLIGENCE_URL
+        value: http://rez-atlas-web-intelligence:4595

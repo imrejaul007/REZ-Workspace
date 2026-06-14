@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-influencer-authenticity
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-influencer-authenticity
+    tier: social-automation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-influencer-authenticity
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-influencer-authenticity
+        tier: social-automation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5111"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: influencer-authenticity-check
+        image: adbazaar/influencer-authenticity-check:latest
+        ports:
+        - containerPort: 5111
+          name: http
+        env:
+        - name: PORT
+          value: "5111"
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: ad-bazaar-influencer-authenticity-config
+              key: NODE_ENV
+        - name: MONGODB_URI
+          valueFrom:
+            configMapKeyRef:
+              name: ad-bazaar-influencer-authenticity-config
+              key: MONGODB_URI
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ad-bazaar-influencer-authenticity-config
+              key: REDIS_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: adbazaar-secrets
+              key: jwt-secret
+        - name: HUGGINGFACE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: adbazaar-secrets
+              key: huggingface-api-key
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: adbazaar-secrets
+              key: openai-api-key
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5111
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5111
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: app-config
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: app-config
+        configMap:
+          name: ad-bazaar-influencer-authenticity-config

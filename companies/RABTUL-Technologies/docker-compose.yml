@@ -1,0 +1,433 @@
+# ============================================================
+# RABTUL-Technologies Docker Compose
+# Full local development environment
+# ============================================================
+
+version: '3.8'
+
+services:
+  # ─────────────────────────────────────────────
+  # Core Services
+  # ─────────────────────────────────────────────
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - redis
+      - mongodb
+    networks:
+      - rez-network
+
+  rez-auth-service:
+    build: ./rez-auth-service
+    ports:
+      - "4002:4002"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_auth
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  rez-payment-service:
+    build: ./rez-payment-service
+    ports:
+      - "4001:4001"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_payments
+      - REDIS_URL=redis://redis:6379
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  rez-wallet-service:
+    build: ./rez-wallet-service
+    ports:
+      - "4004:4004"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_wallet
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  rez-order-service:
+    build: ./rez-order-service
+    ports:
+      - "4006:4006"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_orders
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  rez-catalog-service:
+    build: ./rez-catalog-service
+    ports:
+      - "4007:4007"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_catalog
+    depends_on:
+      - mongodb
+    networks:
+      - rez-network
+
+  rez-search-service:
+    build: ./rez-search-service
+    ports:
+      - "4008:4008"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_search
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  rez-delivery-service:
+    build: ./rez-delivery-service
+    ports:
+      - "4009:4009"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_delivery
+    depends_on:
+      - mongodb
+    networks:
+      - rez-network
+
+  rez-notifications-service:
+    build: ./rez-notifications-service
+    ports:
+      - "4011:4011"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_notifications
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  rez-profile-service:
+    build: ./rez-profile-service
+    ports:
+      - "4013:4013"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_profiles
+    depends_on:
+      - mongodb
+    networks:
+      - rez-network
+
+  rez-analytics-service:
+    build: ./rez-analytics-service
+    ports:
+      - "4016:4016"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_analytics
+    depends_on:
+      - mongodb
+    networks:
+      - rez-network
+
+  rez-booking-service:
+    build: ./rez-booking-service
+    ports:
+      - "4020:4020"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/rez_bookings
+    depends_on:
+      - mongodb
+    networks:
+      - rez-network
+
+  # ─────────────────────────────────────────────
+  # Infrastructure Services
+  # ─────────────────────────────────────────────
+
+  REZ-circuit-breaker:
+    build: ./REZ-circuit-breaker
+    ports:
+      - "4030:4030"
+    networks:
+      - rez-network
+
+  REZ-retry-service:
+    build: ./REZ-retry-service
+    ports:
+      - "4031:4031"
+    depends_on:
+      - redis
+    networks:
+      - rez-network
+
+  REZ-dlq-service:
+    build: ./REZ-dlq-service
+    ports:
+      - "4032:4032"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - rez-network
+
+  REZ-idempotency-service:
+    build: ./REZ-idempotency-service
+    ports:
+      - "4033:4033"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - rez-network
+
+  REZ-policy-engine:
+    build: ./REZ-policy-engine
+    ports:
+      - "4034:4034"
+    depends_on:
+      - mongodb
+    networks:
+      - rez-network
+
+  REZ-secrets-manager:
+    build: ./REZ-secrets-manager
+    ports:
+      - "4035:4035"
+    environment:
+      - MASTER_PASSWORD=${MASTER_PASSWORD}
+    networks:
+      - rez-network
+
+  REZ-scheduler-service:
+    build: ./REZ-scheduler-service
+    ports:
+      - "4038:4038"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/rez_scheduler
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  REZ-observability-platform:
+    build: ./REZ-observability-platform
+    ports:
+      - "4025:4025"
+    networks:
+      - rez-network
+
+  REZ-data-aggregator:
+    build: ./REZ-data-aggregator
+    ports:
+      - "4058:4058"
+    depends_on:
+      - mongodb
+    networks:
+      - rez-network
+
+  # ─────────────────────────────────────────────
+  # BuzzLocal Services
+  # ─────────────────────────────────────────────
+
+  buzzlocal-feed-service:
+    build: ./buzzlocal-feed-service
+    ports:
+      - "4201:4201"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/buzzlocal_feed
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  buzzlocal-community-service:
+    build: ./buzzlocal-community-service
+    ports:
+      - "4202:4202"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/buzzlocal_community
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  buzzlocal-intelligence-service:
+    build: ./buzzlocal-intelligence-service
+    ports:
+      - "4203:4203"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/buzzlocal_intelligence
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  buzzlocal-notification-service:
+    build: ./buzzlocal-notification-service
+    ports:
+      - "4204:4204"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/buzzlocal_notifications
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  buzzlocal-payment-service:
+    build: ./buzzlocal-payment-service
+    ports:
+      - "4205:4205"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/buzzlocal_payments
+      - REDIS_URL=redis://redis:6379
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  buzzlocal-realtime-service:
+    build: ./buzzlocal-realtime-service
+    ports:
+      - "4206:4206"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - rez-network
+
+  buzzlocal-vibe-service:
+    build: ./buzzlocal-vibe-service
+    ports:
+      - "4207:4207"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/buzzlocal_vibes
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rez-network
+
+  buzzlocal-weather-service:
+    build: ./buzzlocal-weather-service
+    ports:
+      - "4208:4208"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/buzzlocal_weather
+    depends_on:
+      - mongodb
+    networks:
+      - rez-network
+
+  # ─────────────────────────────────────────────
+  # Supporting Services
+  # ─────────────────────────────────────────────
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - rez-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - rez-network
+
+  # ─────────────────────────────────────────────
+  # Observability
+  # ─────────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - rez-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - rez-network
+
+# ─────────────────────────────────────────────
+# Networks & Volumes
+# ─────────────────────────────────────────────
+
+networks:
+  rez-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:

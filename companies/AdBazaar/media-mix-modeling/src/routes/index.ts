@@ -1,0 +1,1 @@
+export { default as mmmRoutes } from './mmm.routes';

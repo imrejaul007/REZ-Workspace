@@ -1,0 +1,188 @@
+# Prometheus configuration for RestaurantHub - Enhanced AI Sentry Monitoring
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+  external_labels:
+    cluster: 'restauranthub'
+    environment: 'production'
+    version: '1.0.0'
+    region: 'us-east-1'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Load alerting rules
+rule_files:
+  - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # RestaurantHub API
+  - job_name: 'restauranthub-api'
+    static_configs:
+      - targets: ['api:3000', 'localhost:3000']
+    metrics_path: /api/v1/metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+
+  # RestaurantHub Web App
+  - job_name: 'restauranthub-web'
+    static_configs:
+      - targets: ['web:3001', 'localhost:3001']
+    metrics_path: /api/metrics
+    scrape_interval: 30s
+
+  # PostgreSQL
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgres_exporter:9187']
+    scrape_interval: 30s
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis_exporter:9121']
+    scrape_interval: 15s
+
+  # Node Exporter (System metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node_exporter:9100', 'localhost:9100']
+    scrape_interval: 15s
+
+  # Docker containers
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 20s
+
+  # Nginx
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx_exporter:9113']
+    scrape_interval: 30s
+
+  # Application Performance Monitoring
+  - job_name: 'restauranthub-apm'
+    static_configs:
+      - targets: ['api:3000']
+    metrics_path: /api/v1/metrics/detailed
+    scrape_interval: 10s
+    params:
+      include: ['http_requests', 'database_queries', 'redis_operations', 'auth_operations']
+
+  # Business Metrics
+  - job_name: 'restauranthub-business'
+    static_configs:
+      - targets: ['api:3000']
+    metrics_path: /api/v1/metrics/business
+    scrape_interval: 60s
+    params:
+      include: ['user_registrations', 'restaurant_operations', 'job_applications', 'orders_processed']
+
+  # Security Monitoring
+  - job_name: 'restauranthub-security'
+    static_configs:
+      - targets: ['api:3000']
+    metrics_path: /api/v1/metrics/security
+    scrape_interval: 30s
+    params:
+      include: ['failed_logins', 'auth_anomalies', 'rate_limit_violations', 'suspicious_activities']
+
+  # Microservices Monitoring
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:3002']
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:3003']
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  - job_name: 'order-service'
+    static_configs:
+      - targets: ['order-service:3004']
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  - job_name: 'restaurant-service'
+    static_configs:
+      - targets: ['restaurant-service:3005']
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # CI/CD Pipeline Monitoring
+  - job_name: 'pushgateway'
+    static_configs:
+      - targets: ['pushgateway:9091']
+    scrape_interval: 30s
+
+  # Health checks with blackbox exporter
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://api:3000/api/v1/auth/health
+          - http://api:3000/api/v1/auth/redis-health
+          - http://web:3001/health
+          - https://restauranthub.com
+          - https://api.restauranthub.com/api/v1/auth/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox_exporter:9115
+
+  # SSL Certificate monitoring
+  - job_name: 'blackbox-ssl'
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+      - targets:
+          - restauranthub.com:443
+          - api.restauranthub.com:443
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox_exporter:9115
+
+# Remote write for long-term storage (optional)
+remote_write:
+  - url: "http://prometheus-remote-write:8086/api/v1/prom/write"
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 200
+      capacity: 10000
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 10GB
+    wal-compression: true

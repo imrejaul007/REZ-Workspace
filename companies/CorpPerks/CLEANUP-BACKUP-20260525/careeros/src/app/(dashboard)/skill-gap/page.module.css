@@ -1,0 +1,325 @@
+.container {
+  padding: 2rem;
+}
+
+.heroCard {
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.heroContent h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.heroContent p {
+  opacity: 0.9;
+}
+
+.overallScore {
+  text-align: center;
+  background: rgba(255,255,255,0.2);
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+}
+
+.scoreNum {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.scoreLabel {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.section h2 {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.skillBars {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skillRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.skillInfo {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.skillName {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.skillCategory {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.skillLevel {
+  width: 40px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.gapList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gapCard {
+  padding: 1.25rem;
+  background: var(--bg);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.gapCard:hover {
+  border-color: var(--border);
+}
+
+.gapCard.selected {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.gapHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.gapHeader h3 {
+  font-size: 0.9375rem;
+}
+
+.priority {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.priority.high {
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.priority.medium {
+  background: #fffbeb;
+  color: var(--warning);
+}
+
+.gapReason {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.gapProgress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.gapProgress span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.miniBar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.miniFill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 2px;
+}
+
+.pathList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pathCard {
+  padding: 1.25rem;
+  background: var(--bg);
+  border-radius: 10px;
+}
+
+.pathHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pathIcon {
+  font-size: 2rem;
+}
+
+.pathHeader h3 {
+  font-size: 0.9375rem;
+  margin-bottom: 0.25rem;
+}
+
+.pathDuration {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pathSteps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.pathStep {
+  background: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.pathFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pathFooter span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pathFooter button {
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pathFooter button:hover {
+  background: var(--primary-dark);
+}
+
+.winsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.winItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.winIcon {
+  font-size: 1.5rem;
+}
+
+.winItem strong {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.winItem span {
+  font-size: 0.75rem;
+  color: var(--success);
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+}

@@ -1,0 +1,17 @@
+/* New Order Notification Sound
+ *
+ * This is a placeholder file. Replace with actual MP3 audio file.
+ * Recommended: short chime or alert tone (< 5 seconds)
+ *
+ * Place your actual audio file at:
+ * public/sounds/new-order.mp3
+ *
+ * For React Native with Expo, you can use:
+ * - expo-av for audio playback
+ * - Place audio in assets folder instead
+ *
+ * For the sound to work, ensure:
+ * 1. File is valid MP3 format
+ * 2. File size is under 1MB for quick loading
+ * 3. Recommended duration: 1-3 seconds
+ */

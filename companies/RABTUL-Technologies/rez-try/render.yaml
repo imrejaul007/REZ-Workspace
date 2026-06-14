@@ -1,0 +1,56 @@
+# Render Blueprint for ReZ Try (Trial Discovery)
+# Domain: try.rez.money
+# Next.js standalone output enabled
+
+services:
+  - type: web
+    name: rez-try
+    env: node
+    region: oregon
+    plan: starter
+
+    buildCommand: npm run build
+    startCommand: npm start
+
+    # Health check endpoint
+    healthCheckPath: /api/health
+
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.rez.money
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://rez.money
+
+      # Database
+      - key: DATABASE_URL
+        sync: false
+
+      # Authentication
+      - key: JWT_SECRET
+        sync: false
+      - key: QR_SECRET
+        sync: false
+
+      # REZ Service URLs
+      - key: REZ_AUTH_SERVICE_URL
+        value: https://auth.rez.money
+      - key: REZ_MERCHANT_SERVICE_URL
+        value: https://merchant.rez.money
+      - key: REZ_CATALOG_SERVICE_URL
+        value: https://catalog.rez.money
+
+      # Monitoring
+      - key: SENTRY_DSN
+        sync: false
+
+    # Auto-deploy from main branch
+    autoDeploy: true
+
+    # Headers for caching
+    headers:
+      - path: /_next/static/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

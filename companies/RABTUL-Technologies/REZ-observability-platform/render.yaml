@@ -1,0 +1,35 @@
+# Render Blueprint for REZ Observability Platform
+# Deploy with: render-blueprints create
+
+services:
+  - type: web
+    name: rez-observability-platform
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: LOG_LEVEL
+        value: info
+
+  # PostgreSQL Database
+  - type: pserv
+    name: observability-db
+    plan: starter
+    region: oregon
+    databaseName: rez_observability
+    ipAllowList: []
+
+  # Redis Cache
+  - type: redis
+    name: observability-cache
+    plan: starter
+    region: oregon
+    ipAllowList: []

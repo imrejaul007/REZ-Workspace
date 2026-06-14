@@ -1,0 +1,295 @@
+# Performance Alerting Rules for RestaurantHub
+# Designed for 10,000+ Concurrent User Load Testing
+
+groups:
+  - name: api_performance
+    interval: 10s
+    rules:
+      # High Response Time Alert
+      - alert: HighAPIResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="restauranthub-api"}[5m])) > 2
+        for: 30s
+        labels:
+          severity: warning
+          component: api
+          team: backend
+        annotations:
+          summary: "High API response time detected"
+          description: "API 95th percentile response time is {{ $value }}s (threshold: 2s) for {{ $labels.method }} {{ $labels.endpoint }}"
+          impact: "User experience degradation"
+          runbook: "https://docs.restauranthub.com/runbooks/high-response-time"
+
+      # Critical Response Time Alert
+      - alert: CriticalAPIResponseTime
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job="restauranthub-api"}[5m])) > 5
+        for: 30s
+        labels:
+          severity: critical
+          component: api
+          team: backend
+        annotations:
+          summary: "Critical API response time detected"
+          description: "API 99th percentile response time is {{ $value }}s (threshold: 5s) for {{ $labels.method }} {{ $labels.endpoint }}"
+          impact: "Severe user experience impact, potential service unavailability"
+          action: "Immediate investigation required"
+
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="restauranthub-api",status=~"5.."}[5m]) / rate(http_requests_total{job="restauranthub-api"}[5m]) > 0.05
+        for: 1m
+        labels:
+          severity: warning
+          component: api
+          team: backend
+        annotations:
+          summary: "High API error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%) for {{ $labels.endpoint }}"
+          impact: "Service reliability issues"
+          action: "Check logs and error patterns"
+
+      # Critical Error Rate Alert
+      - alert: CriticalErrorRate
+        expr: rate(http_requests_total{job="restauranthub-api",status=~"5.."}[5m]) / rate(http_requests_total{job="restauranthub-api"}[5m]) > 0.15
+        for: 30s
+        labels:
+          severity: critical
+          component: api
+          team: backend
+        annotations:
+          summary: "Critical API error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 15%) for {{ $labels.endpoint }}"
+          impact: "Major service disruption"
+          action: "Immediate escalation and investigation"
+
+      # Low Throughput Alert
+      - alert: LowAPIThroughput
+        expr: rate(http_requests_total{job="restauranthub-api"}[5m]) < 50
+        for: 2m
+        labels:
+          severity: warning
+          component: api
+          team: backend
+        annotations:
+          summary: "Low API throughput detected"
+          description: "Current throughput is {{ $value | humanize }}req/s (threshold: 50req/s)"
+          impact: "Potential capacity issues or service degradation"
+          action: "Check for bottlenecks and scaling issues"
+
+      # Memory Usage Alert
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes{job="node-exporter"} - node_memory_MemAvailable_bytes{job="node-exporter"}) / node_memory_MemTotal_bytes{job="node-exporter"} > 0.85
+        for: 2m
+        labels:
+          severity: warning
+          component: system
+          team: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} (threshold: 85%)"
+          impact: "Potential service instability"
+          action: "Monitor for memory leaks and consider scaling"
+
+      # Critical Memory Usage Alert
+      - alert: CriticalMemoryUsage
+        expr: (node_memory_MemTotal_bytes{job="node-exporter"} - node_memory_MemAvailable_bytes{job="node-exporter"}) / node_memory_MemTotal_bytes{job="node-exporter"} > 0.95
+        for: 1m
+        labels:
+          severity: critical
+          component: system
+          team: infrastructure
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} (threshold: 95%)"
+          impact: "Imminent service failure"
+          action: "Immediate scaling or service restart required"
+
+      # CPU Usage Alert
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{job="node-exporter",mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+          component: system
+          team: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}% (threshold: 80%)"
+          impact: "Performance degradation"
+          action: "Check for resource-intensive processes"
+
+      # Concurrent Users Threshold
+      - alert: HighConcurrentUsers
+        expr: gauge_concurrent_users > 8000
+        for: 30s
+        labels:
+          severity: warning
+          component: application
+          team: backend
+        annotations:
+          summary: "High concurrent users detected"
+          description: "Current concurrent users: {{ $value }} (threshold: 8000)"
+          impact: "Approaching capacity limits"
+          action: "Prepare for scaling and monitor closely"
+
+      # Critical Concurrent Users
+      - alert: CriticalConcurrentUsers
+        expr: gauge_concurrent_users > 10000
+        for: 10s
+        labels:
+          severity: critical
+          component: application
+          team: backend
+        annotations:
+          summary: "Critical concurrent users level reached"
+          description: "Current concurrent users: {{ $value }} (threshold: 10000)"
+          impact: "At maximum designed capacity"
+          action: "Immediate scaling action required"
+
+  - name: authentication_performance
+    interval: 15s
+    rules:
+      # Authentication Failure Rate
+      - alert: HighAuthFailureRate
+        expr: rate(auth_failures_total[5m]) / rate(auth_attempts_total[5m]) > 0.05
+        for: 1m
+        labels:
+          severity: warning
+          component: auth
+          team: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Auth failure rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+          impact: "Potential security issue or service problem"
+          action: "Check for brute force attacks or service issues"
+
+      # JWT Token Generation Time
+      - alert: SlowJWTGeneration
+        expr: histogram_quantile(0.95, rate(jwt_generation_duration_seconds_bucket[5m])) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+          component: auth
+          team: backend
+        annotations:
+          summary: "Slow JWT token generation"
+          description: "JWT generation 95th percentile is {{ $value }}s (threshold: 0.5s)"
+          impact: "Slow authentication response"
+          action: "Check JWT service performance"
+
+      # Session Cleanup Issues
+      - alert: HighActiveSessionCount
+        expr: gauge_active_sessions > 50000
+        for: 5m
+        labels:
+          severity: warning
+          component: auth
+          team: backend
+        annotations:
+          summary: "High active session count"
+          description: "Active sessions: {{ $value }} (threshold: 50000)"
+          impact: "Memory and storage pressure"
+          action: "Check session cleanup processes"
+
+  - name: business_logic_performance
+    interval: 30s
+    rules:
+      # Job Search Performance
+      - alert: SlowJobSearches
+        expr: histogram_quantile(0.95, rate(job_search_duration_seconds_bucket[5m])) > 3
+        for: 1m
+        labels:
+          severity: warning
+          component: search
+          team: backend
+        annotations:
+          summary: "Slow job search performance"
+          description: "Job search 95th percentile is {{ $value }}s (threshold: 3s)"
+          impact: "Poor user search experience"
+          action: "Check database indexes and search optimization"
+
+      # Job Application Processing
+      - alert: SlowJobApplications
+        expr: histogram_quantile(0.95, rate(job_application_processing_duration_seconds_bucket[5m])) > 2
+        for: 1m
+        labels:
+          severity: warning
+          component: applications
+          team: backend
+        annotations:
+          summary: "Slow job application processing"
+          description: "Application processing 95th percentile is {{ $value }}s (threshold: 2s)"
+          impact: "Delayed job application submissions"
+          action: "Check application processing pipeline"
+
+      # Employee Verification Delays
+      - alert: SlowEmployeeVerification
+        expr: histogram_quantile(0.95, rate(employee_verification_duration_seconds_bucket[5m])) > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: verification
+          team: compliance
+        annotations:
+          summary: "Slow employee verification process"
+          description: "Verification 95th percentile is {{ $value }}s (threshold: 5s)"
+          impact: "Delayed employee onboarding"
+          action: "Check verification service and external dependencies"
+
+  - name: scalability_indicators
+    interval: 20s
+    rules:
+      # Queue Depth Monitoring
+      - alert: HighJobQueueDepth
+        expr: gauge_job_queue_depth > 1000
+        for: 1m
+        labels:
+          severity: warning
+          component: queue
+          team: infrastructure
+        annotations:
+          summary: "High job queue depth"
+          description: "Job queue depth: {{ $value }} (threshold: 1000)"
+          impact: "Processing delays"
+          action: "Scale job processors or investigate bottlenecks"
+
+      # Connection Pool Exhaustion
+      - alert: ConnectionPoolNearExhaustion
+        expr: gauge_db_connections_active / gauge_db_connections_max > 0.8
+        for: 1m
+        labels:
+          severity: warning
+          component: database
+          team: infrastructure
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: "Connection usage: {{ $value | humanizePercentage }} (threshold: 80%)"
+          impact: "Potential connection exhaustion"
+          action: "Scale connection pool or optimize queries"
+
+      # Cache Hit Rate
+      - alert: LowCacheHitRate
+        expr: rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m])) < 0.8
+        for: 2m
+        labels:
+          severity: warning
+          component: cache
+          team: backend
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate: {{ $value | humanizePercentage }} (threshold: 80%)"
+          impact: "Increased database load"
+          action: "Review caching strategy and cache warming"
+
+      # Request Queue Latency
+      - alert: HighRequestQueueLatency
+        expr: histogram_quantile(0.95, rate(request_queue_duration_seconds_bucket[5m])) > 1
+        for: 30s
+        labels:
+          severity: critical
+          component: queue
+          team: infrastructure
+        annotations:
+          summary: "High request queue latency"
+          description: "Queue latency 95th percentile: {{ $value }}s (threshold: 1s)"
+          impact: "Requests backing up in queue"
+          action: "Immediate scaling or load balancing adjustment needed"

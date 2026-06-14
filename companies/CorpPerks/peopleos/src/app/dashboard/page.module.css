@@ -1,0 +1,264 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subtitle {
+  color: var(--gray-500);
+}
+
+.aiBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #10b981 0%, #6366f1 100%);
+  color: white;
+  border-radius: 25px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.statIcon {
+  font-size: 32px;
+}
+
+.statValue {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.statLabel {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cardHeader h2 {
+  margin-bottom: 0;
+}
+
+.viewAll {
+  font-size: 14px;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Pipeline */
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pipelineStage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pipelineBar {
+  flex: 1;
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pipelineFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 4px;
+}
+
+.pipelineInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.pipelineCount {
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.pipelineLabel {
+  color: var(--gray-500);
+  font-size: 13px;
+}
+
+/* Hires */
+.hires {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hire {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--gray-100);
+  border-radius: 8px;
+}
+
+.avatar {
+  font-size: 28px;
+}
+
+.hireInfo {
+  flex: 1;
+}
+
+.hireName {
+  display: block;
+  font-weight: 500;
+}
+
+.hireRole {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.hireStatus {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--primary);
+  border-radius: 15px;
+  font-weight: 500;
+}
+
+/* Quick Actions */
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.quickAction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  background: var(--gray-100);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--gray-700);
+  transition: all 0.2s;
+}
+
+.quickAction:hover {
+  background: var(--gray-200);
+}
+
+.quickIcon {
+  font-size: 24px;
+}
+
+/* Approvals */
+.approvals {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.approval {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--gray-100);
+  border-radius: 8px;
+}
+
+.approvalIcon {
+  font-size: 24px;
+}
+
+.approvalInfo {
+  flex: 1;
+}
+
+.approvalName {
+  display: block;
+  font-weight: 500;
+}
+
+.approvalType {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.approvalActions {
+  display: flex;
+  gap: 8px;
+}
+
+.approveBtn, .rejectBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.approveBtn {
+  background: var(--primary);
+  color: white;
+}
+
+.rejectBtn {
+  background: var(--error);
+  color: white;
+}

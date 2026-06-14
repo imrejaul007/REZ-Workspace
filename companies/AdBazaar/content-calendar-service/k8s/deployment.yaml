@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-content-calendar
+  labels:
+    app: ad-bazaar-content-calendar
+    tier: social-automation
+    component: calendar
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-content-calendar
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-content-calendar
+        tier: social-automation
+        component: calendar
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5092"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/content-calendar-service:latest
+        ports:
+        - containerPort: 5092
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: ad-bazaar-content-calendar-config
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5092
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3

@@ -1,0 +1,16 @@
+{
+  "ios": {
+    "name": "REZ — Earn While You Spend",
+    "subtitle": "Cashback & Loyalty Rewards",
+    "description": "REZ turns every purchase into cashback coins. Scan QR codes at partner stores, earn coins instantly, redeem for discounts. Track your savings, build streaks, and climb the leaderboard.\n\n• Instant cashback on every purchase\n• Daily streak rewards\n• Group buy with friends\n• 2× coins with REZ Premium\n• Nearby store finder with live offers",
+    "keywords": ["cashback", "loyalty", "rewards", "coins", "savings", "deals", "offers", "QR"],
+    "supportUrl": "https://rez.money/support",
+    "marketingUrl": "https://rez.money",
+    "privacyPolicyUrl": "https://rez.money/privacy"
+  },
+  "android": {
+    "title": "REZ — Earn While You Spend",
+    "shortDescription": "Cashback coins on every purchase. Scan, earn, redeem.",
+    "fullDescription": "REZ turns every purchase into cashback coins. Scan QR codes at partner stores, earn coins instantly, and redeem for discounts.\n\n• Instant cashback on every purchase\n• Daily streak rewards\n• Group buy with friends\n• 2× coins with REZ Premium\n• Nearby store finder with live offers"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@risna/migrations",
+  "version": "1.0.0",
+  "description": "RisnaEstate MongoDB Database Migrations",
+  "main": "migrate.ts",
+  "scripts": {
+    "migrate": "tsx migrate.ts",
+    "migrate:up": "tsx migrate.ts up",
+    "migrate:down": "tsx migrate.ts rollback",
+    "migrate:rollback": "tsx migrate.ts rollback",
+    "migrate:status": "tsx migrate.ts status",
+    "migrate:rollback:id": "tsx migrate.ts rollback <migration-id>"
+  },
+  "keywords": [
+    "mongodb",
+    "migrations",
+    "database",
+    "risnaestate"
+  ],
+  "author": "RisnaEstate",
+  "license": "MIT",
+  "dependencies": {
+    "mongoose": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

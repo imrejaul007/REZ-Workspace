@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "REZ Safe QR",
+    "slug": "safe-qr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "rezsafe",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rez.safeqr",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "REZ Safe QR needs location access to show nearby QR codes",
+        "NSCameraUsageDescription": "REZ Safe QR needs camera access to scan QR codes"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.rez.safeqr",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "REZ Safe QR needs camera access to scan QR codes"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "REZ Safe QR needs location access"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "safe-qr-project-id"
+      }
+    }
+  }
+}

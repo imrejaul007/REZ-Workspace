@@ -1,0 +1,27 @@
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+export default function Landing() {
+  const router = useRouter();
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}><Text style={styles.logo}>👕 REZ Laundry</Text><Text style={styles.tagline}>Smart Laundry Management</Text></View>
+      <View style={styles.features}>
+        <Text style={styles.featureItem}>📋 Order Management</Text>
+        <Text style={styles.featureItem}>👕 Service Tracking</Text>
+        <Text style={styles.featureItem}>💰 Billing</Text>
+        <Text style={styles.featureItem}>📊 Reports</Text>
+      </View>
+      <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push("/(tabs)")}><Text style={styles.primaryBtnText}>Get Started</Text></TouchableOpacity>
+    </View>
+  );
+}
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff", padding: 24 },
+  header: { alignItems: "center", marginTop: 60 },
+  logo: { fontSize: 28, fontWeight: "bold", color: "#0ea5e9" },
+  tagline: { fontSize: 16, color: "#666", marginTop: 8 },
+  features: { marginTop: 48, padding: 24, backgroundColor: "#e0f2fe", borderRadius: 16 },
+  featureItem: { fontSize: 16, marginVertical: 8, color: "#075985" },
+  primaryBtn: { backgroundColor: "#0ea5e9", padding: 16, borderRadius: 12, alignItems: "center", marginTop: "auto" },
+  primaryBtnText: { color: "#fff", fontSize: 18, fontWeight: "600" },
+});

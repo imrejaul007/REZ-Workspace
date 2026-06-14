@@ -1,0 +1,12 @@
+# Atlas Engage - Kubernetes ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atlas-engage-config
+  namespace: rez-merchant
+data:
+  SERVICE_NAME: "atlas-engage"
+  PORT: "5165"
+  NODE_ENV: "production"
+  EMAIL_SERVICE_URL: "http://atlas-email-service:5161"
+  CALL_SERVICE_URL: "http://atlas-call-service:5164"

@@ -1,0 +1,24 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# rez-restaurant-loyalty-service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-restaurant-loyalty-service
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-loyalty-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-restaurant-loyalty-service - Restaurant Loyalty API"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4007
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-restaurant-loyalty-service

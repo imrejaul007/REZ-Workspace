@@ -1,0 +1,29 @@
+# ================================================
+# REZ-Merchant Render Blueprint
+# rez-restaurant-analytics-service
+# ================================================
+
+services:
+  - type: web
+    name: rez-restaurant-analytics-service
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3005
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+      - key: ALLOWED_ORIGINS
+        value: https://rez.money

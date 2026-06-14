@@ -1,0 +1,498 @@
+import { withErrorBoundary } from '@/utils/withErrorBoundary';
+// Profile QR Code Page
+// Display QR code for profile sharing and wallet payments
+
+import React, { useState } from 'react';
+import { View, ScrollView, StyleSheet, Pressable, StatusBar, Share } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { ThemedText } from '@/components/ThemedText';
+import { useAuthUser, useGetCurrencySymbol } from '@/stores/selectors';
+import * as Clipboard from 'expo-clipboard';
+import QRCode from 'react-native-qrcode-svg';
+import { platformAlertSimple } from '@/utils/platformAlert';
+import { Colors, Spacing, BorderRadius, Shadows, Typography } from '@/constants/DesignSystem';
+import { colors } from '@/constants/theme';
+import { useIsMounted } from '@/hooks/useIsMounted';
+
+const QRCodePage = () => {
+  const router = useRouter();
+  const user = useAuthUser();
+  const [activeTab, setActiveTab] = useState<'profile' | 'wallet'>('profile');
+  const getCurrencySymbol = useGetCurrencySymbol();
+  const isMounted = useIsMounted();
+  const currencySymbol = getCurrencySymbol();
+
+  // Generate profile link
+  const profileLink = `https://rezapp.com/user/${user?.id || 'user123'}`;
+  const walletId = `REZW${user?.phoneNumber?.slice(-6) || '123456'}`;
+
+  const handleCopyLink = async () => {
+    await Clipboard.setStringAsync(activeTab === 'profile' ? profileLink : walletId);
+    platformAlertSimple('Copied!', `${activeTab === 'profile' ? 'Profile link' : 'Wallet ID'} copied to clipboard`);
+  };
+
+  const handleShare = async () => {
+    try {
+      const message =
+        activeTab === 'profile'
+          ? `Check out my profile on REZ App!\n${profileLink}`
+          : `Send payment to my REZ Wallet:\nID: ${walletId}`;
+
+      await Share.share({
+        message,
+        title: activeTab === 'profile' ? 'My Profile' : 'My Wallet',
+      });
+    } catch (error) {
+      // silently handle
+    }
+  };
+
+  const handleScan = () => {
+    router.push('/wallet-screen' as unknown as string);
+  };
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.lightMustard} />
+
+      {/* Header */}
+      <LinearGradient colors={[Colors.gold, colors.nileBlue]} style={styles.header}>
+        <View style={styles.headerContent}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.push('/profile');
+              }
+            }}
+          >
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </Pressable>
+          <ThemedText style={styles.headerTitle}>QR Code</ThemedText>
+          <Pressable style={styles.scanButton} onPress={handleScan}>
+            <Ionicons name="scan" size={24} color="white" />
+          </Pressable>
+        </View>
+
+        {/* Tabs */}
+        <View style={styles.tabContainer}>
+          <Pressable
+            style={[styles.tab, activeTab === 'profile' && styles.tabActive]}
+            onPress={() => setActiveTab('profile')}
+          >
+            <Ionicons name="person" size={20} color={activeTab === 'profile' ? Colors.gold : 'rgba(255,255,255,0.7)'} />
+            <ThemedText style={[styles.tabText, activeTab === 'profile' && styles.tabTextActive]}>Profile</ThemedText>
+          </Pressable>
+
+          <Pressable
+            style={[styles.tab, activeTab === 'wallet' && styles.tabActive]}
+            onPress={() => setActiveTab('wallet')}
+          >
+            <Ionicons name="wallet" size={20} color={activeTab === 'wallet' ? Colors.gold : 'rgba(255,255,255,0.7)'} />
+            <ThemedText style={[styles.tabText, activeTab === 'wallet' && styles.tabTextActive]}>Wallet</ThemedText>
+          </Pressable>
+        </View>
+      </LinearGradient>
+
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        {/* QR Code Card */}
+        <View style={styles.qrCard}>
+          <View style={styles.qrContainer}>
+            <QRCode
+              value={activeTab === 'profile' ? profileLink : walletId}
+              size={220}
+              color={colors.text.primary}
+              backgroundColor="white"
+            />
+          </View>
+
+          {/* Info Section */}
+          <View style={styles.infoSection}>
+            {activeTab === 'profile' ? (
+              <>
+                <View style={styles.infoRow}>
+                  <View style={styles.avatarSmall}>
+                    <ThemedText style={styles.avatarText}>
+                      {user?.profile?.firstName?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.infoText}>
+                    <ThemedText style={styles.infoName}>
+                      {user?.profile?.firstName && user?.profile?.lastName
+                        ? `${user.profile.firstName} ${user.profile.lastName}`
+                        : user?.profile?.firstName || user?.email || 'User Name'}
+                    </ThemedText>
+                    <ThemedText style={styles.infoEmail}>{user?.email || 'user@email.com'}</ThemedText>
+                  </View>
+                </View>
+                <View style={styles.linkBox}>
+                  <ThemedText style={styles.linkLabel}>Profile Link</ThemedText>
+                  <ThemedText style={styles.linkText} numberOfLines={1}>
+                    {profileLink}
+                  </ThemedText>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.walletInfo}>
+                  <Ionicons name="wallet" size={32} color={Colors.gold} />
+                  <ThemedText style={styles.walletId}>{walletId}</ThemedText>
+                  <ThemedText style={styles.walletBalance}>
+                    Balance: {currencySymbol}
+                    {user?.wallet?.balance || 0}
+                  </ThemedText>
+                </View>
+                <View style={styles.instructionBox}>
+                  <Ionicons name="information-circle" size={20} color={colors.text.tertiary} />
+                  <ThemedText style={styles.instructionText}>
+                    Share this QR code to receive payments directly to your REZ wallet
+                  </ThemedText>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionButtons}>
+          <Pressable style={styles.actionButton} onPress={handleShare}>
+            <LinearGradient colors={[Colors.gold, colors.nileBlue]} style={styles.actionButtonGradient}>
+              <Ionicons name="share-social" size={20} color="white" />
+              <ThemedText style={styles.actionButtonText}>Share</ThemedText>
+            </LinearGradient>
+          </Pressable>
+
+          <Pressable style={styles.actionButton} onPress={handleCopyLink}>
+            <View style={styles.actionButtonOutline}>
+              <Ionicons name="copy" size={20} color={Colors.gold} />
+              <ThemedText style={styles.actionButtonTextOutline}>Copy Link</ThemedText>
+            </View>
+          </Pressable>
+        </View>
+
+        {/* Features List */}
+        <View style={styles.featuresSection}>
+          <ThemedText style={styles.featuresTitle}>
+            {activeTab === 'profile' ? 'Share Your Profile' : 'Receive Payments'}
+          </ThemedText>
+
+          {activeTab === 'profile' ? (
+            <>
+              <View style={styles.featureItem}>
+                <View style={styles.featureIcon}>
+                  <Ionicons name="people" size={20} color={Colors.gold} />
+                </View>
+                <ThemedText style={styles.featureText}>Share your profile with friends and family</ThemedText>
+              </View>
+
+              <View style={styles.featureItem}>
+                <View style={styles.featureIcon}>
+                  <Ionicons name="star" size={20} color={Colors.warning} />
+                </View>
+                <ThemedText style={styles.featureText}>Show your reviews and ratings</ThemedText>
+              </View>
+
+              <View style={styles.featureItem}>
+                <View style={styles.featureIcon}>
+                  <Ionicons name="gift" size={20} color={colors.brand.pink} />
+                </View>
+                <ThemedText style={styles.featureText}>Earn referral bonus when they sign up</ThemedText>
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.featureItem}>
+                <View style={styles.featureIcon}>
+                  <Ionicons name="flash" size={20} color={Colors.gold} />
+                </View>
+                <ThemedText style={styles.featureText}>Instant payment to your wallet</ThemedText>
+              </View>
+
+              <View style={styles.featureItem}>
+                <View style={styles.featureIcon}>
+                  <Ionicons name="shield-checkmark" size={20} color={Colors.info} />
+                </View>
+                <ThemedText style={styles.featureText}>Secure and encrypted transactions</ThemedText>
+              </View>
+
+              <View style={styles.featureItem}>
+                <View style={styles.featureIcon}>
+                  <Ionicons name="cash" size={20} color={Colors.warning} />
+                </View>
+                <ThemedText style={styles.featureText}>No transaction fees for REZ users</ThemedText>
+              </View>
+            </>
+          )}
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.secondary,
+  },
+  header: {
+    paddingTop: 50,
+    paddingBottom: 0,
+    paddingHorizontal: Spacing.lg,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.lg,
+  },
+  backButton: {
+    padding: Spacing.sm,
+  },
+  headerTitle: {
+    ...Typography.h3,
+    fontWeight: '700',
+    color: colors.text.inverse,
+    flex: 1,
+    textAlign: 'center',
+  },
+  scanButton: {
+    padding: Spacing.sm,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    paddingBottom: Spacing.base,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: BorderRadius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    gap: 6,
+  },
+  tabActive: {
+    backgroundColor: colors.background.primary,
+  },
+  tabText: {
+    ...Typography.body,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  tabTextActive: {
+    color: Colors.gold,
+  },
+  content: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: Spacing.lg,
+    paddingBottom: 120,
+  },
+  qrCard: {
+    backgroundColor: colors.background.primary,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  qrContainer: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+  },
+  qrPlaceholder: {
+    width: 220,
+    height: 220,
+    backgroundColor: colors.background.primary,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 2,
+    borderColor: colors.border.default,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  qrPattern: {
+    width: 180,
+    height: 180,
+  },
+  qrRow: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  qrDot: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    margin: 1,
+  },
+  qrDotFilled: {
+    backgroundColor: colors.text.primary,
+  },
+  qrNote: {
+    position: 'absolute',
+    bottom: 10,
+    ...Typography.bodySmall,
+    color: colors.text.tertiary,
+    fontWeight: '600',
+  },
+  infoSection: {
+    gap: Spacing.base,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  avatarSmall: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius['2xl'],
+    backgroundColor: Colors.gold,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    ...Typography.h4,
+    fontWeight: '700',
+    color: colors.text.inverse,
+  },
+  infoText: {
+    flex: 1,
+  },
+  infoName: {
+    ...Typography.bodyLarge,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 2,
+  },
+  infoEmail: {
+    ...Typography.body,
+    color: colors.text.tertiary,
+  },
+  linkBox: {
+    backgroundColor: colors.background.secondary,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.sm,
+  },
+  linkLabel: {
+    ...Typography.bodySmall,
+    color: colors.text.tertiary,
+    marginBottom: Spacing.xs,
+  },
+  linkText: {
+    ...Typography.bodySmall,
+    color: colors.text.primary,
+    fontWeight: '500',
+  },
+  walletInfo: {
+    alignItems: 'center',
+    paddingVertical: Spacing.base,
+  },
+  walletId: {
+    ...Typography.h3,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  walletBalance: {
+    ...Typography.bodyLarge,
+    color: colors.text.tertiary,
+  },
+  instructionBox: {
+    flexDirection: 'row',
+    backgroundColor: colors.background.secondary,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    gap: Spacing.sm,
+  },
+  instructionText: {
+    flex: 1,
+    ...Typography.bodySmall,
+    color: colors.text.tertiary,
+    lineHeight: 18,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginTop: Spacing.lg,
+  },
+  actionButton: {
+    flex: 1,
+  },
+  actionButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+  },
+  actionButtonText: {
+    ...Typography.bodyLarge,
+    fontWeight: '600',
+    color: colors.text.inverse,
+  },
+  actionButtonOutline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: BorderRadius.md,
+    borderWidth: 2,
+    borderColor: Colors.gold,
+    gap: Spacing.sm,
+  },
+  actionButtonTextOutline: {
+    ...Typography.bodyLarge,
+    fontWeight: '600',
+    color: Colors.gold,
+  },
+  featuresSection: {
+    marginTop: Spacing.xl,
+    backgroundColor: colors.background.primary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  featuresTitle: {
+    ...Typography.bodyLarge,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: Spacing.base,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  featureIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  featureText: {
+    flex: 1,
+    ...Typography.body,
+    color: colors.text.tertiary,
+    lineHeight: 20,
+  },
+});
+
+export default withErrorBoundary(QRCodePage, 'ProfileQrCode');

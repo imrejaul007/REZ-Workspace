@@ -1,0 +1,884 @@
+version: '3.8'
+
+# ============================================================
+# RisnaEstate - Production Ready Docker Compose
+# ============================================================
+# Services: 30 microservices + MongoDB + Redis + Frontend
+# Usage: docker-compose up -d
+# ============================================================
+
+services:
+  # ============================================================
+  # INFRASTRUCTURE
+  # ============================================================
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - risna_mongo_data:/data/db
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - risna_redis_data:/data
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================
+  # API GATEWAY (Entry Point)
+  # ============================================================
+
+  gateway:
+    build: ./services/risna-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET required}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://risnaestate.com}
+      - RISNA_PROPERTY_URL=http://property-service:4100
+      - RISNA_LEAD_URL=http://lead-service:4101
+      - RISNA_VISA_URL=http://visa-service:4102
+      - RISNA_REFERRAL_URL=http://referral-service:4103
+      - RISNA_BROKER_URL=http://broker-service:4104
+      - RISNA_CRM_URL=http://crm-service:4105
+      - RISNA_MEDIA_URL=http://media-service:4106
+      - RISNA_INTELLIGENCE_URL=http://intelligence-service:4110
+      - RISNA_WHATSAPP_URL=http://whatsapp-service:4111
+      - RISNA_INVESTMENT_URL=http://investment-service:4112
+      - RISNA_DISTRIBUTION_URL=http://distribution-service:4113
+      - RISNA_NOTIFICATION_URL=http://notification-service:4108
+      - RISNA_PAYMENT_URL=http://payment-service:4109
+      - RISNA_BUILDER_URL=http://builder-service:4107
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================
+  # CORE SERVICES
+  # ============================================================
+
+  property-service:
+    build: ./services/risna-property-service
+    ports:
+      - "4100:4100"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-property-service
+      - PORT=4100
+      - HEALTH_PORT=4200
+      - MONGODB_URI=mongodb://mongo:27017/risna-property
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://risnaestate.com}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  lead-service:
+    build: ./services/risna-lead-service
+    ports:
+      - "4101:4101"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-lead-service
+      - PORT=4101
+      - HEALTH_PORT=4201
+      - MONGODB_URI=mongodb://mongo:27017/risna-lead
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+      - RISNA_PROPERTY_SERVICE_URL=http://property-service:4100
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4101/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  visa-service:
+    build: ./services/risna-visa-service
+    ports:
+      - "4102:4102"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-visa-service
+      - PORT=4102
+      - HEALTH_PORT=4202
+      - MONGODB_URI=mongodb://mongo:27017/risna-visa
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4102/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  referral-service:
+    build: ./services/risna-referral-service
+    ports:
+      - "4103:4103"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-referral-service
+      - PORT=4103
+      - HEALTH_PORT=4203
+      - MONGODB_URI=mongodb://mongo:27017/risna-referral
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+      - REZ_WALLET_SERVICE_URL=http://host.docker.internal:4004
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4103/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  broker-service:
+    build: ./services/risna-broker-service
+    ports:
+      - "4104:4104"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-broker-service
+      - PORT=4104
+      - HEALTH_PORT=4204
+      - MONGODB_URI=mongodb://mongo:27017/risna-broker
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4104/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  crm-service:
+    build: ./services/risna-crm-service
+    ports:
+      - "4105:4105"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-crm-service
+      - PORT=4105
+      - HEALTH_PORT=4205
+      - MONGODB_URI=mongodb://mongo:27017/risna-crm
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+      - REZ_WHATSAPP_URL=http://host.docker.internal:4202
+      - REZ_NOTIFICATIONS_URL=http://host.docker.internal:4011
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4105/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  media-service:
+    build: ./services/risna-media-service
+    ports:
+      - "4106:4106"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-media-service
+      - PORT=4106
+      - HEALTH_PORT=4206
+      - MONGODB_URI=mongodb://mongo:27017/risna-media
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4106/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================
+  # TRANSACTION LIFECYCLE SERVICES
+  # ============================================================
+
+  deal-service:
+    build: ./services/risna-deal-service
+    ports:
+      - "4119:4119"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-deal-service
+      - PORT=4119
+      - HEALTH_PORT=4219
+      - MONGODB_URI=mongodb://mongo:27017/risna-deal
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4119/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  agreement-service:
+    build: ./services/risna-agreement-service
+    ports:
+      - "4127:4127"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-agreement-service
+      - PORT=4127
+      - HEALTH_PORT=4227
+      - MONGODB_URI=mongodb://mongo:27017/risna-agreement
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4127/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  handover-service:
+    build: ./services/risna-handover-service
+    ports:
+      - "4129:4129"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-handover-service
+      - PORT=4129
+      - HEALTH_PORT=4229
+      - MONGODB_URI=mongodb://mongo:27017/risna-handover
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4129/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================
+  # INTELLIGENCE SERVICES
+  # ============================================================
+
+  intelligence-service:
+    build: ./services/risna-intelligence-service
+    ports:
+      - "4110:4110"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-intelligence-service
+      - PORT=4110
+      - MONGODB_URI=mongodb://mongo:27017/risna-intelligence
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4110/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  whatsapp-service:
+    build: ./services/risna-whatsapp-service
+    ports:
+      - "4111:4111"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-whatsapp-service
+      - PORT=4111
+      - MONGODB_URI=mongodb://mongo:27017/risna-whatsapp
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4111/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  investment-service:
+    build: ./services/risna-investment-service
+    ports:
+      - "4112:4112"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-investment-service
+      - PORT=4112
+      - MONGODB_URI=mongodb://mongo:27017/risna-investment
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4112/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  distribution-service:
+    build: ./services/risna-distribution-service
+    ports:
+      - "4113:4113"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-distribution-service
+      - PORT=4113
+      - MONGODB_URI=mongodb://mongo:27017/risna-distribution
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4113/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================
+  # PLATFORM SERVICES
+  # ============================================================
+
+  notification-service:
+    build: ./services/risna-notification-service
+    ports:
+      - "4108:4108"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-notification-service
+      - PORT=4108
+      - MONGODB_URI=mongodb://mongo:27017/risna-notification
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4108/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  payment-service:
+    build: ./services/risna-payment-service
+    ports:
+      - "4109:4109"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-payment-service
+      - PORT=4109
+      - MONGODB_URI=mongodb://mongo:27017/risna-payment
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4109/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  builder-service:
+    build: ./services/risna-builder-service
+    ports:
+      - "4107:4107"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-builder-service
+      - PORT=4107
+      - HEALTH_PORT=4207
+      - MONGODB_URI=mongodb://mongo:27017/risna-builder
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4107/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  booking-service:
+    build: ./services/risna-booking-service
+    ports:
+      - "4120:4120"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-booking-service
+      - PORT=4120
+      - MONGODB_URI=mongodb://mongo:27017/risna-booking
+      - RABTUL_PAYMENT_URL=http://host.docker.internal:4001
+      - RABTUL_WALLET_URL=http://host.docker.internal:4004
+      - RABTUL_NOTIFICATION_URL=http://host.docker.internal:4011
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4120/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================
+  # INTEGRATION SERVICES
+  # ============================================================
+
+  corpperks-bridge:
+    build: ./services/risna-corpperks-bridge
+    ports:
+      - "4114:4114"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-corpperks-bridge
+      - PORT=4114
+      - MONGODB_URI=mongodb://mongo:27017/risna-corpperks-bridge
+      - CORPPERKS_API_URL=${CORPPERKS_API_URL:-https://corpperks.rez.app}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4114/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  ads-integration:
+    build: ./services/risna-ads-integration
+    ports:
+      - "4115:4115"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-ads-integration
+      - PORT=4115
+      - MONGODB_URI=mongodb://mongo:27017/risna-ads-integration
+      - ADSBazaar_API_URL=${ADSBazaar_API_URL:-https://adsbazaar.rez.app}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4115/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  property-intelligence:
+    build: ./services/risna-property-intelligence
+    ports:
+      - "4116:4116"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-property-intelligence
+      - PORT=4116
+      - MONGODB_URI=mongodb://mongo:27017/risna-property-intelligence
+      - REZ_INTELLIGENCE_URL=${REZ_INTELLIGENCE_URL:-http://host.docker.internal:4018}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4116/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  distribution-router:
+    build: ./services/risna-distribution-router
+    ports:
+      - "4117:4117"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-distribution-router
+      - PORT=4117
+      - MONGODB_URI=mongodb://mongo:27017/risna-distribution-router
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4117/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  influencer-tracker:
+    build: ./services/risna-influencer-tracker
+    ports:
+      - "4118:4118"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-influencer-tracker
+      - PORT=4118
+      - MONGODB_URI=mongodb://mongo:27017/risna-influencer-tracker
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4118/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================
+  # UTILITY SERVICES
+  # ============================================================
+
+  realtime-service:
+    build: ./services/risna-realtime-service
+    ports:
+      - "4121:4121"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-realtime-service
+      - PORT=4121
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4121/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  email-service:
+    build: ./services/risna-email-service
+    ports:
+      - "4122:4122"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-email-service
+      - PORT=4122
+      - MONGODB_URI=mongodb://mongo:27017/risna-email
+      - NOTIFICATION_URL=${NOTIFICATION_URL:-http://host.docker.internal:4011}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4122/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  chatbot-service:
+    build: ./services/risna-chatbot-service
+    ports:
+      - "4123:4123"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-chatbot-service
+      - PORT=4123
+      - MONGODB_URI=mongodb://mongo:27017/risna-chatbot
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4123/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  document-service:
+    build: ./services/risna-document-service
+    ports:
+      - "4124:4124"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-document-service
+      - PORT=4124
+      - MONGODB_URI=mongodb://mongo:27017/risna-docs
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4124/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  virtual-tour-service:
+    build: ./services/risna-virtual-tour-service
+    ports:
+      - "4125:4125"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-virtual-tour-service
+      - PORT=4125
+      - MONGODB_URI=mongodb://mongo:27017/risna-tours
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4125/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  push-service:
+    build: ./services/risna-push-service
+    ports:
+      - "4126:4126"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=risna-push-service
+      - PORT=4126
+      - MONGODB_URI=mongodb://mongo:27017/risna-push
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4126/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================
+  # FRONTEND WEB APP
+  # ============================================================
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=http://gateway:3000
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://gateway:3000
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - risna-network
+    restart: unless-stopped
+
+# ============================================================
+# VOLUMES
+# ============================================================
+volumes:
+  risna_mongo_data:
+    driver: local
+  risna_redis_data:
+    driver: local
+
+# ============================================================
+# NETWORKS
+# ============================================================
+networks:
+  risna-network:
+    driver: bridge

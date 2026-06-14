@@ -1,0 +1,1 @@
+import express from'express';import logger from'./utils/logger';import pipelineRoutes from'./routes/pipelines';const app=express();const PORT=4315;app.use(express.json());app.get('/health',(_,res)=>res.json({service:'REZ Data Pipeline',status:'healthy'}));app.use('/api/pipelines',pipelineRoutes);app.listen(PORT,()=>logger.info(`REZ Data Pipeline running on ${PORT}`));export{app};

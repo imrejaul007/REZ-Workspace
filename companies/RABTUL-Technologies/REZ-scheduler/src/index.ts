@@ -1,0 +1,1 @@
+import express from'express';import logger from'./utils/logger';import schedulerRoutes from'./routes/scheduler';const app=express();const PORT=4320;app.use(express.json());app.get('/health',(_,res)=>res.json({service:'REZ Scheduler',status:'healthy'}));app.use('/api/scheduler',schedulerRoutes);app.listen(PORT,()=>logger.info(`REZ Scheduler running on ${PORT}`));export{app};

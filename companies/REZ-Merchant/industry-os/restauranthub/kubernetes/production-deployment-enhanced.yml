@@ -1,0 +1,841 @@
+# ========================================================================================
+# KUBERNETES PRODUCTION DEPLOYMENT - ENHANCED CONFIGURATION
+# ========================================================================================
+# This configuration provides:
+# - Advanced horizontal pod autoscaling
+# - Network policies for security
+# - Service mesh integration ready
+# - Comprehensive monitoring and observability
+# - Multi-zone deployment
+# - Advanced storage classes
+# ========================================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: restauranthub-production
+  labels:
+    name: restauranthub-production
+    environment: production
+    security-scan: enabled
+    monitoring: enabled
+  annotations:
+    scheduler.alpha.kubernetes.io/node-selector: "node-type=application"
+
+---
+# ========================================================================================
+# RBAC AND SERVICE ACCOUNTS
+# ========================================================================================
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: restauranthub-api-sa
+  namespace: restauranthub-production
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT-ID:role/RestaurantHubAPIRole
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: restauranthub-api-role
+  namespace: restauranthub-production
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: restauranthub-api-rolebinding
+  namespace: restauranthub-production
+subjects:
+- kind: ServiceAccount
+  name: restauranthub-api-sa
+  namespace: restauranthub-production
+roleRef:
+  kind: Role
+  name: restauranthub-api-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ========================================================================================
+# SECRETS AND CONFIGURATION
+# ========================================================================================
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: restauranthub-secrets
+  namespace: restauranthub-production
+type: Opaque
+data:
+  # Base64 encoded secrets - USE EXTERNAL SECRET MANAGER IN PRODUCTION
+  database-url: cG9zdGdyZXNxbDovL3VzZXI6cGFzc3dvcmRAaG9zdDo1NDMyL2Ri  # Example - change this
+  jwt-secret: Y2hhbmdlLXRoaXMtdG8tYS1zdHJvbmctc2VjcmV0  # Example - change this
+  redis-password: Y2hhbmdlLXRoaXMtcmVkaXMtcGFzc3dvcmQ=  # Example - change this
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: restauranthub-config
+  namespace: restauranthub-production
+data:
+  environment: "production"
+  log-level: "info"
+  prometheus-enabled: "true"
+  health-check-interval: "30"
+  redis-cluster-nodes: "redis-node-1:6379,redis-node-2:6379,redis-node-3:6379"
+  database-pool-min: "5"
+  database-pool-max: "25"
+
+---
+# ========================================================================================
+# PERSISTENT VOLUMES AND STORAGE
+# ========================================================================================
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: restauranthub-ssd-storage
+  namespace: restauranthub-production
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp3
+  iops: "3000"
+  throughput: "125"
+  encrypted: "true"
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uploads-pvc
+  namespace: restauranthub-production
+  labels:
+    app: restauranthub
+    component: storage
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: restauranthub-ssd-storage
+  resources:
+    requests:
+      storage: 100Gi
+
+---
+# ========================================================================================
+# API DEPLOYMENT WITH ADVANCED FEATURES
+# ========================================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restauranthub-api
+  namespace: restauranthub-production
+  labels:
+    app: restauranthub-api
+    version: v1
+    component: backend
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    kubernetes.io/change-cause: "Production deployment with enhanced configuration"
+spec:
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: restauranthub-api
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: restauranthub-api
+        version: v1
+        component: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/api/v1/metrics"
+        linkerd.io/inject: enabled
+        config.alpha.linkerd.io/proxy-cpu-request: "0.1"
+        config.alpha.linkerd.io/proxy-memory-request: "20Mi"
+    spec:
+      serviceAccountName: restauranthub-api-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: restauranthub-api
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: restauranthub-api
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - restauranthub-api
+              topologyKey: kubernetes.io/hostname
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-type
+                operator: In
+                values:
+                - application
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      tolerations:
+      - key: "application-load"
+        operator: "Equal"
+        value: "high"
+        effect: "NoSchedule"
+      initContainers:
+      - name: migration
+        image: ghcr.io/restauranthub/api:latest
+        command: ["npm", "run", "db:migrate"]
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: restauranthub-secrets
+              key: database-url
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      containers:
+      - name: api
+        image: ghcr.io/restauranthub/api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: API_PORT
+          value: "3000"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: restauranthub-secrets
+              key: database-url
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: restauranthub-secrets
+              key: redis-password
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: restauranthub-secrets
+              key: jwt-secret
+        envFrom:
+        - configMapRef:
+            name: restauranthub-config
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+            ephemeral-storage: "1Gi"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+            ephemeral-storage: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: http
+            httpHeaders:
+            - name: Authorization
+              value: "Bearer health-check-token"
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /api/v1/health/ready
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        startupProbe:
+          httpGet:
+            path: /api/v1/health/startup
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+          successThreshold: 1
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+        - name: logs-volume
+          mountPath: /app/logs
+        - name: uploads-volume
+          mountPath: /app/uploads
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: var-cache-volume
+          mountPath: /var/cache
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+      - name: logging-sidecar
+        image: fluent/fluent-bit:2.1
+        ports:
+        - containerPort: 2020
+          name: metrics
+        volumeMounts:
+        - name: logs-volume
+          mountPath: /app/logs
+          readOnly: true
+        - name: fluent-bit-config
+          mountPath: /fluent-bit/etc
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config-volume
+        configMap:
+          name: restauranthub-config
+      - name: logs-volume
+        emptyDir:
+          sizeLimit: 1Gi
+      - name: uploads-volume
+        persistentVolumeClaim:
+          claimName: uploads-pvc
+      - name: fluent-bit-config
+        configMap:
+          name: fluent-bit-config
+      - name: tmp-volume
+        emptyDir:
+          sizeLimit: 1Gi
+      - name: var-cache-volume
+        emptyDir:
+          sizeLimit: 512Mi
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+
+---
+# ========================================================================================
+# WEB DEPLOYMENT
+# ========================================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restauranthub-web
+  namespace: restauranthub-production
+  labels:
+    app: restauranthub-web
+    version: v1
+    component: frontend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: restauranthub-web
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: restauranthub-web
+        version: v1
+        component: frontend
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+      - name: web
+        image: ghcr.io/restauranthub/web:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: var-cache-volume
+          mountPath: /var/cache
+      volumes:
+      - name: tmp-volume
+        emptyDir:
+          sizeLimit: 512Mi
+      - name: var-cache-volume
+        emptyDir:
+          sizeLimit: 256Mi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - restauranthub-web
+              topologyKey: kubernetes.io/hostname
+
+---
+# ========================================================================================
+# SERVICES
+# ========================================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: restauranthub-api-service
+  namespace: restauranthub-production
+  labels:
+    app: restauranthub-api
+    component: backend
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "5"
+    service.beta.kubernetes.io/aws-load-balancer-healthy-threshold: "2"
+    service.beta.kubernetes.io/aws-load-balancer-unhealthy-threshold: "2"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/api/v1/metrics"
+spec:
+  type: LoadBalancer
+  selector:
+    app: restauranthub-api
+    version: v1
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  - port: 9090
+    targetPort: metrics
+    protocol: TCP
+    name: metrics
+  sessionAffinity: None
+  externalTrafficPolicy: Local
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restauranthub-web-service
+  namespace: restauranthub-production
+  labels:
+    app: restauranthub-web
+    component: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: restauranthub-web
+    version: v1
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  sessionAffinity: None
+
+---
+# ========================================================================================
+# HORIZONTAL POD AUTOSCALERS
+# ========================================================================================
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: restauranthub-api-hpa
+  namespace: restauranthub-production
+  labels:
+    app: restauranthub-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: restauranthub-api
+  minReplicas: 5
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "100"
+  - type: External
+    external:
+      metric:
+        name: sqs_queue_length
+      target:
+        type: AverageValue
+        averageValue: "10"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 60
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+      - type: Pods
+        value: 5
+        periodSeconds: 60
+      selectPolicy: Max
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: restauranthub-web-hpa
+  namespace: restauranthub-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: restauranthub-web
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+
+---
+# ========================================================================================
+# POD DISRUPTION BUDGETS
+# ========================================================================================
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: restauranthub-api-pdb
+  namespace: restauranthub-production
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: restauranthub-api
+      version: v1
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: restauranthub-web-pdb
+  namespace: restauranthub-production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: restauranthub-web
+      version: v1
+
+---
+# ========================================================================================
+# NETWORK POLICIES
+# ========================================================================================
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restauranthub-api-netpol
+  namespace: restauranthub-production
+spec:
+  podSelector:
+    matchLabels:
+      app: restauranthub-api
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: restauranthub-web
+    - podSelector:
+        matchLabels:
+          app: nginx-ingress
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-monitoring
+    ports:
+    - protocol: TCP
+      port: 3000
+    - protocol: TCP
+      port: 9090
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restauranthub-web-netpol
+  namespace: restauranthub-production
+spec:
+  podSelector:
+    matchLabels:
+      app: restauranthub-web
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: nginx-ingress
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: restauranthub-api
+    ports:
+    - protocol: TCP
+      port: 3000
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+
+---
+# ========================================================================================
+# VERTICAL POD AUTOSCALER (Optional)
+# ========================================================================================
+
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: restauranthub-api-vpa
+  namespace: restauranthub-production
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: restauranthub-api
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: api
+      minAllowed:
+        cpu: 100m
+        memory: 512Mi
+      maxAllowed:
+        cpu: 2000m
+        memory: 4Gi
+      controlledResources: ["cpu", "memory"]

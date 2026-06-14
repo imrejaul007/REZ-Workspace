@@ -1,0 +1,17 @@
+# Render Blueprint - REZ Business AI
+# Autonomous AI operating system for merchants
+
+services:
+  - type: web
+    name: rez-business-ai
+    env: node
+    region: Mumbai
+    plan: starter
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '4059'

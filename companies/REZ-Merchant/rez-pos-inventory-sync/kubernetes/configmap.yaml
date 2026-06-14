@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for rez-pos-inventory-sync
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-pos-inventory-sync-config
+  namespace: rez-merchant
+  labels:
+    app: rez-pos-inventory-sync
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4031"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-pos-inventory-sync"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez-pos-inventory-sync"
+  REDIS_DATABASE: "0"

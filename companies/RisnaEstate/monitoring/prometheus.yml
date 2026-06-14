@@ -1,0 +1,111 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  # Gateway
+  - job_name: 'risna-gateway'
+    static_configs:
+      - targets: ['gateway:3000']
+    metrics_path: '/metrics'
+
+  # Property Service
+  - job_name: 'risna-property-service'
+    static_configs:
+      - targets: ['property-service:4100']
+    metrics_path: '/metrics'
+
+  # Lead Service
+  - job_name: 'risna-lead-service'
+    static_configs:
+      - targets: ['lead-service:4101']
+    metrics_path: '/metrics'
+
+  # Visa Service
+  - job_name: 'risna-visa-service'
+    static_configs:
+      - targets: ['visa-service:4102']
+    metrics_path: '/metrics'
+
+  # Referral Service
+  - job_name: 'risna-referral-service'
+    static_configs:
+      - targets: ['referral-service:4103']
+    metrics_path: '/metrics'
+
+  # Broker Service
+  - job_name: 'risna-broker-service'
+    static_configs:
+      - targets: ['broker-service:4104']
+    metrics_path: '/metrics'
+
+  # CRM Service
+  - job_name: 'risna-crm-service'
+    static_configs:
+      - targets: ['crm-service:4105']
+    metrics_path: '/metrics'
+
+  # Media Service
+  - job_name: 'risna-media-service'
+    static_configs:
+      - targets: ['media-service:4106']
+    metrics_path: '/metrics'
+
+  # Builder Service
+  - job_name: 'risna-builder-service'
+    static_configs:
+      - targets: ['builder-service:4107']
+    metrics_path: '/metrics'
+
+  # Notification Service
+  - job_name: 'risna-notification-service'
+    static_configs:
+      - targets: ['notification-service:4108']
+    metrics_path: '/metrics'
+
+  # Payment Service
+  - job_name: 'risna-payment-service'
+    static_configs:
+      - targets: ['payment-service:4109']
+    metrics_path: '/metrics'
+
+  # Intelligence Service
+  - job_name: 'risna-intelligence-service'
+    static_configs:
+      - targets: ['intelligence-service:4110']
+    metrics_path: '/metrics'
+
+  # WhatsApp Service
+  - job_name: 'risna-whatsapp-service'
+    static_configs:
+      - targets: ['whatsapp-service:4111']
+    metrics_path: '/metrics'
+
+  # Investment Service
+  - job_name: 'risna-investment-service'
+    static_configs:
+      - targets: ['investment-service:4112']
+    metrics_path: '/metrics'
+
+  # Distribution Service
+  - job_name: 'risna-distribution-service'
+    static_configs:
+      - targets: ['distribution-service:4113']
+    metrics_path: '/metrics'
+
+  # MongoDB Exporter
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongo-exporter:9216']
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']

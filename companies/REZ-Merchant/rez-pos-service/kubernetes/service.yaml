@@ -1,0 +1,23 @@
+# ================================================
+# REZ POS Service - Kubernetes Service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-pos-service
+  namespace: rez-merchant
+  labels:
+    app: rez-pos-service
+    managed-by: rez-merchant
+  annotations:
+    description: "ReZ POS Service - Restaurant Point of Sale"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4081
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-pos-service

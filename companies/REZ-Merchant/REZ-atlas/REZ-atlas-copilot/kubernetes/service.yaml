@@ -1,0 +1,20 @@
+# Kubernetes Service for REZ-atlas-copilot
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-atlas-copilot
+  namespace: rez-merchant
+  labels:
+    app: REZ-atlas-copilot
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-atlas-copilot service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5172
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-atlas-copilot

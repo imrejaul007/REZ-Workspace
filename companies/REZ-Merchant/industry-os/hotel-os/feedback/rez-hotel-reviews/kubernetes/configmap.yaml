@@ -1,0 +1,38 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap Template
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-hotel-reviews-service-config
+  namespace: rez-merchant
+  labels:
+    app: rez-hotel-reviews-service
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "4023"
+  LOG_LEVEL: "info"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-hotel-reviews-service"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_hotel_reviews_service"
+
+  # Redis
+  REDIS_DATABASE: "0"

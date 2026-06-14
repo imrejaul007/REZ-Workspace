@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: adbazaar-social
+  labels:
+    name: adbazaar-social
+    environment: production

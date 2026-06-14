@@ -1,0 +1,39 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap
+# rez-mind-restaurant-service
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-mind-restaurant-service-config
+  namespace: rez-merchant
+  labels:
+    app: rez-mind-restaurant-service
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "4007"
+  LOG_LEVEL: "info"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-mind-restaurant-service"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "*"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_mind_restaurant"
+
+  # Redis
+  REDIS_DATABASE: "0"

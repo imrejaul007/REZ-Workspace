@@ -1,0 +1,237 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "tsconfig.json",
+    "tsconfigRootDir": "./",
+    "sourceType": "module",
+    "ecmaVersion": 2021
+  },
+  "plugins": [
+    "@typescript-eslint/eslint-plugin",
+    "import",
+    "security"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "@typescript-eslint/recommended",
+    "@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:security/recommended",
+    "prettier"
+  ],
+  "root": true,
+  "env": {
+    "node": true,
+    "jest": true,
+    "es2021": true
+  },
+  "ignorePatterns": [
+    ".eslintrc.js",
+    "dist/",
+    "node_modules/",
+    "coverage/",
+    "*.d.ts"
+  ],
+  "rules": {
+    // TypeScript specific rules
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "@typescript-eslint/explicit-module-boundary-types": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/prefer-nullish-coalescing": "warn",
+    "@typescript-eslint/prefer-optional-chain": "warn",
+    "@typescript-eslint/no-unnecessary-type-assertion": "error",
+    "@typescript-eslint/no-non-null-assertion": "warn",
+    "@typescript-eslint/ban-ts-comment": [
+      "error",
+      {
+        "ts-ignore": "allow-with-description",
+        "minimumDescriptionLength": 10
+      }
+    ],
+    "@typescript-eslint/consistent-type-imports": [
+      "warn",
+      {
+        "prefer": "type-imports",
+        "disallowTypeAnnotations": false
+      }
+    ],
+    "@typescript-eslint/consistent-type-definitions": ["warn", "interface"],
+    "@typescript-eslint/array-type": ["warn", { "default": "array-simple" }],
+    "@typescript-eslint/prefer-readonly": "warn",
+    "@typescript-eslint/prefer-readonly-parameter-types": "off",
+    "@typescript-eslint/strict-boolean-expressions": "off",
+
+    // General ESLint rules
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-console": "warn",
+    "no-debugger": "error",
+    "no-alert": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "no-proto": "error",
+    "no-iterator": "error",
+    "no-caller": "error",
+    "no-extend-native": "error",
+    "no-extra-bind": "error",
+    "no-invalid-this": "error",
+    "no-multi-spaces": "error",
+    "no-multi-str": "error",
+    "no-new-wrappers": "error",
+    "no-throw-literal": "error",
+    "no-undef-init": "error",
+    "no-unused-expressions": "error",
+    "no-useless-call": "error",
+    "no-useless-concat": "error",
+    "no-void": "error",
+    "no-with": "error",
+    "prefer-arrow-callback": "warn",
+    "prefer-spread": "warn",
+    "prefer-template": "warn",
+    "radix": "error",
+    "wrap-iife": ["error", "inside"],
+    "yoda": "error",
+
+    // Import rules
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index"
+        ],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "import/no-unresolved": "error",
+    "import/no-duplicates": "error",
+    "import/no-unused-modules": "warn",
+    "import/no-deprecated": "warn",
+    "import/newline-after-import": "warn",
+    "import/no-anonymous-default-export": "warn",
+
+    // Security rules
+    "security/detect-object-injection": "warn",
+    "security/detect-non-literal-regexp": "warn",
+    "security/detect-unsafe-regex": "error",
+    "security/detect-buffer-noassert": "error",
+    "security/detect-child-process": "warn",
+    "security/detect-disable-mustache-escape": "error",
+    "security/detect-eval-with-expression": "error",
+    "security/detect-no-csrf-before-method-override": "error",
+    "security/detect-non-literal-fs-filename": "warn",
+    "security/detect-non-literal-require": "warn",
+    "security/detect-possible-timing-attacks": "warn",
+    "security/detect-pseudoRandomBytes": "error",
+
+    // Code quality rules
+    "complexity": ["warn", 15],
+    "max-depth": ["warn", 4],
+    "max-lines": ["warn", 500],
+    "max-lines-per-function": ["warn", 100],
+    "max-nested-callbacks": ["warn", 3],
+    "max-params": ["warn", 5],
+    "no-magic-numbers": [
+      "warn",
+      {
+        "ignore": [-1, 0, 1, 2, 100, 200, 201, 400, 401, 403, 404, 500],
+        "ignoreArrayIndexes": true,
+        "enforceConst": true,
+        "detectObjects": false
+      }
+    ],
+
+    // Naming conventions
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        "selector": "default",
+        "format": ["camelCase"]
+      },
+      {
+        "selector": "variable",
+        "format": ["camelCase", "UPPER_CASE"]
+      },
+      {
+        "selector": "parameter",
+        "format": ["camelCase"],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "memberLike",
+        "modifiers": ["private"],
+        "format": ["camelCase"],
+        "leadingUnderscore": "require"
+      },
+      {
+        "selector": "typeLike",
+        "format": ["PascalCase"]
+      },
+      {
+        "selector": "interface",
+        "format": ["PascalCase"],
+        "custom": {
+          "regex": "^I[A-Z]",
+          "match": false
+        }
+      },
+      {
+        "selector": "enumMember",
+        "format": ["UPPER_CASE"]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.spec.ts", "**/*.test.ts", "**/test/**/*.ts"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/ban-ts-comment": "off",
+        "no-magic-numbers": "off",
+        "max-lines-per-function": "off",
+        "security/detect-object-injection": "off",
+        "@typescript-eslint/unbound-method": "off"
+      }
+    },
+    {
+      "files": ["**/*.dto.ts", "**/*.entity.ts", "**/*.interface.ts"],
+      "rules": {
+        "@typescript-eslint/no-empty-interface": "off",
+        "max-lines": "off"
+      }
+    }
+  ],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      }
+    }
+  }
+}

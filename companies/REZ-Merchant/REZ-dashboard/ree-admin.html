@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REE Admin Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f7; color: #1d1d1f; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    header { margin-bottom: 24px; }
+    h1 { font-size: 28px; font-weight: 700; }
+    .subtitle { color: #86868b; font-size: 14px; margin-top: 4px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab { padding: 10px 20px; background: #e8e8ed; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    .tab.active { background: #0071e3; color: white; }
+    .tab:hover:not(.active) { background: #d2d2d7; }
+    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+    .row:last-child { border: none; }
+    .label { color: #86868b; font-size: 14px; }
+    .value { font-weight: 500; }
+    .tier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr); gap: 16px; }
+    .tier-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .tier-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .tier-name { font-size: 18px; font-weight: 700; color: #0071e3; }
+    .tier-min { font-size: 12px; color: #86868b; }
+    .input-group { display: flex; gap: 12px; margin-bottom: 16px; }
+    input { flex: 1; padding: 12px; border: 1px solid #d2d2d7; border-radius: 8px; font-size: 16px; }
+    button { padding: 12px 24px; background: #0071e3; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    button:hover { background: #0077ed; }
+    .result { margin-top: 16px; padding: 16px; background: #f5f5f7; border-radius: 8px; }
+    .result-row { display: flex; justify-content: space-between; padding: 8px 0; }
+    .green { color: #34c759; }
+    .red { color: #ff3b30; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+    .badge-enabled { background: #d1f7d1; color: #1a9f1a; }
+    .badge-disabled { background: #ffd2d2; color: #c00; }
+    .info { padding: 16px; background: #f0f0f0; border-radius: 8px; margin-bottom: 16px; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>REE Admin Dashboard</h1>
+      <p class="subtitle">ReZ Economic Engine Controls</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('tiers')">User Tiers</button>
+      <button class="tab" onclick="showTab('merchant')">Merchant Tiers</button>
+      <button class="tab" onclick="showTab('cashback')">Cashback Calculator</button>
+      <button class="tab" onclick="showTab('fraud')">Fraud Rules</button>
+      <button class="tab" onclick="showTab('info')">Info</button>
+    </div>
+
+    <div id="tiers" class="tab-content">
+      <h2 style="margin-bottom: 16px">User Tiers</h2>
+      <div id="tiers-grid" class="tier-grid"></div>
+    </div>
+
+    <div id="merchant" class="tab-content" style="display:none">
+      <h2 style="margin-bottom: 16px">Merchant Tiers</h2>
+      <div id="merchant-grid" class="tier-grid"></div>
+    </div>
+
+    <div id="cashback" class="tab-content" style="display:none">
+      <div class="card">
+        <div class="card-title">Cashback Calculator</div>
+        <div class="input-group">
+          <input type="number" id="cashback-amount" placeholder="Order amount" value="500">
+          <button onclick="calculateCashback()">Calculate</button>
+        </div>
+        <div id="cashback-result" class="result" style="display:none"></div>
+      </div>
+    </div>
+
+    <div id="fraud" class="tab-content" style="display:none">
+      <div class="info">Fraud rules configured in REE. Includes velocity, travel, duplicate detection, abuse prevention.</div>
+      <div class="card">
+        <div class="card-title">Active Fraud Rules</div>
+        <div class="row"><span class="label">Rapid Scanning Detection</span><span class="badge badge-enabled">Active</span></div>
+        <div class="row"><span class="label">IP Flooding</span><span class="badge badge-enabled">Active</span></div>
+        <div class="row"><span class="label">Impossible Travel</span><span class="badge badge-enabled">Active</span></div>
+        <div class="row"><span class="label">Duplicate Bill Detection</span><span class="badge badge-enabled">Active</span></div>
+        <div class="row"><span class="label">Social Share Abuse</span><span class="badge badge-enabled">Active</span></div>
+      </div>
+    </div>
+
+    <div id="info" class="tab-content" style="display:none">
+      <div class="info"><strong>REE (ReZ Economic Engine</strong> controls commission, cashback, karma, fraud, features.</div>
+      <div class="card">
+        <div class="card-title">Coin Types</div>
+        <div class="row"><span class="label">REZ Coins</span><span class="value">Platform currency, no expiry</span></div>
+        <div class="row"><span class="label">Branded Coins</span><span class="value">Merchant-funded, same-merchant only</span></div>
+        <div class="row"><span class="label">Promo Coins</span><span class="value">Discount currency, 90 day expiry</span></div>
+        <div class="row"><span class="label">Prive Coins</span><span class="value">Universal, 365 day expiry</span></div>
+        <div class="row"><span class="label">Karma Coins</span><span class="value">Impact economy, 20:1 to REZ</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const REE_URL = 'http://localhost:4000/api';
+
+    async function loadTiers() {
+      try {
+        const res = await fetch(REE_URL + '/features/tiers/user');
+        const data = await res.json();
+        const tiers = data.tiers || [];
+        document.getElementById('tiers-grid').innerHTML = tiers.map(t => `
+          <div class="tier-card">
+            <div class="tier-header">
+              <span class="tier-name">${t.name?.toUpperCase() || 'STARTER'}</span>
+              <span class="tier-min">Min ₹${t.minSpend?.toLocaleString() || 0}</span>
+            </div>
+            <div class="row"><span class="label">Cashback</span><span class="value">${t.benefits?.maxCashbackPercent || 5}%</span></div>
+            <div class="row"><span class="label">Social Shares</span><span class="value">${t.benefits?.maxSocialSharesPerDay === -1 ? 'Unlimited' : (t.benefits?.maxSocialSharesPerDay || 3) + '/day'}</span></div>
+            <div class="row"><span class="label">Prive Coins</span><span class="${t.benefits?.canEarnPrive ? 'green' : 'red'}">${t.benefits?.canEarnPrive ? 'Enabled' : 'Disabled'}</span></div>
+            <div class="row"><span class="label">Priority Support</span><span class="${t.benefits?.hasPrioritySupport ? 'green' : 'red'}">${t.benefits?.hasPrioritySupport ? 'Yes' : 'No'}</span></div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('tiers-grid').innerHTML = '<p style="color:#ff3b30">Connect to REE service</p>';
+      }
+    }
+
+    async function loadMerchantTiers() {
+      try {
+        const res = await fetch(REE_URL + '/features/tiers/merchant');
+        const data = await res.json();
+        const tiers = data.tiers || [];
+        document.getElementById('merchant-grid').innerHTML = tiers.map(t => `
+          <div class="tier-card">
+            <div class="tier-header">
+              <span class="tier-name">${t.name?.toUpperCase() || 'FREE'}</span>
+              <span class="tier-min">₹${t.monthlyFee || 0}/mo</span>
+            </div>
+            <div class="row"><span class="label">Commission</span><span class="value">${t.benefits?.commissionRate || 15}%</span></div>
+            <div class="row"><span class="label">QR Codes</span><span class="value">${t.benefits?.maxQRCodes === -1 ? 'Unlimited' : (t.benefits?.maxQRCodes || 100)}</span></div>
+            <div class="row"><span class="label">Analytics</span><span class="${t.benefits?.hasAnalytics ? 'green' : 'red'}">${t.benefits?.hasAnalytics ? 'Yes' : 'No'}</span></div>
+            <div class="row"><span class="label">API Access</span><span class="${t.benefits?.hasAPI ? 'green' : 'red'}">${t.benefits?.hasAPI ? 'Enabled' : 'Disabled'}</span></div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('merchant-grid').innerHTML = '<p style="color:#ff3b30">Connect to REE service</p>';
+      }
+    }
+
+    async function calculateCashback() {
+      const amount = document.getElementById('cashback-amount').value || 500;
+      try {
+        const res = await fetch(REE_URL + '/query/cashback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: parseInt(amount) })
+        });
+        const data = await res.json();
+        const r = data.data || {};
+        const total = (r.cashbackAmount || 0) + (r.socialAmount || 0);
+        document.getElementById('cashback-result').style.display = 'block';
+        document.getElementById('cashback-result').innerHTML = `
+          <div class="result-row"><span>Cashback (${r.cashbackPercent || 5}%)</span><span class="value">₹${r.cashbackAmount || 0}</span></div>
+          <div class="result-row"><span>Social (${r.cashbackPercent || 5}%)</span><span class="value">₹${r.socialAmount || 0}</span></div>
+          <div class="result-row" style="border-top:1px solid #d0d0d0;padding-top:12px;margin-top:8px;font-weight:600">
+            <span>Total Earnings</span><span>₹${total}</span>
+          </div>
+        `;
+      } catch (e) {
+        alert('Error. Is REE running?');
+      }
+    }
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(tab).style.display = 'block';
+      event.target.classList.add('active');
+      if (tab === 'tiers') loadTiers();
+      if (tab === 'merchant') loadMerchantTiers();
+    }
+
+    loadTiers();
+  </script>
+</body>
+</html>

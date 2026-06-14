@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: rez-prive-service
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4070
+      - key: MONGODB_URI
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: WALLET_SERVICE_URL
+        value: https://rez-wallet-service-36vo.onrender.com
+      - key: KARMA_SERVICE_URL
+        value: https://rez-karma-service.onrender.com

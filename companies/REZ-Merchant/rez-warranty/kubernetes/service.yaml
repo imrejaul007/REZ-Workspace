@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-warranty
+  namespace: rez-merchant
+  labels:
+    app: rez-warranty
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-warranty service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4620
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-warranty
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-warranty-internal
+  namespace: rez-merchant
+  labels:
+    app: rez-warranty
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-warranty internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4620
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-warranty

@@ -1,0 +1,39 @@
+{
+  "name": "REZ Now",
+  "short_name": "REZ Now",
+  "description": "Order food, pay at any store, earn REZ coins",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/apple-icon", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ],
+  "categories": ["food", "shopping", "finance"],
+  "shortcuts": [
+    {
+      "name": "Order Food",
+      "short_name": "Order",
+      "description": "Browse nearby restaurants and order food",
+      "url": "/",
+      "icons": [{ "src": "/icon", "sizes": "512x512" }]
+    },
+    {
+      "name": "Scan & Pay",
+      "short_name": "Pay",
+      "description": "Scan QR code to pay at any store",
+      "url": "/?action=scan",
+      "icons": [{ "src": "/icon", "sizes": "512x512" }]
+    },
+    {
+      "name": "My Wallet",
+      "short_name": "Wallet",
+      "description": "View REZ coins and transaction history",
+      "url": "/wallet",
+      "icons": [{ "src": "/icon", "sizes": "512x512" }]
+    }
+  ]
+}

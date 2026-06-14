@@ -1,0 +1,185 @@
+# HOJAI AI - GitHub Actions CD Pipeline
+# Deploys to staging/production on merge to main
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ============================================
+  # DEPLOY TO STAGING
+  # ============================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=staging-
+
+      - name: Build core images
+        run: |
+          for service in hojai-api-gateway hojai-memory hojai-intelligence hojai-agents; do
+            echo "Building $service..."
+            docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service:${{ github.sha }} \
+              -f hojai-core/$service/Dockerfile \
+              --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service:latest \
+              hojai-core/$service
+          done
+
+      - name: Push images
+        run: |
+          for service in hojai-api-gateway hojai-memory hojai-intelligence hojai-agents; do
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service:${{ github.sha }}
+          done
+
+      - name: Deploy to Staging
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > deploy_key
+          chmod 600 deploy_key
+
+          ssh -o StrictHostKeyChecking=no \
+              -i deploy_key \
+              ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_HOST }} \
+              './hojai-deploy.sh staging ${{ github.sha }}'
+
+  # ============================================
+  # SMOKE TESTS
+  # ============================================
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Smoke Test - Health
+        run: |
+          for port in 4500 4520 4530 4550; do
+            echo "Testing port $port..."
+            curl -sf http://staging.hojai.ai:$port/health || exit 1
+          done
+
+      - name: Smoke Test - API
+        run: |
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Tenant-Id: test-smoke" \
+            http://staging.hojai.ai/api/services \
+            | jq -e '.success == true' || exit 1
+
+  # ============================================
+  # DEPLOY TO PRODUCTION
+  # ============================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull staging images
+        run: |
+          for service in hojai-api-gateway hojai-memory hojai-intelligence hojai-agents; do
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service:${{ github.sha }}
+            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service:${{ github.sha }} \
+                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service:latest
+          done
+
+      - name: Push as latest
+        run: |
+          for service in hojai-api-gateway hojai-memory hojai-intelligence hojai-agents; do
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service:latest
+          done
+
+      - name: Deploy to Production
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > deploy_key
+          chmod 600 deploy_key
+
+          ssh -o StrictHostKeyChecking=no \
+              -i deploy_key \
+              ${{ secrets.PRODUCTION_SSH_USER }}@${{ secrets.PRODUCTION_HOST }} \
+              './hojai-deploy.sh production ${{ github.sha }}'
+
+  # ============================================
+  # PRODUCTION VERIFICATION
+  # ============================================
+  verify-production:
+    name: Verify Production
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    environment: production
+
+    steps:
+      - name: Health Check
+        run: |
+          for port in 4500 4520 4530 4550; do
+            echo "Testing port $port..."
+            curl -sf http://api.hojai.ai:$port/health || exit 1
+          done
+
+      - name: Notify
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
+          payload: |
+            {
+              "text": "HOJAI AI Deployment ${{ needs.deploy-production.result }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*HOJAI AI Deployment*\nCommit: `${{ github.sha }}`\nEnvironment: Production\nStatus: ${{ needs.deploy-production.result }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        continue-on-error: true

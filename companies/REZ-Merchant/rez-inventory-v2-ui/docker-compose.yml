@@ -1,0 +1,28 @@
+# ================================================
+# REZ Inventory V2 UI - Docker Compose
+# Production: Nginx serving built SPA
+# ================================================
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rez-inventory-v2-ui
+    restart: unless-stopped
+    ports:
+      - "${PORT:-4000}:80"
+    networks:
+      - rez-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  rez-network:
+    driver: bridge

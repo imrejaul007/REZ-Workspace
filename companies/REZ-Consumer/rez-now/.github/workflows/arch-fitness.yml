@@ -1,0 +1,87 @@
+name: REZ Now — Architecture Fitness
+
+# Runs on every PR touching this app
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'rez-now/**'
+      - 'rez-shared/**'
+      - '.github/workflows/arch-fitness.yml'
+
+jobs:
+  arch-fitness:
+    name: Architecture Fitness Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rez-now
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: No Bespoke Buttons Check
+        run: |
+          echo "Checking for bespoke Button imports..."
+          # Should use @rez/rez-ui Button, not custom button components
+          BAD_BUTTONS=$(grep -rn "from.*'.*[Bb]utton'" app/ components/ --include='*.tsx' | grep -v '@rez/rez-ui' | grep -v 'lucide-react' | grep -v 'radix' | grep -v 'shadcn' | grep -v 'ui/button' || echo "")
+          if [ -n "$BAD_BUTTONS" ]; then
+            echo "⚠️  Found non-standard Button imports:"
+            echo "$BAD_BUTTONS"
+            echo ""
+            echo "Import Button from '@rez/rez-ui' for consistency."
+          else
+            echo "✅ All Button imports use @rez/rez-ui"
+          fi
+
+      - name: No Console Logs Check
+        run: |
+          echo "Checking for console.log/console.error in source..."
+          CONSOLE_LOGS=$(find app components -name '*.ts' -o -name '*.tsx' | xargs grep -l 'console\.\(log\|error\|warn\)' 2>/dev/null || echo "")
+          if [ -n "$CONSOLE_LOGS" ]; then
+            echo "⚠️  Found console logs in:"
+            echo "$CONSOLE_LOGS"
+            echo ""
+            echo "Use the centralized logger from rez-shared/telemetry instead."
+          else
+            echo "✅ No console logs found"
+          fi
+
+      - name: No Math.random() Check
+        run: |
+          echo "Checking for Math.random() in source..."
+          MATH_RANDOM=$(find app components -name '*.ts' -o -name '*.tsx' | xargs grep -n 'Math\.random()' 2>/dev/null || echo "")
+          if [ -n "$MATH_RANDOM" ]; then
+            echo "❌ Found Math.random() in:"
+            echo "$MATH_RANDOM"
+            echo ""
+            echo "Use crypto.randomUUID() or uuid library instead."
+            exit 1
+          else
+            echo "✅ No Math.random() found"
+          fi
+
+      - name: Bundle Size Check
+        run: |
+          echo "Checking for large bundle warnings..."
+          # If there's a .next directory (from build step), check it
+          if [ -d ".next" ]; then
+            echo "Bundle analysis available after build step"
+          else
+            echo "⚠️  Bundle size not checked (build step not run in this job)"
+            echo "Run 'npm run analyze' locally to check bundle sizes."
+          fi
+
+      - name: No Hardcoded API URLs Check
+        run: |
+          echo "Checking for hardcoded API URLs..."
+          HARDCODED=$(grep -rn "https://[^'\"\047]*\." app/ components/ --include='*.ts' --include='*.tsx' | grep -v 'process.env' | grep -v 'NEXT_PUBLIC' | grep -v 'localhost' | grep -v 'example' || echo "")
+          if [ -n "$HARDCODED" ]; then
+            echo "⚠️  Potential hardcoded URLs found:"
+            echo "$HARDCODED"
+            echo ""
+            echo "Use NEXT_PUBLIC_* env vars for client-side URLs."
+          else
+            echo "✅ No hardcoded API URLs found"
+          fi

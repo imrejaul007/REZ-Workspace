@@ -1,0 +1,64 @@
+name: Architecture Fitness
+
+on:
+  pull_request:
+    paths:
+      - 'src/routes/**'
+      - 'src/models/**'
+      - 'src/middleware/**'
+      - 'src/config/**'
+  push:
+    branches: [main]
+
+jobs:
+  route-file-size:
+    name: Route file size limits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check route file sizes
+        run: |
+          set -e
+          WARN_LINES=300
+          FAIL_LINES=500
+          VIOLATIONS=0
+          for f in $(find src/routes -name '*.ts' -type f); do
+            lines=$(wc -l < "$f")
+            if [ "$lines" -gt "$FAIL_LINES" ]; then
+              echo "FAIL: $f is ${lines} lines (limit: ${FAIL_LINES})"
+              VIOLATIONS=$((VIOLATIONS+1))
+            elif [ "$lines" -gt "$WARN_LINES" ]; then
+              echo "WARN: $f is ${lines} lines (consider splitting, limit: ${FAIL_LINES})"
+            fi
+          done
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo "::error::Found $VIOLATIONS route file(s) exceeding ${FAIL_LINES}-line limit"
+            exit 1
+          fi
+          echo "All route files within limits"
+
+  security-audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint

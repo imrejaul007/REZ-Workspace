@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  merchant:
+    build: .
+    ports:
+      - "4005:4005"
+    environment:
+      - NODE_ENV=staging
+      - MONGODB_URI=mongodb://mongo:27017/rez_merchant_staging
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./src:/app/src
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"

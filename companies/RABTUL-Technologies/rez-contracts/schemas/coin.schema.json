@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rez.money/contracts/coin.schema.json",
+  "title": "CoinEntry",
+  "description": "REZ coin earning or redemption record",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["coinEntryId", "userId", "amount", "type", "source", "status", "createdAt"],
+  "properties": {
+    "coinEntryId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{24}$"
+    },
+    "userId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{24}$"
+    },
+    "amount": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "type": {
+      "type": "string",
+      "enum": ["earn", "redeem", "expire", "adjust"]
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "payment_cashback",
+        "karma_reward",
+        "referral_bonus",
+        "merchant_promotion",
+        "gamification_challenge",
+        "manual_adjustment",
+        "expiry"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "expired", "voided"]
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "nullable": true
+    },
+    "transactionId": {
+      "type": "string",
+      "nullable": true
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

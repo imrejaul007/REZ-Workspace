@@ -1,0 +1,162 @@
+# Jaeger configuration for RestaurantHub distributed tracing
+# Production-ready configuration with optimized performance
+
+# Storage configuration
+storage:
+  type: elasticsearch
+  elasticsearch:
+    # Elasticsearch cluster for trace storage
+    server-urls: http://elasticsearch:9200
+    index-prefix: jaeger
+    index-date-separator: "-"
+    tags-as-fields:
+      # Include common tags as fields for better querying
+      include: ["error", "http.status_code", "http.method", "db.type", "component"]
+      config:
+        # Set custom mappings for better performance
+        "http.status_code":
+          type: keyword
+        "http.method":
+          type: keyword
+        "error":
+          type: boolean
+    # Retention policy
+    create-index-templates: true
+    master-timeout: 30s
+    sniffer: false
+    max-span-age: 72h
+
+    # Performance optimizations
+    bulk:
+      size: 5000
+      workers: 10
+      flush-interval: 200ms
+
+    # Security (if needed)
+    # username: jaeger
+    # password: password
+    # tls:
+    #   enabled: true
+    #   ca: /path/to/ca.crt
+    #   cert: /path/to/cert.crt
+    #   key: /path/to/key.key
+
+# Query service configuration
+query:
+  # HTTP server settings
+  http-server:
+    host-port: ":16686"
+
+  # GRPC server settings
+  grpc-server:
+    host-port: ":16685"
+
+  # UI configuration
+  query:
+    base-path: "/"
+    static-files: "/go/jaeger-ui/"
+
+  # Performance settings
+  max-traces: 200
+  log-level: info
+
+  # Additional query settings
+  query:
+    max-clock-skew-adjustment: 30s
+
+# Collector configuration
+collector:
+  # HTTP server for collecting spans
+  http-server:
+    host-port: ":14268"
+
+  # GRPC server for collecting spans
+  grpc-server:
+    host-port: ":14250"
+
+  # Jaeger thrift binary protocol
+  collector:
+    jaeger:
+      thrift-binary:
+        host-port: ":6832"
+      thrift-compact:
+        host-port: ":6831"
+      thrift-http:
+        host-port: ":14268"
+
+  # Zipkin compatibility
+  zipkin:
+    http-port: 9411
+
+  # Queue and batching settings
+  queue:
+    size: 10000
+    workers: 50
+
+  # Sampling configuration
+  sampling:
+    # Default sampling strategy
+    strategies-file: /etc/jaeger/sampling-strategies.json
+
+  # Health check
+  admin:
+    http:
+      host-port: ":14269"
+
+# Agent configuration (for sidecar deployment)
+agent:
+  # Agent ports
+  jaeger:
+    thrift-compact:
+      host-port: ":6831"
+    thrift-binary:
+      host-port: ":6832"
+    grpc:
+      host-port: ":14250"
+
+  # Zipkin thrift
+  zipkin:
+    thrift:
+      host-port: ":5775"
+
+  # Processor configuration
+  processor:
+    jaeger-binary:
+      server-max-packet-size: 1048576
+      server-queue-size: 1000
+      workers: 10
+
+    jaeger-compact:
+      server-max-packet-size: 1048576
+      server-queue-size: 1000
+      workers: 10
+
+# Ingester configuration (for Kafka-based deployments)
+ingester:
+  # Kafka configuration
+  kafka:
+    consumer:
+      brokers: ["kafka:9092"]
+      topic: jaeger-spans
+      group-id: jaeger-ingester
+
+    # Authentication (if needed)
+    # authentication: "kerberos"
+    # kerberos:
+    #   service-name: "kafka"
+    #   realm: "EXAMPLE.COM"
+    #   username: "jaeger"
+    #   password: "password"
+
+# Metrics configuration
+metrics:
+  backend: prometheus
+  http-route: /metrics
+
+# Health check configuration
+health-check:
+  http-port: 14269
+
+# Log configuration
+log-level: info
+log-format: json

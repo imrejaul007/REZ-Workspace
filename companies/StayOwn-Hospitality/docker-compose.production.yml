@@ -1,0 +1,786 @@
+# StayOwn Hospitality - Production Docker Compose
+# Deploy all services with proper configuration
+
+version: '3.8'
+
+services:
+  # ============================================
+  # INFRASTRUCTURE
+  # ============================================
+
+  mongodb:
+    image: mongo:7.0
+    container_name: stayown-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+      MONGO_INITDB_DATABASE: stayown
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: stayown-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-changeme}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: stayown-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-changeme}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # CORE AI SERVICES
+  # ============================================
+
+  hojai-memory:
+    build:
+      context: ./hojai-memory
+      dockerfile: Dockerfile
+    container_name: stayown-hojai-memory
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4520
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/hojai-memory?authSource=admin
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+    ports:
+      - "4520:4520"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4520/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  hojai-staybot:
+    build:
+      context: ./hojai-staybot
+      dockerfile: Dockerfile
+    container_name: stayown-hojai-staybot
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4840
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/hojai-staybot?authSource=admin
+      HOJAI_BRAIN_URL: ${HOJAI_BRAIN_URL:-http://hojai-brain:4530}
+      HOJAI_BRAIN_API_KEY: ${HOJAI_BRAIN_API_KEY:-}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+    ports:
+      - "4840:4840"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4840/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  hojai-genie:
+    build:
+      context: ./hojai-genie
+      dockerfile: Dockerfile
+    container_name: stayown-hojai-genie
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4703
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/hojai-genie?authSource=admin
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+    ports:
+      - "4703:4703"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4703/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # RABTUL CORE SERVICES
+  # ============================================
+
+  rez-auth:
+    build:
+      context: ./rez-auth
+      dockerfile: Dockerfile
+    container_name: stayown-rez-auth
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4002
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/rez-auth?authSource=admin
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN:-7d}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "4002:4002"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  rez-payment:
+    build:
+      context: ./rez-payment
+      dockerfile: Dockerfile
+    container_name: stayown-rez-payment
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4001
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/rez-payment?authSource=admin
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      REZ_MIND_URL: ${REZ_MIND_URL:-http://rez-mind:4017}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+    ports:
+      - "4001:4001"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  rez-wallet:
+    build:
+      context: ./rez-wallet
+      dockerfile: Dockerfile
+    container_name: stayown-rez-wallet
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4004
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/rez-wallet?authSource=admin
+      JWT_SECRET: ${JWT_SECRET}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+    ports:
+      - "4004:4004"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # HOTEL CORE SERVICES
+  # ============================================
+
+  ai-front-desk:
+    build:
+      context: ./ai-front-desk
+      dockerfile: Dockerfile
+    container_name: stayown-ai-front-desk
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3800
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/ai-front-desk?authSource=admin
+      HOJAI_STAYBOT_URL: http://hojai-staybot:4840
+      HOJAI_MEMORY_URL: http://hojai-memory:4520
+      REZ_AUTH_URL: http://rez-auth:4002
+      REZ_PAYMENT_URL: http://rez-payment:4001
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    ports:
+      - "3800:3800"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3800/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  integration-gateway:
+    build:
+      context: ./integration-gateway
+      dockerfile: Dockerfile
+    container_name: stayown-integration-gateway
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3898
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+    ports:
+      - "3898:3898"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3898/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # FRONTEND
+  # ============================================
+
+  hotel-dashboard:
+    build:
+      context: ./hotel-dashboard
+      dockerfile: Dockerfile
+    container_name: stayown-hotel-dashboard
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      VITE_API_URL: ${API_URL:-http://localhost:3800}
+      VITE_WS_URL: ${WS_URL:-ws://localhost:3800}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ai-front-desk
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # RTNM BRIDGE SERVICES (NEW)
+  # ============================================
+
+  staybot-service-router:
+    build:
+      context: ./staybot-service-router
+      dockerfile: Dockerfile
+    container_name: stayown-staybot-router
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4841
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/staybot-router?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379
+      # RABTUL Services
+      REZ_AUTH_URL: http://rez-auth:4002
+      REZ_PAYMENT_URL: http://rez-payment:4001
+      REZ_WALLET_URL: http://rez-wallet:4004
+      # Hotel Services
+      MINIBAR_URL: http://minibar-service:3810
+      RESTAURANT_URL: http://hotel-restaurant-booking:3811
+      SPA_URL: http://hotel-spa-booking:3812
+      HOUSEKEEPING_URL: http://predictive-housekeeping:3826
+      PARKING_URL: http://parking-service:3815
+      CONCIERGE_URL: http://concierge-desk:3821
+      CHECKOUT_URL: http://zero-checkout-automation:3827
+      SMART_LOCK_URL: http://smart-lock-service:3825
+      ROOM_CONTROLS_URL: http://room-controls:3814
+      PRE_ARRIVAL_URL: http://pre-arrival-service:3828
+      UPSELL_URL: http://upsell-engine:3817
+      FEEDBACK_URL: http://feedback-survey:3820
+      REVIEW_URL: http://review-manager:3819
+      LOST_FOUND_URL: http://lost-found:3816
+      # REZ-Merchant
+      REZ_PMS_URL: http://rez-pms:4031
+      REZ_BOOKING_URL: http://rez-booking:4042
+      REZ_ROOM_SERVICE_URL: http://rez-room-service:4043
+      # HOJAI
+      HOJAI_MEMORY_URL: http://hojai-memory:4520
+      HOJAI_STAYBOT_URL: http://hojai-staybot:4840
+      HOJAI_GENIE_URL: http://hojai-genie:4703
+    ports:
+      - "4841:4841"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      hojai-staybot:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4841/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  stayown-airzy-bridge:
+    build:
+      context: ./stayown-airzy-bridge
+      dockerfile: Dockerfile
+    container_name: stayown-airzy-bridge
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3891
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/stayown-airzy-bridge?authSource=admin
+      STAYBOT_URL: http://hojai-staybot:4840
+      HOJAI_MEMORY_URL: http://hojai-memory:4520
+      REZ_PMS_URL: http://rez-pms:4031
+      REZ_BOOKING_URL: http://rez-booking:4042
+      PREDICTIVE_HOUSEKEEPING_URL: http://predictive-housekeeping:3826
+    ports:
+      - "3891:3891"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      hojai-staybot:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3891/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  stayown-corp-integration:
+    build:
+      context: ./stayown-corp-integration
+      dockerfile: Dockerfile
+    container_name: stayown-corp-integration
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3890
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/stayown-corp-integration?authSource=admin
+      CORPPERKS_URL: ${CORPPERKS_URL:-http://corpperks-api-gateway:4700}
+      REZ_BOOKING_URL: http://rez-booking:4042
+      REZ_PMS_URL: http://rez-pms:4031
+      REZ_PAYMENT_URL: http://rez-payment:4001
+      STAYBOT_URL: http://hojai-staybot:4840
+    ports:
+      - "3890:3890"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      hojai-staybot:
+        condition: service_healthy
+    networks:
+      - stayown-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3890/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # HOTEL GUEST SERVICES
+  # ============================================
+
+  minibar-service:
+    build:
+      context: ./minibar-service
+      dockerfile: Dockerfile
+    container_name: stayown-minibar
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3810
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/minibar?authSource=admin
+    ports:
+      - "3810:3810"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  hotel-restaurant-booking:
+    build:
+      context: ./hotel-restaurant-booking
+      dockerfile: Dockerfile
+    container_name: stayown-restaurant
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3811
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/restaurant?authSource=admin
+    ports:
+      - "3811:3811"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  hotel-spa-booking:
+    build:
+      context: ./hotel-spa-booking
+      dockerfile: Dockerfile
+    container_name: stayown-spa
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3812
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/spa?authSource=admin
+    ports:
+      - "3812:3812"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  predictive-housekeeping:
+    build:
+      context: ./predictive-housekeeping
+      dockerfile: Dockerfile
+    container_name: stayown-housekeeping
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3826
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/housekeeping?authSource=admin
+    ports:
+      - "3826:3826"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  parking-service:
+    build:
+      context: ./parking-service
+      dockerfile: Dockerfile
+    container_name: stayown-parking
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3815
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/parking?authSource=admin
+    ports:
+      - "3815:3815"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  concierge-desk:
+    build:
+      context: ./concierge-desk
+      dockerfile: Dockerfile
+    container_name: stayown-concierge
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3821
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/concierge?authSource=admin
+    ports:
+      - "3821:3821"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  zero-checkout-automation:
+    build:
+      context: ./zero-checkout-automation
+      dockerfile: Dockerfile
+    container_name: stayown-checkout
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3827
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/checkout?authSource=admin
+      REZ_PAYMENT_URL: http://rez-payment:4001
+      REZ_WALLET_URL: http://rez-wallet:4004
+    ports:
+      - "3827:3827"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  smart-lock-service:
+    build:
+      context: ./smart-lock-service
+      dockerfile: Dockerfile
+    container_name: stayown-smartlock
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3825
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/smartlock?authSource=admin
+    ports:
+      - "3825:3825"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  room-controls:
+    build:
+      context: ./room-controls
+      dockerfile: Dockerfile
+    container_name: stayown-roomcontrols
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3814
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/roomcontrols?authSource=admin
+    ports:
+      - "3814:3814"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  pre-arrival-service:
+    build:
+      context: ./pre-arrival-service
+      dockerfile: Dockerfile
+    container_name: stayown-prearrival
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3828
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/prearrival?authSource=admin
+      HOJAI_MEMORY_URL: http://hojai-memory:4520
+    ports:
+      - "3828:3828"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  loyalty-system:
+    build:
+      context: ./loyalty-system
+      dockerfile: Dockerfile
+    container_name: stayown-loyalty
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3818
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/loyalty?authSource=admin
+      REZ_WALLET_URL: http://rez-wallet:4004
+    ports:
+      - "3818:3818"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  upsell-engine:
+    build:
+      context: ./upsell-engine
+      dockerfile: Dockerfile
+    container_name: stayown-upsell
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3817
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/upsell?authSource=admin
+    ports:
+      - "3817:3817"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  feedback-survey:
+    build:
+      context: ./feedback-survey
+      dockerfile: Dockerfile
+    container_name: stayown-feedback
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3820
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/feedback?authSource=admin
+    ports:
+      - "3820:3820"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  review-manager:
+    build:
+      context: ./review-manager
+      dockerfile: Dockerfile
+    container_name: stayown-reviews
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3819
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/reviews?authSource=admin
+    ports:
+      - "3819:3819"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  lost-found:
+    build:
+      context: ./lost-found
+      dockerfile: Dockerfile
+    container_name: stayown-lostfound
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3816
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/lostfound?authSource=admin
+    ports:
+      - "3816:3816"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  # ============================================
+  # REZ-MERCHANT HOTEL OS
+  # ============================================
+
+  rez-pms:
+    build:
+      context: ./rez-pms
+      dockerfile: Dockerfile
+    container_name: stayown-rez-pms
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4031
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/rez-pms?authSource=admin
+    ports:
+      - "4031:4031"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  rez-booking:
+    build:
+      context: ./rez-booking
+      dockerfile: Dockerfile
+    container_name: stayown-rez-booking
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4042
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/rez-booking?authSource=admin
+      REZ_PAYMENT_URL: http://rez-payment:4001
+    ports:
+      - "4042:4042"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+  rez-housekeeping:
+    build:
+      context: ./rez-housekeeping
+      dockerfile: Dockerfile
+    container_name: stayown-rez-housekeeping
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4021
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/rez-housekeeping?authSource=admin
+    ports:
+      - "4021:4021"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - stayown-network
+
+# ============================================
+# NETWORKS & VOLUMES
+# ============================================
+
+networks:
+  stayown-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:

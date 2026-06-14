@@ -1,0 +1,2 @@
+# Landing page - static HTML
+# No Python dependencies needed

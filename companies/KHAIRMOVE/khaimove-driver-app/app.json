@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "KHAIRMOVE Driver",
+    "slug": "khaimove-driver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "khaimove-driver",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#16A34A"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.khaimove.driver",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "KHAIRMOVE Driver needs your location to accept rides.",
+        "NSLocationAlwaysUsageDescription": "KHAIRMOVE Driver needs background location for ride tracking.",
+        "NSCameraUsageDescription": "KHAIRMOVE Driver needs camera for document verification."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#16A34A"
+      },
+      "package": "com.khaimove.driver",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "FOREGROUND_SERVICE",
+        "WAKE_LOCK"
+      ]
+    },
+    "plugins": [
+      "expo-location",
+      "expo-notifications",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "khaimove-driver-app"
+      },
+      "API_URL": "https://api.khaimove.com",
+      "SOCKET_URL": "wss://api.khaimove.com",
+      "environment": "production"
+    }
+  }
+}

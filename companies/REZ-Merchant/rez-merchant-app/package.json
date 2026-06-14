@@ -1,0 +1,23 @@
+{
+  "name": "rez-merchant-app",
+  "version": "1.0.0",
+  "description": "Merchant app for REZ-Merchant",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "PORT=4066 ts-node-dev --respawn src/index.ts", // Port: 4066
+    "build": "tsc",
+    "start": "PORT=4066 node dist/index.js", // Port: 4066
+    "test": "vitest",
+    "test:ci": "vitest run"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.6.0"
+  }
+}

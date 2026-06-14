@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ inputs.version }}
+          release_name: Release ${{ inputs.version }}
+          draft: false
+          prerelease: false
+          body: |
+            ## Release Notes
+
+            See [CHANGELOG.md](CHANGELOG.md) for details.
+
+            ### Services Included
+            - 23 production-ready services
+            - Full ecosystem integration
+            - 100% documentation
+
+            ### Installation
+
+            ```bash
+            docker-compose up
+            ```
+
+            Built with ❤️ by RTNM Group
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

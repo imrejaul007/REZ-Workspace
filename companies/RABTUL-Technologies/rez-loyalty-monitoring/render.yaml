@@ -1,0 +1,105 @@
+# Render Blueprint - REZ Loyalty Monitoring Service
+# Deploys a comprehensive monitoring service for the REZ Loyalty System
+
+services:
+  - type: web
+    name: rez-loyalty-monitoring
+    env: node
+    region: oregon
+    plan: starter
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /ready
+    autoDeploy: true
+    envVars:
+      # Application
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4010
+
+      # MongoDB
+      - key: MONGODB_URI
+        sync: false
+        # Render will prompt for this value during deployment
+
+      # Redis
+      - key: REDIS_HOST
+        fromDatabase:
+          name: rez-redis
+          property: host
+      - key: REDIS_PORT
+        fromDatabase:
+          name: rez-redis
+          property: port
+      - key: REDIS_PASSWORD
+        sync: false
+        fromDatabase:
+          name: rez-redis
+          property: password
+
+      # Loyalty Service URLs
+      - key: PROFILE_AGGREGATOR_URL
+        value: https://rez-profile-aggregator.onrender.com
+      - key: STREAK_SERVICE_URL
+        value: https://rez-streak-service.onrender.com
+      - key: CROSS_MERCHANT_URL
+        value: https://rez-cross-merchant.onrender.com
+      - key: SCORE_SERVICE_URL
+        value: https://rez-score-service.onrender.com
+      - key: KARMA_BRIDGE_URL
+        value: https://rez-karma-bridge.onrender.com
+
+      # Alert Thresholds
+      - key: ALERT_ERROR_RATE_THRESHOLD
+        value: 5
+      - key: ALERT_LATENCY_THRESHOLD_MS
+        value: 2000
+      - key: ALERT_CACHE_MISS_THRESHOLD
+        value: 50
+      - key: ALERT_CHECK_INTERVAL_MS
+        value: 30000
+      - key: ALERT_RETENTION_DAYS
+        value: 30
+
+      # Metrics Configuration
+      - key: METRICS_COLLECTION_INTERVAL_MS
+        value: 10000
+      - key: METRICS_HISTORY_RETENTION_DAYS
+        value: 7
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info
+
+# Database for Redis (add this to your render.yaml resources section)
+databases:
+  - name: rez-monitoring-redis
+    plan: starter
+    databaseName: rez_loyalty_monitoring
+    ipAllowList: []
+    redis: true
+
+# Cron Job for cleanup (optional - alert cleanup runs internally)
+# schedules:
+#   - name: daily-metrics-cleanup
+#     schedule: "0 3 * * *"
+#     command: "node dist/scripts/cleanup.js"
+#     regions:
+#       - oregon
+
+# Note: This service requires the following environment variables to be set:
+# - MONGODB_URI: Connection string for MongoDB database
+# - REDIS_HOST, REDIS_PORT, REDIS_PASSWORD: Redis connection details
+#
+# Health check endpoints:
+# - /health: Aggregated health status
+# - /ready: Readiness check for deployments
+#
+# API endpoints:
+# - GET /health/monitoring/health - Detailed health check
+# - GET /health/monitoring/metrics - Current metrics
+# - GET /health/monitoring/metrics/history - Historical metrics
+# - GET /health/monitoring/alerts - Active alerts
+# - GET /health/monitoring/dashboard - Dashboard summary

@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "REZ Purchase Order",
+    "slug": "rez-purchase-order-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "rezpo",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2196F3"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rezapp.purchaseorder",
+      "infoPlist": {
+        "NSCameraUsageDescription": "REZ Purchase Order needs camera access to capture delivery photos",
+        "NSPhotoLibraryUsageDescription": "REZ Purchase Order needs photo library access to attach images to purchase orders"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2196F3"
+      },
+      "package": "com.rezapp.purchaseorder",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "REZ Purchase Order needs camera access to capture delivery photos"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "REZ Purchase Order needs photo library access to attach images"
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "rez-purchase-order-mobile"
+      }
+    }
+  }
+}

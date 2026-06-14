@@ -1,0 +1,1423 @@
+openapi: 3.0.0
+info:
+  title: Social Content Publisher API
+  version: 1.0.0
+  description: |
+    Unified social media content publishing service.
+    Manage posts across multiple platforms, scheduling, approval workflows,
+    and calendar views.
+  contact:
+    name: AdBazaar Support
+    email: support@adbazaar.com
+  license:
+    name: Proprietary
+    url: https://adbazaar.com/license
+
+servers:
+  - url: http://localhost:5083
+    description: Local development server
+  - url: https://api.adbazaar.com/publisher/v1
+    description: Production server
+
+tags:
+  - name: System
+    description: System health and monitoring
+  - name: Posts
+    description: Post management
+  - name: Queue
+    description: Publishing queue management
+  - name: Calendar
+    description: Content calendar
+  - name: Platforms
+    description: Platform connections
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the current health status of the service
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                service: social-content-publisher
+                version: "1.0.0"
+                timestamp: "2026-06-08T10:30:00.000Z"
+                uptime: 3600
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics
+      tags:
+        - System
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  # ============ POSTS ============
+  /api/posts:
+    get:
+      summary: List posts
+      description: Get all posts with filtering and pagination
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: Filter by status (draft, scheduled, published, failed)
+        - name: workflowStatus
+          in: query
+          schema:
+            type: string
+          description: Filter by workflow status (pending, approved, rejected)
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter from date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter to date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Posts retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostListResponse'
+        '401':
+          description: Unauthorized
+
+    post:
+      summary: Create post
+      description: Create a new unified post
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+            example:
+              title: "Summer Sale Announcement"
+              content:
+                text: "Get ready for our biggest summer sale! Up to 50% off on all items."
+                media:
+                  - url: "https://example.com/summer-sale.jpg"
+                    type: image
+              platforms:
+                - platform: instagram
+                  enabled: true
+                  adaptedContent:
+                    text: "Summer sale is HERE! Up to 50% off. Link in bio!"
+              scheduledTime: "2026-06-20T10:00:00Z"
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+
+  /api/posts/{id}:
+    get:
+      summary: Get post
+      description: Get a single post by ID
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      responses:
+        '200':
+          description: Post retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '404':
+          description: Post not found
+
+    patch:
+      summary: Update post
+      description: Update an existing post
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostRequest'
+      responses:
+        '200':
+          description: Post updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+
+    delete:
+      summary: Delete post
+      description: Delete a post
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      responses:
+        '200':
+          description: Post deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /api/posts/{id}/publish:
+    post:
+      summary: Publish post
+      description: Publish a post immediately to all enabled platforms
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      responses:
+        '200':
+          description: Post published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishResultResponse'
+        '400':
+          description: Cannot publish (workflow not approved)
+        '404':
+          description: Post not found
+
+  /api/posts/{id}/schedule:
+    post:
+      summary: Schedule post
+      description: Schedule a post for future publishing
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - scheduledTime
+              properties:
+                scheduledTime:
+                  type: string
+                  format: date-time
+            example:
+              scheduledTime: "2026-06-20T10:00:00Z"
+      responses:
+        '200':
+          description: Post scheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleResponse'
+        '409':
+          description: Scheduling conflict detected
+
+  /api/posts/{id}/submit-review:
+    post:
+      summary: Submit for review
+      description: Submit a post for approval workflow
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+            example:
+              notes: "Ready for approval - Summer sale content"
+      responses:
+        '200':
+          description: Submitted for review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+
+  /api/posts/{id}/approve:
+    post:
+      summary: Approve post
+      description: Approve a post in the workflow
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+            example:
+              notes: "Approved - Good content"
+      responses:
+        '200':
+          description: Post approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+
+  /api/posts/{id}/reject:
+    post:
+      summary: Reject post
+      description: Reject a post in the workflow
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+            example:
+              reason: "Caption needs to be more engaging"
+      responses:
+        '200':
+          description: Post rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+
+  /api/posts/{id}/history:
+    get:
+      summary: Get version history
+      description: Get the version history of a post
+      tags:
+        - Posts
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Post ID
+      responses:
+        '200':
+          description: History retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionHistoryResponse'
+
+  # ============ QUEUE ============
+  /api/queue:
+    get:
+      summary: Get queue
+      description: Get publishing queue items with filtering
+      tags:
+        - Queue
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: Filter by status (pending, published, failed)
+        - name: platform
+          in: query
+          schema:
+            type: string
+          description: Filter by platform
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Queue retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueListResponse'
+
+  /api/queue/pending:
+    get:
+      summary: Get pending items
+      description: Get pending queue items for workers
+      tags:
+        - Queue
+      security:
+        - InternalServiceAuth: []
+      responses:
+        '200':
+          description: Pending items retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PendingQueueResponse'
+
+  /api/queue/reorder:
+    post:
+      summary: Reorder queue
+      description: Reorder items in the publishing queue
+      tags:
+        - Queue
+      security:
+        - InternalServiceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      order:
+                        type: integer
+            example:
+              items:
+                - id: "507f1f77bcf86cd799439011"
+                  order: 1
+                - id: "507f1f77bcf86cd799439012"
+                  order: 2
+      responses:
+        '200':
+          description: Queue reordered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReorderResponse'
+
+  /api/queue/stats:
+    get:
+      summary: Get queue statistics
+      description: Get publishing queue statistics
+      tags:
+        - Queue
+      security:
+        - InternalServiceAuth: []
+      responses:
+        '200':
+          description: Stats retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueStatsResponse'
+
+  /api/queue/{id}/retry:
+    post:
+      summary: Retry failed item
+      description: Retry publishing a failed queue item
+      tags:
+        - Queue
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Queue item ID
+      responses:
+        '200':
+          description: Retry initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueItemResponse'
+
+  /api/queue/{id}:
+    get:
+      summary: Get queue item
+      description: Get a single queue item by ID
+      tags:
+        - Queue
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Queue item ID
+      responses:
+        '200':
+          description: Queue item retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueItemResponse'
+
+  # ============ CALENDAR ============
+  /api/calendar:
+    get:
+      summary: Get calendar
+      description: Get calendar data for a date range
+      tags:
+        - Calendar
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: start
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [week, month]
+            default: week
+          description: Date range type
+      responses:
+        '200':
+          description: Calendar data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarResponse'
+
+  /api/calendar/month/{year}/{month}:
+    get:
+      summary: Get month calendar
+      description: Get calendar data for a specific month
+      tags:
+        - Calendar
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Year (e.g., 2026)
+        - name: month
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+          description: Month (1-12)
+      responses:
+        '200':
+          description: Month calendar retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthCalendarResponse'
+
+  /api/calendar/upcoming:
+    get:
+      summary: Get upcoming posts
+      description: Get upcoming scheduled posts
+      tags:
+        - Calendar
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 7
+          description: Number of days to look ahead
+      responses:
+        '200':
+          description: Upcoming posts retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpcomingPostsResponse'
+
+  # ============ PLATFORMS ============
+  /api/platforms:
+    get:
+      summary: List platforms
+      description: Get all connected platforms
+      tags:
+        - Platforms
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: platform
+          in: query
+          schema:
+            type: string
+          description: Filter by platform name
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: Filter by connection status
+      responses:
+        '200':
+          description: Platforms retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListResponse'
+
+  /api/platforms/active:
+    get:
+      summary: Get active platforms
+      description: Get all active/connected platforms
+      tags:
+        - Platforms
+      security:
+        - InternalServiceAuth: []
+      responses:
+        '200':
+          description: Active platforms retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListResponse'
+
+  /api/platforms/stats:
+    get:
+      summary: Get platform statistics
+      description: Get statistics for all platforms
+      tags:
+        - Platforms
+      security:
+        - InternalServiceAuth: []
+      responses:
+        '200':
+          description: Stats retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformStatsResponse'
+
+  /api/platforms/connect:
+    post:
+      summary: Connect platform
+      description: Connect a new social media platform
+      tags:
+        - Platforms
+      security:
+        - InternalServiceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectPlatformRequest'
+            example:
+              platform: instagram
+              accessToken: "IGQVJ..."
+              refreshToken: "refresh_token"
+              expiresAt: "2026-12-31T23:59:59Z"
+              accountId: "123456789"
+              accountName: "My Business Account"
+      responses:
+        '201':
+          description: Platform connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformResponse'
+
+  /api/platforms/{id}:
+    delete:
+      summary: Disconnect platform
+      description: Disconnect a social media platform
+      tags:
+        - Platforms
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Platform connection ID
+      responses:
+        '200':
+          description: Platform disconnected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisconnectResponse'
+
+  /api/platforms/{id}/sync:
+    post:
+      summary: Sync platform
+      description: Sync data from a platform
+      tags:
+        - Platforms
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Platform connection ID
+      responses:
+        '200':
+          description: Platform synced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+
+  /api/platforms/sync-all:
+    post:
+      summary: Sync all platforms
+      description: Sync data from all connected platforms
+      tags:
+        - Platforms
+      security:
+        - InternalServiceAuth: []
+      responses:
+        '200':
+          description: All platforms synced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkSyncResponse'
+
+  /api/platforms/{id}/status:
+    patch:
+      summary: Update platform status
+      description: Enable or disable a platform
+      tags:
+        - Platforms
+      security:
+        - InternalServiceAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Platform connection ID
+        - name: enabled
+          in: query
+          required: true
+          schema:
+            type: boolean
+          description: Enable or disable platform
+      responses:
+        '200':
+          description: Platform status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusUpdateResponse'
+
+# ============ COMPONENTS ============
+components:
+  securitySchemes:
+    InternalServiceAuth:
+      type: apiKey
+      in: header
+      name: x-internal-token
+      description: Internal service authentication token
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        service:
+          type: string
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+
+    Post:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        content:
+          $ref: '#/components/schemas/PostContent'
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformConfig'
+        status:
+          type: string
+          enum: [draft, scheduled, published, failed]
+        scheduledTime:
+          type: string
+          format: date-time
+        publishedAt:
+          type: string
+          format: date-time
+        workflow:
+          $ref: '#/components/schemas/WorkflowStatus'
+        userId:
+          type: string
+        companyId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PostContent:
+      type: object
+      properties:
+        text:
+          type: string
+        media:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+              type:
+                type: string
+                enum: [image, video]
+              alt:
+                type: string
+
+    PlatformConfig:
+      type: object
+      properties:
+        platform:
+          type: string
+        enabled:
+          type: boolean
+        accountId:
+          type: string
+        adaptedContent:
+          type: object
+          properties:
+            text:
+              type: string
+        status:
+          type: string
+          enum: [pending, published, failed]
+        publishedId:
+          type: string
+        publishedUrl:
+          type: string
+          format: uri
+        error:
+          type: string
+
+    WorkflowStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        submittedAt:
+          type: string
+          format: date-time
+        submittedBy:
+          type: string
+        reviewedAt:
+          type: string
+          format: date-time
+        reviewedBy:
+          type: string
+        notes:
+          type: string
+
+    CreatePostRequest:
+      type: object
+      required:
+        - title
+        - content
+        - platforms
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        content:
+          $ref: '#/components/schemas/PostContent'
+        platforms:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/PlatformConfig'
+        scheduledTime:
+          type: string
+          format: date-time
+
+    UpdatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          $ref: '#/components/schemas/PostContent'
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformConfig'
+        scheduledTime:
+          type: string
+          format: date-time
+
+    PostResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Post'
+
+    PostListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    PublishResultResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            postId:
+              type: string
+            results:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/PlatformPublishResult'
+
+    PlatformPublishResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        publishedId:
+          type: string
+        publishedUrl:
+          type: string
+        error:
+          type: string
+
+    ScheduleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            postId:
+              type: string
+            scheduledTime:
+              type: string
+              format: date-time
+
+    VersionHistoryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              version:
+                type: integer
+              content:
+                $ref: '#/components/schemas/PostContent'
+              createdAt:
+                type: string
+                format: date-time
+              createdBy:
+                type: string
+
+    QueueItem:
+      type: object
+      properties:
+        _id:
+          type: string
+        postId:
+          type: string
+        platform:
+          type: string
+        scheduledTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, published, failed]
+        attempts:
+          type: integer
+        lastError:
+          type: string
+        publishedId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    QueueItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/QueueItem'
+
+    QueueListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueueItem'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    PendingQueueResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueueItem'
+
+    ReorderResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    QueueStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            total:
+              type: integer
+            pending:
+              type: integer
+            published:
+              type: integer
+            failed:
+              type: integer
+            byPlatform:
+              type: object
+              additionalProperties:
+                type: object
+
+    CalendarItem:
+      type: object
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+          format: date-time
+        post:
+          $ref: '#/components/schemas/Post'
+        status:
+          type: string
+
+    CalendarResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date-time
+            endDate:
+              type: string
+              format: date-time
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/CalendarItem'
+            groupedByDate:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarItem'
+            total:
+              type: integer
+
+    MonthCalendarResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            year:
+              type: integer
+            month:
+              type: integer
+            startDate:
+              type: string
+              format: date-time
+            endDate:
+              type: string
+              format: date-time
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/CalendarItem'
+            total:
+              type: integer
+
+    UpcomingPostsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/CalendarItem'
+            total:
+              type: integer
+
+    Platform:
+      type: object
+      properties:
+        _id:
+          type: string
+        companyId:
+          type: string
+        platform:
+          type: string
+        platformAccountId:
+          type: string
+        accountName:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenExpiresAt:
+          type: string
+          format: date-time
+        enabled:
+          type: boolean
+        status:
+          type: string
+          enum: [connected, disconnected, error]
+        lastSyncedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    PlatformResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Platform'
+
+    PlatformListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Platform'
+
+    PlatformStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            byPlatform:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  posts:
+                    type: integer
+                  followers:
+                    type: integer
+                  engagement:
+                    type: number
+
+    ConnectPlatformRequest:
+      type: object
+      required:
+        - platform
+        - accessToken
+        - accountId
+      properties:
+        platform:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        accountId:
+          type: string
+        accountName:
+          type: string
+
+    DisconnectResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    SyncResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    BulkSyncResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            synced:
+              type: integer
+            failed:
+              type: integer
+            results:
+              type: array
+              items:
+                type: object
+                properties:
+                  platformId:
+                    type: string
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+
+    StatusUpdateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    DeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer

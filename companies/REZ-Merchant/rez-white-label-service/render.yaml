@@ -1,0 +1,74 @@
+# ================================================
+# REZ-Merchant Render Blueprint Template
+# ================================================
+
+services:
+  - type: web
+    name: rez-white-label-service
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3083
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+---
+
+# Alternative: With auto-scaling
+services:
+  - type: web
+    name: rez-white-label-service
+    env: node
+    region: oregon
+    plan: performance
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoScalar:
+      min: 2
+      max: 10
+      targetMemoryPercent: 70
+      targetCPUPercent: 60
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3083
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+---
+
+# Alternative: Background worker service
+services:
+  - type: worker
+    name: rez-white-label-service-worker
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/worker.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REDIS_URL
+        sync: false
+      - key: MONGODB_URI
+        sync: false

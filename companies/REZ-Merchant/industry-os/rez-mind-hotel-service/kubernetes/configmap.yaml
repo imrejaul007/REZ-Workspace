@@ -1,0 +1,38 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap Template
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-mind-hotel-service-config
+  namespace: rez-merchant
+  labels:
+    app: rez-mind-hotel-service
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "4017"
+  LOG_LEVEL: "info"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-mind-hotel-service"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_mind_hotel_service"
+
+  # Redis
+  REDIS_DATABASE: "0"

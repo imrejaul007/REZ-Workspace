@@ -1,0 +1,297 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: restauranthub
+data:
+  redis.conf: |
+    # Redis Cluster Configuration
+    port 7000
+    cluster-enabled yes
+    cluster-config-file nodes.conf
+    cluster-node-timeout 5000
+    appendonly yes
+    appendfsync everysec
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+
+    # Memory management
+    maxmemory 1gb
+    maxmemory-policy allkeys-lru
+
+    # Security
+    requirepass ${REDIS_PASSWORD}
+    masterauth ${REDIS_PASSWORD}
+
+    # Performance
+    tcp-keepalive 300
+    timeout 0
+    tcp-backlog 511
+
+    # Logging
+    loglevel notice
+    logfile "/var/log/redis/redis.log"
+
+    # Persistence
+    save 900 1
+    save 300 10
+    save 60 10000
+    stop-writes-on-bgsave-error yes
+    rdbcompression yes
+    rdbchecksum yes
+    dbfilename dump.rdb
+    dir /data
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: restauranthub
+type: Opaque
+data:
+  redis-password: <BASE64_ENCODED_REDIS_PASSWORD>
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+  namespace: restauranthub
+  labels:
+    app: redis-cluster
+spec:
+  serviceName: redis-cluster-service
+  replicas: 6
+  selector:
+    matchLabels:
+      app: redis-cluster
+  template:
+    metadata:
+      labels:
+        app: redis-cluster
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+    spec:
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+      initContainers:
+      - name: redis-init
+        image: redis:7-alpine
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Calculate port based on pod ordinal
+          ORDINAL=$(hostname | grep -o '[0-9]*$')
+          PORT=$((7000 + ORDINAL))
+
+          # Create redis config with dynamic port
+          sed "s/port 7000/port $PORT/" /etc/redis/redis.conf > /data/redis.conf
+          echo "cluster-announce-ip $(hostname -i)" >> /data/redis.conf
+          echo "cluster-announce-port $PORT" >> /data/redis.conf
+
+          # Set permissions
+          chown -R 999:999 /data
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redis-password
+        volumeMounts:
+        - name: redis-config
+          mountPath: /etc/redis
+        - name: redis-data
+          mountPath: /data
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        command:
+        - redis-server
+        - /data/redis.conf
+        ports:
+        - containerPort: 7000
+          name: redis-0
+        - containerPort: 7001
+          name: redis-1
+        - containerPort: 7002
+          name: redis-2
+        - containerPort: 7003
+          name: redis-3
+        - containerPort: 7004
+          name: redis-4
+        - containerPort: 7005
+          name: redis-5
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redis-password
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        - name: redis-logs
+          mountPath: /var/log/redis
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - -a
+            - $(REDIS_PASSWORD)
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - -a
+            - $(REDIS_PASSWORD)
+            - ping
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      - name: redis-exporter
+        image: oliver006/redis_exporter:latest
+        ports:
+        - containerPort: 9121
+          name: metrics
+        env:
+        - name: REDIS_ADDR
+          value: "redis://localhost:$(REDIS_PORT)"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redis-password
+        - name: REDIS_PORT
+          value: "7000"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      volumes:
+      - name: redis-config
+        configMap:
+          name: redis-config
+      - name: redis-logs
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - redis-cluster
+            topologyKey: kubernetes.io/hostname
+      nodeSelector:
+        node-type: cache
+      tolerations:
+      - key: "cache-load"
+        operator: "Equal"
+        value: "high"
+        effect: "NoSchedule"
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: fast-ssd
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-service
+  namespace: restauranthub
+  labels:
+    app: redis-cluster
+spec:
+  clusterIP: None
+  selector:
+    app: redis-cluster
+  ports:
+  - port: 7000
+    targetPort: 7000
+    name: redis-0
+  - port: 7001
+    targetPort: 7001
+    name: redis-1
+  - port: 7002
+    targetPort: 7002
+    name: redis-2
+  - port: 7003
+    targetPort: 7003
+    name: redis-3
+  - port: 7004
+    targetPort: 7004
+    name: redis-4
+  - port: 7005
+    targetPort: 7005
+    name: redis-5
+  - port: 9121
+    targetPort: metrics
+    name: metrics
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-cluster-init
+  namespace: restauranthub
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: redis-cluster-init
+        image: redis:7-alpine
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Wait for all Redis instances to be ready
+          for i in {0..5}; do
+            while ! redis-cli -h redis-cluster-${i}.redis-cluster-service -p $((7000 + i)) -a $REDIS_PASSWORD ping; do
+              echo "Waiting for redis-cluster-${i}..."
+              sleep 5
+            done
+          done
+
+          # Create cluster if not already exists
+          redis-cli -a $REDIS_PASSWORD --cluster create \
+            redis-cluster-0.redis-cluster-service:7000 \
+            redis-cluster-1.redis-cluster-service:7001 \
+            redis-cluster-2.redis-cluster-service:7002 \
+            redis-cluster-3.redis-cluster-service:7003 \
+            redis-cluster-4.redis-cluster-service:7004 \
+            redis-cluster-5.redis-cluster-service:7005 \
+            --cluster-replicas 1 \
+            --cluster-yes
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redis-password
+      nodeSelector:
+        node-type: cache

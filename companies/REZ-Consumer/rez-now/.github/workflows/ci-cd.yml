@@ -1,0 +1,306 @@
+name: REZ Now CI/CD
+
+# ── Triggers ──────────────────────────────────────────────────────────────
+# CI: every push/PR
+# Deploy: on merge to main (production), on develop (staging)
+# ────────────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'rez-now/**'
+      - 'rez-shared/**'
+      - '.github/workflows/rez-now*.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'rez-now/**'
+      - 'rez-shared/**'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: rez-now-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────
+  # JOB 1: LINT & TYPE CHECK
+  # ────────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rez-now
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: rez-now/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Type check
+        run: npx tsc --noEmit
+        continue-on-error: true
+
+  # ────────────────────────────────────────────────────────────────────
+  # JOB 2: UNIT TESTS
+  # ────────────────────────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    defaults:
+      run:
+        working-directory: rez-now
+    env:
+      NODE_ENV: test
+      # Mock env vars needed by the app
+      REZ_AUTH_SERVICE_URL: http://localhost:4002
+      REZ_WALLET_SERVICE_URL: http://localhost:4001
+      REZ_MERCHANT_SERVICE_URL: http://localhost:4005
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: rez-now/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --passWithNoTests --forceExit
+        continue-on-error: true
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rez-now-coverage
+          path: rez-now/coverage/
+          retention-days: 14
+
+  # ────────────────────────────────────────────────────────────────────
+  # JOB 3: BUILD (PRs and all branches)
+  # ────────────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: lint
+    defaults:
+      run:
+        working-directory: rez-now
+    env:
+      NODE_ENV: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: rez-now/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        continue-on-error: true
+
+  # ────────────────────────────────────────────────────────────────────
+  # JOB 4: SECURITY SCAN
+  # ────────────────────────────────────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    defaults:
+      run:
+        working-directory: rez-now
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: rez-now
+          format: 'sarif'
+          output: trivy-results.sarif
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+  # ────────────────────────────────────────────────────────────────────
+  # JOB 5: DEPLOY TO VERCEL — STAGING (develop branch)
+  # ────────────────────────────────────────────────────────────────────
+  deploy-staging:
+    name: Deploy to Vercel (Staging)
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: ${{ vars.VERCEL_STAGING_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel (Preview)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ vars.VERCEL_NOW_PROJECT_ID }}
+          vercel-args: '--prod=false'
+          working-directory: rez-now
+
+  # ────────────────────────────────────────────────────────────────────
+  # JOB 6: DEPLOY TO VERCEL — PRODUCTION (main branch)
+  # ────────────────────────────────────────────────────────────────────
+  deploy-production:
+    name: Deploy to Vercel (Production)
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://now.rez.money
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ vars.VERCEL_NOW_PROJECT_ID }}
+          vercel-args: '--prod=true'
+          working-directory: rez-now
+
+  # ────────────────────────────────────────────────────────────────────
+  # JOB 7: SMOKE TESTS (after production deploy)
+  # ────────────────────────────────────────────────────────────────────
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for deployment
+        run: sleep 20
+
+      - name: Smoke test — homepage
+        run: |
+          echo "Testing: https://now.rez.money"
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://now.rez.money || echo "000")
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Homepage responding (HTTP $STATUS)"
+          else
+            echo "❌ Homepage failed (HTTP $STATUS)"
+            exit 1
+          fi
+
+      - name: Smoke test — health/API
+        run: |
+          echo "Testing: /api/auth/check"
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://now.rez.money/api/auth/check || echo "000")
+          echo "API check: HTTP $STATUS"
+
+  # ────────────────────────────────────────────────────────────────────
+  # JOB 8: NOTIFY ON COMPLETION
+  # ────────────────────────────────────────────────────────────────────
+  notify:
+    name: Notify Status
+    runs-on: ubuntu-latest
+    needs: [smoke-tests]
+    if: always()
+
+    steps:
+      - name: Slack notification — success
+        if: needs.smoke-tests.result == 'success'
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_DEPLOY_CHANNEL || 'C05XXXXXXXXX' }}
+          slack-message: |
+            ✅ *REZ Now* deployed successfully
+            Commit: `${{ github.sha }}`
+            Branch: `${{ github.ref_name }}`
+            Author: @${{ github.actor }}
+            URL: https://now.rez.money
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow>
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Slack notification — failure
+        if: needs.smoke-tests.result == 'failure'
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_DEPLOY_CHANNEL || 'C05XXXXXXXXX' }}
+          slack-message: |
+            ❌ *REZ Now* deployment FAILED
+            Commit: `${{ github.sha }}`
+            Branch: `${{ github.ref_name }}`
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow>
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

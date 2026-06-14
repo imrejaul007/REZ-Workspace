@@ -1,0 +1,20 @@
+# Kubernetes Service for REZ-dashboard
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-dashboard
+  namespace: rez-merchant
+  labels:
+    app: rez-dashboard
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-dashboard service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-dashboard

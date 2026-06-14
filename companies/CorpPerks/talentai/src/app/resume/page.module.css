@@ -1,0 +1,528 @@
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.backLink {
+  color: var(--gray-500);
+  text-decoration: none;
+  font-size: 14px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.backLink:hover {
+  color: var(--primary);
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--gray-500);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.atsScore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid var(--gray-200);
+}
+
+.atsLabel {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.atsValue {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.downloadBtn, .saveBtn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.downloadBtn {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.saveBtn {
+  background: white;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: white;
+  padding: 8px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background: var(--gray-100);
+}
+
+.tabActive {
+  background: var(--primary);
+  color: white;
+}
+
+.content {
+  min-height: 600px;
+}
+
+.editor {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+}
+
+.editorMain {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--gray-900);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sectionHeader h2 {
+  margin-bottom: 0;
+}
+
+.addBtn {
+  padding: 8px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+}
+
+.formGroup input,
+.formGroup textarea {
+  padding: 12px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.experienceCard {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: var(--gray-50);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.expNumber {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.expFields {
+  flex: 1;
+}
+
+.removeBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.educationCard {
+  padding: 16px;
+  background: var(--gray-50);
+  border-radius: 12px;
+}
+
+.editorSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebarSection {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.sidebarSection h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.aiTips {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tip {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%);
+  border-radius: 8px;
+}
+
+.tipIcon {
+  font-size: 20px;
+}
+
+.tip p {
+  font-size: 13px;
+  color: var(--gray-700);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.keywordTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keywordTag {
+  padding: 6px 12px;
+  background: var(--gray-100);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.templates {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.templates h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.templatesDesc {
+  color: var(--gray-500);
+  margin-bottom: 32px;
+}
+
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.templateCard {
+  background: white;
+  border: 2px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.templateCard:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+}
+
+.templateSelected {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%);
+}
+
+.templatePreview {
+  height: 200px;
+  background: white;
+  border-radius: 8px;
+  border-top: 4px solid;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.previewHeader {
+  height: 40px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.previewLines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.previewLine {
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: 4px;
+}
+
+.templateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.templateName {
+  font-weight: 600;
+}
+
+.templateDesc {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.selectedBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.preview {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.resumePreview {
+  width: 800px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+  border-top: 6px solid;
+  overflow: hidden;
+}
+
+.resumeHeader {
+  padding: 32px;
+  text-align: center;
+}
+
+.resumeHeader h1 {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.resumeContact {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.resumeBody {
+  padding: 32px;
+}
+
+.resumeSection {
+  margin-bottom: 24px;
+}
+
+.resumeSection h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+  border-bottom: 2px solid var(--gray-200);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.resumeSection p {
+  font-size: 14px;
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+
+.resumeSkills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resumeSkill {
+  padding: 6px 14px;
+  background: var(--gray-100);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.resumeExp {
+  margin-bottom: 16px;
+}
+
+.resumeExpHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.resumeExpHeader span {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.resumeExp em {
+  font-size: 13px;
+  color: var(--gray-600);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.resumeEdu strong {
+  display: block;
+  font-size: 14px;
+}
+
+.resumeEdu p {
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+@media (max-width: 1200px) {
+  .editor {
+    grid-template-columns: 1fr;
+  }
+
+  .templateGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .templateGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,10 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Safe area: 80px padding -->
+  <rect width="352" height="352" x="80" y="80" rx="88" fill="#6366F1"/>
+  <!-- Airplane wing -->
+  <path d="M256 144L304 224H208L256 144Z" fill="white"/>
+  <!-- Coin center -->
+  <circle cx="256" cy="288" r="56" fill="#F59E0B"/>
+  <circle cx="256" cy="288" r="40" fill="#FBBF24"/>
+  <text x="256" y="304" font-size="40" font-weight="bold" fill="#92400E" text-anchor="middle">A</text>
+</svg>

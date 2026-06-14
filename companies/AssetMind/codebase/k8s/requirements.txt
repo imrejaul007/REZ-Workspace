@@ -1,0 +1,2 @@
+# Kubernetes - no runtime deps needed
+# Uses kubectl CLI for deployment

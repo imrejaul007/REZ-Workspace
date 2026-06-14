@@ -1,0 +1,364 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-21T04:08:41.062Z",
+    "testDuration": 37,
+    "environment": "Development",
+    "version": "1.0.0"
+  },
+  "summary": {
+    "totalTests": 46,
+    "passedTests": 29,
+    "failedTests": 17,
+    "skippedTests": 0,
+    "successRate": "63.04%"
+  },
+  "categories": {
+    "Frontend Pages": {
+      "total": 8,
+      "passed": 7,
+      "failed": 1,
+      "tests": [
+        {
+          "name": "Page: /auth/login",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Page: /auth/register",
+          "status": "FAILED",
+          "details": "Missing: /Users/rejaulkarim/Documents/Resturistan App/restauranthub/apps/web/app/auth/register",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Page: /auth/verify-2fa",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Page: /dashboard",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Page: /restaurants",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Page: /jobs",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Page: /admin",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Page: /profile",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        }
+      ]
+    },
+    "API Endpoints": {
+      "total": 12,
+      "passed": 0,
+      "failed": 12,
+      "tests": [
+        {
+          "name": "GET /api/v1/auth/health",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/auth/health failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.092Z"
+        },
+        {
+          "name": "POST /api/v1/auth/login",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/auth/login failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.093Z"
+        },
+        {
+          "name": "POST /api/v1/auth/register",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/auth/register failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.093Z"
+        },
+        {
+          "name": "GET /api/v1/auth/profile",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/auth/profile failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.093Z"
+        },
+        {
+          "name": "GET /api/v1/restaurants",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/restaurants failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.094Z"
+        },
+        {
+          "name": "GET /api/v1/restaurants/search",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/restaurants/search failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.094Z"
+        },
+        {
+          "name": "GET /api/v1/jobs",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/jobs failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.094Z"
+        },
+        {
+          "name": "GET /api/v1/jobs/search",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/jobs/search failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.095Z"
+        },
+        {
+          "name": "GET /api/v1/vendors",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/vendors failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.095Z"
+        },
+        {
+          "name": "GET /api/v1/users/profile",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/users/profile failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.096Z"
+        },
+        {
+          "name": "GET /api/v1/admin/dashboard",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/admin/dashboard failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.096Z"
+        },
+        {
+          "name": "GET /api/v1/community/posts",
+          "status": "FAILED",
+          "details": "Status: 0 - request to http://localhost:3010/api/v1/community/posts failed, reason: connect ECONNREFUSED ::1:3010",
+          "timestamp": "2025-09-21T04:08:41.097Z"
+        }
+      ]
+    },
+    "Authentication Flow": {
+      "total": 4,
+      "passed": 2,
+      "failed": 2,
+      "tests": [
+        {
+          "name": "Component: page.tsx",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.097Z"
+        },
+        {
+          "name": "Component: page.tsx",
+          "status": "FAILED",
+          "details": "Component file missing",
+          "timestamp": "2025-09-21T04:08:41.097Z"
+        },
+        {
+          "name": "Component: page.tsx",
+          "status": "FAILED",
+          "details": "Missing authentication logic",
+          "timestamp": "2025-09-21T04:08:41.097Z"
+        },
+        {
+          "name": "Auth API services",
+          "status": "PASSED",
+          "details": "Found 2 auth service files",
+          "timestamp": "2025-09-21T04:08:41.098Z"
+        }
+      ]
+    },
+    "User Journeys": {
+      "total": 4,
+      "passed": 2,
+      "failed": 2,
+      "tests": [
+        {
+          "name": "Restaurant Owner Journey",
+          "status": "FAILED",
+          "details": "3/5 pages (60.0%)",
+          "timestamp": "2025-09-21T04:08:41.098Z"
+        },
+        {
+          "name": "Job Seeker Journey",
+          "status": "FAILED",
+          "details": "2/5 pages (40.0%)",
+          "timestamp": "2025-09-21T04:08:41.098Z"
+        },
+        {
+          "name": "Customer Journey",
+          "status": "PASSED",
+          "details": "3/4 pages (75.0%)",
+          "timestamp": "2025-09-21T04:08:41.098Z"
+        },
+        {
+          "name": "Admin Journey",
+          "status": "PASSED",
+          "details": "5/5 pages (100.0%)",
+          "timestamp": "2025-09-21T04:08:41.098Z"
+        }
+      ]
+    },
+    "Database Operations": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Prisma Schema Models",
+          "status": "PASSED",
+          "details": "6/6 models found",
+          "timestamp": "2025-09-21T04:08:41.099Z"
+        },
+        {
+          "name": "Prisma Service",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.099Z"
+        }
+      ]
+    },
+    "Real-time Features": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "WebSocket Implementation",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.099Z"
+        },
+        {
+          "name": "Notification System",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.099Z"
+        }
+      ]
+    },
+    "File Structure": {
+      "total": 14,
+      "passed": 14,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Frontend: app exists",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Frontend: components exists",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Frontend: lib exists",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Frontend: public exists",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Frontend: package.json exists",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Frontend: next.config.js exists",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Frontend: tailwind.config.js exists",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.063Z"
+        },
+        {
+          "name": "Backend Module: auth",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.064Z"
+        },
+        {
+          "name": "Backend Module: users",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.064Z"
+        },
+        {
+          "name": "Backend Module: restaurants",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.064Z"
+        },
+        {
+          "name": "Backend Module: jobs",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.064Z"
+        },
+        {
+          "name": "Backend Module: vendors",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.064Z"
+        },
+        {
+          "name": "Backend Module: admin",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.064Z"
+        },
+        {
+          "name": "Backend Module: community",
+          "status": "PASSED",
+          "details": "",
+          "timestamp": "2025-09-21T04:08:41.064Z"
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    {
+      "category": "Frontend Pages",
+      "priority": "MEDIUM",
+      "message": "Frontend Pages has 12.5% failure rate - review recommended"
+    },
+    {
+      "category": "API Endpoints",
+      "priority": "HIGH",
+      "message": "API Endpoints has 100.0% failure rate - requires immediate attention"
+    },
+    {
+      "category": "Authentication Flow",
+      "priority": "HIGH",
+      "message": "Authentication Flow has 50.0% failure rate - requires immediate attention"
+    },
+    {
+      "category": "User Journeys",
+      "priority": "HIGH",
+      "message": "User Journeys has 50.0% failure rate - requires immediate attention"
+    }
+  ]
+}

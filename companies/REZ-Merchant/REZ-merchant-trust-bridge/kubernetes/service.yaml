@@ -1,0 +1,20 @@
+# Kubernetes Service for REZ-merchant-trust-bridge
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-merchant-trust-bridge
+  namespace: rez-merchant
+  labels:
+    app: REZ-merchant-trust-bridge
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-merchant-trust-bridge service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4041
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-merchant-trust-bridge

@@ -1,0 +1,432 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: restauranthub
+data:
+  postgresql.conf: |
+    # PostgreSQL production configuration
+    max_connections = 200
+    shared_buffers = 512MB
+    effective_cache_size = 2GB
+    maintenance_work_mem = 128MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 32MB
+    min_wal_size = 2GB
+    max_wal_size = 8GB
+
+    # Logging
+    log_destination = 'stderr'
+    logging_collector = on
+    log_directory = '/var/log/postgresql'
+    log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+    log_rotation_age = 1d
+    log_rotation_size = 100MB
+    log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+    log_checkpoints = on
+    log_connections = on
+    log_disconnections = on
+    log_lock_waits = on
+    log_temp_files = 0
+    log_autovacuum_min_duration = 0
+    log_error_verbosity = default
+
+    # Performance monitoring
+    shared_preload_libraries = 'pg_stat_statements'
+    track_activities = on
+    track_counts = on
+    track_io_timing = on
+    track_functions = pl
+
+    # Replication
+    wal_level = replica
+    max_wal_senders = 3
+    max_replication_slots = 3
+    hot_standby = on
+    wal_log_hints = on
+
+  pg_hba.conf: |
+    # PostgreSQL Client Authentication Configuration File
+    local   all             all                                     trust
+    host    all             all             127.0.0.1/32            md5
+    host    all             all             ::1/128                 md5
+    host    all             all             10.0.0.0/8              md5
+    host    replication     replicator      10.0.0.0/8              md5
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: restauranthub
+type: Opaque
+data:
+  postgres-password: <BASE64_ENCODED_PASSWORD>
+  replication-password: <BASE64_ENCODED_REPLICATION_PASSWORD>
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-primary-pvc
+  namespace: restauranthub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-replica-pvc
+  namespace: restauranthub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-ssd
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-primary
+  namespace: restauranthub
+  labels:
+    app: postgres-primary
+    role: master
+spec:
+  serviceName: postgres-primary-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-primary
+      role: master
+  template:
+    metadata:
+      labels:
+        app: postgres-primary
+        role: master
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9187"
+    spec:
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          value: "restauranthub"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: POSTGRES_REPLICATION_USER
+          value: "replicator"
+        - name: POSTGRES_REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: replication-password
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-config
+          mountPath: /etc/postgresql/postgresql.conf
+          subPath: postgresql.conf
+        - name: postgres-config
+          mountPath: /etc/postgresql/pg_hba.conf
+          subPath: pg_hba.conf
+        - name: backup-storage
+          mountPath: /backups
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      - name: postgres-exporter
+        image: prometheuscommunity/postgres-exporter:latest
+        ports:
+        - containerPort: 9187
+          name: metrics
+        env:
+        - name: DATA_SOURCE_NAME
+          value: "postgresql://postgres:$(POSTGRES_PASSWORD)@localhost:5432/restauranthub?sslmode=disable"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      - name: backup-sidecar
+        image: postgres:15-alpine
+        command:
+        - /bin/bash
+        - -c
+        - |
+          while true; do
+            echo "Starting backup at $(date)"
+            pg_dump -h localhost -U postgres -d restauranthub | gzip > /backups/backup-$(date +%Y%m%d-%H%M%S).sql.gz
+
+            # Clean old backups (keep last 7 days)
+            find /backups -name "backup-*.sql.gz" -mtime +7 -delete
+
+            # Sleep for 6 hours
+            sleep 21600
+          done
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        volumeMounts:
+        - name: backup-storage
+          mountPath: /backups
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-primary-pvc
+      - name: postgres-config
+        configMap:
+          name: postgres-config
+      - name: backup-storage
+        persistentVolumeClaim:
+          claimName: backup-pvc
+      nodeSelector:
+        node-type: database
+      tolerations:
+      - key: "database-load"
+        operator: "Equal"
+        value: "high"
+        effect: "NoSchedule"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-replica
+  namespace: restauranthub
+  labels:
+    app: postgres-replica
+    role: replica
+spec:
+  serviceName: postgres-replica-service
+  replicas: 2
+  selector:
+    matchLabels:
+      app: postgres-replica
+      role: replica
+  template:
+    metadata:
+      labels:
+        app: postgres-replica
+        role: replica
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9187"
+    spec:
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+      initContainers:
+      - name: replica-setup
+        image: postgres:15-alpine
+        command:
+        - /bin/bash
+        - -c
+        - |
+          if [ ! -f /var/lib/postgresql/data/PG_VERSION ]; then
+            echo "Setting up replica..."
+            PGPASSWORD=$POSTGRES_REPLICATION_PASSWORD pg_basebackup -h postgres-primary-service -D /var/lib/postgresql/data -U replicator -v -P -W
+            echo "standby_mode = 'on'" >> /var/lib/postgresql/data/postgresql.auto.conf
+            echo "primary_conninfo = 'host=postgres-primary-service port=5432 user=replicator'" >> /var/lib/postgresql/data/postgresql.auto.conf
+            echo "trigger_file = '/var/lib/postgresql/data/trigger_file'" >> /var/lib/postgresql/data/postgresql.auto.conf
+          fi
+        env:
+        - name: POSTGRES_REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: replication-password
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-config
+          mountPath: /etc/postgresql/postgresql.conf
+          subPath: postgresql.conf
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      - name: postgres-exporter
+        image: prometheuscommunity/postgres-exporter:latest
+        ports:
+        - containerPort: 9187
+          name: metrics
+        env:
+        - name: DATA_SOURCE_NAME
+          value: "postgresql://postgres:$(POSTGRES_PASSWORD)@localhost:5432/restauranthub?sslmode=disable"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      volumes:
+      - name: postgres-config
+        configMap:
+          name: postgres-config
+      nodeSelector:
+        node-type: database
+      tolerations:
+      - key: "database-load"
+        operator: "Equal"
+        value: "high"
+        effect: "NoSchedule"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: fast-ssd
+      resources:
+        requests:
+          storage: 100Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-primary-service
+  namespace: restauranthub
+  labels:
+    app: postgres-primary
+spec:
+  selector:
+    app: postgres-primary
+    role: master
+  ports:
+  - port: 5432
+    targetPort: postgres
+    name: postgres
+  - port: 9187
+    targetPort: metrics
+    name: metrics
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-replica-service
+  namespace: restauranthub
+  labels:
+    app: postgres-replica
+spec:
+  selector:
+    app: postgres-replica
+    role: replica
+  ports:
+  - port: 5432
+    targetPort: postgres
+    name: postgres
+  - port: 9187
+    targetPort: metrics
+    name: metrics
+  type: ClusterIP

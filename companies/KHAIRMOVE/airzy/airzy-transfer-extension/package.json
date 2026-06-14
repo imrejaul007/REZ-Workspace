@@ -1,0 +1,10 @@
+{
+  "name": "airzy-transfer-extension",
+  "version": "1.0.0",
+  "description": "Airport transfer booking for Airzy",
+  "main": "dist/index.js",
+  "scripts": { "dev": "ts-node-dev --respawn --transpile-only src/index.ts", "build": "tsc", "start": "node dist/index.js" },
+  "dependencies": { "express": "^4.18.2", "mongoose": "^8.0.3", "ioredis": "^5.3.2", "zod": "^3.22.4", "helmet": "^7.1.0", "cors": "^2.8.5", "winston": "^3.11.0", "uuid": "^9.0.1", "dotenv": "^16.3.1", "express-rate-limit": "^7.1.5", "compression": "^1.7.4", "express-validator": "^7.0.1" },
+  "devDependencies": { "@types/express": "^4.17.21", "@types/node": "^20.10.4", "@types/uuid": "^9.0.7", "typescript": "^5.3.3", "ts-node-dev": "^2.0.0" },
+  "engines": { "node": ">=18.0.0" }
+}

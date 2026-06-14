@@ -1,0 +1,42 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "login": "Login",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign In",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalSales": "Total Sales",
+    "orders": "Orders",
+    "customers": "Customers",
+    "revenue": "Revenue"
+  },
+  "menu": {
+    "home": "Home",
+    "products": "Products",
+    "orders": "Orders",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "settings": {
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "notifications": "Notifications",
+    "darkMode": "Dark Mode"
+  }
+}

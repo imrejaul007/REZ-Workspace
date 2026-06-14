@@ -1,0 +1,265 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "REZ Hotel OS API",
+    "version": "1.0.0",
+    "description": "Unified API for all Hotel OS services"
+  },
+  "servers": [
+    { "url": "http://localhost:4801", "description": "Development" }
+  ],
+  "paths": {
+    "/api/bookings": {
+      "get": {
+        "summary": "List all bookings",
+        "tags": ["Booking"],
+        "parameters": [
+          { "name": "hotelId", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of bookings" }
+        }
+      },
+      "post": {
+        "summary": "Create a booking",
+        "tags": ["Booking"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hotelId": { "type": "string" },
+                  "guestId": { "type": "string" },
+                  "checkIn": { "type": "string", "format": "date" },
+                  "checkOut": { "type": "string", "format": "date" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Booking created" }
+        }
+      }
+    },
+    "/api/bookings/{id}": {
+      "get": {
+        "summary": "Get booking by ID",
+        "tags": ["Booking"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Booking details" }
+        }
+      },
+      "patch": {
+        "summary": "Update booking",
+        "tags": ["Booking"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Booking updated" }
+        }
+      }
+    },
+    "/api/bookings/{id}/checkin": {
+      "post": {
+        "summary": "Check in guest",
+        "tags": ["Booking"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Check-in successful" }
+        }
+      }
+    },
+    "/api/bookings/{id}/checkout": {
+      "post": {
+        "summary": "Check out guest",
+        "tags": ["Booking"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Check-out successful" }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "summary": "Send message to AI concierge",
+        "tags": ["Staybot"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "guestId": { "type": "string" },
+                  "message": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "reply": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks": {
+      "get": {
+        "summary": "List housekeeping tasks",
+        "tags": ["Housekeeping"],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "roomId", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of tasks" }
+        }
+      },
+      "post": {
+        "summary": "Create housekeeping task",
+        "tags": ["Housekeeping"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roomId": { "type": "string" },
+                  "type": { "type": "string", "enum": ["cleaning", "maintenance", "turndown"] },
+                  "priority": { "type": "string", "enum": ["low", "medium", "high", "urgent"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Task created" }
+        }
+      }
+    },
+    "/api/payments": {
+      "post": {
+        "summary": "Create payment",
+        "tags": ["Payments"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bookingId": { "type": "string" },
+                  "amount": { "type": "number" },
+                  "method": { "type": "string", "enum": ["card", "upi", "wallet", "cash"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Payment created" }
+        }
+      }
+    },
+    "/api/reviews": {
+      "get": {
+        "summary": "List reviews",
+        "tags": ["Reviews"],
+        "parameters": [
+          { "name": "hotelId", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of reviews" }
+        }
+      },
+      "post": {
+        "summary": "Create review",
+        "tags": ["Reviews"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bookingId": { "type": "string" },
+                  "rating": { "type": "number", "minimum": 1, "maximum": 5 },
+                  "comment": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Review created" }
+        }
+      }
+    },
+    "/api/metrics": {
+      "get": {
+        "summary": "Get hotel metrics",
+        "tags": ["Analytics"],
+        "parameters": [
+          { "name": "hotelId", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "period", "in": "query", "schema": { "type": "string", "enum": ["day", "week", "month"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hotel metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "occupancyRate": { "type": "number" },
+                    "revPAR": { "type": "number" },
+                    "avgDailyRate": { "type": "number" },
+                    "npsScore": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  }
+}

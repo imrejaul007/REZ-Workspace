@@ -1,0 +1,26 @@
+{
+  "extends": "expo/tsconfig.base.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@/*": ["./*"],
+      "@rez/brand-tokens": ["../packages/rez-brand-tokens/src"],
+      "@rez/shared": ["../packages/rez-shared/src"],
+      "@rez/shared-types": ["./packages/shared-types/dist"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "app",
+    "components",
+    "types",
+    "lib",
+    "packages"
+  ]
+}

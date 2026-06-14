@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-crisis-alert
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-crisis-alert
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+spec:
+  tls:
+  - hosts:
+    - crisis-alert.adbazaar.internal
+    secretName: ad-bazaar-crisis-alert-tls
+  rules:
+  - host: crisis-alert.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-crisis-alert
+            port:
+              number: 5103

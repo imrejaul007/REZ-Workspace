@@ -1,0 +1,758 @@
+/**
+ * REZ Ecosystem - Unified Integration Hub
+ *
+ * Central module connecting all companies and services
+ *
+ * Connects:
+ * - RABTUL Infrastructure (Auth, Payment, Wallet, etc.)
+ * - REZ Intelligence (AI/ML services)
+ * - REZ Media (Ads, Karma, Attribution)
+ * - CorpPerks (HR, Benefits, Perks)
+ * - REZ-Consumer (QR, Apps)
+ * - REZ-Merchant (POS, KDS)
+ * - StayOwn-Hospitality (Hotels)
+ */
+
+import axios from 'axios';
+import { EventEmitter } from 'events';
+
+// ============================================
+// SERVICE URLs
+// ============================================
+
+export const SERVICES = {
+  // RABTUL Core
+  AUTH: process.env.AUTH_SERVICE_URL || 'https://rez-auth-service.onrender.com',
+  PAYMENT: process.env.PAYMENT_SERVICE_URL || 'https://rez-payment-service.onrender.com',
+  WALLET: process.env.WALLET_SERVICE_URL || 'https://rez-wallet-service.onrender.com',
+  ORDER: process.env.ORDER_SERVICE_URL || 'https://rez-order-service.onrender.com',
+  CATALOG: process.env.CATALOG_SERVICE_URL || 'https://rez-catalog-service.onrender.com',
+  SEARCH: process.env.SEARCH_SERVICE_URL || 'https://rez-search-service.onrender.com',
+  DELIVERY: process.env.DELIVERY_SERVICE_URL || 'https://rez-delivery-service.onrender.com',
+  NOTIFICATIONS: process.env.NOTIFICATIONS_SERVICE_URL || 'https://rez-notifications-service.onrender.com',
+  PROFILE: process.env.PROFILE_SERVICE_URL || 'https://rez-profile-service.onrender.com',
+  BOOKING: process.env.BOOKING_SERVICE_URL || 'https://rez-booking-service.onrender.com',
+
+  // RABTUL Infrastructure
+  CIRCUIT_BREAKER: process.env.CB_SERVICE_URL || 'https://rez-circuit-breaker.onrender.com',
+  RETRY: process.env.RETRY_SERVICE_URL || 'https://REZ-retry-service.onrender.com',
+  DLQ: process.env.DLQ_SERVICE_URL || 'https://REZ-dlq-service.onrender.com',
+  IDEMPOTENCY: process.env.IDEMPOTENCY_SERVICE_URL || 'https://REZ-idempotency-service.onrender.com',
+  SECRETS: process.env.SECRETS_SERVICE_URL || 'https://REZ-secrets-manager.onrender.com',
+  SCHEDULER: process.env.SCHEDULER_SERVICE_URL || 'https://REZ-scheduler-service.onrender.com',
+
+  // REZ Intelligence
+  INTENT: process.env.INTENT_URL || 'https://rez-intent-predictor.onrender.com',
+  FRAUD: process.env.FRAUD_URL || 'https://rez-fraud-agent.onrender.com',
+  RECOMMEND: process.env.RECOMMEND_URL || 'https://REZ-recommendation-engine.onrender.com',
+  PREDICT: process.env.PREDICT_URL || 'https://REZ-predictive-engine.onrender.com',
+  SIGNAL: process.env.SIGNAL_URL || 'https://REZ-signal-aggregator.onrender.com',
+  PERSONAL: process.env.PERSONAL_URL || 'https://REZ-personalization-engine.onrender.com',
+  SEGMENTS: process.env.SEGMENTS_URL || 'https://REZ-realtime-segments.onrender.com',
+  CDP: process.env.CDP_URL || 'https://REZ-cdp-service.onrender.com',
+  RFM: process.env.RFM_URL || 'https://REZ-rfm-service.onrender.com',
+  IDENTITY: process.env.IDENTITY_URL || 'https://REZ-identity-graph.onrender.com',
+
+  // REZ Media
+  ADS: process.env.ADS_URL || 'https://REZ-ads-platform.onrender.com',
+  KARMA: process.env.KARMA_URL || 'https://rez-gamification-service.onrender.com',
+  ATTRIBUTION: process.env.ATTRIBUTION_URL || 'https://REZ-attribution-hub.onrender.com',
+  CRM: process.env.CRM_URL || 'https://REZ-crm-hub.onrender.com',
+
+  // QR Services
+  VERIFY_QR: process.env.VERIFY_QR_URL || 'https://verify-qr.onrender.com',
+  SAFE_QR: process.env.SAFE_QR_URL || 'https://safe-qr.onrender.com',
+  CREATOR_QR: process.env.CREATOR_QR_URL || 'https://creator-qr.onrender.com',
+  ADS_QR: process.env.ADS_QR_URL || 'https://ads-qr.onrender.com',
+  ROOM_QR: process.env.ROOM_QR_URL || 'https://room-qr.onrender.com',
+
+  // CorpPerks
+  PEOPLE_OS: process.env.PEOPLE_OS_URL || 'https://peopleos.onrender.com',
+  TALENT_AI: process.env.TALENT_AI_URL || 'https://talentai.onrender.com',
+  INSIGHT_CAMPUS: process.env.INSIGHT_URL || 'https://insight-campus.onrender.com',
+  HR_APP: process.env.HR_APP_URL || 'https://hr-app.onrender.com',
+
+  // REZ Mind & Agent
+  MIND: process.env.MIND_API || 'https://REZ-mind.onrender.com',
+  AGENT: process.env.AGENT_API || 'https://REZ-agent.onrender.com',
+  CARE: process.env.CARE_API || 'https://REZ-care.onrender.com',
+};
+
+const INTERNAL_KEY = process.env.INTERNAL_SERVICE_TOKEN || 'your-internal-token';
+
+// ============================================
+// EVENT BUS
+// ============================================
+
+class EventBus extends EventEmitter {
+  private subscribers: Map<string, Set<Function>> = new Map();
+
+  subscribe(event: string, handler: Function) {
+    if (!this.subscribers.has(event)) {
+      this.subscribers.set(event, new Set());
+    }
+    this.subscribers.get(event)!.add(handler);
+  }
+
+  publish(event: string, data) {
+    // Emit locally
+    this.emit(event, data);
+
+    // Publish to external event bus (if configured)
+    this.publishExternal(event, data).catch(console.error);
+  }
+
+  private async publishExternal(event: string, data) {
+    // Would publish to Kafka/Redis in production
+    console.log(`[EventBus] ${event}:`, data);
+  }
+}
+
+export const eventBus = new EventBus();
+
+// ============================================
+// API HELPER
+// ============================================
+
+async function call(service: keyof typeof SERVICES, endpoint: string, method = 'POST', data?) {
+  const url = `${SERVICES[service]}${endpoint}`;
+  try {
+    const response = await axios({
+      method,
+      url,
+      data,
+      headers: {
+        'X-Internal-Token': INTERNAL_KEY,
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`[${service}] ${endpoint} failed:`, error);
+    return null;
+  }
+}
+
+// ============================================
+// UNIFIED CUSTOMER PROFILE
+// ============================================
+
+export const unifiedProfile = {
+  /**
+   * Get complete customer profile across all companies
+   */
+  async getProfile(userId: string) {
+    const [cdp, profile, rfms, segments] = await Promise.all([
+      call('CDP', '/api/profile', 'POST', { user_id: userId }),
+      call('PROFILE', '/api/profile', 'POST', { user_id: userId }),
+      call('RFM', '/api/score', 'POST', { user_id: userId }),
+      call('SEGMENTS', '/api/segments', 'POST', { user_id: userId }),
+    ]);
+
+    return {
+      user_id: userId,
+      cdp: cdp,
+      profile: profile,
+      rfm: rfms,
+      segments: segments?.segments || [],
+      companies: this.getCompaniesFromProfile(profile),
+    };
+  },
+
+  /**
+   * Identify user across devices
+   */
+  async identify(identifiers: {
+    email?: string;
+    phone?: string;
+    device_id?: string;
+    cookie_id?: string;
+  }) {
+    return call('IDENTITY', '/api/resolve', 'POST', identifiers);
+  },
+
+  /**
+   * Merge user profiles
+   */
+  async merge(primaryId: string, secondaryId: string) {
+    return call('CDP', '/api/merge', 'POST', {
+      primary_id: primaryId,
+      secondary_id: secondaryId
+    });
+  },
+
+  /**
+   * Enrich profile with intelligence
+   */
+  async enrich(userId: string) {
+    const [churn, ltv, intent, fraud] = await Promise.all([
+      call('PREDICT', '/api/churn', 'POST', { user_id: userId }),
+      call('PREDICT', '/api/ltv', 'POST', { user_id: userId }),
+      call('INTENT', '/api/predict', 'POST', { user_id: userId }),
+      call('FRAUD', '/api/risk-level', 'POST', { user_id: userId }),
+    ]);
+
+    return { churn, ltv, intent, fraud };
+  },
+
+  getCompaniesFromProfile(profile): string[] {
+    const companies: string[] = [];
+    if (profile?.consumer_id) companies.push('REZ-Consumer');
+    if (profile?.merchant_id) companies.push('REZ-Merchant');
+    if (profile?.employee_id) companies.push('CorpPerks');
+    if (profile?.guest_id) companies.push('StayOwn');
+    return companies;
+  }
+};
+
+// ============================================
+// CROSS-COMPANY LOYALTY
+// ============================================
+
+export const crossCompanyLoyalty = {
+  /**
+   * Award karma points across companies
+   */
+  async awardPoints(params: {
+    user_id: string;
+    company: string;
+    points: number;
+    action: string;
+    reference?: string;
+  }) {
+    // Award in user's primary wallet
+    const walletResult = await call('WALLET', '/api/earn', 'POST', {
+      user_id: params.user_id,
+      amount: params.points,
+      source: `${params.company}_${params.action}`,
+      reference_id: params.reference
+    });
+
+    // Also record in karma for gamification
+    await call('KARMA', '/api/points/award', 'POST', {
+      user_id: params.user_id,
+      points: params.points,
+      source: params.company,
+      action: params.action
+    });
+
+    // Track event
+    eventBus.publish('karma.earned', params);
+
+    return walletResult;
+  },
+
+  /**
+   * Get unified karma/points balance
+   */
+  async getBalance(userId: string) {
+    const [wallet, karma] = await Promise.all([
+      call('WALLET', '/api/balance', 'POST', { user_id: userId }),
+      call('KARMA', '/api/balance', 'POST', { user_id: userId }),
+    ]);
+
+    return {
+      wallet_balance: wallet?.balance || 0,
+      karma_points: karma?.points || 0,
+      total_points: (wallet?.balance || 0) + (karma?.points || 0),
+      tier: karma?.tier || 'standard'
+    };
+  },
+
+  /**
+   * Redeem points for rewards
+   */
+  async redeem(params: {
+    user_id: string;
+    points: number;
+    reward_id: string;
+    company?: string;
+  }) {
+    return call('KARMA', '/api/redeem', 'POST', params);
+  }
+};
+
+// ============================================
+// CROSS-COMPANY COMMERCE
+// ============================================
+
+export const crossCompanyCommerce = {
+  /**
+   * Create order across companies
+   */
+  async createOrder(params: {
+    user_id: string;
+    company: string;
+    items: Array<{
+      product_id: string;
+      quantity: number;
+      price: number;
+      company: string;
+    }>;
+    payment_method?: 'wallet' | 'upi' | 'card';
+  }) {
+    // Check fraud risk first
+    const fraudCheck = await call('FRAUD', '/api/score', 'POST', {
+      user_id: params.user_id,
+      transaction_type: 'purchase',
+      amount: params.items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+    });
+
+    if (fraudCheck?.risk_level === 'high') {
+      return { error: 'Transaction blocked due to fraud risk' };
+    }
+
+    // Create order
+    const order = await call('ORDER', '/api/orders', 'POST', {
+      user_id: params.user_id,
+      company: params.company,
+      items: params.items,
+      payment_method: params.payment_method
+    });
+
+    // Track for attribution
+    await call('ATTRIBUTION', '/api/track', 'POST', {
+      event_type: 'purchase',
+      user_id: params.user_id,
+      value: order?.total_amount
+    });
+
+    // Publish event
+    eventBus.publish('order.created', order);
+
+    return order;
+  },
+
+  /**
+   * Get personalized recommendations across all products
+   */
+  async getRecommendations(userId: string, context?) {
+    const [products, services, content] = await Promise.all([
+      call('RECOMMEND', '/api/products', 'POST', { user_id: userId, context }),
+      call('RECOMMEND', '/api/services', 'POST', { user_id: userId, context }),
+      call('PERSONAL', '/api/content', 'POST', { user_id: userId, slot: 'recommendations' }),
+    ]);
+
+    return {
+      products: products?.items || [],
+      services: services?.items || [],
+      content: content?.items || []
+    };
+  }
+};
+
+// ============================================
+// EMPLOYEE/PROFESSIONAL SERVICES
+// ============================================
+
+export const professionalServices = {
+  /**
+   * Onboard employee with cross-company benefits
+   */
+  async onboardEmployee(params: {
+    employee_id: string;
+    company: string;
+    email: string;
+    name: string;
+    department: string;
+    benefits_eligible: string[];
+  }) {
+    // Create user in Auth
+    const user = await call('AUTH', '/api/users', 'POST', {
+      email: params.email,
+      name: params.name,
+      type: 'employee'
+    });
+
+    // Create employee record
+    const employee = await call('PEOPLE_OS', '/api/employees', 'POST', {
+      employee_id: params.employee_id,
+      company: params.company,
+      user_id: user?.id,
+      department: params.department
+    });
+
+    // Setup wallet with welcome bonus
+    await call('WALLET', '/api/initialize', 'POST', {
+      user_id: user?.id,
+      type: 'employee',
+      initial_balance: 100 // Welcome bonus
+    });
+
+    // Setup karma
+    await call('KARMA', '/api/init', 'POST', {
+      user_id: user?.id,
+      tier: 'employee'
+    });
+
+    // Create profile in CDP
+    await call('CDP', '/api/profile/create', 'POST', {
+      user_id: user?.id,
+      type: 'employee',
+      company: params.company,
+      benefits: params.benefits_eligible
+    });
+
+    // Publish event
+    eventBus.publish('employee.onboarded', {
+      employee_id: params.employee_id,
+      user_id: user?.id,
+      company: params.company
+    });
+
+    return { user_id: user?.id, employee_id: params.employee_id };
+  },
+
+  /**
+   * Get employee benefits across ecosystem
+   */
+  async getBenefits(employeeId: string) {
+    const [profile, karma, perks] = await Promise.all([
+      call('PEOPLE_OS', '/api/benefits', 'POST', { employee_id: employeeId }),
+      call('KARMA', '/api/employee/points', 'POST', { employee_id: employeeId }),
+      call('CRM', '/api/perks', 'POST', { employee_id: employeeId }),
+    ]);
+
+    return {
+      benefits: profile?.benefits || [],
+      karma_points: karma?.points || 0,
+      available_perks: perks?.items || []
+    };
+  },
+
+  /**
+   * Redeem employee perks
+   */
+  async redeemPerk(params: {
+    employee_id: string;
+    perk_id: string;
+    company_source?: string;
+  }) {
+    return call('KARMA', '/api/redeem', 'POST', {
+      user_id: params.employee_id,
+      source: params.company_source || 'corpperks',
+      item_id: params.perk_id
+    });
+  }
+};
+
+// ============================================
+// HOSPITALITY INTEGRATION
+// ============================================
+
+export const hospitalityServices = {
+  /**
+   * Book hotel with loyalty benefits
+   */
+  async bookHotel(params: {
+    guest_id: string;
+    hotel_id: string;
+    room_type: string;
+    check_in: string;
+    check_out: string;
+    use_karma?: boolean;
+  }) {
+    // Get guest profile for personalization
+    const guest = await unifiedProfile.getProfile(params.guest_id);
+
+    // Book room
+    const booking = await call('BOOKING', '/api/bookings', 'POST', {
+      guest_id: params.guest_id,
+      hotel_id: params.hotel_id,
+      room_type: params.room_type,
+      check_in: params.check_in,
+      check_out: params.check_out,
+      guest_profile: guest
+    });
+
+    // Apply karma discount if requested
+    if (params.use_karma && guest.karma_points > 0) {
+      const discount = Math.min(guest.karma_points, booking?.total * 0.1);
+      await crossCompanyLoyalty.redeem({
+        user_id: params.guest_id,
+        points: discount,
+        reward_id: `booking_discount_${booking?.id}`
+      });
+    }
+
+    // Setup room QR for guest
+    await call('ROOM_QR', '/api/rooms/setup', 'POST', {
+      booking_id: booking?.id,
+      guest_id: params.guest_id
+    });
+
+    // Publish event
+    eventBus.publish('booking.created', booking);
+
+    return booking;
+  },
+
+  /**
+   * Get hotel recommendations based on user history
+   */
+  async recommendHotels(userId: string) {
+    const [recommendations, history] = await Promise.all([
+      call('RECOMMEND', '/api/hotels', 'POST', { user_id: userId }),
+      call('SIGNAL', '/api/history', 'POST', { user_id: userId, type: 'bookings' }),
+    ]);
+
+    return {
+      recommended: recommendations?.hotels || [],
+      similar_users_booked: recommendations?.similar_bookings || [],
+      personal_history: history?.items || []
+    };
+  }
+};
+
+// ============================================
+// ADVERTISING & ATTRIBUTION
+// ============================================
+
+export const advertisingServices = {
+  /**
+   * Track ad conversion across channels
+   */
+  async trackConversion(params: {
+    user_id: string;
+    campaign_id: string;
+    channel: string;
+    event: 'view' | 'click' | 'conversion';
+    value?: number;
+  }) {
+    // Record in attribution
+    await call('ATTRIBUTION', '/api/track', 'POST', {
+      event_type: params.event,
+      user_id: params.user_id,
+      campaign_id: params.campaign_id,
+      channel: params.channel,
+      value: params.value
+    });
+
+    // Update signal for intelligence
+    await call('SIGNAL', '/api/collect', 'POST', {
+      service: 'advertising',
+      event: `${params.channel}_${params.event}`,
+      user_id: params.user_id,
+      entities: {
+        campaign_id: params.campaign_id,
+        value: params.value
+      }
+    });
+
+    // Award karma if conversion
+    if (params.event === 'conversion') {
+      await crossCompanyLoyalty.awardPoints({
+        user_id: params.user_id,
+        company: 'REZ-Media',
+        points: Math.floor((params.value || 0) * 0.01),
+        action: 'ad_conversion'
+      });
+    }
+
+    // Publish event
+    eventBus.publish('ad.conversion', params);
+  },
+
+  /**
+   * Get multi-touch attribution for user journey
+   */
+  async getAttribution(userId: string, conversionId: string) {
+    return call('ATTRIBUTION', '/api/journey', 'POST', {
+      user_id: userId,
+      conversion_id: conversionId
+    });
+  },
+
+  /**
+   * Create targeted campaign for segment
+   */
+  async createCampaign(params: {
+    name: string;
+    targeting: {
+      segments?: string[];
+      rfm_tiers?: string[];
+      behaviors?: string[];
+    };
+    budget: number;
+    channels: string[];
+  }) {
+    // Get segment members
+    const members = await call('SEGMENTS', '/api/segment-members', 'POST', {
+      segments: params.targeting.segments,
+      rfm_tiers: params.targeting.rfm_tiers,
+      limit: 10000
+    });
+
+    // Create campaign
+    const campaign = await call('ADS', '/api/campaigns', 'POST', {
+      ...params,
+      audience_size: members?.count || 0
+    });
+
+    return {
+      campaign,
+      audience_size: members?.count || 0,
+      estimated_reach: Math.floor((members?.count || 0) * 0.3)
+    };
+  }
+};
+
+// ============================================
+// QR SERVICES INTEGRATION
+// ============================================
+
+export const qrServices = {
+  /**
+   * Get complete QR experience with intelligence
+   */
+  async getQRExperience(params: {
+    qr_type: 'verify' | 'safe' | 'creator' | 'ads' | 'room';
+    qr_id: string;
+    user_id?: string;
+    location?: { lat: number; lng: number };
+  }) {
+    // Get QR data based on type
+    const serviceMap = {
+      verify: 'VERIFY_QR',
+      safe: 'SAFE_QR',
+      creator: 'CREATOR_QR',
+      ads: 'ADS_QR',
+      room: 'ROOM_QR'
+    };
+
+    const qrData = await call(serviceMap[params.qr_type] as unknown, '/api/qr/data', 'POST', {
+      qr_id: params.qr_id
+    });
+
+    // Get personalization if user logged in
+    let personalization = null;
+    if (params.user_id) {
+      personalization = await call('PERSONAL', '/api/content', 'POST', {
+        user_id: params.user_id,
+        slot: `${params.qr_type}_qr`,
+        context: { qr_data: qrData }
+      });
+    }
+
+    // Get fraud score for verification QR
+    let fraudScore = null;
+    if (params.qr_type === 'verify' && params.user_id) {
+      fraudScore = await call('FRAUD', '/api/verify-scan', 'POST', {
+        user_id: params.user_id,
+        qr_id: params.qr_id,
+        location: params.location
+      });
+    }
+
+    // Get recommendations
+    let recommendations = null;
+    if (params.user_id) {
+      recommendations = await call('RECOMMEND', '/api/contextual', 'POST', {
+        user_id: params.user_id,
+        context: { qr_type: params.qr_type, qr_data: qrData }
+      });
+    }
+
+    // Track scan
+    if (params.user_id) {
+      await call('SIGNAL', '/api/collect', 'POST', {
+        service: 'qr',
+        event: 'qr_scanned',
+        user_id: params.user_id,
+        entities: { qr_type: params.qr_type, qr_id: params.qr_id }
+      });
+    }
+
+    return {
+      qr_data: qrData,
+      personalization: personalization?.content || null,
+      fraud_score: fraudScore,
+      recommendations: recommendations?.items || [],
+      user_segments: personalization?.segments || []
+    };
+  },
+
+  /**
+   * Activate warranty with full intelligence
+   */
+  async activateWarranty(params: {
+    serial_number: string;
+    user_id: string;
+    purchase_date: string;
+    price_paid: number;
+    location?: { lat: number; lng: number };
+  }) {
+    // Fraud check
+    const fraudCheck = await call('FRAUD', '/api/score', 'POST', {
+      user_id: params.user_id,
+      transaction_type: 'warranty_activation',
+      amount: params.price_paid
+    });
+
+    if (fraudCheck?.risk_level === 'high') {
+      return { error: 'Verification blocked due to fraud risk' };
+    }
+
+    // Get personalized warranty plan recommendations
+    const planRecs = await call('RECOMMEND', '/api/warranty-plans', 'POST', {
+      user_id: params.user_id,
+      product_serial: params.serial_number,
+      purchase_price: params.price_paid
+    });
+
+    // Get cashback eligibility
+    const cashback = Math.floor(params.price_paid * 0.01);
+
+    // Track activation
+    await call('SIGNAL', '/api/collect', 'POST', {
+      service: 'verify_qr',
+      event: 'warranty_activated',
+      user_id: params.user_id,
+      entities: {
+        serial_number: params.serial_number,
+        price: params.price_paid
+      }
+    });
+
+    // Award karma points
+    await crossCompanyLoyalty.awardPoints({
+      user_id: params.user_id,
+      company: 'REZ-Consumer',
+      points: cashback,
+      action: 'warranty_activation'
+    });
+
+    // Publish event
+    eventBus.publish('warranty.activated', {
+      user_id: params.user_id,
+      serial_number: params.serial_number,
+      cashback
+    });
+
+    return {
+      cashback,
+      plan_recommendations: planRecs?.plans || [],
+      fraud_status: fraudCheck?.risk_level || 'low'
+    };
+  }
+};
+
+// ============================================
+// DEFAULT EXPORT
+// ============================================
+
+export const unifiedHub = {
+  profile: unifiedProfile,
+  loyalty: crossCompanyLoyalty,
+  commerce: crossCompanyCommerce,
+  professional: professionalServices,
+  hospitality: hospitalityServices,
+  advertising: advertisingServices,
+  qr: qrServices,
+  eventBus,
+  call,
+  SERVICES
+};
+
+export default unifiedHub;

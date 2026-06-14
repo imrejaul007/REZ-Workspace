@@ -1,0 +1,22 @@
+{
+  "id": "session-1776851207537",
+  "startedAt": "2026-04-22T09:46:47.537Z",
+  "cwd": "/Users/rejaulkarim/Documents/ReZ Full App/rez-app-consumer",
+  "context": {
+    "lastMatchedPatterns": [
+      "mem-project_hotel_ota_rez_integration-how-to-apply",
+      "mem-reference_services_urls-key-backend-endpoints",
+      "mem-project_rez_now_product_truth-3-binding-threads",
+      "mem-project_hotel_ota_rez_integration-why----design"
+    ]
+  },
+  "metrics": {
+    "edits": 54,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "updatedAt": "2026-04-22T11:40:47.499Z",
+  "endedAt": "2026-04-22T13:06:40.615Z",
+  "duration": 11993079
+}

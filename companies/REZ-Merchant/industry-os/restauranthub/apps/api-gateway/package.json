@@ -1,0 +1,33 @@
+{
+  "name": "@restopapa/api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway with Load Balancing and Service Discovery",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/config": "^3.0.0",
+    "@nestjs/microservices": "^10.0.0",
+    "@nestjs/swagger": "^7.1.8",
+    "@nestjs/throttler": "^4.2.1",
+    "@nestjs/cache-manager": "^2.1.0",
+    "express-rate-limit": "^6.8.1",
+    "helmet": "^7.0.0",
+    "compression": "^1.7.4",
+    "http-proxy-middleware": "^2.0.6",
+    "consul": "^0.40.0",
+    "redis": "^4.6.7",
+    "winston": "^3.10.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.1",
+    "class-validator": "^0.14.0",
+    "class-transformer": "^0.5.1"
+  }
+}

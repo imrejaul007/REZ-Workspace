@@ -1,0 +1,27 @@
+# ================================================
+# REZ-Merchant Render Blueprint
+# rez-ai-restaurant
+# ================================================
+
+services:
+  - type: web
+    name: rez-ai-restaurant
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: MONGODB_URI
+        sync: false
+      - key: INTENT_GRAPH_URL
+        value: http://localhost:3007
+      - key: INTELLIGENCE_URL
+        value: http://localhost:4020
+      - key: LOG_LEVEL
+        value: info

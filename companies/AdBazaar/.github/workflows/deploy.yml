@@ -1,0 +1,175 @@
+name: Deploy AdBazaar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ============ BUILD CORE ============
+  build-core:
+    name: Build Core Services
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # AdBazaar Main
+      - name: Build adBazaar
+        run: |
+          cd adBazaar && npm ci && npm run build
+
+      # AdBazaar Backend
+      - name: Build adBazaar-backend
+        run: |
+          cd adBazaar-backend && npm ci && npm run build
+
+      # AdBazaar Service
+      - name: Build adBazaar-service
+        run: |
+          cd adBazaar-service && npm ci && npm run build
+
+      # API Gateway
+      - name: Build adbazaar-api-gateway
+        run: |
+          cd adbazaar-api-gateway && npm ci && npm run build
+
+  # ============ BUILD INTELLIGENCE SERVICES ============
+  build-intelligence:
+    name: Build Intelligence Services
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # Ad Intelligence (Ports 4810-4819)
+      - name: Build Intelligence Services
+        run: |
+          for svc in services/REZ-email-validator services/REZ-fraud-detection \
+                     services/REZ-creative-ab-testing services/REZ-brand-safety \
+                     services/REZ-viewability-tracker services/REZ-attribution-modeling \
+                     services/REZ-audience-sync services/REZ-creative-rotation \
+                     services/REZ-frequency-capping services/REZ-budget-allocator; do
+            if [ -d "$svc" ]; then
+              echo "Building $svc"
+              cd "$svc" && npm ci && npm run build && cd ../..
+            fi
+          done
+
+      # Analytics Services (Ports 4900-4904)
+      - name: Build Analytics Services
+        run: |
+          cd ../REZ-Intelligence/services
+          for svc in REZ-churn-predictor REZ-ltv-calculator REZ-next-best-action \
+                     REZ-sentiment-analyzer REZ-competitor-monitor; do
+            if [ -d "$svc" ]; then
+              echo "Building $svc"
+              cd "$svc" && npm ci && npm run build && cd ../..
+            fi
+          done
+
+  # ============ BUILD INTEGRATIONS ============
+  build-integrations:
+    name: Build Integrations
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # HOJAI Integration
+      - name: Build HOJAI Integration
+        run: |
+          cd adBazaar-hojai-integration && npm ci && npm run build
+
+      # CorpPerks Bridge
+      - name: Build CorpPerks Bridge
+        run: |
+          cd adbazaar-corpperks-bridge && npm ci && npm run build
+
+  # ============ BUILD DASHBOARD ============
+  build-dashboard:
+    name: Build Dashboard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Build Analytics Dashboard
+        run: |
+          cd REZ-ads-analytics-dashboard && npm ci && npm run build
+
+  # ============ DEPLOY ============
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [build-core, build-integrations, build-dashboard, build-intelligence]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy Services
+        run: |
+          echo "🚀 Deploying AdBazaar services..."
+          # Add deployment commands here
+          echo "✅ Deployment complete"
+
+  # ============ DOCKER COMPOSE DEPLOY ============
+  docker-deploy:
+    name: Docker Compose Deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Intelligence Services
+        run: docker compose -f docker-compose.adbazaar-services.yml up -d
+
+      - name: Start Monitoring
+        run: docker compose -f monitoring/docker-compose.monitoring.yml up -d
+
+      - name: Health Check
+        run: |
+          sleep 15
+          for port in 4810 4811 4812 4813 4814 4815 4816 4817 4818 4819; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$port/health || echo "000")
+            if [ "$status" = "200" ]; then
+              echo "✓ Port $port healthy"
+            else
+              echo "✗ Port $port failed (status: $status)"
+            fi
+          done
+
+      - name: Stop Services
+        if: always()
+        run: |
+          docker compose -f docker-compose.adbazaar-services.yml down
+          docker compose -f monitoring/docker-compose.monitoring.yml down

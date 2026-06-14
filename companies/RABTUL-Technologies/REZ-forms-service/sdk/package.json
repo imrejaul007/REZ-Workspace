@@ -1,0 +1,26 @@
+{
+  "name": "@rez/forms-sdk",
+  "version": "1.0.0",
+  "description": "REZ Forms JavaScript/TypeScript SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "forms",
+    "survey",
+    "tally",
+    "rez"
+  ],
+  "author": "REZ Technologies",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }
+}

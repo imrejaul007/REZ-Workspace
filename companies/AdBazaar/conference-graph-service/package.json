@@ -1,0 +1,40 @@
+{
+  "name": "conference-graph-service",
+  "version": "1.0.0",
+  "description": "AdBazaar Conference Graph - Event intelligence for conferences and business events",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.2.0",
+    "ioredis": "^5.3.2",
+    "winston": "^3.11.0",
+    "prom-client": "^15.1.0",
+    "zod": "^3.22.4",
+    "axios": "^1.6.7",
+    "uuid": "^9.0.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.19",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5",
+    "@types/uuid": "^9.0.8",
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.1",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

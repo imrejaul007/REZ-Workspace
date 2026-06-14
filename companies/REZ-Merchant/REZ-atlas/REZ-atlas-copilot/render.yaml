@@ -1,0 +1,23 @@
+# Render Blueprint for REZ-atlas-copilot
+# Deploy at: https://dashboard.render.com/blueprints
+
+services:
+  - type: web
+    name: rez-atlas-copilot
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5172
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false

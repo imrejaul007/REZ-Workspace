@@ -1,0 +1,24 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# rez-restaurant-crm-service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-restaurant-crm-service
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-crm-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-restaurant-crm-service - Restaurant CRM API"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4007
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-restaurant-crm-service

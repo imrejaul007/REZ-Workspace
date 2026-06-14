@@ -1,0 +1,36 @@
+# ================================================
+# REZ App Merchant - Docker Compose Staging
+# Includes monitoring and logging
+# ================================================
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rez-app-merchant-staging
+    restart: unless-stopped
+    ports:
+      - "${STAGING_PORT:-8081}:80"
+    environment:
+      NODE_ENV: staging
+      EXPO_PUBLIC_ENVIRONMENT: staging
+      EXPO_PUBLIC_API_BASE_URL: ${REZ_API_BASE_URL:-https://rez-api-gateway-staging.onrender.com/api}
+      EXPO_PUBLIC_SOCKET_URL: ${REZ_WS_URL:-wss://rez-backend-staging.onrender.com}
+      EXPO_PUBLIC_DEBUG_MODE: "false"
+      EXPO_PUBLIC_LOG_LEVEL: debug
+      SENTRY_DSN: ${SENTRY_DSN}
+    networks:
+      - rez-network
+    volumes:
+      - app-logs:/var/log/nginx
+
+networks:
+  rez-network:
+    driver: bridge
+
+volumes:
+  app-logs:
+    driver: local

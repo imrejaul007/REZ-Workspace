@@ -1,0 +1,11 @@
+{
+  "name": "@rez/sign-service",
+  "version": "1.0.0",
+  "description": "REZ Sign - DocuSign competitor for e-signatures",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  }
+}

@@ -1,0 +1,25 @@
+# Atlas Engage - Kubernetes Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: atlas-engage
+  namespace: rez-merchant
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - atlas-engage.rez.money
+      secretName: atlas-engage-tls
+  rules:
+    - host: atlas-engage.rez.money
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: atlas-engage
+                port:
+                  number: 5165

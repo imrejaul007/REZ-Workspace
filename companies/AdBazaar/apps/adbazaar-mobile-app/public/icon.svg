@@ -1,0 +1,90 @@
+# AdBazaar Mobile App
+
+A React Native (Expo) mobile application for social media management with offline support and PWA capabilities.
+
+## Features
+
+- **Content Creation** - Create posts with multi-platform support
+- **Calendar View** - Visualize and manage scheduled posts
+- **Analytics Dashboard** - Track post performance and engagement
+- **Offline Mode (PWA)** - Full functionality when offline with automatic sync
+- **Quick Actions** - Fast access to common tasks
+- **Multi-Platform Support** - Twitter, LinkedIn, Instagram, Facebook, TikTok, Reddit
+
+## Installation
+
+```bash
+cd apps/adbazaar-mobile-app
+npm install
+```
+
+## Running
+
+```bash
+# Development
+npm start
+
+# Web (PWA)
+npm run web
+
+# iOS Simulator
+npm run ios
+
+# Android
+npm run android
+```
+
+## Project Structure
+
+```
+adbazaar-mobile-app/
+├── app/                    # Expo Router screens
+│   ├── (tabs)/            # Tab navigation
+│   │   ├── index.tsx      # Home screen
+│   │   ├── create.tsx      # Content creation
+│   │   ├── calendar.tsx    # Calendar view
+│   │   ├── analytics.tsx   # Analytics dashboard
+│   │   └── profile.tsx    # Profile & settings
+│   └── post/[id].tsx      # Post detail modal
+├── src/
+│   ├── components/         # Reusable components
+│   ├── hooks/             # Custom React hooks
+│   ├── services/          # API & offline services
+│   ├── store/             # Zustand state management
+│   └── types/             # TypeScript types
+└── public/
+    ├── manifest.json       # PWA manifest
+    └── service-worker.js   # PWA service worker
+```
+
+## Offline Support
+
+The app uses:
+- AsyncStorage for caching drafts and posts
+- Background sync for pending actions
+- Service Worker for PWA caching
+- Network status monitoring with automatic sync
+
+## API Integration
+
+Configure the API base URL in `src/services/api.ts`:
+```typescript
+const API_BASE_URL = 'http://localhost:3000/api';
+```
+
+## Build for Production
+
+```bash
+# Build web PWA
+npm run build:web
+
+# Build iOS (requires Xcode)
+expo run:ios --configuration Release
+
+# Build Android (requires Android SDK)
+expo run:android --variant release
+```
+
+## License
+
+MIT

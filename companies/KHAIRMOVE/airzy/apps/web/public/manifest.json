@@ -1,0 +1,53 @@
+{
+  "name": "Airzy - Smart companion for frequent travelers",
+  "short_name": "Airzy",
+  "description": "Premium airport lifestyle ecosystem - flights, lounges, hotels, and rewards",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#6366F1",
+  "theme_color": "#6366F1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["travel", "lifestyle", "finance"],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book Flight",
+      "short_name": "Flights",
+      "description": "Search and book flights",
+      "url": "/?action=flights",
+      "icons": [{ "src": "/icons/flight.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Find Lounges",
+      "short_name": "Lounges",
+      "description": "Discover airport lounges",
+      "url": "/?action=lounges",
+      "icons": [{ "src": "/icons/lounge.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

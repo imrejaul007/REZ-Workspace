@@ -1,0 +1,541 @@
+openapi: 3.0.3
+info:
+  title: REZ Verify QR Service API
+  description: |
+    Product authenticity, warranty management, service booking, and customer support API.
+
+    ## Features
+    - Serial Registry & Verification
+    - Warranty Activation & Claims
+    - Extended Warranty Subscriptions
+    - Service Booking & Scheduling
+    - Express Replacement
+    - Pickup & Delivery
+    - Priority Slots
+    - ML-powered Center Recommendations
+    - Push Notifications
+    - Merchant Analytics
+  version: 1.0.0
+  contact:
+    name: ReZ Platform Team
+    email: platform@rez.money
+
+servers:
+  - url: https://verify-qr.rezapp.com/api
+    description: Production
+  - url: http://localhost:4003/api
+    description: Development
+
+tags:
+  - name: Verification
+    description: Product verification APIs
+  - name: Warranty
+    description: Warranty management
+  - name: Service Booking
+    description: Service appointment APIs
+  - name: Subscriptions
+    description: Extended warranty subscriptions
+  - name: Express Replacement
+    description: Express replacement service
+  - name: Pickup Delivery
+    description: Pickup and delivery APIs
+  - name: Analytics
+    description: Analytics and predictions
+
+paths:
+  /verify:
+    post:
+      tags: [Verification]
+      summary: Verify product
+      description: Verify a product by scanning QR code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serial_number]
+              properties:
+                serial_number:
+                  type: string
+                  example: "PRD1234567890ABCD"
+                user_id:
+                  type: string
+                  example: "user_123"
+                user_phone:
+                  type: string
+                  example: "+919999999999"
+                location:
+                  type: object
+                  properties:
+                    lat: { type: number }
+                    lng: { type: number }
+                    city: { type: string }
+                device_id:
+                  type: string
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [AUTHENTIC, INVALID, FLAGGED]
+                  serial_number: { type: string }
+                  brand: { type: string }
+                  model: { type: string }
+                  warranty_status: { type: string }
+                  action:
+                    type: string
+                    enum: [VIEW_WARRANTY, ACTIVATE_WARRANTY]
+
+  /activate-warranty:
+    post:
+      tags: [Warranty]
+      summary: Activate warranty
+      description: Activate warranty for a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serial_number, user_id, customer_name, customer_phone]
+              properties:
+                serial_number: { type: string }
+                user_id: { type: string }
+                customer_name: { type: string }
+                customer_phone: { type: string }
+                customer_email: { type: string }
+                purchase_date: { type: string, format: date }
+                invoice_url: { type: string }
+                price_paid: { type: number }
+      responses:
+        '200':
+          description: Warranty activated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  warranty_id: { type: string }
+                  expires: { type: string, format: date-time }
+                  cashback_earned: { type: number }
+
+  /claim:
+    post:
+      tags: [Warranty]
+      summary: File warranty claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [warranty_id, issue_type, issue_description]
+              properties:
+                warranty_id: { type: string }
+                issue_type:
+                  type: string
+                  enum: [not_working, damaged, defective, other]
+                issue_description: { type: string }
+                photos: { type: array, items: { type: string } }
+                service_center_id: { type: string }
+      responses:
+        '200':
+          description: Claim filed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  claim_id: { type: string }
+
+  /service-slots:
+    get:
+      tags: [Service Booking]
+      summary: Get available service slots
+      parameters:
+        - name: center_id
+          in: query
+          required: true
+          schema: { type: string }
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+        - name: days
+          in: query
+          schema: { type: integer, default: 7 }
+      responses:
+        '200':
+          description: Available slots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  center_id: { type: string }
+                  slots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date: { type: string, format: date }
+                        slots:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              time: { type: string }
+                              available: { type: boolean }
+
+  /book-service:
+    post:
+      tags: [Service Booking]
+      summary: Book service appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serial_number, user_id, service_center_id, service_type, preferred_date, preferred_time]
+              properties:
+                serial_number: { type: string }
+                user_id: { type: string }
+                customer_name: { type: string }
+                customer_phone: { type: string }
+                service_center_id: { type: string }
+                service_type:
+                  type: string
+                  enum: [routine_service, repair, inspection, warranty_claim, general_maintenance]
+                preferred_date: { type: string, format: date }
+                preferred_time: { type: string }
+                issue_description: { type: string }
+                photos: { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  booking_id: { type: string }
+                  status: { type: string }
+                  estimated_cost: { type: number }
+                  warranty_covered: { type: boolean }
+
+  /warranty-plans:
+    get:
+      tags: [Subscriptions]
+      summary: Get warranty plans
+      parameters:
+        - name: brand
+          in: query
+          schema: { type: string }
+        - name: coverage_type
+          in: query
+          schema: { type: string, enum: [basic, standard, premium, comprehensive] }
+      responses:
+        '200':
+          description: Available plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                  plans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WarrantyPlan'
+
+  /subscribe:
+    post:
+      tags: [Subscriptions]
+      summary: Subscribe to warranty plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, plan_id, serial_number]
+              properties:
+                user_id: { type: string }
+                customer_name: { type: string }
+                customer_phone: { type: string }
+                plan_id: { type: string }
+                serial_number: { type: string }
+                product_name: { type: string }
+                brand: { type: string }
+                purchase_date: { type: string, format: date }
+                purchase_price: { type: number }
+                auto_renew: { type: boolean }
+      responses:
+        '200':
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  subscription_id: { type: string }
+                  status: { type: string }
+                  start_date: { type: string, format: date-time }
+                  end_date: { type: string, format: date-time }
+
+  /express-replacement:
+    post:
+      tags: [Express Replacement]
+      summary: Request express replacement
+      description: Request express replacement for approved warranty claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [claim_id, serial_number, user_id, customer_address]
+              properties:
+                claim_id: { type: string }
+                warranty_id: { type: string }
+                serial_number: { type: string }
+                user_id: { type: string }
+                customer_name: { type: string }
+                customer_phone: { type: string }
+                customer_address:
+                  type: object
+                  properties:
+                    line1: { type: string }
+                    city: { type: string }
+                    state: { type: string }
+                    pincode: { type: string }
+                    lat: { type: number }
+                    lng: { type: number }
+                brand: { type: string }
+                model: { type: string }
+                issue_description: { type: string }
+      responses:
+        '200':
+          description: Replacement requested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  replacement_id: { type: string }
+                  status: { type: string }
+                  estimated_delivery: { type: string, format: date-time }
+
+  /express-replacement/{id}/track:
+    get:
+      tags: [Express Replacement]
+      summary: Track express replacement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Tracking info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  replacement_id: { type: string }
+                  status: { type: string }
+                  tracking_id: { type: string }
+                  courier_name: { type: string }
+                  estimated_delivery: { type: string, format: date-time }
+                  live_tracking: { type: object }
+                  timeline: { type: array }
+
+  /pickup-request:
+    post:
+      tags: [Pickup Delivery]
+      summary: Request pickup for service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [booking_id, user_id, pickup_address]
+              properties:
+                booking_id: { type: string }
+                user_id: { type: string }
+                customer_name: { type: string }
+                customer_phone: { type: string }
+                pickup_address:
+                  $ref: '#/components/schemas/Address'
+                delivery_address:
+                  $ref: '#/components/schemas/Address'
+                service_type: { type: string }
+                scheduled_pickup: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Pickup scheduled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  pickup_id: { type: string }
+                  status: { type: string }
+                  scheduled_pickup: { type: string, format: date-time }
+
+  /nearest-center:
+    get:
+      tags: [Service Booking]
+      summary: Get nearest service center
+      description: Auto-assign nearest service center with ML optimization
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number }
+        - name: lng
+          in: query
+          required: true
+          schema: { type: number }
+        - name: service_type
+          in: query
+          schema: { type: string }
+        - name: brand
+          in: query
+          schema: { type: string }
+        - name: user_id
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Recommended service center
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommended:
+                    $ref: '#/components/schemas/ServiceCenter'
+                  alternatives:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceCenter'
+                  ml_recommendation: { type: object }
+
+  /admin/analytics/predict:
+    get:
+      tags: [Analytics]
+      summary: Get predictive analytics
+      description: Get demand predictions and patterns for service center
+      parameters:
+        - name: center_id
+          in: query
+          required: true
+          schema: { type: string }
+        - name: period
+          in: query
+          schema: { type: string, enum: [7days, 30days, 90days], default: 30days }
+      responses:
+        '200':
+          description: Predictive analytics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      total_bookings: { type: integer }
+                      total_claims: { type: integer }
+                      avg_daily: { type: integer }
+                      claim_rate: { type: string }
+                  patterns: { type: object }
+                  predictions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date: { type: string }
+                        predicted_demand: { type: integer }
+                        confidence: { type: number }
+                  ml_predictions: { type: object }
+
+components:
+  schemas:
+    WarrantyPlan:
+      type: object
+      properties:
+        plan_id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        duration_months: { type: integer }
+        price: { type: number }
+        coverage_type:
+          type: string
+          enum: [basic, standard, premium, comprehensive]
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              feature: { type: string }
+              included: { type: boolean }
+              limit: { type: number }
+        includes_express_replacement: { type: boolean }
+        includes_pickup_delivery: { type: boolean }
+        includes_accidental_damage: { type: boolean }
+        includes_theft_loss: { type: boolean }
+        max_claims: { type: integer }
+        claim_deductible: { type: number }
+
+    ServiceCenter:
+      type: object
+      properties:
+        center_id: { type: string }
+        name: { type: string }
+        address: { type: string }
+        city: { type: string }
+        phone: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+        services: { type: array, items: { type: string } }
+        brands: { type: array, items: { type: string } }
+        distance_km: { type: number }
+        current_load: { type: integer }
+        score: { type: number }
+
+    Address:
+      type: object
+      properties:
+        line1: { type: string }
+        line2: { type: string }
+        city: { type: string }
+        state: { type: string }
+        pincode: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+        instructions: { type: string }
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atlas-qualification-agent
+  namespace: rez-merchant
+  labels:
+    app: atlas-qualification-agent
+    version: latest
+    managed-by: rez-merchant
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: atlas-qualification-agent
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: atlas-qualification-agent
+        version: latest
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5175"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: atlas-qualification-agent
+          image: ghcr.io/imrejaul007/atlas-qualification-agent:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5175
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: atlas-qualification-agent-config
+            - secretRef:
+                name: atlas-qualification-agent-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}

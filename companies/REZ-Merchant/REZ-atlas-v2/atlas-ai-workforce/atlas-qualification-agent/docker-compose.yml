@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  atlas-qualification-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atlas-qualification-agent
+    restart: unless-stopped
+    ports:
+      - "5175:5175"
+    environment:
+      NODE_ENV: production
+      PORT: 5175
+      SERVICE_NAME: atlas-qualification-agent
+      MONGODB_URI: mongodb://mongodb:27017/atlas-qualification-agent
+      LOG_LEVEL: info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5175/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rez-network
+
+  mongodb:
+    image: mongo:6-alpine
+    container_name: qualification-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: atlas-qualification-agent
+    ports:
+      - "27018:27017"
+    volumes:
+      - qualification-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - rez-network
+
+networks:
+  rez-network:
+    driver: bridge
+
+volumes:
+  qualification-mongo-data:
+    driver: local

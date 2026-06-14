@@ -1,0 +1,622 @@
+openapi: 3.0.0
+info:
+  title: ReZ Payment Service API
+  version: 1.0.0
+  description: |
+    ReZ Payment Service handles payment initiation, processing, and reconciliation.
+    Supports multiple payment methods including UPI, cards, netbanking, and BNPL.
+    Integrates with Razorpay for payment gateway operations.
+  contact:
+    name: ReZ API Support
+    email: api-support@rez.money
+  license:
+    name: Proprietary
+    url: https://rez.money/terms
+
+servers:
+  - url: https://api.rez.money/payment
+    description: Production
+  - url: https://staging-api.rez.money/payment
+    description: Staging
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Payment
+    description: Payment initiation and capture
+  - name: Refund
+    description: Refund operations
+  - name: Webhook
+    description: Payment gateway webhooks
+  - name: Merchant
+    description: Merchant settlement operations
+  - name: Internal
+    description: Internal service endpoints
+
+paths:
+  # Payment Routes
+  /pay/initiate:
+    post:
+      summary: Initiate Payment
+      description: |
+        Initiates a payment request. Creates a payment record and returns
+        payment details for the client to complete via Razorpay.
+        Rate limited per user.
+      tags: [Payment]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - orderId
+                - amount
+                - paymentMethod
+              properties:
+                orderId:
+                  type: string
+                  description: Order ID or order number
+                amount:
+                  type: number
+                  maximum: 500000
+                  description: Payment amount in rupees
+                paymentMethod:
+                  type: string
+                  enum: [upi, card, wallet, netbanking]
+                purpose:
+                  type: string
+                  enum: [wallet_topup, order_payment, event_booking, financial_service, other]
+                  default: order_payment
+                orchestratorIdempotencyKey:
+                  type: string
+                  description: Idempotency key (auto-generated if not provided)
+                userDetails:
+                  type: object
+                metadata:
+                  type: object
+      responses:
+        '200':
+          description: Payment initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      paymentId:
+                        type: string
+                      orderId:
+                        type: string
+                      amount:
+                        type: number
+                      status:
+                        type: string
+        '400':
+          description: Invalid request
+        '429':
+          description: Rate limit exceeded
+
+  /pay/capture:
+    post:
+      summary: Capture Payment
+      description: |
+        Captures payment after Razorpay Checkout completes.
+        Verifies HMAC signature and updates payment status.
+        Implements replay prevention via Razorpay payment ID deduplication.
+      tags: [Payment]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - paymentId
+                - razorpayPaymentId
+                - razorpayOrderId
+                - razorpaySignature
+              properties:
+                paymentId:
+                  type: string
+                  description: Internal payment document ID
+                razorpayPaymentId:
+                  type: string
+                  pattern: "^pay_[A-Za-z0-9]{14,20}$"
+                razorpayOrderId:
+                  type: string
+                  pattern: "^order_[A-Za-z0-9]{14,20}$"
+                razorpaySignature:
+                  type: string
+      responses:
+        '200':
+          description: Payment captured
+        '409':
+          description: Payment already captured (replay detected)
+        '400':
+          description: Signature verification failed
+
+  /pay/refund:
+    post:
+      summary: Process Refund
+      description: |
+        Initiates a refund for a completed payment.
+        Requires merchant or admin role.
+        Refunds are processed through Razorpay.
+      tags: [Refund]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - paymentId
+                - amount
+              properties:
+                paymentId:
+                  type: string
+                amount:
+                  type: number
+                  maximum: 500000
+                  description: Refund amount in rupees (supports paise via 0.01)
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Refund initiated
+        '403':
+          description: Merchant/admin role required
+        '400':
+          description: Payment not eligible for refund
+
+  /pay/status/{paymentId}:
+    get:
+      summary: Get Payment Status
+      description: Returns payment status and audit trail.
+      tags: [Payment]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment status returned
+        '404':
+          description: Payment not found
+
+  # Razorpay Routes
+  /api/razorpay/create-order:
+    post:
+      summary: Create Razorpay Order
+      description: Creates a Razorpay order for payment processing.
+      tags: [Payment]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+              properties:
+                amount:
+                  type: number
+                  maximum: 500000
+                receipt:
+                  type: string
+                notes:
+                  type: object
+                orderId:
+                  type: string
+                orderNumber:
+                  type: string
+      responses:
+        '200':
+          description: Order created
+
+  /api/razorpay/config:
+    get:
+      summary: Get Razorpay Config
+      description: Returns Razorpay key_id for client SDK initialization.
+      tags: [Payment]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Config returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      key_id:
+                        type: string
+
+  /api/razorpay/verify-payment:
+    post:
+      summary: Verify Payment Signature
+      description: Verifies Razorpay payment signature. Internal use only.
+      tags: [Payment]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - razorpayOrderId
+                - razorpayPaymentId
+                - razorpaySignature
+              properties:
+                razorpayOrderId:
+                  type: string
+                razorpayPaymentId:
+                  type: string
+                razorpaySignature:
+                  type: string
+      responses:
+        '200':
+          description: Signature verification result
+
+  # Webhook Routes
+  /pay/webhook/razorpay:
+    post:
+      summary: Razorpay Webhook
+      description: |
+        Receives payment status updates from Razorpay.
+        Verifies webhook signature and processes events.
+        Events: payment.captured, payment.failed, refund.processed, refund.failed
+      tags: [Webhook]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed
+        '400':
+          description: Invalid signature
+        '503':
+          description: Service temporarily unavailable
+
+  # Merchant Settlement Routes
+  /pay/merchant/settlements:
+    get:
+      summary: Get Merchant Settlements
+      description: Returns merchant payment settlement history.
+      tags: [Merchant]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: merchantId
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Settlements retrieved
+        '403':
+          description: Merchant access required
+
+  # Internal Routes
+  /pay/internal/wallet-credit:
+    post:
+      summary: Credit Wallet After Payment (Internal)
+      description: |
+        Credits wallet after successful payment capture.
+        Called by rez-backend to credit coins.
+        Requires X-Internal-Token header.
+      tags: [Internal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - paymentId
+              properties:
+                paymentId:
+                  type: string
+                amount:
+                  type: number
+                idempotencyKey:
+                  type: string
+      responses:
+        '200':
+          description: Wallet credited
+        '404':
+          description: Payment not found
+        '502':
+          description: Wallet credit failed
+
+  /internal/pay/deduct:
+    post:
+      summary: Deduct Payment (Internal)
+      description: Initiates payment deduction for internal use.
+      tags: [Internal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - orderId
+                - amount
+              properties:
+                userId:
+                  type: string
+                orderId:
+                  type: string
+                amount:
+                  type: number
+                paymentMethod:
+                  type: string
+                  enum: [cod, wallet, razorpay, upi, card, netbanking, bnpl]
+                purpose:
+                  type: string
+                  enum: [order, wallet_topup, subscription, refund, other]
+      responses:
+        '200':
+          description: Payment initiated
+
+  /internal/pay/{paymentId}:
+    get:
+      summary: Get Payment (Internal)
+      description: Returns payment details. Internal service use.
+      tags: [Internal]
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment returned
+        '404':
+          description: Payment not found
+
+  /internal/merchants/{merchantId}/payment-regularity:
+    get:
+      summary: Get Payment Regularity (Internal)
+      description: |
+        Returns the fraction of payments completed on-time over trailing 90 days.
+        Used by credit scoring service.
+      tags: [Internal]
+      parameters:
+        - name: merchantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment regularity returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      onTimeRate:
+                        type: number
+                        description: Fraction 0.0-1.0
+                      totalPayments:
+                        type: integer
+                      completedPayments:
+                        type: integer
+
+  # DLQ Admin Routes
+  /admin/dlq:
+    get:
+      summary: Get DLQ Summary
+      description: Returns failed/waiting job counts for wallet-credit and monolith-sync queues.
+      tags: [Internal]
+      responses:
+        '200':
+          description: Queue summary
+
+  /admin/dlq/{queue}/jobs:
+    get:
+      summary: Get Failed Jobs
+      description: Returns paginated list of failed jobs for a queue.
+      tags: [Internal]
+      parameters:
+        - name: queue
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [wallet-credit, monolith-sync]
+        - name: start
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: end
+          in: query
+          schema:
+            type: integer
+            default: 49
+      responses:
+        '200':
+          description: Failed jobs retrieved
+
+  /admin/dlq/{queue}/jobs/{jobId}/retry:
+    post:
+      summary: Retry Failed Job
+      description: Retries a single failed job.
+      tags: [Internal]
+      parameters:
+        - name: queue
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [wallet-credit, monolith-sync]
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job requeued
+
+  /admin/dlq/{queue}/retry-all:
+    post:
+      summary: Retry All Failed Jobs
+      description: Retries all failed jobs with bounded concurrency.
+      tags: [Internal]
+      parameters:
+        - name: queue
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [wallet-credit, monolith-sync]
+      responses:
+        '200':
+          description: Bulk retry completed
+
+  /admin/dlq/{queue}/jobs/{jobId}:
+    delete:
+      summary: Discard Failed Job
+      description: Permanently removes a failed job.
+      tags: [Internal]
+      parameters:
+        - name: queue
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [wallet-credit, monolith-sync]
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job removed
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        code:
+          type: string
+
+    Payment:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        orderId:
+          type: string
+        userId:
+          type: string
+        amount:
+          type: number
+        paymentMethod:
+          type: string
+          enum: [upi, card, wallet, netbanking, cod, bnpl]
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, cancelled, refunded]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Refund:
+      type: object
+      properties:
+        refundId:
+          type: string
+        paymentId:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [pending, processed, failed]
+        reason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Settlement:
+      type: object
+      properties:
+        settlementId:
+          type: string
+        merchantId:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+        processedAt:
+          type: string
+          format: date-time

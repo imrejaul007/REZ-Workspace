@@ -1,0 +1,29 @@
+{
+  "name": "@rez/tenant-middleware",
+  "version": "1.0.0",
+  "description": "Multi-tenant middleware for AdBazaar - REZ Internal vs External client isolation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./types": "./dist/types.js",
+    "./context": "./dist/context.js",
+    "./middleware": "./dist/middleware.js",
+    "./decorators": "./dist/decorators.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,643 @@
+openapi: 3.0.0
+info:
+  title: ReZ Order Service API
+  version: 1.0.0
+  description: |
+    ReZ Order Service handles order creation, status management, and real-time order tracking.
+    Supports consumer checkout, merchant order management, and SSE-based order streaming.
+  contact:
+    name: ReZ API Support
+    email: api-support@rez.money
+  license:
+    name: Proprietary
+    url: https://rez.money/terms
+
+servers:
+  - url: https://api.rez.money
+    description: Production
+  - url: https://staging-api.rez.money
+    description: Staging
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Orders
+    description: Order creation and management
+  - name: Health
+    description: Health check endpoints
+  - name: Admin
+    description: Administrative endpoints
+
+paths:
+  # Health Endpoints
+  /health/live:
+    get:
+      summary: Liveness Check
+      description: Returns service liveness status. Used by load balancers to determine if the service is alive.
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: live
+                  service:
+                    type: string
+                    example: rez-order-service
+                  uptime:
+                    type: number
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /health:
+    get:
+      summary: Health Check
+      description: Returns detailed health status including MongoDB and Redis connectivity.
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  checks:
+                    type: object
+                  uptime:
+                    type: number
+                  timestamp:
+                    type: string
+                    format: date-time
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  checks:
+                    type: object
+                  errors:
+                    type: array
+                    items:
+                      type: string
+
+  /health/ready:
+    get:
+      summary: Readiness Check
+      description: Returns readiness status with deep checks for MongoDB and Redis.
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  mongodb:
+                    type: string
+                  redis:
+                    type: string
+        '503':
+          description: Service is not ready
+
+  /health/detailed:
+    get:
+      summary: Detailed Health Check
+      description: Returns comprehensive health metrics with latency for each dependency.
+      tags: [Health]
+      responses:
+        '200':
+          description: Detailed health metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                  uptime:
+                    type: number
+                  checks:
+                    type: object
+
+  # Metrics
+  /metrics:
+    get:
+      summary: Prometheus Metrics
+      description: Returns Prometheus-compatible metrics for monitoring.
+      tags: [Health]
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  # Order Routes
+  /orders:
+    post:
+      summary: Create Order
+      description: |
+        Creates a new order for consumer checkout. Validates payload, checks store,
+        and creates order in 'placed' status. Supports idempotency via Idempotency-Key header.
+        Distributed locking prevents duplicate orders from concurrent requests.
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Unique key to prevent duplicate orders
+        - name: X-Correlation-ID
+          in: header
+          schema:
+            type: string
+          description: Correlation ID for request tracing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - storeId
+                - items
+              properties:
+                storeId:
+                  type: string
+                  description: MongoDB ObjectId of the store
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - product
+                      - quantity
+                      - price
+                    properties:
+                      product:
+                        type: string
+                        description: Product ID (ObjectId or string)
+                      quantity:
+                        type: integer
+                        minimum: 1
+                      price:
+                        type: number
+                        minimum: 0
+                      name:
+                        type: string
+                totals:
+                  type: object
+                  properties:
+                    subtotal:
+                      type: number
+                    total:
+                      type: number
+                    tax:
+                      type: number
+                    discount:
+                      type: number
+                    deliveryFee:
+                      type: number
+                paymentMethod:
+                  type: string
+                  enum: [upi, card, wallet, netbanking, cod, unknown]
+                  default: unknown
+                deliveryAddress:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    phone:
+                      type: string
+                    line1:
+                      type: string
+                    line2:
+                      type: string
+                    city:
+                      type: string
+                    state:
+                      type: string
+                    pincode:
+                      type: string
+                delivery:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [delivery, pickup]
+                    address:
+                      type: object
+                coinsUsed:
+                  type: object
+                couponCode:
+                  type: string
+                tax:
+                  type: number
+                deliveryFee:
+                  type: number
+                discount:
+                  type: number
+                currency:
+                  type: string
+                  default: INR
+                specialInstructions:
+                  type: string
+                idempotencyKey:
+                  type: string
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+        '401':
+          description: Authentication required
+        '409':
+          description: Concurrent request detected (idempotency)
+        '429':
+          description: Rate limit exceeded
+
+    get:
+      summary: List Orders
+      description: Returns paginated list of orders. Supports filtering by merchantId, userId, and status.
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: merchantId
+          in: query
+          schema:
+            type: string
+          description: Filter by merchant ID
+        - name: userId
+          in: query
+          schema:
+            type: string
+          description: Filter by user ID (users can only see their own)
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [placed, confirmed, preparing, ready, out_for_delivery, delivered, cancelled, refunded, partially_refunded]
+          description: Filter by order status
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor for pagination (base64 encoded)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Number of orders to return
+      responses:
+        '200':
+          description: Orders retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                  hasMore:
+                    type: boolean
+                  nextCursor:
+                    type: string
+        '401':
+          description: Authentication required
+        '403':
+          description: Access denied
+
+  /orders/stream:
+    get:
+      summary: Order Stream (SSE)
+      description: |
+        Server-Sent Events stream for real-time order updates.
+        Uses MongoDB change streams when replica set is available,
+        falls back to polling otherwise.
+        Requires merchantId query parameter.
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: merchantId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Merchant ID to subscribe to
+      responses:
+        '200':
+          description: SSE stream established
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '400':
+          description: merchantId required
+        '401':
+          description: Authentication required
+        '429':
+          description: Connection limit reached (max 10 per merchant, 1000 global)
+
+  /orders/summary/{userId}:
+    get:
+      summary: Get Order Summary
+      description: Returns order statistics for a user (last 30 days).
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: User ID to get summary for
+      responses:
+        '200':
+          description: Order summary retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      totalSpend30d:
+                        type: number
+                      orderCount30d:
+                        type: integer
+                      avgOrderValue:
+                        type: number
+                      paymentHistory:
+                        type: integer
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden
+
+  /orders/{id}:
+    get:
+      summary: Get Order
+      description: Returns a specific order by ID.
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Order ID (ObjectId or order number)
+      responses:
+        '200':
+          description: Order found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '401':
+          description: Authentication required
+        '404':
+          description: Order not found
+
+  /orders/{id}/status:
+    patch:
+      summary: Update Order Status
+      description: Updates order status with state machine validation.
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [placed, confirmed, preparing, ready, out_for_delivery, delivered, cancelled, refunded]
+                reason:
+                  type: string
+                  description: Reason for status change
+      responses:
+        '200':
+          description: Status updated
+        '400':
+          description: Invalid status transition
+        '401':
+          description: Authentication required
+        '404':
+          description: Order not found
+
+  /orders/{id}/cancel:
+    post:
+      summary: Cancel Order
+      description: Cancels an order if eligible (state machine enforced).
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Order cancelled
+        '400':
+          description: Order cannot be cancelled
+        '401':
+          description: Authentication required
+        '404':
+          description: Order not found
+
+  # Internal Routes
+  /internal/orders/summary/{userId}:
+    get:
+      summary: Get Order Summary (Internal)
+      description: Internal service endpoint for order statistics.
+      tags: [Internal]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Summary retrieved
+
+  # Admin DLQ Routes
+  /admin/dlq:
+    get:
+      summary: Get DLQ Summary
+      description: Returns failed/waiting job counts for order queues.
+      tags: [Admin]
+      responses:
+        '200':
+          description: DLQ summary
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        error:
+          type: string
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        orderNumber:
+          type: string
+        status:
+          type: string
+          enum: [placed, confirmed, preparing, ready, out_for_delivery, delivered, cancelled, refunded, partially_refunded]
+        user:
+          type: string
+        store:
+          type: string
+        merchant:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+        totals:
+          type: object
+          properties:
+            subtotal:
+              type: number
+            total:
+              type: number
+            tax:
+              type: number
+            discount:
+              type: number
+            deliveryFee:
+              type: number
+        paymentMethod:
+          type: string
+        payment:
+          type: object
+        delivery:
+          type: object
+        currency:
+          type: string
+        timeline:
+          type: array
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: string

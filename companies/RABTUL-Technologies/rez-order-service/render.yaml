@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: rez-order-service
+    runtime: node
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    # M24 FIX: Add memory limit. Limits protect against OOM on Render's shared hosting.
+    memoryMB: 512
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "4005"
+      - key: NODE_ENV
+        value: production
+      # MongoDB with authentication:
+      # Format: mongodb://admin:PASSWORD@host:27017/rez?authSource=admin
+      - key: MONGODB_URI
+        sync: false
+      # Redis with authentication:
+      # Format: redis://:PASSWORD@host:6379
+      # For Redis Cloud: rediss://:PASSWORD@redis-host:12345
+      - key: REDIS_URL
+        sync: false
+      - key: INTERNAL_SERVICE_TOKENS_JSON
+        sync: false
+      # INTERNAL_SERVICE_HMAC_SECRET — HMAC key for internal service token verification (C9 fix)
+      - key: INTERNAL_SERVICE_HMAC_SECRET
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://rez.money,https://merchant.rez.money,https://admin.rez.money
+
+  - type: worker
+    name: rez-order-worker
+    runtime: node
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm run start:worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # MongoDB with authentication:
+      - key: MONGODB_URI
+        sync: false
+      # Redis with authentication:
+      - key: REDIS_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false

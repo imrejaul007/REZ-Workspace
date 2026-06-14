@@ -1,0 +1,23 @@
+# ================================================
+# REZ-Inventory-Engine Kubernetes Service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-inventory-engine
+  namespace: rez-merchant
+  labels:
+    app: rez-inventory-engine
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ Inventory Engine service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4010
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-inventory-engine

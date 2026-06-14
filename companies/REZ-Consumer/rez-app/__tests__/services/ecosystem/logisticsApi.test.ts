@@ -1,0 +1,89 @@
+// @ts-nocheck
+/**
+ * Logistics API Tests
+ */
+
+import * as logisticsApi from '@/services/logisticsApi';
+
+jest.mock('@/services/apiClient', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), post: jest.fn() },
+  ApiResponse: {},
+}));
+
+import apiClient from '@/services/apiClient';
+
+describe('Logistics API', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  describe('getRates', () => {
+    it('should fetch carrier rates', async () => {
+      const mockRates = [
+        { carrier: 'delhivery' as const, rate: 50, deliveryDays: 3 },
+        { carrier: 'bluedart' as const, rate: 75, deliveryDays: 2 },
+      ];
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({ success: true, data: mockRates });
+
+      const result = await logisticsApi.getRates({
+        pickupPincode: '560001',
+        deliveryPincode: '110001',
+        weight: 1,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+    });
+  });
+
+  describe('createShipment', () => {
+    it('should create shipment', async () => {
+      const mockShipment = {
+        id: 'ship-1',
+        orderId: 'order-1',
+        trackingNumber: 'TRK123',
+        carrier: 'delhivery' as const,
+        status: 'pending' as const,
+      };
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({ success: true, data: mockShipment });
+
+      const result = await logisticsApi.createShipment({
+        orderId: 'order-1',
+        carrier: 'delhivery',
+        pickupPincode: '560001',
+        deliveryPincode: '110001',
+        weight: 1,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data?.trackingNumber).toBe('TRK123');
+    });
+  });
+
+  describe('trackShipment', () => {
+    it('should track shipment', async () => {
+      const mockTimeline = [
+        { status: 'picked_up' as const, message: 'Picked up', timestamp: '2026-05-15T10:00:00Z' },
+        { status: 'in_transit' as const, message: 'In transit', timestamp: '2026-05-15T14:00:00Z' },
+      ];
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockTimeline });
+
+      const result = await logisticsApi.trackShipment('ship-1');
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+    });
+  });
+
+  describe('getShipmentByTracking', () => {
+    it('should get shipment by tracking number', async () => {
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { id: 'ship-1', trackingNumber: 'TRK123' },
+      });
+
+      const result = await logisticsApi.getShipmentByTracking('TRK123');
+      expect(result.success).toBe(true);
+      expect(result.data?.trackingNumber).toBe('TRK123');
+    });
+  });
+});
+});

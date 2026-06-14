@@ -1,0 +1,28 @@
+{
+  "name": "rez-salon-membership-service",
+  "version": "1.0.0",
+  "description": "Salon Membership and Packages Service for ReZ platform",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@rez/shared-types": "*",
+    "mongoose": "^8.0.0",
+    "express": "^4.18.2",
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.3.0",
+    "zod": "^3.22.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0"
+  }
+}

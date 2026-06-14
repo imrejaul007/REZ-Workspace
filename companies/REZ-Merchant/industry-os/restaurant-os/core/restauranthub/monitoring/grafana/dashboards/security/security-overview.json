@@ -1,0 +1,821 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Security Overview Dashboard for RestoPapa Platform - AI Sentry Security Monitoring",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1694952000000,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Executive Dashboard",
+      "tooltip": "View executive overview",
+      "type": "link",
+      "url": "/d/executive-overview/executive-overview"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "description": "Overall security posture of the platform",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "SECURITY BREACH"
+                },
+                "1": {
+                  "color": "yellow",
+                  "index": 1,
+                  "text": "ELEVATED RISK"
+                },
+                "2": {
+                  "color": "green",
+                  "index": 2,
+                  "text": "SECURE"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "(\n  (sum(rate(auth_failures_total[5m])) < 10) +\n  (sum(ALERTS{alertname=~\".*Security.*\",alertstate=\"firing\"}) == 0) +\n  (sum(rate(rate_limit_violations_total[5m])) < 5)\n) / 3 * 2",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Security Status",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Authentication failures per second",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "sum(rate(auth_failures_total[5m]))",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Auth Failures/sec",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Rate limit violations per second",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "sum(rate(rate_limit_violations_total[5m]))",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Rate Limit Violations/sec",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Active security alerts",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "sum(ALERTS{alertname=~\".*Security.*|.*Auth.*|.*SQL.*|.*XSS.*\",alertstate=\"firing\"})",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Security Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Authentication failure patterns over time",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(auth_failures_total[5m])) by (reason)",
+          "interval": "",
+          "legendFormat": "{{ reason }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Authentication Failures by Reason",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Top suspicious IP addresses",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "topk(10, sum(rate(http_requests_total[5m])) by (source_ip))",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Top Source IPs by Request Rate",
+      "type": "table"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Security events timeline",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(auth_failures_total[5m]))",
+          "interval": "",
+          "legendFormat": "Auth Failures",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(rate_limit_violations_total[5m]))",
+          "interval": "",
+          "legendFormat": "Rate Limit Violations",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(sql_injection_attempts_total[5m]))",
+          "interval": "",
+          "legendFormat": "SQL Injection Attempts",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(rate(xss_attempts_total[5m]))",
+          "interval": "",
+          "legendFormat": "XSS Attempts",
+          "refId": "D"
+        },
+        {
+          "expr": "sum(rate(privilege_escalation_attempts_total[5m]))",
+          "interval": "",
+          "legendFormat": "Privilege Escalation",
+          "refId": "E"
+        }
+      ],
+      "title": "Security Events Timeline",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Vulnerability scan results",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            }
+          },
+          "mappings": []
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "vulnerability_scan_critical_severity",
+          "interval": "",
+          "legendFormat": "Critical",
+          "refId": "A"
+        },
+        {
+          "expr": "vulnerability_scan_high_severity",
+          "interval": "",
+          "legendFormat": "High",
+          "refId": "B"
+        },
+        {
+          "expr": "vulnerability_scan_medium_severity",
+          "interval": "",
+          "legendFormat": "Medium",
+          "refId": "C"
+        },
+        {
+          "expr": "vulnerability_scan_low_severity",
+          "interval": "",
+          "legendFormat": "Low",
+          "refId": "D"
+        }
+      ],
+      "title": "Vulnerability Scan Results",
+      "type": "piechart"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Compliance status across different standards",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "NON-COMPLIANT"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "COMPLIANT"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 24
+      },
+      "id": 9,
+      "options": {
+        "displayMode": "list",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "compliance_check_pci_dss",
+          "interval": "",
+          "legendFormat": "PCI DSS",
+          "refId": "A"
+        },
+        {
+          "expr": "compliance_check_gdpr",
+          "interval": "",
+          "legendFormat": "GDPR",
+          "refId": "B"
+        },
+        {
+          "expr": "compliance_check_sox",
+          "interval": "",
+          "legendFormat": "SOX",
+          "refId": "C"
+        },
+        {
+          "expr": "compliance_check_iso27001",
+          "interval": "",
+          "legendFormat": "ISO 27001",
+          "refId": "D"
+        }
+      ],
+      "title": "Compliance Status",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Security metrics summary",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 24
+      },
+      "id": 10,
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "sum(increase(auth_failures_total[24h]))",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "Auth Failures (24h)",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(account_lockouts_total[24h]))",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "Account Lockouts (24h)",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(increase(rate_limit_violations_total[24h]))",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "Rate Limit Violations (24h)",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(increase(suspicious_activities_total[24h]))",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "Suspicious Activities (24h)",
+          "refId": "D"
+        }
+      ],
+      "title": "Security Metrics (24h)",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": [
+    "restopapa",
+    "security",
+    "monitoring",
+    "ai-sentry"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "RestoPapa - Security Overview",
+  "uid": "security-overview",
+  "version": 1
+}

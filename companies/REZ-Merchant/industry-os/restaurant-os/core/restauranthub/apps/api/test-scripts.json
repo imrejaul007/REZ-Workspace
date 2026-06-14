@@ -1,0 +1,43 @@
+{
+  "scripts": {
+    "test": "jest",
+    "test:unit": "jest --testPathPattern='unit.*test.js'",
+    "test:auth": "jest --testPathPattern='auth.*test.js'",
+    "test:auth-unit": "jest --testPathPattern='unit/auth.*test.js'",
+    "test:coverage": "jest --coverage --testPathPattern='unit.*test.js'",
+    "test:auth-coverage": "jest --coverage --testPathPattern='auth.*test.js' --collectCoverageFrom='src/modules/auth/**/*.ts'",
+    "test:security": "jest --testPathPattern='security.*test.js'",
+    "test:performance": "jest --testPathPattern='performance.*test.js'",
+    "test:integration": "jest --testPathPattern='integration.*test.js'",
+    "test:watch": "jest --watch --testPathPattern='unit.*test.js'",
+    "test:debug": "jest --testPathPattern='unit.*test.js' --verbose --no-cache",
+    "test:ci": "jest --coverage --testPathPattern='unit.*test.js' --ci --watchAll=false"
+  },
+  "testPatterns": {
+    "unit": "test/unit/**/*.test.js",
+    "integration": "test/integration/**/*.test.js",
+    "security": "test/security/**/*.test.js",
+    "performance": "test/performance/**/*.test.js",
+    "auth": "test/**/auth*.test.js"
+  },
+  "coverage": {
+    "global": {
+      "branches": 80,
+      "functions": 80,
+      "lines": 80,
+      "statements": 80
+    },
+    "auth": {
+      "branches": 90,
+      "functions": 90,
+      "lines": 90,
+      "statements": 90
+    }
+  },
+  "testEnvironment": {
+    "NODE_ENV": "test",
+    "MOCK_DATABASE": "true",
+    "JWT_SECRET": "test-jwt-secret-key-for-testing-only",
+    "JWT_REFRESH_SECRET": "test-refresh-secret-key-for-testing-only"
+  }
+}

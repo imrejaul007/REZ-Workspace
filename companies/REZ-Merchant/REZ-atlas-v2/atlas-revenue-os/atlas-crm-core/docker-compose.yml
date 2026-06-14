@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  atlas-crm-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atlas-crm-core
+    restart: unless-stopped
+    ports:
+      - "5183:5183"
+    environment:
+      NODE_ENV: production
+      PORT: 5183
+      SERVICE_NAME: atlas-crm-core
+      MONGODB_URI: mongodb://mongodb:27017/atlas-crm-core
+      LOG_LEVEL: info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5183/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rez-network
+
+  mongodb:
+    image: mongo:6-alpine
+    container_name: crm-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: atlas-crm-core
+    ports:
+      - "27026:27017"
+    volumes:
+      - crm-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - rez-network
+
+networks:
+  rez-network:
+    driver: bridge
+
+volumes:
+  crm-mongo-data:
+    driver: local

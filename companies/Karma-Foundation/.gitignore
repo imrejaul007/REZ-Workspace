@@ -1,0 +1,491 @@
+# ===========================================
+# Karma Foundation - Git Ignore
+# ===========================================
+# Comprehensive gitignore for all services
+# ===========================================
+
+# ===========================================
+# Environment Files
+# ===========================================
+.env
+.env.local
+.env.*.local
+.env.production
+.env.production.local
+.env.development
+.env.development.local
+
+# IDE-specific env files
+*.env
+!.env.example
+
+# ===========================================
+# Dependencies
+# ===========================================
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm/
+
+# Dependency directories
+packages/*/node_modules/
+karma-service/node_modules/
+karma-loyalty-bridge/node_modules/
+karma-web/node_modules/
+karma-mobile/node_modules/
+
+# Bower
+bower_components/
+.bower/
+
+# Yarn
+.yarn/*
+!.yarn/releases/
+
+# ===========================================
+# Build Outputs
+# ===========================================
+
+# Next.js build output
+karma-web/.next/
+karma-web/out/
+karma-web/build/
+
+# React Native / Expo
+karma-mobile/.expo/
+karma-mobile/dist/
+karma-mobile/release/
+karma-mobile/android/app/build/
+karma-mobile/ios/Pods/
+karma-mobile/ios/build/
+karma-mobile/ios/*.xcworkspace
+karma-mobile/ios/*.xcodeproj/project.xcworkspace
+karma-mobile/ios/*.xcodeproj/xcuserdata
+
+# Android
+*.apk
+*.aab
+*.dex
+*.class
+*.jar
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# iOS
+*.ipa
+*.dSYM
+*.hprof
+*.mobileprovision
+
+# Expo EAS builds
+.eas/
+eas.json
+
+# Metro bundler
+karma-mobile/metro.config.js.timestamp
+karma-mobile/metro.config.js.map
+
+# ===========================================
+# Testing & Coverage
+# ===========================================
+
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+*.lcov
+*.info
+
+# Jest
+karma-mobile/coverage/
+karma-web/coverage/
+
+# Vitest
+*.vitest.config.*.timestamp-*
+
+# ===========================================
+# Logs
+# ===========================================
+
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+pm2.log
+*.log.*
+
+# Log directories
+karma-service/logs/
+karma-loyalty-bridge/logs/
+
+# ===========================================
+# Operating System Files
+# ===========================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Apple files
+*.apple-extension
+*.apdisk
+.Thumbs.db
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.Trash-*
+
+# KDE
+.directory
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Vim
+*.swp
+*.swo
+*~
+Session.vim
+.netrwhist
+
+# ===========================================
+# IDE & Editor Files
+# ===========================================
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains
+.idea/
+*.iml
+.idea_modules/
+.atlassian-ide-plugin.conf
+.atlassian-ide-plugin-cache/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Atom
+.atom/
+.atom/*.lock
+.atom/config.cson
+.atom/packages/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.workspace/
+.metadata/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ===========================================
+# Cache Files
+# ===========================================
+
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.tsbuildinfo
+*.tsbuildinfo
+
+# Babel
+.babelrc
+.babelrc.js
+.babelrc.json
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js
+.next/
+.cache/
+
+# ===========================================
+# Docker
+# ===========================================
+
+docker-compose.override.yml
+.docker/
+.dockerignore
+
+# Build context
+.dockerignore
+
+# Docker volumes (never commit data)
+volumes/
+data/
+
+# ===========================================
+# Temporary Files
+# ===========================================
+
+tmp/
+temp/
+tmp-*
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+*~
+*.orig
+*.orig.*
+
+# Temporary directories
+__pycache__/
+__pypackages__/
+*.pyc
+*.pyo
+
+# Rust
+target/
+Cargo.lock
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# ===========================================
+# Certificates & Keys
+# ===========================================
+
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.jks
+*.p8
+*.logins
+*.local Key
+
+# SSL certificates
+ssl/
+certs/
+*.pem
+!*.pem.example
+
+# SSH keys
+.ssh/
+*.ssh/
+
+# GPG keys
+.gnupg/
+secring.gpg
+pubring.gpg
+
+# ===========================================
+# Database Files
+# ===========================================
+
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.fdb
+*.sdf
+
+# MongoDB dumps
+dump/
+*.archive
+*.bson
+
+# PostgreSQL
+*.backup
+*.dump
+
+# ===========================================
+# Uploads & User Data
+# ===========================================
+
+uploads/
+attachments/
+media/
+user-uploads/
+user-files/
+user-media/
+
+# Avatar uploads
+avatars/
+profile-pictures/
+
+# ===========================================
+# Security & Auth
+# ===========================================
+
+# JWT tokens (development)
+*.token
+*.jwt
+auth-token-*
+
+# Session files
+.sessions/
+*.sess
+session_*
+
+# ===========================================
+# Development Tools
+# ===========================================
+
+# Hardhat
+karma-web/cache/
+karma-web/artifacts/
+
+# Truffle
+karma-web/contracts/build/
+
+# Remix
+.klaytn/
+
+# Firebase
+.firebase/
+firebaserc.database.*.json
+firebase-debug*.log
+ui-debug.log
+
+# Amplify
+amplify/\#current-cloud-backend/
+amplify/mock-data/
+amplify/backend/amplify-data/
+.amplify/
+
+# Serverless
+.serverless/
+.serverless-nextjs/
+
+# ===========================================
+# Secrets & Credentials
+# ===========================================
+
+# Credentials
+credentials.json
+service-account*.json
+*.credentials.json
+*service-account*.json
+
+# Secrets
+secrets.json
+secrets.yaml
+secrets.yml
+.vault/
+
+# Config with secrets
+config*.json
+config*.yaml
+!config.example.json
+!config.example.yaml
+
+# ===========================================
+# Testing Artifacts
+# ===========================================
+
+.storybook/dist/
+.storybook/build/
+
+# Playwright
+test-results/
+screenshots/
+videos/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+cypress/fixtures/example.json
+
+# Detox
+detox/artifacts/
+
+# ===========================================
+# Documentation Build
+# ===========================================
+
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+site/.vitepress/dist/
+
+# ===========================================
+# Git Files (rarely needed)
+# ===========================================
+
+# Git hooks (use Husky instead)
+.git/hooks/
+.git/modules/
+
+# ===========================================
+# Misc
+# ===========================================
+
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+Gemfile.lock
+composer.lock
+Pipfile.lock
+poetry.lock
+*.snap
+
+# Local configuration
+.local/
+local/
+config.local.js
+config.local.ts
+config.local.json
+
+# Debug
+npm-dev.log
+yarn-error.log

@@ -1,0 +1,493 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TreasuryOS API",
+    "description": "Cash Management, Investment Tracking, and Forecast Optimization API",
+    "version": "1.0.0",
+    "contact": {
+      "name": "RABTUL Technologies",
+      "email": "api@rabtul.tech"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4055",
+      "description": "Local development"
+    },
+    {
+      "url": "https://api.rezapp.com/treasury",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    { "name": "accounts", "description": "Treasury account operations" },
+    { "name": "investments", "description": "Investment management" },
+    { "name": "forecasts", "description": "Cash flow forecasting" },
+    { "name": "alerts", "description": "Shortfall alerts" },
+    { "name": "webhooks", "description": "Webhook management" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts": {
+      "post": {
+        "tags": ["accounts"],
+        "summary": "Create treasury account",
+        "security": [{ "InternalToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["businessId", "businessName", "accountType"],
+                "properties": {
+                  "businessId": { "type": "string" },
+                  "businessName": { "type": "string" },
+                  "accountType": { "type": "string", "enum": ["master", "operating", "reserve", "escrow"] },
+                  "currency": { "type": "string", "default": "INR" },
+                  "bankName": { "type": "string" },
+                  "bankAccountNumber": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Account created" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/v1/accounts/{businessId}": {
+      "get": {
+        "tags": ["accounts"],
+        "summary": "Get business accounts",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "businessId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of accounts" }
+        }
+      }
+    },
+    "/api/v1/accounts/{businessId}/position": {
+      "get": {
+        "tags": ["accounts"],
+        "summary": "Get consolidated cash position",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "businessId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cash position",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalBalance": { "type": "number" },
+                    "totalReserved": { "type": "number" },
+                    "totalAvailable": { "type": "number" },
+                    "byCurrency": { "type": "object" },
+                    "byAccountType": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{accountId}/deposit": {
+      "post": {
+        "tags": ["accounts"],
+        "summary": "Deposit funds",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "accountId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["amount"],
+                "properties": {
+                  "amount": { "type": "number", "minimum": 0.01 },
+                  "reference": { "type": "string" },
+                  "referenceType": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Deposit successful" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Account not found" }
+        }
+      }
+    },
+    "/api/v1/accounts/{accountId}/withdraw": {
+      "post": {
+        "tags": ["accounts"],
+        "summary": "Withdraw funds",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "accountId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["amount"],
+                "properties": {
+                  "amount": { "type": "number", "minimum": 0.01 },
+                  "reference": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Withdrawal successful" },
+          "400": { "description": "Insufficient balance" },
+          "404": { "description": "Account not found" }
+        }
+      }
+    },
+    "/api/v1/transfers": {
+      "post": {
+        "tags": ["accounts"],
+        "summary": "Transfer between accounts",
+        "security": [{ "InternalToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["fromAccountId", "toAccountId", "amount"],
+                "properties": {
+                  "fromAccountId": { "type": "string" },
+                  "toAccountId": { "type": "string" },
+                  "amount": { "type": "number", "minimum": 0.01 },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Transfer successful" },
+          "400": { "description": "Transfer failed" }
+        }
+      }
+    },
+    "/api/v1/investments": {
+      "post": {
+        "tags": ["investments"],
+        "summary": "Create investment",
+        "security": [{ "InternalToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["businessId", "accountId", "type", "name", "provider", "principal", "interestRate", "tenureDays"],
+                "properties": {
+                  "businessId": { "type": "string" },
+                  "accountId": { "type": "string" },
+                  "type": { "type": "string", "enum": ["fixed_deposit", "mutual_fund", "government_bond", "corporate_bond", "money_market"] },
+                  "name": { "type": "string" },
+                  "provider": { "type": "string" },
+                  "principal": { "type": "number" },
+                  "interestRate": { "type": "number" },
+                  "tenureDays": { "type": "integer" },
+                  "autoRenew": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Investment created" }
+        }
+      }
+    },
+    "/api/v1/investments/{businessId}": {
+      "get": {
+        "tags": ["investments"],
+        "summary": "List business investments",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "businessId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["active", "matured", "foreclosed"] } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of investments" }
+        }
+      }
+    },
+    "/api/v1/investments/{businessId}/summary": {
+      "get": {
+        "tags": ["investments"],
+        "summary": "Get investment portfolio summary",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "businessId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portfolio summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalInvested": { "type": "number" },
+                    "currentValue": { "type": "number" },
+                    "totalReturns": { "type": "number" },
+                    "returnPercent": { "type": "number" },
+                    "activeCount": { "type": "integer" },
+                    "maturedCount": { "type": "integer" },
+                    "upcomingMaturities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "amount": { "type": "number" },
+                          "maturityDate": { "type": "string", "format": "date" },
+                          "daysRemaining": { "type": "integer" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/investments/{investmentId}/redeem": {
+      "post": {
+        "tags": ["investments"],
+        "summary": "Redeem investment",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "investmentId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["targetAccountId"],
+                "properties": {
+                  "targetAccountId": { "type": "string" },
+                  "premature": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Redemption successful" }
+        }
+      }
+    },
+    "/api/v1/forecast/{businessId}": {
+      "post": {
+        "tags": ["forecasts"],
+        "summary": "Generate 13-week forecast",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "businessId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "startingBalance": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Forecast generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "weekNumber": { "type": "integer" },
+                      "weekStartDate": { "type": "string", "format": "date" },
+                      "projectedInflow": { "type": "number" },
+                      "projectedOutflow": { "type": "number" },
+                      "closingBalance": { "type": "number" },
+                      "confidence": { "type": "number" },
+                      "shortfallRisk": { "type": "string", "enum": ["low", "medium", "high", "critical"] }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/forecast/{businessId}/shortfall": {
+      "get": {
+        "tags": ["forecasts"],
+        "summary": "Predict cash shortfall",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "businessId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "requiredBalance", "in": "query", "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shortfall prediction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "willShortfall": { "type": "boolean" },
+                    "projectedShortfall": { "type": "number" },
+                    "shortfallDate": { "type": "string", "format": "date" },
+                    "projectedBalance": { "type": "number" },
+                    "recoveryActions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": { "type": "string" },
+                          "estimatedAmount": { "type": "number" },
+                          "timeline": { "type": "string" },
+                          "priority": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alerts/{businessId}": {
+      "get": {
+        "tags": ["alerts"],
+        "summary": "Get active alerts",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "businessId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of alerts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "alertId": { "type": "string" },
+                      "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+                      "projectedShortfall": { "type": "number" },
+                      "shortfallDate": { "type": "string", "format": "date" },
+                      "status": { "type": "string", "enum": ["active", "acknowledged", "resolved"] }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alerts/{alertId}/acknowledge": {
+      "post": {
+        "tags": ["alerts"],
+        "summary": "Acknowledge alert",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "alertId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Alert acknowledged" }
+        }
+      }
+    },
+    "/api/v1/alerts/{alertId}/resolve": {
+      "post": {
+        "tags": ["alerts"],
+        "summary": "Resolve alert",
+        "security": [{ "InternalToken": [] }],
+        "parameters": [
+          { "name": "alertId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["resolution"],
+                "properties": {
+                  "resolution": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Alert resolved" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "InternalToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Internal-Token"
+      }
+    }
+  }
+}

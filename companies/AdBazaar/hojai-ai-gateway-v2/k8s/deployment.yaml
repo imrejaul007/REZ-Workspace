@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hojai-ai-gateway
+  namespace: rez-media
+  labels:
+    app: hojai-ai-gateway
+    version: v1.1.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hojai-ai-gateway
+  template:
+    metadata:
+      labels:
+        app: hojai-ai-gateway
+        version: v1.1.0
+    spec:
+      containers:
+        - name: hojai-ai-gateway
+          image: registry.rezapp.com/hojai-ai-gateway:v1.1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4560
+              name: http
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4560"
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: REDIS_URL
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: ADMIN_TOKEN
+            - name: API_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: hojai-secrets
+                  key: API_KEYS
+            - name: REZ_INTENT_SERVICE_URL
+              value: "http://rez-intent-graph.rez-intelligence:4018"
+            - name: REZ_PREDICTIVE_SERVICE_URL
+              value: "http://rez-predictive-engine.rez-intelligence:4141"
+            - name: REZ_IDENTITY_SERVICE_URL
+              value: "http://rez-identity-graph.rez-intelligence:4050"
+            - name: REZ_SIGNAL_SERVICE_URL
+              value: "http://rez-signal-aggregator.rez-intelligence:4142"
+            - name: REZ_SEGMENT_SERVICE_URL
+              value: "http://rez-segmentation.rez-intelligence:4126"
+            - name: REZ_COMMERCE_SERVICE_URL
+              value: "http://rez-commerce-graph.rez-intelligence:4129"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4560
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4560
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          ports:
+            - containerPort: 4560
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hojai-ai-gateway
+  namespace: rez-media
+spec:
+  selector:
+    app: hojai-ai-gateway
+  ports:
+    - port: 4560
+      targetPort: 4560
+      name: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hojai-ai-gateway
+  namespace: rez-media
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: hojai-api.rez.money
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hojai-ai-gateway
+                port:
+                  number: 4560

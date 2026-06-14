@@ -1,0 +1,24 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# rez-restaurant-analytics-service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-restaurant-analytics-service
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-analytics-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-restaurant-analytics-service - Restaurant Analytics API"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3005
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-restaurant-analytics-service

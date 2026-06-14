@@ -1,0 +1,109 @@
+---
+title: Webhooks
+description: Receive real-time notifications for events in your application
+lastUpdated: May 17, 2026
+order: 5
+---
+
+## Overview
+
+Webhooks allow you to receive real-time notifications when events occur in the REZ ecosystem. Instead of polling our API, we will push data to your endpoint when important events happen.
+
+## Webhook Payload
+
+Each webhook delivery includes a JSON payload with event details:
+
+```json
+{
+  "id": "evt_abc123",
+  "type": "payment.captured",
+  "timestamp": "2026-05-17T10:30:00Z",
+  "data": {
+    "object": {
+      "id": "pay_xyz789",
+      "amount": 49900,
+      "currency": "INR",
+      "status": "captured",
+      "customer_id": "cust_123"
+    }
+  }
+}
+```
+
+## Verifying Webhook Signatures
+
+Always verify the webhook signature to ensure the request is from REZ:
+
+```typescript
+import crypto from 'crypto';
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+
+// In your webhook handler
+app.post('/webhooks/rez', (req, res) => {
+  const signature = req.headers['x-rez-signature'];
+  const isValid = verifyWebhookSignature(
+    JSON.stringify(req.body),
+    signature,
+    process.env.WEBHOOK_SECRET
+  );
+
+  if (!isValid) {
+    return res.status(401).send('Invalid signature');
+  }
+
+  // Process the webhook
+  console.log('Event received:', req.body.type);
+  res.status(200).send('OK');
+});
+```
+
+## Event Types
+
+Here are the available webhook event types:
+
+```bash
+payment.created
+payment.captured
+payment.failed
+payment.refunded
+order.created
+order.confirmed
+order.shipped
+order.delivered
+order.cancelled
+customer.created
+customer.updated
+```
+
+## Best Practices
+
+1. **Always return a 200 status quickly, then process asynchronously**
+2. **Implement idempotency using the event ID**
+3. **Verify the webhook signature on every request**
+4. **Handle failures gracefully with retries**
+5. **Log all incoming webhook events for debugging**
+
+## Retry Policy
+
+REZ will retry failed webhook deliveries with exponential backoff:
+
+| Attempt | Delay |
+|---------|-------|
+| 1 | Immediate |
+| 2 | 1 minute |
+| 3 | 5 minutes |
+| 4 | 30 minutes |
+| 5 | 2 hours |
+
+After 5 failed attempts, the webhook will be marked as failed and no further retries will occur.

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: restauranthub
+  labels:
+    name: restauranthub
+    environment: production
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: restauranthub-monitoring
+  labels:
+    name: restauranthub-monitoring
+    environment: production
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: restauranthub-ingress
+  labels:
+    name: restauranthub-ingress
+    environment: production

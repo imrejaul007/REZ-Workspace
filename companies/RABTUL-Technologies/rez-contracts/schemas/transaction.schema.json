@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rez.money/contracts/transaction.schema.json",
+  "title": "Transaction",
+  "description": "REZ financial transaction",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["transactionId", "userId", "type", "amount", "currency", "status", "createdAt"],
+  "properties": {
+    "transactionId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{24}$"
+    },
+    "userId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{24}$"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "payment",
+        "refund",
+        "coin_earn",
+        "coin_redeem",
+        "cashback",
+        "topup",
+        "p2p_transfer",
+        "merchant_payout"
+      ]
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0.01,
+      "multipleOf": 0.01
+    },
+    "currency": {
+      "type": "string",
+      "enum": ["INR", "COINS"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "processing", "completed", "failed", "cancelled", "refunded"]
+    },
+    "razorpayPaymentId": {
+      "type": "string",
+      "nullable": true
+    },
+    "razorpayOrderId": {
+      "type": "string",
+      "nullable": true
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

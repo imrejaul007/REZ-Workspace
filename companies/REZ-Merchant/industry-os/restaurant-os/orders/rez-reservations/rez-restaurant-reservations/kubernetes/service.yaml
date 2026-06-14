@@ -1,0 +1,24 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# rez-restaurant-reservations
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-restaurant-reservations
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-reservations
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-restaurant-reservations - Restaurant Reservations API"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4020
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-restaurant-reservations

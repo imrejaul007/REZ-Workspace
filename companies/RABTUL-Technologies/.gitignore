@@ -1,0 +1,88 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.js.map
+
+# Environment files - NEVER COMMIT THESE
+.env
+.env.*
+!.env.example
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+*.env.local
+
+# Claude Code / Claude Flow
+.claude/
+.claude-flow/
+.claude/skills/
+
+# NPM
+.npmrc
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Secrets and credentials
+*.pem
+*.key
+*.pfx
+*.crt
+*.cer
+credentials.json
+secrets.json
+secrets.yaml
+service-account.json
+*.secret
+*.credential
+
+# Docker
+docker-compose.override.yml
+
+# Terraform state (never commit)
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+.cache/
+
+# Render deployment
+.render
+
+# Local development
+*.local
+.local/

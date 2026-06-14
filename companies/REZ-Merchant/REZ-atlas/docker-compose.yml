@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # =============================================================================
+  # REZ ATLAS - Merchant Intelligence Network
+  # The Map-First Sales Intelligence Platform
+  # =============================================================================
+
+  atlas-gateway:
+    build:
+      context: ./REZ-atlas-gateway
+      dockerfile: Dockerfile
+    container_name: rez-atlas-gateway
+    ports:
+      - "5150:5150"
+    environment:
+      - NODE_ENV=production
+      - PORT=5150
+    depends_on:
+      - atlas-discover
+      - atlas-maps
+      - atlas-twin
+      - atlas-score
+      - atlas-signals
+      - atlas-territory
+      - atlas-routes
+      - atlas-copilot
+      - atlas-graph
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5150/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - atlas-network
+
+  atlas-discover:
+    build:
+      context: ./REZ-atlas-discover
+      dockerfile: Dockerfile
+    container_name: rez-atlas-discover
+    ports:
+      - "5151:5151"
+    environment:
+      - NODE_ENV=production
+      - PORT=5151
+    networks:
+      - atlas-network
+
+  atlas-maps:
+    build:
+      context: ./REZ-atlas-maps
+      dockerfile: Dockerfile
+    container_name: rez-atlas-maps
+    ports:
+      - "5152:5152"
+    environment:
+      - NODE_ENV=production
+      - PORT=5152
+    networks:
+      - atlas-network
+
+  atlas-twin:
+    build:
+      context: ./REZ-atlas-twin
+      dockerfile: Dockerfile
+    container_name: rez-atlas-twin
+    ports:
+      - "5153:5153"
+    environment:
+      - NODE_ENV=production
+      - PORT=5153
+    networks:
+      - atlas-network
+
+  atlas-score:
+    build:
+      context: ./REZ-atlas-score
+      dockerfile: Dockerfile
+    container_name: rez-atlas-score
+    ports:
+      - "5154:5154"
+    environment:
+      - NODE_ENV=production
+      - PORT=5154
+    networks:
+      - atlas-network
+
+  atlas-signals:
+    build:
+      context: ./REZ-atlas-signals
+      dockerfile: Dockerfile
+    container_name: rez-atlas-signals
+    ports:
+      - "5155:5155"
+    environment:
+      - NODE_ENV=production
+      - PORT=5155
+    networks:
+      - atlas-network
+
+  atlas-territory:
+    build:
+      context: ./REZ-atlas-territory
+      dockerfile: Dockerfile
+    container_name: rez-atlas-territory
+    ports:
+      - "5170:5170"
+    environment:
+      - NODE_ENV=production
+      - PORT=5170
+    networks:
+      - atlas-network
+
+  atlas-routes:
+    build:
+      context: ./REZ-atlas-routes
+      dockerfile: Dockerfile
+    container_name: rez-atlas-routes
+    ports:
+      - "5171:5171"
+    environment:
+      - NODE_ENV=production
+      - PORT=5171
+    networks:
+      - atlas-network
+
+  atlas-copilot:
+    build:
+      context: ./REZ-atlas-copilot
+      dockerfile: Dockerfile
+    container_name: rez-atlas-copilot
+    ports:
+      - "5172:5172"
+    environment:
+      - NODE_ENV=production
+      - PORT=5172
+    networks:
+      - atlas-network
+
+  atlas-graph:
+    build:
+      context: ./REZ-atlas-graph
+      dockerfile: Dockerfile
+    container_name: rez-atlas-graph
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=production
+      - PORT=5173
+    networks:
+      - atlas-network
+
+  atlas-dashboard:
+    build:
+      context: ./REZ-atlas-dashboard
+      dockerfile: Dockerfile
+    container_name: rez-atlas-dashboard
+    ports:
+      - "5190:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_ATLAS_GATEWAY=http://atlas-gateway:5150
+    depends_on:
+      - atlas-gateway
+    networks:
+      - atlas-network
+
+networks:
+  atlas-network:
+    driver: bridge

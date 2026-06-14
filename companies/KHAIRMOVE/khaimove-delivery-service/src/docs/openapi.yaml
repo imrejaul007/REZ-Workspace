@@ -1,0 +1,98 @@
+# KHAIRMOVE Delivery Service API
+
+openapi: 3.0.3
+info:
+  title: KHAIRMOVE Delivery Service
+  description: Hyperlocal delivery management
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4603
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+
+  /api/deliveries:
+    get:
+      summary: List deliveries
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of deliveries
+
+    post:
+      summary: Create delivery request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pickup:
+                  type: object
+                drop:
+                  type: object
+                priority:
+                  type: string
+                  enum: [standard, express, instant]
+                weight:
+                  type: number
+      responses:
+        '201':
+          description: Delivery created
+
+  /api/deliveries/{id}:
+    get:
+      summary: Get delivery by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Delivery details
+
+  /api/deliveries/{id}/cancel:
+    post:
+      summary: Cancel delivery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Delivery cancelled
+
+  /api/delivery-drivers:
+    get:
+      summary: List delivery drivers
+      responses:
+        '200':
+          description: List of drivers
+
+    post:
+      summary: Register delivery driver
+      responses:
+        '201':
+          description: Driver registered
+
+  /api/delivery-drivers/{id}/location:
+    put:
+      summary: Update driver location
+      responses:
+        '200':
+          description: Location updated

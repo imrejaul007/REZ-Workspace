@@ -1,0 +1,91 @@
+{
+  "name": "@rez/connector-sdk",
+  "version": "1.0.0",
+  "description": "Official SDK for connecting to RABTUL services (Auth, Wallet, Payment, Notification, EventBus, Intent)",
+  "author": "ReZ Team",
+  "license": "MIT",
+  "keywords": [
+    "rez",
+    "rabtul",
+    "sdk",
+    "auth",
+    "wallet",
+    "payment",
+    "notification"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./auth": {
+      "import": "./dist/auth/index.mjs",
+      "require": "./dist/auth/index.js",
+      "types": "./dist/auth/index.d.ts"
+    },
+    "./wallet": {
+      "import": "./dist/wallet/index.mjs",
+      "require": "./dist/wallet/index.js",
+      "types": "./dist/wallet/index.d.ts"
+    },
+    "./payment": {
+      "import": "./dist/payment/index.mjs",
+      "require": "./dist/payment/index.js",
+      "types": "./dist/payment/index.d.ts"
+    },
+    "./notification": {
+      "import": "./dist/notification/index.mjs",
+      "require": "./dist/notification/index.js",
+      "types": "./dist/notification/index.d.ts"
+    },
+    "./eventBus": {
+      "import": "./dist/eventBus/index.mjs",
+      "require": "./dist/eventBus/index.js",
+      "types": "./dist/eventBus/index.d.ts"
+    },
+    "./intent": {
+      "import": "./dist/intent/index.mjs",
+      "require": "./dist/intent/index.js",
+      "types": "./dist/intent/index.d.ts"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE",
+    ".env.example"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --sourcemap",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.3",
+    "vitest": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "axios": ">=1.6.0",
+    "zod": ">=3.22.0"
+  }
+}

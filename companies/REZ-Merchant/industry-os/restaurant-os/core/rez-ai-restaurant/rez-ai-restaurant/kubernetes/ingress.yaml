@@ -1,0 +1,72 @@
+# ================================================
+# REZ-Merchant Kubernetes Ingress
+# rez-ai-restaurant
+# ================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rez-ai-restaurant
+  namespace: rez-merchant
+  labels:
+    app: rez-ai-restaurant
+    managed-by: rez-merchant
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+    - hosts:
+        - api.rezmerchant.com
+      secretName: rez-ai-restaurant-tls
+  rules:
+    - host: api.rezmerchant.com
+      http:
+        paths:
+          - path: /api/ai/demand-forecast
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-ai-restaurant
+                port:
+                  number: 3000
+          - path: /api/ai/menu-optimization
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-ai-restaurant
+                port:
+                  number: 3000
+          - path: /api/ai/prep-time
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-ai-restaurant
+                port:
+                  number: 3000
+          - path: /api/ai/staffing
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-ai-restaurant
+                port:
+                  number: 3000
+          - path: /api/ai/seat-forecast
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-ai-restaurant
+                port:
+                  number: 3000
+          - path: /api/ai/insights
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-ai-restaurant
+                port:
+                  number: 3000

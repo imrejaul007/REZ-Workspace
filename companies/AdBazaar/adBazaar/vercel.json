@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/freshness",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/retry-coin-credits",
+      "schedule": "0 9,21 * * *"
+    },
+    {
+      "path": "/api/cron/stale-bookings",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}

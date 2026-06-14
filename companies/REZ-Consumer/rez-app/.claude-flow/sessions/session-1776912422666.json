@@ -1,0 +1,23 @@
+{
+  "id": "session-1776912422666",
+  "startedAt": "2026-04-23T02:47:02.666Z",
+  "cwd": "/Users/rejaulkarim/Documents/ReZ Full App/rez-app-consumer",
+  "context": {
+    "lastMatchedPatterns": [
+      "mem-project_sprint1_migrations-bug-doc-accuracy-audit--sessio",
+      "mem-project_rezapp-rez-consumer-app--nuqta-master",
+      "mem-project_hotel_ota_rez_integration-what-was-built",
+      "mem-project_adbazaar_go_live-build-fix-history--for-context",
+      "mem-project_vesper-architecture--8-agents--featur"
+    ]
+  },
+  "metrics": {
+    "edits": 167,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "updatedAt": "2026-04-23T03:15:55.087Z",
+  "endedAt": "2026-04-23T03:18:09.874Z",
+  "duration": 1867209
+}

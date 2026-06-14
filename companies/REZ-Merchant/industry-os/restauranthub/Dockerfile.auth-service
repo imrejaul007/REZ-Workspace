@@ -1,0 +1,56 @@
+# Multi-stage build for Auth Service
+FROM node:18-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json ./
+COPY apps/auth-service/package.json ./apps/auth-service/
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+
+# Copy all source files
+COPY . .
+COPY --from=deps /app/node_modules ./node_modules
+
+# Build the auth service
+WORKDIR /app/apps/auth-service
+RUN npm run build
+
+# Production stage
+FROM base AS runner
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
+
+# Copy built application
+COPY --from=builder --chown=nestjs:nodejs /app/apps/auth-service/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/apps/auth-service/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/apps/auth-service/package.json ./
+
+# Copy Prisma schema and generate client
+COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+RUN npx prisma generate
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node healthcheck.js
+
+USER nestjs
+
+EXPOSE 3002
+
+ENV NODE_ENV=production
+ENV AUTH_SERVICE_PORT=3002
+
+CMD ["node", "dist/main"]

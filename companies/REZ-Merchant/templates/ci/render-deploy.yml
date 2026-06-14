@@ -1,0 +1,39 @@
+# ================================================
+# REZ-Merchant GitHub Actions Render Deploy Template
+# ================================================
+
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Render CLI
+        run: npm install -g @renderinc/cli
+
+      - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          render deploy \
+            --token=$RENDER_API_KEY \
+            --spec=render.yaml \
+            --environment=production

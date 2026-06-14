@@ -1,0 +1,45 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap
+# rez-restaurant-analytics-service
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-restaurant-analytics-service-config
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-analytics-service
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "3005"
+  LOG_LEVEL: "info"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-restaurant-analytics-service"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  ALLOWED_ORIGINS: "https://rez.money"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_restaurant_analytics"
+
+  # Redis
+  REDIS_DATABASE: "0"
+
+  # Analytics Settings
+  CACHE_DURATION_REVENUE: "300"
+  CACHE_DURATION_CUSTOMER: "600"
+  CACHE_DURATION_MENU: "300"
+  CACHE_DURATION_TRENDS: "900"

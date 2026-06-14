@@ -1,0 +1,177 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  MONGODB_URI: mongodb://localhost:27017/test
+  REDIS_URL: redis://localhost:6379
+
+jobs:
+  # Build all services
+  build:
+    name: Build Services
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - risna-property-service
+          - risna-lead-service
+          - risna-visa-service
+          - risna-referral-service
+          - risna-broker-service
+          - risna-crm-service
+          - risna-media-service
+          - risna-builder-service
+          - risna-notification-service
+          - risna-payment-service
+          - risna-intelligence-service
+          - risna-whatsapp-service
+          - risna-investment-service
+          - risna-distribution-service
+          - risna-gateway
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            services/${{ matrix.service }}/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('services/${{ matrix.service }}/package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          cd services/${{ matrix.service }}
+          npm ci
+
+      - name: Type check
+        run: |
+          cd services/${{ matrix.service }}
+          npx tsc --noEmit
+
+      - name: Build
+        run: |
+          cd services/${{ matrix.service }}
+          npm run build
+
+  # Test all services
+  test:
+    name: Test Services
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - risna-gateway
+          - risna-property-service
+          - risna-lead-service
+          - risna-visa-service
+          - risna-referral-service
+          - risna-broker-service
+          - risna-crm-service
+          - risna-media-service
+          - risna-builder-service
+          - risna-notification-service
+          - risna-payment-service
+          - risna-intelligence-service
+          - risna-whatsapp-service
+          - risna-investment-service
+          - risna-distribution-service
+          - risna-corpperks-bridge
+          - risna-ads-integration
+          - risna-property-intelligence
+          - risna-distribution-router
+          - risna-influencer-tracker
+          - risna-booking-service
+          - risna-realtime-service
+          - risna-email-service
+          - risna-chatbot-service
+          - risna-document-service
+          - risna-virtual-tour-service
+          - risna-push-service
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd services/${{ matrix.service }}
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd services/${{ matrix.service }}
+          npm test
+        env:
+          MONGODB_URI: mongodb://localhost:27017/test_${{ matrix.service }}
+          REDIS_URL: redis://localhost:6379
+
+  # Build frontend
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.FRONTEND_API_URL }}
+
+  # Lint check
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint

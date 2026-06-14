@@ -1,0 +1,72 @@
+services:
+  - type: web
+    name: rez-marketing-service
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '4000'
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: INTERNAL_SERVICE_TOKENS_JSON
+        sync: false
+      # CORS_ORIGIN — comma-separated allowed browser origins.
+      - key: CORS_ORIGIN
+        sync: false
+      # Razorpay credentials — required if the marketing service processes payments
+      # or verifies Razorpay webhooks for campaign billing.
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      # Twilio SMS — used by SMSChannel to send campaign messages.
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      # WhatsApp Business API — used by WhatsAppChannel for campaign delivery.
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_ID
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      # Webhook verify token — Meta sends this during WhatsApp webhook setup.
+      - key: WHATSAPP_WEBHOOK_VERIFY_TOKEN
+        sync: false
+      # AWS SES — used by EmailChannel for transactional/campaign emails.
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_SES_SMTP_USER
+        sync: false
+      - key: AWS_SES_SMTP_PASS
+        sync: false
+      - key: SES_REGION
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # FCM — used by PushChannel to send push notifications to mobile devices.
+      - key: FCM_SERVER_KEY
+        sync: false
+      # AdBazaar integration — internal API key used to authenticate requests
+      # from AdBazaar to this service's /adbazaar route.
+      - key: ADBAZAAR_INTERNAL_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      # Public URL of this service — used to build tracking pixel URLs in campaign emails.
+      # Must be set or open-tracking pixels will be empty strings in all sent emails.
+      - key: MARKETING_SERVICE_URL
+        sync: false

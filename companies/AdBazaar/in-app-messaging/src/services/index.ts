@@ -1,0 +1,1 @@
+export { MessagingService, messagingService } from './MessagingService';

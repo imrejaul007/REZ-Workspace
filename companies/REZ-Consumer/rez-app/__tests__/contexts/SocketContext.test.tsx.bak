@@ -1,0 +1,205 @@
+/**
+ * SocketContext Tests
+ * Tests socket state management, initial state, safe defaults, and
+ * event subscription helper patterns — all without a real socket connection.
+ */
+
+// ---------------------------------------------------------------------------
+// Inline types mirroring SocketContext
+// ---------------------------------------------------------------------------
+
+interface SocketState {
+  connected: boolean;
+  reconnecting: boolean;
+  error: string | null;
+  lastConnected: Date | null;
+  reconnectAttempts: number;
+}
+
+const initialSocketState: SocketState = {
+  connected: false,
+  reconnecting: false,
+  error: null,
+  lastConnected: null,
+  reconnectAttempts: 0,
+};
+
+// Simulates what the SocketProvider does when the connection is established
+const onConnectState = (prev: SocketState): SocketState => ({
+  ...prev,
+  connected: true,
+  reconnecting: false,
+  error: null,
+  lastConnected: new Date(),
+  reconnectAttempts: 0,
+});
+
+const onDisconnectState = (prev: SocketState, reason: string): SocketState => ({
+  ...prev,
+  connected: false,
+  reconnecting: reason !== 'io server disconnect',
+});
+
+const onConnectErrorState = (
+  prev: SocketState,
+  errorMessage: string
+): SocketState => ({
+  ...prev,
+  error: errorMessage,
+  reconnecting: true,
+});
+
+const onReconnectAttemptState = (
+  prev: SocketState,
+  attempt: number
+): SocketState => ({
+  ...prev,
+  reconnecting: true,
+  reconnectAttempts: attempt,
+});
+
+const onReconnectFailedState = (prev: SocketState): SocketState => ({
+  ...prev,
+  reconnecting: false,
+  error: 'Failed to reconnect after maximum attempts',
+});
+
+// ---------------------------------------------------------------------------
+// Mock socket object used to test subscription helpers
+// ---------------------------------------------------------------------------
+const makeMockSocket = () => {
+  const handlers: Record<string, Set<(...args: unknown[]) => void>> = {};
+  return {
+    on: jest.fn((event: string, cb: (...args: unknown[]) => void) => {
+      if (!handlers[event]) handlers[event] = new Set();
+      handlers[event].add(cb);
+    }),
+    off: jest.fn((event: string, cb: (...args: unknown[]) => void) => {
+      handlers[event]?.delete(cb);
+    }),
+    emit: jest.fn(),
+    connected: true,
+    // trigger helpers for tests
+    _trigger: (event: string, ...args: unknown[]) => {
+      handlers[event]?.forEach((cb) => cb(...args));
+    },
+  };
+};
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+describe('SocketContext – initial state (SOCKET_DEFAULTS)', () => {
+  it('starts disconnected', () => {
+    expect(initialSocketState.connected).toBe(false);
+  });
+
+  it('starts with no error', () => {
+    expect(initialSocketState.error).toBeNull();
+  });
+
+  it('starts with zero reconnect attempts', () => {
+    expect(initialSocketState.reconnectAttempts).toBe(0);
+  });
+
+  it('starts with lastConnected as null', () => {
+    expect(initialSocketState.lastConnected).toBeNull();
+  });
+});
+
+describe('SocketContext – connection state transitions', () => {
+  it('onConnectState marks socket as connected', () => {
+    const state = onConnectState(initialSocketState);
+    expect(state.connected).toBe(true);
+    expect(state.reconnecting).toBe(false);
+    expect(state.lastConnected).toBeInstanceOf(Date);
+    expect(state.reconnectAttempts).toBe(0);
+  });
+
+  it('onDisconnectState marks socket as disconnected and sets reconnecting based on reason', () => {
+    const connected = onConnectState(initialSocketState);
+    const transportClose = onDisconnectState(connected, 'transport close');
+    expect(transportClose.connected).toBe(false);
+    expect(transportClose.reconnecting).toBe(true);
+
+    const serverDisconnect = onDisconnectState(connected, 'io server disconnect');
+    expect(serverDisconnect.connected).toBe(false);
+    expect(serverDisconnect.reconnecting).toBe(false);
+  });
+
+  it('onConnectErrorState stores error and sets reconnecting', () => {
+    const state = onConnectErrorState(initialSocketState, 'Connection refused');
+    expect(state.error).toBe('Connection refused');
+    expect(state.reconnecting).toBe(true);
+  });
+
+  it('onReconnectAttemptState tracks attempt count', () => {
+    let state = onReconnectAttemptState(initialSocketState, 1);
+    state = onReconnectAttemptState(state, 2);
+    state = onReconnectAttemptState(state, 3);
+    expect(state.reconnectAttempts).toBe(3);
+    expect(state.reconnecting).toBe(true);
+  });
+
+  it('onReconnectFailedState stops reconnecting and records error', () => {
+    const state = onReconnectFailedState(initialSocketState);
+    expect(state.reconnecting).toBe(false);
+    expect(state.error).toBe('Failed to reconnect after maximum attempts');
+  });
+});
+
+describe('SocketContext – event subscriptions', () => {
+  it('onStockUpdate registers and unregisters callback', () => {
+    const socket = makeMockSocket();
+    const callback = jest.fn();
+
+    // Register
+    socket.on('stock:updated', callback);
+    expect(socket.on).toHaveBeenCalledWith('stock:updated', callback);
+
+    // Trigger the event
+    socket._trigger('stock:updated', { productId: 'p1', stock: 5, status: 'LOW_STOCK' });
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({ productId: 'p1' })
+    );
+
+    // Unregister
+    socket.off('stock:updated', callback);
+    expect(socket.off).toHaveBeenCalledWith('stock:updated', callback);
+  });
+
+  it('subscribeToProduct emits with correct payload', () => {
+    const socket = makeMockSocket();
+    const productId = 'prod-xyz';
+
+    socket.emit('product:subscribe', { productId });
+
+    expect(socket.emit).toHaveBeenCalledWith('product:subscribe', { productId });
+  });
+
+  it('unsubscribeFromProduct emits with correct payload', () => {
+    const socket = makeMockSocket();
+    socket.emit('product:unsubscribe', { productId: 'prod-xyz' });
+    expect(socket.emit).toHaveBeenCalledWith('product:unsubscribe', { productId: 'prod-xyz' });
+  });
+});
+
+describe('SocketContext – safe defaults when no socket is available', () => {
+  it('onStockUpdate returns a noop unsubscribe function when socket is null', () => {
+    // When socketRef.current is null the context returns () => {}
+    const noopUnsubscribe = () => {};
+    const onStockUpdateNoSocket = (_cb) => noopUnsubscribe;
+
+    const cb = jest.fn();
+    const unsub = onStockUpdateNoSocket(cb);
+
+    expect(typeof unsub).toBe('function');
+    expect(() => unsub()).not.toThrow();
+  });
+
+  it('connect noop does not throw when socket is null', () => {
+    const connectNoop = () => {};
+    expect(() => connectNoop()).not.toThrow();
+  });
+});

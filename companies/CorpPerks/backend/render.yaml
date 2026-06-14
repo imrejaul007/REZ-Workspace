@@ -1,0 +1,75 @@
+# =============================================================================
+# Render Blueprint - CorpPerks Backend API
+# =============================================================================
+# Auto-deploy configuration for render.com
+# Deploy at: https://dashboard.render.com/blueprints
+# =============================================================================
+
+services:
+  - type: web
+    name: corpperks-api
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    healthCheckInterval: 30s
+    healthCheckThreshold: 3
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4006"
+
+      # MongoDB
+      - key: MONGODB_URI
+        sync: false
+
+      # Redis
+      - key: REDIS_URL
+        sync: false
+
+      # JWT Authentication
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: "7d"
+      - key: REFRESH_TOKEN_EXPIRES_IN
+        value: "30d"
+
+      # Internal Service Token
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+      # CORS
+      - key: CORS_ORIGIN
+        value: https://peopleos.corpperks.com
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+
+      # RABTUL Integration
+      - key: RABTUL_AUTH_URL
+        sync: false
+      - key: RABTUL_PROFILE_URL
+        sync: false
+      - key: RABTUL_WALLET_URL
+        sync: false
+      - key: RABTUL_NOTIFICATION_URL
+        sync: false
+
+      # Admin
+      - key: ADMIN_EMAIL
+        value: admin@corpperks.com
+      - key: ADMIN_COMPANY
+        value: CorpPerks
+      - key: ADMIN_PASSWORD
+        sync: false
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info

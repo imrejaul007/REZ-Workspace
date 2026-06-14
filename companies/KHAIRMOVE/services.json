@@ -1,0 +1,84 @@
+{
+  "name": "KHAIRMOVE",
+  "tagline": "Mobility & Logistics Infrastructure",
+  "version": "1.0.0",
+  "services": [
+    {
+      "name": "khaimove-api-gateway",
+      "port": 4600,
+      "description": "Unified API entry point",
+      "docker": "khaimove-api-gateway",
+      "depends_on": ["ride", "fleet", "delivery", "logistics", "rental", "buzzlocal"]
+    },
+    {
+      "name": "khaimove-ride-service",
+      "port": 4601,
+      "description": "Core ride-hailing with REZ Intelligence",
+      "docker": "khaimove-ride-service",
+      "db": "khaimove-ride",
+      "integrations": ["rez-intelligence", "rabtul-wallet", "rabtul-notify"]
+    },
+    {
+      "name": "khaimove-fleet-service",
+      "port": 4602,
+      "description": "Fleet management and dispatch",
+      "docker": "khaimove-fleet-service",
+      "db": "khaimove-fleet",
+      "integrations": ["rez-intelligence"]
+    },
+    {
+      "name": "khaimove-delivery-service",
+      "port": 4603,
+      "description": "Hyperlocal delivery",
+      "docker": "khaimove-delivery-service",
+      "db": "khaimove-delivery",
+      "integrations": ["rez-intelligence", "rabtul-wallet", "rabtul-notify"]
+    },
+    {
+      "name": "khaimove-logistics-aggregator",
+      "port": 4604,
+      "description": "Multi-carrier shipping",
+      "docker": "khaimove-logistics-service",
+      "integrations": ["carriers"]
+    },
+    {
+      "name": "khaimove-rental-service",
+      "port": 4605,
+      "description": "Hourly vehicle rentals",
+      "docker": "khaimove-rental-service",
+      "db": "khaimove-rental"
+    },
+    {
+      "name": "buzzlocal-rides-integration",
+      "port": 4606,
+      "description": "Community rides and carpooling",
+      "docker": "khaimove-buzzlocal-service",
+      "integrations": ["rez-intelligence"]
+    }
+  ],
+  "integrations": {
+    "rez-intelligence": [
+      "Intent Predictor (4018)",
+      "Signal Aggregator (4142)",
+      "Fraud Detection (3007)",
+      "Predictive Engine (4123)",
+      "Location Intel (4040)",
+      "Memory Layer (4201)"
+    ],
+    "rabtul-wallet": {
+      "port": 4004,
+      "purpose": "10% cashback credits"
+    },
+    "rabtul-notify": {
+      "port": 4011,
+      "purpose": "Push notifications"
+    },
+    "carriers": [
+      "Delhivery",
+      "BlueDart",
+      "DTDC",
+      "FedEx",
+      "DHL"
+    ]
+  }
+}

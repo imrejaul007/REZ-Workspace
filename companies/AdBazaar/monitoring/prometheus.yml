@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'adbazaar-core'
+    static_configs:
+      - targets:
+          - 'localhost:4007'  # REZ-ads-service
+          - 'localhost:4085'  # adBazaar-backend
+          - 'localhost:4000'  # REZ-marketing
+          - 'localhost:4018'  # REZ-dooh-service
+          - 'localhost:4800'  # intent-signal-aggregator
+          - 'localhost:4801'  # intent-prediction-engine
+          - 'localhost:4802'  # intent-marketplace
+          - 'localhost:4870'  # adbazaar-hojai-gateway
+          - 'localhost:4965'  # adbazaar-marketing-agent

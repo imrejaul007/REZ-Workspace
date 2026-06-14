@@ -1,0 +1,344 @@
+.container {
+  padding: 2rem;
+}
+
+.heroSection {
+  margin-bottom: 2rem;
+}
+
+.heroCard {
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+}
+
+.heroContent h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.heroContent p {
+  opacity: 0.9;
+}
+
+.salaryCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.salaryRange {
+  margin-bottom: 2rem;
+}
+
+.rangeBar {
+  margin-bottom: 1rem;
+}
+
+.rangeTrack {
+  height: 12px;
+  background: linear-gradient(90deg, var(--success) 0%, var(--warning) 50%, var(--primary) 100%);
+  border-radius: 6px;
+  position: relative;
+}
+
+.rangeFill {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  border-radius: 6px;
+}
+
+.rangeUser {
+  position: absolute;
+  top: -8px;
+  transform: translateX(-50%);
+}
+
+.rangeUserLabel {
+  background: var(--primary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rangeAvg {
+  position: absolute;
+  top: -8px;
+  transform: translateX(-50%);
+}
+
+.rangeAvgLabel {
+  background: var(--text);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rangeLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.salaryValue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.currency {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.salaryValue input {
+  width: 120px;
+  font-size: 3rem;
+  font-weight: 800;
+  border: none;
+  text-align: center;
+  color: var(--text);
+}
+
+.salaryValue input:focus {
+  outline: none;
+}
+
+.unit {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.section h2 {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sectionHeader h2 {
+  margin-bottom: 0;
+}
+
+.sectionHeader button {
+  padding: 0.375rem 0.75rem;
+  background: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: 10px;
+}
+
+.statIcon {
+  font-size: 1.5rem;
+}
+
+.statInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.statValue {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tipsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.tipCard {
+  padding: 1.25rem;
+  background: var(--bg);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.tipIcon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.tipCard h3 {
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+}
+
+.tipCard p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.scriptsList {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s;
+}
+
+.scriptsList.show {
+  max-height: 500px;
+}
+
+.scriptCard {
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+.scriptCard h4 {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.scriptCard p {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.copyBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.5rem;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.625rem;
+  cursor: pointer;
+}
+
+.factorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.factorItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.factorIcon {
+  font-size: 1.25rem;
+}
+
+.factorItem strong {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.factorItem span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.negotiateBtn {
+  width: 100%;
+  padding: 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.negotiateBtn:hover {
+  background: var(--primary-dark);
+}
+
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tipsGrid {
+    grid-template-columns: 1fr;
+  }
+}

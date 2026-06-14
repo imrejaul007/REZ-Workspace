@@ -1,0 +1,183 @@
+openapi: 3.0.0
+info:
+  title: REZ Webhook Manager API
+  version: 1.0.0
+  description: Central webhook management with retry logic
+
+servers:
+  - url: https://webhook-manager.rez.money
+    description: Production
+  - url: https://webhook-manager.staging.rez.money
+    description: Staging
+
+paths:
+  /webhooks:
+    get:
+      summary: List webhooks
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhooks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+    post:
+      summary: Create webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, events]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                events:
+                  type: array
+                  items:
+                    type: string
+                secret:
+                  type: string
+                headers:
+                  type: object
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhook_id:
+                    type: string
+                  secret:
+                    type: string
+
+  /webhooks/{id}:
+    patch:
+      summary: Update webhook
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+    delete:
+      summary: Delete webhook
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+  /webhooks/trigger:
+    post:
+      summary: Trigger webhook event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [event, payload]
+              properties:
+                event:
+                  type: string
+                payload:
+                  type: object
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delivered:
+                    type: number
+
+  /webhooks/deliveries:
+    get:
+      summary: List deliveries
+      parameters:
+        - in: query
+          name: webhook_id
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, success, failed]
+
+  /webhooks/deliveries/{id}/retry:
+    post:
+      summary: Retry delivery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+components:
+  schemas:
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+        secret:
+          type: string
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    Delivery:
+      type: object
+      properties:
+        id:
+          type: string
+        webhook_id:
+          type: string
+        event:
+          type: string
+        status:
+          type: string
+          enum: [pending, success, failed]
+        attempts:
+          type: number
+        last_attempt:
+          type: string
+        created_at:
+          type: string

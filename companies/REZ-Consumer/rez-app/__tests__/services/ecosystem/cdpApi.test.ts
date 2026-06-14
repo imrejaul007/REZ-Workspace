@@ -1,0 +1,88 @@
+// @ts-nocheck
+/**
+ * CDP API Tests
+ * Tests for cdpApi.ts - Customer Data Platform
+ */
+
+import * as cdpApi from '@/services/cdpApi';
+
+jest.mock('@/services/apiClient', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), patch: jest.fn(), post: jest.fn() },
+  ApiResponse: {},
+}));
+
+import apiClient from '@/services/apiClient';
+
+describe('CDP API', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  describe('getCustomerProfile', () => {
+    it('should fetch customer profile', async () => {
+      const mockProfile = {
+        id: 'cust-1',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        traits: { age: 30, city: 'Mumbai' },
+        segments: ['frequent_buyer', 'high_value'],
+        lifetime: { orders: 50, spent: 25000, avgOrderValue: 500 },
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockProfile });
+
+      const result = await cdpApi.getCustomerProfile('cust-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.segments).toContain('frequent_buyer');
+    });
+  });
+
+  describe('updateCustomerTraits', () => {
+    it('should update customer traits', async () => {
+      (apiClient.patch as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { id: 'cust-1', traits: { age: 31, preference: 'veg' } },
+      });
+
+      const result = await cdpApi.updateCustomerTraits('cust-1', { age: 31, preference: 'veg' });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('getSegments', () => {
+    it('should fetch all segments', async () => {
+      const mockSegments = [
+        { id: 'seg-1', name: 'High Value', description: 'Top 10% customers', customerCount: 1000 },
+        { id: 'seg-2', name: 'At Risk', description: 'Customers at risk of churn', customerCount: 500 },
+      ];
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockSegments });
+
+      const result = await cdpApi.getSegments();
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+    });
+  });
+
+  describe('getSegmentCustomers', () => {
+    it('should fetch customers in segment', async () => {
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { customerIds: ['cust-1', 'cust-2', 'cust-3'] },
+      });
+
+      const result = await cdpApi.getSegmentCustomers('seg-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.customerIds).toHaveLength(3);
+    });
+  });
+
+  describe('trackCustomerEvent', () => {
+    it('should track event', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({ success: true });
+
+      const result = await cdpApi.trackCustomerEvent('cust-1', 'purchase', { amount: 500 });
+      expect(result.success).toBe(true);
+    });
+  });
+});

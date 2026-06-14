@@ -1,0 +1,409 @@
+.page {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.subtitle {
+  color: var(--gray-500);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.periodSelect {
+  padding: 10px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+/* Metrics */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metricCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.metricLabel {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-bottom: 8px;
+}
+
+.metricValue {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.metricChange {
+  display: inline-block;
+  font-size: 12px;
+  color: #10b981;
+  background: #d1fae5;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: var(--gray-800);
+}
+
+/* Revenue Chart */
+.chart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 200px;
+  padding-top: 20px;
+}
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.barValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-600);
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.barContainer {
+  width: 40px;
+  height: 150px;
+  background: var(--gray-100);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.barFill {
+  width: 100%;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 8px;
+  animation: growUp 0.8s ease-out forwards;
+  transform-origin: bottom;
+}
+
+@keyframes growUp {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.barLabel {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 8px;
+}
+
+/* Conversion Funnel */
+.conversionFunnel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.conversionStep {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conversionBar {
+  height: 24px;
+  background: var(--gray-100);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.conversionFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.conversionInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.conversionStage {
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.conversionRate {
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.funnelSummary {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: center;
+}
+
+.funnelStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.funnelStat strong {
+  font-size: 24px;
+  color: var(--primary);
+}
+
+/* Product List */
+.productList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.productItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--gray-50);
+  border-radius: 8px;
+}
+
+.productRank {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+.productInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.productName {
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.productDeals {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.productRevenue {
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+/* Pipeline Health */
+.pipelineHealth {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.healthMetric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.healthCircle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--primary) calc(var(--percentage) * 1%),
+    var(--gray-200) 0
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.healthCircle::before {
+  content: '';
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: white;
+}
+
+.healthValue {
+  position: absolute;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--gray-800);
+}
+
+.healthLabel {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.healthDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.healthItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.healthDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.healthItem strong {
+  margin-left: auto;
+  color: var(--gray-800);
+}
+
+/* Activity Summary */
+.activitySummary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.activityItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: var(--gray-50);
+  border-radius: 8px;
+}
+
+.activityIcon {
+  font-size: 24px;
+}
+
+.activityValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.activityLabel {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+/* Forecast */
+.forecast {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.forecastItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  border-left: 4px solid var(--primary);
+}
+
+.forecastLabel {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.forecastValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.forecastConfidence {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .activitySummary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -1,0 +1,20 @@
+# Kubernetes Service for rez-kitchen-display
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-kitchen-display
+  namespace: rez-merchant
+  labels:
+    app: rez-kitchen-display
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-kitchen-display service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4014
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-kitchen-display

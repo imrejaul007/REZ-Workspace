@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged for formatting and linting
+npx lint-staged
+
+# Run type checking for both frontend and backend
+echo "🔧 Type checking backend..."
+cd apps/api && npm run type-check
+
+echo "🔧 Type checking frontend..."
+cd ../web && npm run type-check
+
+echo "✅ Pre-commit checks completed!"

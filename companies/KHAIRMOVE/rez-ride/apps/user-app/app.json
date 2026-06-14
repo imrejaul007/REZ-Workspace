@@ -1,0 +1,96 @@
+{
+  "expo": {
+    "name": "ReZ Ride",
+    "slug": "rez-ride-user",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "rezride",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6B4EFF"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rezride.user",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "ReZ Ride needs your location to find nearby drivers",
+        "NSLocationAlwaysUsageDescription": "ReZ Ride needs your location to track your ride",
+        "UIBackgroundModes": ["location", "fetch"]
+      },
+      "associatedDomains": [
+        "applinks:rezride.com",
+        "applinks:www.rezride.com",
+        "applinks:api.rezride.com"
+      ]
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6B4EFF"
+      },
+      "package": "com.rezride.user",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CALL_PHONE",
+        "FOREGROUND_SERVICE"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "rezride.com",
+              "pathPrefix": "/ride"
+            },
+            {
+              "scheme": "https",
+              "host": "www.rezride.com",
+              "pathPrefix": "/ride"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "rezride"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow ReZ Ride to use your location"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#6B4EFF",
+          "sounds": []
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      },
+      "API_URL": "https://api.rezride.com"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+.next/
+.env
+.env.local
+*.log
+.DS_Store
+
+# Firebase config - Replace with real credentials before building
+# DO NOT commit real google-services.json to version control
+google-services.json
+
+# macOS case-insensitivity fix for EAS builds
+# Ensures consistent casing across macOS file system
+git ls-files -z | xargs -0 git update-index --assume-unchanged 2>/dev/null || true
+.vercel

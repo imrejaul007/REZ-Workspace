@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: revenue-ai-gateway
+  namespace: rez-revenue-ai
+  labels:
+    app: revenue-ai-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: revenue-ai-gateway
+  template:
+    metadata:
+      labels:
+        app: revenue-ai-gateway
+    spec:
+      serviceAccountName: rez-revenue-ai
+      containers:
+        - name: gateway
+          image: rez-revenue-ai-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4300
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4300"
+            - name: PRICING_ENGINE_PORT
+              value: "4301"
+            - name: DEMAND_FORECAST_PORT
+              value: "4302"
+            - name: OFFER_OPTIMIZER_PORT
+              value: "4303"
+            - name: CASHBACK_OPTIMIZER_PORT
+              value: "4304"
+            - name: MERCHANT_ADVISOR_PORT
+              value: "4305"
+            - name: CROSS_MERCHANT_PORT
+              value: "4306"
+            - name: LOG_LEVEL
+              value: "info"
+          envFrom:
+            - secretRef:
+                name: rez-revenue-ai-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4300
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4300
+            initialDelaySeconds: 10
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: revenue-ai-gateway
+  namespace: rez-revenue-ai
+spec:
+  type: LoadBalancer
+  selector:
+    app: revenue-ai-gateway
+  ports:
+    - port: 80
+      targetPort: 4300
+      name: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: revenue-ai-gateway-hpa
+  namespace: rez-revenue-ai
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: revenue-ai-gateway
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

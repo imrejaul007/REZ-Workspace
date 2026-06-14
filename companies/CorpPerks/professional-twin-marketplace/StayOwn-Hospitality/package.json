@@ -1,0 +1,45 @@
+{
+  "name": "stayown-hospitality",
+  "version": "1.0.0",
+  "description": "StayOwn Hospitality - The Invisible Hotel",
+  "private": true,
+  "workspaces": [
+    "guest-twin-service",
+    "hotel-business-twin",
+    "hotel-event-bus",
+    "maintenance-ai",
+    "zero-checkout"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:guest-twin\" \"npm run dev:hotel-twin\" \"npm run dev:event-bus\" \"npm run dev:maintenance\" \"npm run dev:checkout\"",
+    "dev:guest-twin": "cd guest-twin-service && npm run dev",
+    "dev:hotel-twin": "cd hotel-business-twin && npm run dev",
+    "dev:event-bus": "cd hotel-event-bus && npm run dev",
+    "dev:maintenance": "cd maintenance-ai && npm run dev",
+    "dev:checkout": "cd zero-checkout && npm run dev",
+    "build": "npm run build:guest-twin && npm run build:hotel-twin && npm run build:event-bus && npm run build:maintenance && npm run build:checkout",
+    "build:guest-twin": "cd guest-twin-service && npm run build",
+    "build:hotel-twin": "cd hotel-business-twin && npm run build",
+    "build:event-bus": "cd hotel-event-bus && npm run build",
+    "build:maintenance": "cd maintenance-ai && npm run build",
+    "build:checkout": "cd zero-checkout && npm run build",
+    "start": "docker-compose up -d",
+    "stop": "docker-compose down",
+    "logs": "docker-compose logs -f",
+    "test": "npm run test:guest-twin && npm run test:hotel-twin && npm run test:event-bus && npm run test:maintenance && npm run test:checkout",
+    "test:guest-twin": "cd guest-twin-service && npm test",
+    "test:hotel-twin": "cd hotel-business-twin && npm test",
+    "test:event-bus": "cd hotel-event-bus && npm test",
+    "test:maintenance": "cd maintenance-ai && npm test",
+    "test:checkout": "cd zero-checkout && npm test",
+    "lint": "eslint . --ext .ts",
+    "clean": "rm -rf */dist && docker-compose down -v"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

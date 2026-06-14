@@ -1,0 +1,55 @@
+---
+title: Introduction
+description: Learn the basics of the REZ API ecosystem
+lastUpdated: May 17, 2026
+order: 1
+---
+
+## Welcome to REZ API
+
+The REZ API ecosystem provides a comprehensive suite of services for building modern commerce applications. From payment processing to user authentication, our APIs power thousands of applications worldwide.
+
+## Core Services
+
+Our platform consists of multiple microservices, each designed for specific functionality:
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| API Gateway | 4000 | Routing, Rate limiting |
+| Auth Service | 4002 | JWT, OTP, MFA, OAuth |
+| Payment Service | 4001 | Razorpay, UPI, Webhooks |
+| Wallet Service | 4004 | Coins, Balance, Loyalty |
+| Order Service | 4006 | Order lifecycle, FSM |
+
+## Base URL
+
+All API requests should be made to the appropriate service endpoint:
+
+```bash
+https://rez-auth-service.onrender.com/api/v2
+https://rez-payment-service.onrender.com/api/v2
+https://rez-order-service.onrender.com/api/v2
+```
+
+## Response Format
+
+All responses are returned in JSON format with consistent structure:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "pay_abc123",
+    "amount": 49900,
+    "currency": "INR",
+    "status": "captured"
+  },
+  "timestamp": "2026-05-17T10:30:00Z"
+}
+```
+
+## Next Steps
+
+- [Quick Start](/docs/quick-start) - Make your first API call
+- [Authentication](/docs/authentication) - Secure your requests
+- [API Overview](/docs/api-overview) - Explore all endpoints

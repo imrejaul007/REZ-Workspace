@@ -1,0 +1,251 @@
+openapi: 3.0.3
+info:
+  title: Wallet Service API
+  description: User wallet, balance, and transactions
+  version: 1.0.0
+
+servers:
+  - url: https://wallet.rez.money
+
+paths:
+  /api/v1/wallet/{userId}:
+    get:
+      tags: [Wallet]
+      summary: Get wallet balance
+      security:
+        - InternalToken: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Wallet details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+
+  /api/v1/wallet/{userId}/topup:
+    post:
+      tags: [Wallet]
+      summary: Top up wallet
+      security:
+        - InternalToken: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopupRequest'
+      responses:
+        '200':
+          description: Top up successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransaction'
+
+  /api/v1/wallet/{userId}/deduct:
+    post:
+      tags: [Wallet]
+      summary: Deduct from wallet
+      security:
+        - InternalToken: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeductRequest'
+      responses:
+        '200':
+          description: Deduction successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransaction'
+        '400':
+          description: Insufficient balance
+
+  /api/v1/wallet/{userId}/transfer:
+    post:
+      tags: [Wallet]
+      summary: Transfer to another user
+      security:
+        - InternalToken: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Transfer successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+
+  /api/v1/wallet/{userId}/transactions:
+    get:
+      tags: [Wallet]
+      summary: List transactions
+      security:
+        - InternalToken: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Transactions list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WalletTransaction'
+                  total:
+                    type: integer
+
+components:
+  securitySchemes:
+    InternalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+
+  schemas:
+    Wallet:
+      type: object
+      properties:
+        userId:
+          type: string
+        balance:
+          type: integer
+          description: Balance in paise
+        currency:
+          type: string
+          default: INR
+        status:
+          type: string
+          enum: [active, blocked, frozen]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TopupRequest:
+      type: object
+      required:
+        - amount
+        - paymentId
+      properties:
+        amount:
+          type: integer
+          minimum: 100
+        paymentId:
+          type: string
+        description:
+          type: string
+
+    DeductRequest:
+      type: object
+      required:
+        - amount
+        - reason
+      properties:
+        amount:
+          type: integer
+        reason:
+          type: string
+        orderId:
+          type: string
+
+    TransferRequest:
+      type: object
+      required:
+        - toUserId
+        - amount
+      properties:
+        toUserId:
+          type: string
+        amount:
+          type: integer
+        note:
+          type: string
+
+    WalletTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+          enum: [credit, debit, transfer_in, transfer_out]
+        amount:
+          type: integer
+        balanceAfter:
+          type: integer
+        reason:
+          type: string
+        referenceId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    TransferResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+        fromUserId:
+          type: string
+        toUserId:
+          type: string
+        amount:
+          type: integer
+        status:
+          type: string

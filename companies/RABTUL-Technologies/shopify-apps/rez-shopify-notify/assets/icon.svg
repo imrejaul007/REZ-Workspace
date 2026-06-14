@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#25D366"/>
+      <stop offset="100%" style="stop-color:#128C7E"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="180" fill="url(#bg)"/>
+  <g transform="translate(512, 512)">
+    <!-- WhatsApp Chat Bubble -->
+    <path d="M-280 -200 Q-280 -320 0 -320 Q320 -320 320 -200 L320 100 Q320 220 200 220 L-100 220 L-200 340 L-200 220 L-280 220 Q-320 220 -320 100 Z" fill="white"/>
+    <!-- Notification Bell -->
+    <circle cx="200" cy="-150" r="80" fill="#25D366"/>
+    <path d="M200 -220 L200 -100 M170 -160 L230 -160 M200 -250 L200 -220 M200 -100 L200 -80" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  </g>
+</svg>

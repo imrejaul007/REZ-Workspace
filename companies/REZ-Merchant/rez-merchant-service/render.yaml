@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: rez-merchant-service
+    runtime: node
+    buildCommand: npm install --include=dev && npm run build
+    # Install devDependencies for @types packages during build
+    buildEnv:
+      NODE_ENV: development
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    # M24 FIX: Add memory limit. Limits protect against OOM on Render's shared hosting.
+    memoryMB: 512
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '4005'
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      # JWT_MERCHANT_SECRET — signs merchant JWT tokens (required, min 32 chars)
+      - key: JWT_MERCHANT_SECRET
+        sync: false
+      # INTERNAL_SERVICE_TOKENS_JSON — scoped token map for service-to-service auth.
+      # Format: {"rez-backend":"<token>","rez-catalog-service":"<token>"}
+      - key: INTERNAL_SERVICE_TOKENS_JSON
+        sync: false
+      # QR_SECRET — HMAC key for karma event QR codes (required, min 32 chars)
+      - key: QR_SECRET
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      # ENCRYPTION_KEY — required for AES encryption of bank details (validateEnv exits if missing)
+      - key: ENCRYPTION_KEY
+        sync: false
+      # Cloudinary — required for merchant image/video uploads
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      # Internal bridge token — required for shift-gap bridge endpoint
+      - key: INTERNAL_BRIDGE_TOKEN
+        sync: false

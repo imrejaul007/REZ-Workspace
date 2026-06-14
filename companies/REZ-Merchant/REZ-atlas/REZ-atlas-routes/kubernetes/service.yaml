@@ -1,0 +1,20 @@
+# Kubernetes Service for REZ-atlas-routes
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-atlas-routes
+  namespace: rez-merchant
+  labels:
+    app: REZ-atlas-routes
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-atlas-routes service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5171
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-atlas-routes

@@ -1,0 +1,62 @@
+services:
+  - type: web
+    name: rez-payment-service
+    runtime: node
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    # M24 FIX: Add memory limit. Limits protect against OOM on Render's shared hosting.
+    # Payment service handles webhook processing — needs headroom for burst traffic.
+    memoryMB: 512
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVICE_NAME
+        value: rez-payment-service
+      - key: PORT
+        value: "4001"
+      - key: HEALTH_PORT
+        value: "4101"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      # JWT merchant secret — used to verify merchant-scoped tokens.
+      - key: JWT_MERCHANT_SECRET
+        sync: false
+      # Scoped internal service token map (JSON). Preferred over INTERNAL_SERVICE_TOKEN.
+      - key: INTERNAL_SERVICE_TOKENS_JSON
+        sync: false
+      # Legacy single shared internal token — accepted as fallback during rollout.
+      - key: INTERNAL_SERVICE_TOKEN
+        sync: false
+      # Razorpay credentials — required for payment order creation and capture.
+      # Service warns on startup and disables Razorpay if these are absent.
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      # Razorpay webhook HMAC secret — used to verify webhook signature.
+      # Without this, all incoming Razorpay webhooks are rejected.
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      # Wallet service URL — payment capture posts coin credit events here.
+      # Service warns on startup if not set; coin credits are silently skipped.
+      - key: WALLET_SERVICE_URL
+        sync: false
+      # CORS_ORIGIN — comma-separated list of allowed browser origins.
+      - key: CORS_ORIGIN
+        sync: false
+      # NBFC partner slug — selects which NBFC integration module to activate.
+      - key: NBFC_PARTNER
+        sync: false
+      # REZ_AUTH_SERVICE_URL — required by profileIntegration.ts for user profile updates
+      - key: REZ_AUTH_SERVICE_URL
+        sync: false
+      - key: MONOLITH_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false

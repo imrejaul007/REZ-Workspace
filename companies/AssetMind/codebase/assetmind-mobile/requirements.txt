@@ -1,0 +1,4 @@
+# Mobile app - Expo React Native
+# Run: npx expo install
+expo>=52.0.0
+react-native>=0.76.0

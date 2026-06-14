@@ -1,0 +1,53 @@
+{
+  "name": "@rez/revenue-ai-sdk",
+  "version": "1.0.0",
+  "description": "REZ Revenue AI - Dynamic Pricing & Revenue Intelligence SDK",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest"
+  },
+  "keywords": [
+    "rez",
+    "revenue",
+    "pricing",
+    "dynamic-pricing",
+    "revenue-optimization",
+    "merchant",
+    "restaurant",
+    "hotel",
+    "salon",
+    "fitness",
+    "healthcare"
+  ],
+  "author": "RABTUL Technologies",
+  "license": "MIT",
+  "peerDependencies": {
+    "axios": ">=1.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsup": "^8.0.0",
+    "vitest": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imrejaul007/RABTUL-Technologies"
+  }
+}

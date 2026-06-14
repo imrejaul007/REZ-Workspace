@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ad-bazaar-pinterest-integration-config
+  labels:
+    app: ad-bazaar-pinterest-integration
+data:
+  NODE_ENV: "production"
+  PORT: "5095"
+  LOG_LEVEL: "info"
+  MONGODB_URI: "mongodb://mongo-cluster.mongodb.svc.cluster.local:27017/pinterest_integration"
+  REDIS_URL: "redis://redis-cluster.redis.svc.cluster.local:6379"
+  PINTEREST_API_VERSION: "v5"
+  PINTEREST_API_URL: "https://api.pinterest.com"
+ BOARD_CACHE_TTL: "7200"

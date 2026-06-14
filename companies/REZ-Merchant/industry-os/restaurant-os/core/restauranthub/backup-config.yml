@@ -1,0 +1,208 @@
+# RestaurantHub Automated Backup & Restoration Configuration
+
+# General Configuration
+backup:
+  enabled: true
+  environment: production
+
+  # Database Configuration
+  database:
+    host: ${DB_HOST:-localhost}
+    port: ${DB_PORT:-5432}
+    name: ${DB_NAME:-restauranthub}
+    user: ${DB_USER:-postgres}
+    password: ${DB_PASSWORD}
+
+  # Backup Schedule (cron format)
+  schedule:
+    daily: "0 2 * * *"      # Daily at 2 AM
+    weekly: "0 3 * * 0"     # Weekly on Sunday at 3 AM
+    monthly: "0 4 1 * *"    # Monthly on 1st at 4 AM
+
+  # Retention Policies
+  retention:
+    daily_backups: 30       # Keep daily backups for 30 days
+    weekly_backups: 12      # Keep weekly backups for 12 weeks
+    monthly_backups: 12     # Keep monthly backups for 12 months
+
+  # Storage Configuration
+  storage:
+    local:
+      enabled: true
+      directory: "./backups"
+      compress: true
+
+    s3:
+      enabled: ${S3_ENABLED:-false}
+      bucket: ${S3_BUCKET}
+      region: ${AWS_REGION:-us-east-1}
+      prefix: "restauranthub-backups"
+      storage_class: "STANDARD_IA"
+      lifecycle_policy: true
+
+    # Additional storage options
+    azure:
+      enabled: false
+      container: ${AZURE_CONTAINER}
+
+    gcs:
+      enabled: false
+      bucket: ${GCS_BUCKET}
+
+# Restoration Testing
+restoration_testing:
+  enabled: true
+
+  # Test Schedule
+  schedule:
+    validation: "0 4 * * *"       # Daily validation at 4 AM
+    full_restore_test: "0 5 * * 0" # Weekly full test on Sunday at 5 AM
+
+  # Test Database
+  test_database:
+    name_suffix: "_restore_test"
+    auto_cleanup: true
+    max_age_hours: 24
+
+  # Validation Checks
+  validation:
+    file_size_check: true
+    integrity_check: true
+    schema_validation: true
+    data_validation: true
+    performance_benchmarks: true
+
+# Monitoring & Alerting
+monitoring:
+  enabled: true
+
+  # Metrics Collection
+  metrics:
+    backup_duration: true
+    backup_size: true
+    restoration_time: true
+    success_rate: true
+    storage_usage: true
+
+  # Health Checks
+  health_checks:
+    interval_seconds: 3600        # Check every hour
+    database_connectivity: true
+    storage_accessibility: true
+    recent_backup_existence: true
+    disk_space_threshold: 80      # Alert if disk usage > 80%
+
+  # Alerting
+  alerts:
+    webhook_url: ${WEBHOOK_URL}
+    email: ${ALERT_EMAIL}
+
+    # Alert Conditions
+    backup_failure: true
+    restoration_failure: true
+    health_check_failure: true
+    storage_threshold_exceeded: true
+
+# Security
+security:
+  encryption:
+    enabled: true
+    algorithm: "AES-256"
+    key_rotation_days: 90
+
+  access_control:
+    backup_user_permissions: "read,write"
+    restore_user_permissions: "read"
+
+  audit:
+    log_all_operations: true
+    retention_days: 365
+
+# Performance
+performance:
+  parallel_operations: 2
+  compression_level: 6
+  network_timeout_seconds: 300
+  max_backup_size_gb: 50
+
+  # Resource Limits
+  resources:
+    max_cpu_percent: 50
+    max_memory_mb: 2048
+    max_io_operations: 1000
+
+# Logging
+logging:
+  level: INFO
+  format: json
+  output:
+    - file: "./logs/backup.log"
+      rotation: daily
+      retention_days: 30
+    - syslog:
+        enabled: ${SYSLOG_ENABLED:-false}
+        facility: local0
+    - elasticsearch:
+        enabled: ${ELK_ENABLED:-false}
+        url: ${ELASTICSEARCH_URL}
+        index: "restauranthub-backups"
+
+# Integration
+integration:
+  # CI/CD Integration
+  cicd:
+    pre_backup_hooks:
+      - "./scripts/pre-backup-checks.sh"
+    post_backup_hooks:
+      - "./scripts/post-backup-validation.sh"
+      - "./scripts/update-backup-status.sh"
+
+  # External Tools
+  tools:
+    prometheus:
+      enabled: ${PROMETHEUS_ENABLED:-false}
+      pushgateway_url: ${PROMETHEUS_PUSHGATEWAY_URL}
+      metrics_prefix: "restauranthub_backup"
+
+    grafana:
+      enabled: ${GRAFANA_ENABLED:-false}
+      dashboard_import: true
+
+    slack:
+      enabled: ${SLACK_ENABLED:-false}
+      webhook_url: ${SLACK_WEBHOOK_URL}
+      channel: "#ops-alerts"
+
+# Environment-Specific Overrides
+environments:
+  development:
+    backup:
+      schedule:
+        daily: "0 23 * * *"     # Daily at 11 PM
+      retention:
+        daily_backups: 7        # Keep only 7 days in dev
+    restoration_testing:
+      schedule:
+        validation: "0 1 * * *" # Daily at 1 AM
+
+  staging:
+    backup:
+      schedule:
+        daily: "0 1 * * *"      # Daily at 1 AM
+      retention:
+        daily_backups: 14       # Keep 14 days in staging
+
+  production:
+    backup:
+      enabled: true
+      schedule:
+        daily: "0 2 * * *"      # Daily at 2 AM
+        weekly: "0 3 * * 0"     # Weekly on Sunday
+        monthly: "0 4 1 * *"    # Monthly on 1st
+    monitoring:
+      alerts:
+        critical_priority: true
+    security:
+      encryption:
+        enabled: true
+        key_rotation_days: 30   # More frequent rotation in prod

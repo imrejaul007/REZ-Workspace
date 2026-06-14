@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-merchant-referral-portal
+  namespace: rez-merchant
+  labels:
+    app: REZ-merchant-referral-portal
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-merchant-referral-portal service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4062
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-merchant-referral-portal
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-merchant-referral-portal-internal
+  namespace: rez-merchant
+  labels:
+    app: REZ-merchant-referral-portal
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-merchant-referral-portal internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4062
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-merchant-referral-portal

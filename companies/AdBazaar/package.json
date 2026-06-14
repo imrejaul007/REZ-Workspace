@@ -1,0 +1,38 @@
+{
+  "name": "adbazaar",
+  "version": "1.0.0",
+  "description": "Marketing + DOOH + Creator Economy Platform",
+  "private": true,
+  "workspaces": [
+    "adBazaar",
+    "adBazaar-backend",
+    "adBazaar-creator",
+    "adBazaar-dashboard",
+    "dooh",
+    "dooh-screen-app",
+    "dooh-mobile",
+    "adsqr",
+    "creators",
+    "creator-commerce-service",
+    "rez-*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "start": "npm run start --workspaces --if-present"
+  },
+  "keywords": [
+    "marketing",
+    "advertising",
+    "dooh",
+    "creator",
+    "programmatic",
+    "rez"
+  ],
+  "author": "AdBazaar",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,360 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "RestoPapa - Database Performance",
+    "tags": ["restopapa", "database", "postgresql"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "db_connections_active{app=\"restopapa-api\"}",
+            "legendFormat": "Active Connections"
+          },
+          {
+            "expr": "db_connections_idle{app=\"restopapa-api\"}",
+            "legendFormat": "Idle Connections"
+          },
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"restopapa\"}",
+            "legendFormat": "PostgreSQL Backends"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Connections",
+            "unit": "short"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Query Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(db_operation_duration_seconds_bucket{app=\"restopapa-api\"}[5m]))",
+            "legendFormat": "95th percentile query time"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(db_operation_duration_seconds_bucket{app=\"restopapa-api\"}[5m]))",
+            "legendFormat": "50th percentile query time"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Query Time",
+            "unit": "s"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Database Operations Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(db_operations_total{app=\"restopapa-api\",operation=\"select\"}[5m])",
+            "legendFormat": "SELECT operations/sec"
+          },
+          {
+            "expr": "rate(db_operations_total{app=\"restopapa-api\",operation=\"insert\"}[5m])",
+            "legendFormat": "INSERT operations/sec"
+          },
+          {
+            "expr": "rate(db_operations_total{app=\"restopapa-api\",operation=\"update\"}[5m])",
+            "legendFormat": "UPDATE operations/sec"
+          },
+          {
+            "expr": "rate(db_operations_total{app=\"restopapa-api\",operation=\"delete\"}[5m])",
+            "legendFormat": "DELETE operations/sec"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec",
+            "unit": "ops"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Database Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(db_query_errors_total{app=\"restopapa-api\"}[5m])",
+            "legendFormat": "{{error_type}} - {{table}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Errors/sec",
+            "unit": "ops"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "PostgreSQL Cache Hit Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(pg_stat_database_blks_hit{datname=\"restopapa\"}[5m]) / (rate(pg_stat_database_blks_hit{datname=\"restopapa\"}[5m]) + rate(pg_stat_database_blks_read{datname=\"restopapa\"}[5m])) * 100",
+            "legendFormat": "Cache Hit Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 90
+                },
+                {
+                  "color": "green",
+                  "value": 95
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "Database Size",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "pg_database_size_bytes{datname=\"restopapa\"}",
+            "legendFormat": "Database Size"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 6,
+          "y": 16
+        }
+      },
+      {
+        "id": 7,
+        "title": "Transaction Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(pg_stat_database_xact_commit{datname=\"restopapa\"}[5m])",
+            "legendFormat": "Commits/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 12,
+          "y": 16
+        }
+      },
+      {
+        "id": 8,
+        "title": "Deadlocks",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(pg_stat_database_deadlocks{datname=\"restopapa\"}[5m])",
+            "legendFormat": "Deadlocks/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 0.1
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 18,
+          "y": 16
+        }
+      },
+      {
+        "id": 9,
+        "title": "Top Tables by Operations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "topk(10, rate(db_operations_total{app=\"restopapa-api\"}[5m]))",
+            "legendFormat": "{{table}} - {{operation}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec",
+            "unit": "ops"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 20
+        }
+      },
+      {
+        "id": 10,
+        "title": "Query Duration by Table",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(db_operation_duration_seconds_bucket{app=\"restopapa-api\"}[5m]))",
+            "legendFormat": "{{table}} - 95th percentile"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Duration",
+            "unit": "s"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 20
+        }
+      },
+      {
+        "id": 11,
+        "title": "Lock Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_locks_count",
+            "legendFormat": "{{mode}} locks"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Lock Count",
+            "unit": "short"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 28
+        }
+      },
+      {
+        "id": 12,
+        "title": "Checkpoint Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(pg_stat_bgwriter_checkpoints_timed[5m])",
+            "legendFormat": "Timed Checkpoints/sec"
+          },
+          {
+            "expr": "rate(pg_stat_bgwriter_checkpoints_req[5m])",
+            "legendFormat": "Requested Checkpoints/sec"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Checkpoints/sec",
+            "unit": "ops"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 28
+        }
+      }
+    ]
+  }
+}

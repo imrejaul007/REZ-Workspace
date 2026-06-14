@@ -1,0 +1,414 @@
+# =============================================================================
+# AdBazaar - Docker Compose
+# Complete marketing platform with Business Growth OS
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # CORE MARKETING
+  # =============================================================================
+  marketing:
+    build:
+      context: ./REZ-marketing
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/rez_marketing
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - adbazaar-net
+
+  ads-service:
+    build:
+      context: ./REZ-ads-service
+      dockerfile: Dockerfile
+    ports:
+      - "4007:4007"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/rez_ads
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  dooh-service:
+    build:
+      context: ./REZ-dooh-service
+      dockerfile: Dockerfile
+    ports:
+      - "4018:4018"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/rez_dooh
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  # =============================================================================
+  # BUSINESS GROWTH OS - Core
+  # =============================================================================
+  marketing-os:
+    build:
+      context: ./adbazaar-marketing-os
+      dockerfile: Dockerfile
+    ports:
+      - "4960:4960"
+    environment:
+      - NODE_ENV=production
+      - PORT=4960
+      - MONGODB_URI=mongodb://mongo:27017/marketing_os
+      - AI_GATEWAY=http://hojai-gateway:4870
+      - ADS_SERVICE=http://ads-service:4007
+      - ECOSYSTEM_HUB=http://ecosystem-hub:4955
+    depends_on:
+      - mongo
+      - hojai-gateway
+    networks:
+      - adbazaar-net
+
+  cdp:
+    build:
+      context: ./adbazaar-cdp
+      dockerfile: Dockerfile
+    ports:
+      - "4961:4961"
+    environment:
+      - NODE_ENV=production
+      - PORT=4961
+      - MONGODB_URI=mongodb://mongo:27017/adbazaar_cdp
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  pixel:
+    build:
+      context: ./adbazaar-pixel
+      dockerfile: Dockerfile
+    ports:
+      - "4962:4962"
+    environment:
+      - NODE_ENV=production
+      - PORT=4962
+      - MONGODB_URI=mongodb://mongo:27017/adbazaar_pixel
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  verification:
+    build:
+      context: ./adbazaar-verification
+      dockerfile: Dockerfile
+    ports:
+      - "4963:4963"
+    environment:
+      - NODE_ENV=production
+      - PORT=4963
+      - MONGODB_URI=mongodb://mongo:27017/adbazaar_verification
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  clean-room:
+    build:
+      context: ./adbazaar-clean-room
+      dockerfile: Dockerfile
+    ports:
+      - "4964:4964"
+    environment:
+      - NODE_ENV=production
+      - PORT=4964
+      - MONGODB_URI=mongodb://mongo:27017/adbazaar_clean_room
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  marketing-agent:
+    build:
+      context: ./adbazaar-marketing-agent
+      dockerfile: Dockerfile
+    ports:
+      - "4965:4965"
+    environment:
+      - NODE_ENV=production
+      - PORT=4965
+      - MONGODB_URI=mongodb://mongo:27017/marketing_agent
+      - AI_GATEWAY=http://hojai-gateway:4870
+      - MARKETING_OS=http://marketing-os:4960
+      - CDP=http://cdp:4961
+    depends_on:
+      - mongo
+      - hojai-gateway
+    networks:
+      - adbazaar-net
+
+  event-stream:
+    build:
+      context: ./adbazaar-event-stream
+      dockerfile: Dockerfile
+    ports:
+      - "4966:4966"
+    environment:
+      - NODE_ENV=production
+      - PORT=4966
+      - MONGODB_URI=mongodb://mongo:27017/adbazaar_event_stream
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  intelligence-graph:
+    build:
+      context: ./adbazaar-intelligence-graph
+      dockerfile: Dockerfile
+    ports:
+      - "4967:4967"
+    environment:
+      - NODE_ENV=production
+      - PORT=4967
+      - MONGODB_URI=mongodb://mongo:27017/adbazaar_intelligence_graph
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  data-marketplace:
+    build:
+      context: ./adbazaar-data-marketplace
+      dockerfile: Dockerfile
+    ports:
+      - "4968:4968"
+    environment:
+      - NODE_ENV=production
+      - PORT=4968
+      - MONGODB_URI=mongodb://mongo:27017/adbazaar_data_marketplace
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  revenue-intelligence:
+    build:
+      context: ./adbazaar-revenue-intelligence
+      dockerfile: Dockerfile
+    ports:
+      - "4969:4969"
+    environment:
+      - NODE_ENV=production
+      - PORT=4969
+      - MONGODB_URI=mongodb://mongo:27017/revenue_intelligence
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  creator-wallet:
+    build:
+      context: ./adbazaar-creator-wallet
+      dockerfile: Dockerfile
+    ports:
+      - "4970:4970"
+    environment:
+      - NODE_ENV=production
+      - PORT=4970
+      - MONGODB_URI=mongodb://mongo:27017/creator_wallet
+      - RABTUL_WALLET=http://rabtul-wallet:4004
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  personalization:
+    build:
+      context: ./adbazaar-personalization
+      dockerfile: Dockerfile
+    ports:
+      - "4971:4971"
+    environment:
+      - NODE_ENV=production
+      - PORT=4971
+      - MONGODB_URI=mongodb://mongo:27017/personalization
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  agency-os:
+    build:
+      context: ./adbazaar-agency-os
+      dockerfile: Dockerfile
+    ports:
+      - "4972:4972"
+    environment:
+      - NODE_ENV=production
+      - PORT=4972
+      - MONGODB_URI=mongodb://mongo:27017/agency_os
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  competitive-intel:
+    build:
+      context: ./adbazaar-competitive-intelligence
+      dockerfile: Dockerfile
+    ports:
+      - "4973:4973"
+    environment:
+      - NODE_ENV=production
+      - PORT=4973
+      - MONGODB_URI=mongodb://mongo:27017/competitive_intel
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  community-media:
+    build:
+      context: ./adbazaar-community-media
+      dockerfile: Dockerfile
+    ports:
+      - "4974:4974"
+    environment:
+      - NODE_ENV=production
+      - PORT=4974
+      - MONGODB_URI=mongodb://mongo:27017/community_media
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  # =============================================================================
+  # HOJAI AI & ECOSYSTEM
+  # =============================================================================
+  hojai-gateway:
+    build:
+      context: ./adbazaar-hojai-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "4870:4870"
+    environment:
+      - NODE_ENV=production
+      - PORT=4870
+      - HOJAI_API_KEY=${HOJAI_API_KEY}
+    networks:
+      - adbazaar-net
+
+  ecosystem-hub:
+    build:
+      context: ./ecosystem-integration-hub
+      dockerfile: Dockerfile
+    ports:
+      - "4955:4955"
+    environment:
+      - NODE_ENV=production
+      - PORT=4955
+      - HOJAI_GATEWAY=http://hojai-gateway:4870
+      - INTENT_SIGNALS=http://intent-signals:4800
+    networks:
+      - adbazaar-net
+
+  # =============================================================================
+  # INTENT EXCHANGE
+  # =============================================================================
+  intent-signals:
+    build:
+      context: ./intent-signal-aggregator
+      dockerfile: Dockerfile
+    ports:
+      - "4800:4800"
+    environment:
+      - NODE_ENV=production
+      - PORT=4800
+      - MONGODB_URI=mongodb://mongo:27017/intent_signals
+    depends_on:
+      - mongo
+    networks:
+      - adbazaar-net
+
+  intent-prediction:
+    build:
+      context: ./intent-prediction-engine
+      dockerfile: Dockerfile
+    ports:
+      - "4801:4801"
+    environment:
+      - NODE_ENV=production
+      - PORT=4801
+    networks:
+      - adbazaar-net
+
+  # =============================================================================
+  # SOCIAL AUTOMATION
+  # =============================================================================
+  instagram-publishing:
+    build:
+      context: ./instagram-publishing-service
+      dockerfile: Dockerfile
+    ports:
+      - "5081:5081"
+    environment:
+      - NODE_ENV=production
+      - PORT=5081
+      - INSTAGRAM_API_KEY=${INSTAGRAM_API_KEY}
+    networks:
+      - adbazaar-net
+
+  caption-generator:
+    build:
+      context: ./caption-generator-ai
+      dockerfile: Dockerfile
+    ports:
+      - "5091:5091"
+    environment:
+      - NODE_ENV=production
+      - PORT=5091
+      - HOJAI_GATEWAY=http://hojai-gateway:4870
+    depends_on:
+      - hojai-gateway
+    networks:
+      - adbazaar-net
+
+  # =============================================================================
+  # INFRASTRUCTURE
+  # =============================================================================
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - adbazaar-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - adbazaar-net
+
+# =============================================================================
+# NETWORKS & VOLUMES
+# =============================================================================
+networks:
+  adbazaar-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  redis-data:

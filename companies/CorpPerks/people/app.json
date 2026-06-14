@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "MyTalent",
+    "slug": "mytalent",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#8b5cf6"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.corpperks.mytalent"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#8b5cf6"
+      },
+      "package": "com.corpperks.mytalent",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "NOTIFICATIONS",
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow MyTalent to access your location for attendance tracking."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#8b5cf6"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow MyTalent to access your camera for face attendance."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "mytalent-app"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "rez-rewards",
+  "version": "1.0.0",
+  "description": "ReZ Loyalty Rewards Module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "rewards",
+    "loyalty",
+    "points"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

@@ -1,0 +1,23 @@
+# Render Blueprint for rez-barcode-scanner-ui
+# Deploy at: https://dashboard.render.com/blueprints
+
+services:
+  - type: web
+    name: rez-barcode-scanner-ui
+    runtime: node
+    buildCommand: npm install --force && npx expo-modules install && npx expo export --platform web
+    startCommand: npx serve dist -p ${PORT:-3000} -s
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: EXPO_PUBLIC_API_BASE_URL
+        value: https://rez-api-gateway.onrender.com/api
+      - key: EXPO_PUBLIC_ENVIRONMENT
+        value: production
+      - key: EXPO_PUBLIC_APP_NAME
+        value: REZ Barcode Scanner

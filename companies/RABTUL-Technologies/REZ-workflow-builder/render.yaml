@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: rez-workflow-builder
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: REZ_FLOW_RUNTIME_URL
+        value: http://localhost:4200
+      - key: USE_FLOW_RUNTIME
+        value: "true"
+      - key: INTERNAL_SERVICE_TOKEN
+        sync: false
+      - key: LOG_LEVEL
+        value: info

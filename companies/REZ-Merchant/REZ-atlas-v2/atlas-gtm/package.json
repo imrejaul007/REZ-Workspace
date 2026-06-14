@@ -1,0 +1,25 @@
+{
+  "name": "atlas-gtm",
+  "version": "3.5.0",
+  "description": "REZ Atlas GTM - Autonomous Go-To-Market Agent System with AdBazaar & RABTUL Integration",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "uuid": "^9.0.0",
+    "openai": "^4.28.0",
+    "@sendgrid/mail": "^8.1.0",
+    "axios": "^1.6.5",
+    "jsonwebtoken": "^9.0.2",
+    "mathjs": "^12.4.0",
+    "mongoose": "^8.0.0",
+    "node-cron": "^3.0.3",
+    "ioredis": "^5.3.2"
+  }
+}

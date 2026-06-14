@@ -1,0 +1,520 @@
+openapi: 3.0.3
+info:
+  title: AssetMind API
+  description: Financial Intelligence Platform API
+  version: 1.0.0
+  contact:
+    name: AssetMind Support
+    email: support@assetmind.ai
+
+servers:
+  - url: http://localhost:5260
+    description: Local development
+  - url: https://api.assetmind.ai
+    description: Production
+
+tags:
+  - name: Health
+    description: Service health endpoints
+  - name: Assets
+    description: Asset management
+  - name: Twins
+    description: Digital twin operations
+  - name: Portfolio
+    description: Portfolio management
+  - name: Intelligence
+    description: AI intelligence services
+  - name: Trading
+    description: Trading operations
+  - name: Data
+    description: Market data services
+
+paths:
+  /health:
+    get:
+      summary: Service health check
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: assetmind-api-gateway
+                  version:
+                    type: string
+                    example: 1.0.0
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/health:
+    get:
+      summary: All services health check
+      tags: [Health]
+      responses:
+        '200':
+          description: Services status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  services:
+                    type: object
+                    additionalProperties:
+                      type: string
+
+  /api/routes:
+    get:
+      summary: List all routes
+      tags: [Health]
+      responses:
+        '200':
+          description: List of routes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /api/assets:
+    get:
+      summary: List all assets
+      tags: [Assets]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of assets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Asset'
+
+  /api/assets/{symbol}:
+    get:
+      summary: Get asset by symbol
+      tags: [Assets]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Asset details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '404':
+          description: Asset not found
+
+  /api/twin/{symbol}:
+    get:
+      summary: Get digital twin for asset
+      tags: [Twins]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Twin data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Twin'
+        '404':
+          description: Twin not found
+
+  /api/portfolio:
+    get:
+      summary: List portfolios
+      tags: [Portfolio]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: List of portfolios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Portfolio'
+    post:
+      summary: Create portfolio
+      tags: [Portfolio]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortfolioCreate'
+      responses:
+        '201':
+          description: Portfolio created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio'
+
+  /api/portfolio/{id}:
+    get:
+      summary: Get portfolio
+      tags: [Portfolio]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Portfolio details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio'
+        '404':
+          description: Portfolio not found
+
+  /api/intelligence:
+    get:
+      summary: Get market intelligence
+      tags: [Intelligence]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Intelligence data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Intelligence'
+
+  /api/intelligence/{symbol}:
+    get:
+      summary: Get intelligence for symbol
+      tags: [Intelligence]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Symbol intelligence
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Intelligence'
+
+  /api/trade:
+    post:
+      summary: Execute trade
+      tags: [Trading]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradeRequest'
+      responses:
+        '200':
+          description: Trade executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeResult'
+
+  /api/quotes:
+    get:
+      summary: Get market quotes
+      tags: [Data]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: symbols
+          in: query
+          schema:
+            type: string
+          description: Comma-separated symbols
+      responses:
+        '200':
+          description: Quote data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+
+  /api/quotes/{symbol}:
+    get:
+      summary: Get quote for symbol
+      tags: [Data]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quote data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
+
+    Asset:
+      type: object
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        name:
+          type: string
+          example: Apple Inc.
+        asset_class:
+          type: string
+          example: equity
+        exchange:
+          type: string
+          example: NASDAQ
+        currency:
+          type: string
+          example: USD
+
+    Twin:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        twin_type:
+          type: string
+          example: asset
+        health_score:
+          type: number
+          format: float
+          example: 85.5
+        opportunity_score:
+          type: number
+          format: float
+          example: 72.3
+        risk_score:
+          type: number
+          format: float
+          example: 25.1
+        sentiment:
+          type: number
+          format: float
+          example: 0.65
+        predictions:
+          type: object
+          properties:
+            price_direction:
+              type: string
+              example: up
+            confidence:
+              type: number
+              format: float
+            target_price:
+              type: number
+              format: float
+
+    Portfolio:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        total_value:
+          type: number
+          format: float
+        day_change:
+          type: number
+          format: float
+        day_change_pct:
+          type: number
+          format: float
+        positions_count:
+          type: integer
+
+    PortfolioCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    Intelligence:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        market_sentiment:
+          type: number
+          format: float
+        top_opportunities:
+          type: array
+          items:
+            type: object
+        top_risks:
+          type: array
+          items:
+            type: object
+        sector_performance:
+          type: object
+
+    TradeRequest:
+      type: object
+      required:
+        - symbol
+        - side
+        - quantity
+      properties:
+        symbol:
+          type: string
+        side:
+          type: string
+          enum: [buy, sell]
+        quantity:
+          type: number
+          format: float
+        order_type:
+          type: string
+          enum: [market, limit]
+          default: market
+        limit_price:
+          type: number
+          format: float
+
+    TradeResult:
+      type: object
+      properties:
+        order_id:
+          type: string
+        symbol:
+          type: string
+        side:
+          type: string
+        quantity:
+          type: number
+          format: float
+        price:
+          type: number
+          format: float
+        total:
+          type: number
+          format: float
+        status:
+          type: string
+          example: filled
+
+    Quote:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+        change:
+          type: number
+          format: float
+        change_pct:
+          type: number
+          format: float
+        volume:
+          type: integer
+        market_cap:
+          type: number
+          format: float
+        high_52w:
+          type: number
+          format: float
+        low_52w:
+          type: number
+          format: float

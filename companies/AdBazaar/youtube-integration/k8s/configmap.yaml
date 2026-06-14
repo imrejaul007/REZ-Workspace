@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ad-bazaar-youtube-integration-config
+  labels:
+    app: ad-bazaar-youtube-integration
+data:
+  NODE_ENV: "production"
+  PORT: "5094"
+  LOG_LEVEL: "info"
+  MONGODB_URI: "mongodb://mongo-cluster.mongodb.svc.cluster.local:27017/youtube_integration"
+  REDIS_URL: "redis://redis-cluster.redis.svc.cluster.local:6379"
+  YOUTUBE_API_KEY: "AIza-placeholder"
+  YOUTUBE_DATA_API_URL: "https://www.googleapis.com/youtube/v3"
+  VIDEO_ANALYTICS_WINDOW: "28"

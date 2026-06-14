@@ -1,0 +1,219 @@
+# AssetMind Kubernetes Deployment Template
+# Apply with: kubectl apply -f deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-asset-universe
+  labels:
+    app: assetmind
+    component: asset-universe
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: assetmind
+      component: asset-universe
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: asset-universe
+    spec:
+      serviceAccountName: assetmind
+      containers:
+      - name: asset-universe
+        image: assetmind/asset-universe:latest
+        ports:
+        - containerPort: 5001
+          name: http
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: assetmind-secrets
+              key: database-url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: assetmind-secrets
+              key: redis-url
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-asset-universe
+  labels:
+    app: assetmind
+    component: asset-universe
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5001
+    targetPort: 5001
+    protocol: TCP
+    name: http
+  selector:
+    app: assetmind
+    component: asset-universe
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetmind-api-gateway
+  labels:
+    app: assetmind
+    component: api-gateway
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: assetmind
+      component: api-gateway
+  template:
+    metadata:
+      labels:
+        app: assetmind
+        component: api-gateway
+    spec:
+      serviceAccountName: assetmind
+      containers:
+      - name: api-gateway
+        image: assetmind/api-gateway:latest
+        ports:
+        - containerPort: 5260
+          name: http
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5260
+          initialDelaySeconds: 15
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetmind-api-gateway
+  labels:
+    app: assetmind
+    component: api-gateway
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 5260
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 5260
+    protocol: TCP
+    name: https
+  selector:
+    app: assetmind
+    component: api-gateway
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: assetmind-asset-universe-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: assetmind-asset-universe
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: assetmind-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: assetmind
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: assetmind
+    - podSelector:
+        matchLabels:
+          app: nginx-ingress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgresql
+    - podSelector:
+        matchLabels:
+          app: redis
+    - podSelector:
+        matchLabels:
+          app: neo4j
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - port: 443
+      protocol: TCP
+    - port: 80
+      protocol: TCP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: assetmind
+  labels:
+    app: assetmind
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: assetmind-secrets
+type: Opaque
+stringData:
+  database-url: "postgresql://assetmind:password@postgresql:5432/assetmind"
+  redis-url: "redis://redis:6379"
+  api-key: "your-api-key-here"

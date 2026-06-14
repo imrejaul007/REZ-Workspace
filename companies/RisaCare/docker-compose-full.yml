@@ -1,0 +1,531 @@
+# RisaCare - Complete Docker Compose
+# All 56 services with MongoDB
+
+version: '3.8'
+
+services:
+  # ==========================================
+  # DATABASE & MESSAGING
+  # ==========================================
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - risa-care-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - risa-care-network
+
+  # ==========================================
+  # CORE PLATFORM (4700-4707)
+  # ==========================================
+
+  risa-care-api-gateway:
+    build: ./risa-care-api-gateway
+    ports:
+      - "4700:4700"
+    environment:
+      - NODE_ENV=production
+      - PORT=4700
+      - MONGODB_URI=mongodb://mongo:27017/risa_care
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-profile-service:
+    build: ./risa-care-profile-service
+    ports:
+      - "4701:4701"
+    environment:
+      - NODE_ENV=production
+      - PORT=4701
+      - MONGODB_URI=mongodb://mongo:27017/risa-care-profile
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-records-service:
+    build: ./risa-care-records-service
+    ports:
+      - "4702:4702"
+    environment:
+      - NODE_ENV=production
+      - PORT=4702
+      - MONGODB_URI=mongodb://mongo:27017/risa-care-records
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-wellness-service:
+    build: ./risa-care-wellness-service
+    ports:
+      - "4703:4703"
+    environment:
+      - NODE_ENV=production
+      - PORT=4703
+      - MONGODB_URI=mongodb://mongo:27017/risa-care-wellness
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-visit-service:
+    build: ./risa-care-visit-service
+    ports:
+      - "4704:4704"
+    environment:
+      - NODE_ENV=production
+      - PORT=4704
+      - MONGODB_URI=mongodb://mongo:27017/risa-care-visits
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-consent-service:
+    build: ./risa-care-consent-service
+    ports:
+      - "4705:4705"
+    environment:
+      - NODE_ENV=production
+      - PORT=4705
+      - MONGODB_URI=mongodb://mongo:27017/risa-care-consents
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-care-circle-service:
+    build: ./risa-care-care-circle-service
+    ports:
+      - "4706:4706"
+    environment:
+      - NODE_ENV=production
+      - PORT=4706
+      - MONGODB_URI=mongodb://mongo:27017/risa-care-circles
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-medication-service:
+    build: ./risa-care-medication-service
+    ports:
+      - "4707:4707"
+    environment:
+      - NODE_ENV=production
+      - PORT=4707
+      - MONGODB_URI=mongodb://mongo:27017/risa-care-medications
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  # ==========================================
+  # B2C HEALTHCARE (4720-4729)
+  # ==========================================
+
+  risa-care-chronic-care-service:
+    build: ./risa-care-chronic-care-service
+    ports:
+      - "4720:4720"
+    environment:
+      - NODE_ENV=production
+      - PORT=4720
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_chronic
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-elderly-service:
+    build: ./risa-care-elderly-service
+    ports:
+      - "4721:4721"
+    environment:
+      - NODE_ENV=production
+      - PORT=4721
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_elderly
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-mental-health-service:
+    build: ./risa-care-mental-health-service
+    ports:
+      - "4722:4722"
+    environment:
+      - NODE_ENV=production
+      - PORT=4722
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_mental_health
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-teleconsult-service:
+    build: ./risa-care-teleconsult-service
+    ports:
+      - "4723:4723"
+    environment:
+      - NODE_ENV=production
+      - PORT=4723
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_teleconsult
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-insurance-service:
+    build: ./risa-care-insurance-service
+    ports:
+      - "4724:4724"
+    environment:
+      - NODE_ENV=production
+      - PORT=4724
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_insurance
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-nutrition-service:
+    build: ./risa-care-nutrition-service
+    ports:
+      - "4725:4725"
+    environment:
+      - NODE_ENV=production
+      - PORT=4725
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_nutrition
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-second-opinion-service:
+    build: ./risa-care-second-opinion-service
+    ports:
+      - "4726:4726"
+    environment:
+      - NODE_ENV=production
+      - PORT=4726
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_second_opinion
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-vaccination-service:
+    build: ./risa-care-vaccination-service
+    ports:
+      - "4727:4727"
+    environment:
+      - NODE_ENV=production
+      - PORT=4727
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_vaccination
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-home-healthcare-service:
+    build: ./risa-care-home-healthcare-service
+    ports:
+      - "4728:4728"
+    environment:
+      - NODE_ENV=production
+      - PORT=4728
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_home_healthcare
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-sleep-service:
+    build: ./risa-care-sleep-service
+    ports:
+      - "4729:4729"
+    environment:
+      - NODE_ENV=production
+      - PORT=4729
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_sleep
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  # ==========================================
+  # B2B ENTERPRISE (4740-4743)
+  # ==========================================
+
+  risa-care-hospital-service:
+    build: ./risa-care-hospital-service
+    ports:
+      - "4740:4740"
+    environment:
+      - NODE_ENV=production
+      - PORT=4740
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_hospital
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-doctor-practice-service:
+    build: ./risa-care-doctor-practice-service
+    ports:
+      - "4741:4741"
+    environment:
+      - NODE_ENV=production
+      - PORT=4741
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_doctor_practice
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-lab-service:
+    build: ./risa-care-lab-service
+    ports:
+      - "4742:4742"
+    environment:
+      - NODE_ENV=production
+      - PORT=4742
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_lab
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-pharmacy-management-service:
+    build: ./risa-care-pharmacy-management-service
+    ports:
+      - "4743:4743"
+    environment:
+      - NODE_ENV=production
+      - PORT=4743
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_pharmacy
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  # ==========================================
+  # AI + RCM SERVICES (4750-4762)
+  # ==========================================
+
+  risa-care-rcm-service:
+    build: ./risa-care-rcm-service
+    ports:
+      - "4750:4750"
+    environment:
+      - NODE_ENV=production
+      - PORT=4750
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-wearable-service:
+    build: ./risa-care-wearable-service
+    ports:
+      - "4753:4753"
+    environment:
+      - NODE_ENV=production
+      - PORT=4753
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_wearable
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-predictive-service:
+    build: ./risa-care-predictive-service
+    ports:
+      - "4754:4754"
+    environment:
+      - NODE_ENV=production
+      - PORT=4754
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_predictive
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-lab-integration-service:
+    build: ./risa-care-lab-integration-service
+    ports:
+      - "4755:4755"
+    environment:
+      - NODE_ENV=production
+      - PORT=4755
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_lab_integration
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-teleconsult-v2:
+    build: ./risa-care-teleconsult-v2
+    ports:
+      - "4756:4756"
+    environment:
+      - NODE_ENV=production
+      - PORT=4756
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_teleconsult
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-pharmacy-integration-service:
+    build: ./risa-care-pharmacy-integration-service
+    ports:
+      - "4757:4757"
+    environment:
+      - NODE_ENV=production
+      - PORT=4757
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_pharmacy_integration
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-eligibility-service:
+    build: ./risa-care-eligibility-service
+    ports:
+      - "4758:4758"
+    environment:
+      - NODE_ENV=production
+      - PORT=4758
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_eligibility
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-clearinghouse:
+    build: ./risa-care-clearinghouse
+    ports:
+      - "4759:4759"
+    environment:
+      - NODE_ENV=production
+      - PORT=4759
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_clearinghouse
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-nursing-home-service:
+    build: ./risa-care-nursing-home-service
+    ports:
+      - "4760:4760"
+    environment:
+      - NODE_ENV=production
+      - PORT=4760
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_nursing_home
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-fhir-service:
+    build: ./risa-care-fhir-service
+    ports:
+      - "4761:4761"
+    environment:
+      - NODE_ENV=production
+      - PORT=4761
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_fhir
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  # ==========================================
+  # PATIENT/DOCTOR APPS (4770-4781)
+  # ==========================================
+
+  risa-care-mobile-backend:
+    build: ./risa-care-mobile-backend
+    ports:
+      - "4770:4770"
+    environment:
+      - NODE_ENV=production
+      - PORT=4770
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_mobile
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-hospital-admin:
+    build: ./risa-care-hospital-admin
+    ports:
+      - "4772:4772"
+    environment:
+      - NODE_ENV=production
+      - PORT=4772
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_hospital_admin
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-telemedicine:
+    build: ./risa-care-telemedicine
+    ports:
+      - "4773:4773"
+    environment:
+      - NODE_ENV=production
+      - PORT=4773
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_telemedicine
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-marketplace:
+    build: ./risa-care-marketplace
+    ports:
+      - "4774:4774"
+    environment:
+      - NODE_ENV=production
+      - PORT=4774
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_marketplace
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-insurance-aggregator:
+    build: ./risa-care-insurance-aggregator
+    ports:
+      - "4775:4775"
+    environment:
+      - NODE_ENV=production
+      - PORT=4775
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_insurance_agg
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-homecare:
+    build: ./risa-care-homecare
+    ports:
+      - "4776:4776"
+    environment:
+      - NODE_ENV=production
+      - PORT=4776
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_homecare
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-diagnostics:
+    build: ./risa-care-diagnostics
+    ports:
+      - "4777:4777"
+    environment:
+      - NODE_ENV=production
+      - PORT=4777
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_diagnostics
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-emr-service:
+    build: ./risa-care-emr-service
+    ports:
+      - "4778:4778"
+    environment:
+      - NODE_ENV=production
+      - PORT=4778
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_emr
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-patient-portal:
+    build: ./risa-care-patient-portal
+    ports:
+      - "4779:4779"
+    environment:
+      - NODE_ENV=production
+      - PORT=4779
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_patient_portal
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-provider-directory:
+    build: ./risa-care-provider-directory
+    ports:
+      - "4780:4780"
+    environment:
+      - NODE_ENV=production
+      - PORT=4780
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_provider_directory
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+  risa-care-health-wallet:
+    build: ./risa-care-health-wallet
+    ports:
+      - "4781:4781"
+    environment:
+      - NODE_ENV=production
+      - PORT=4781
+      - MONGODB_URI=mongodb://mongo:27017/risa_care_health_wallet
+    depends_on: [mongo]
+    networks: [risa-care-network]
+
+# ==========================================
+# VOLUMES & NETWORKS
+# ==========================================
+
+volumes:
+  mongo_data:
+  redis_data:
+
+networks:
+  risa-care-network:
+    driver: bridge

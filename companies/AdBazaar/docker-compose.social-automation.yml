@@ -1,0 +1,543 @@
+# =============================================================================
+# AdBazaar - Social Automation Suite
+# Docker Compose for all 20 social automation services
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # P0 - Critical Instagram Services (Ports 5080-5083)
+  # =============================================================================
+
+  instagram-shop-integration:
+    build:
+      context: ./instagram-shop-integration
+      dockerfile: Dockerfile
+    ports:
+      - "5080:5080"
+    environment:
+      - NODE_ENV=production
+      - PORT=5080
+      - MONGODB_URI=mongodb://mongo:27017/instagram_shop
+      - INSTAGRAM_BUSINESS_ACCOUNT_ID=${INSTAGRAM_BUSINESS_ACCOUNT_ID}
+      - INSTAGRAM_CATALOG_ID=${INSTAGRAM_CATALOG_ID}
+      - FACEBOOK_ACCESS_TOKEN=${FACEBOOK_ACCESS_TOKEN}
+      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
+      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  instagram-publishing-service:
+    build:
+      context: ./instagram-publishing-service
+      dockerfile: Dockerfile
+    ports:
+      - "5081:5081"
+    environment:
+      - NODE_ENV=production
+      - PORT=5081
+      - MONGODB_URI=mongodb://mongo:27017/instagram_publishing
+      - INSTAGRAM_APP_ID=${INSTAGRAM_APP_ID}
+      - INSTAGRAM_APP_SECRET=${INSTAGRAM_APP_SECRET}
+      - INSTAGRAM_ACCESS_TOKEN=${INSTAGRAM_ACCESS_TOKEN}
+      - INSTAGRAM_BUSINESS_ACCOUNT_ID=${INSTAGRAM_BUSINESS_ACCOUNT_ID}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  instagram-insights-service:
+    build:
+      context: ./instagram-insights-service
+      dockerfile: Dockerfile
+    ports:
+      - "5082:5082"
+    environment:
+      - NODE_ENV=production
+      - PORT=5082
+      - MONGODB_URI=mongodb://mongo:27017/instagram_insights
+      - INSTAGRAM_BUSINESS_ACCOUNT_ID=${INSTAGRAM_BUSINESS_ACCOUNT_ID}
+      - INSTAGRAM_ACCESS_TOKEN=${INSTAGRAM_ACCESS_TOKEN}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  social-content-publisher:
+    build:
+      context: ./social-content-publisher
+      dockerfile: Dockerfile
+    ports:
+      - "5083:5083"
+    environment:
+      - NODE_ENV=production
+      - PORT=5083
+      - MONGODB_URI=mongodb://mongo:27017/social_publisher
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =============================================================================
+  # P1 - High Priority Services (Ports 5090-5095)
+  # =============================================================================
+
+  hashtag-research-engine:
+    build:
+      context: ./hashtag-research-engine
+      dockerfile: Dockerfile
+    ports:
+      - "5090:5090"
+    environment:
+      - NODE_ENV=production
+      - PORT=5090
+      - MONGODB_URI=mongodb://mongo:27017/hashtag_research
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  caption-generator-ai:
+    build:
+      context: ./caption-generator-ai
+      dockerfile: Dockerfile
+    ports:
+      - "5091:5091"
+    environment:
+      - NODE_ENV=production
+      - PORT=5091
+      - MONGODB_URI=mongodb://mongo:27017/caption_generator
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5091/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  content-calendar-service:
+    build:
+      context: ./content-calendar-service
+      dockerfile: Dockerfile
+    ports:
+      - "5092:5092"
+    environment:
+      - NODE_ENV=production
+      - PORT=5092
+      - MONGODB_URI=mongodb://mongo:27017/content_calendar
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5092/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  follower-growth-tracker:
+    build:
+      context: ./follower-growth-tracker
+      dockerfile: Dockerfile
+    ports:
+      - "5093:5093"
+    environment:
+      - NODE_ENV=production
+      - PORT=5093
+      - MONGODB_URI=mongodb://mongo:27017/follower_growth
+      - INSTAGRAM_ACCESS_TOKEN=${INSTAGRAM_ACCESS_TOKEN}
+      - INSTAGRAM_BUSINESS_ACCOUNT_ID=${INSTAGRAM_BUSINESS_ACCOUNT_ID}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5093/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  youtube-integration:
+    build:
+      context: ./youtube-integration
+      dockerfile: Dockerfile
+    ports:
+      - "5094:5094"
+    environment:
+      - NODE_ENV=production
+      - PORT=5094
+      - MONGODB_URI=mongodb://mongo:27017/youtube_integration
+      - YOUTUBE_CLIENT_ID=${YOUTUBE_CLIENT_ID}
+      - YOUTUBE_CLIENT_SECRET=${YOUTUBE_CLIENT_SECRET}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5094/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  pinterest-integration:
+    build:
+      context: ./pinterest-integration
+      dockerfile: Dockerfile
+    ports:
+      - "5095:5095"
+    environment:
+      - NODE_ENV=production
+      - PORT=5095
+      - MONGODB_URI=mongodb://mongo:27017/pinterest_integration
+      - PINTEREST_APP_ID=${PINTEREST_APP_ID}
+      - PINTEREST_APP_SECRET=${PINTEREST_APP_SECRET}
+      - PINTEREST_ACCESS_TOKEN=${PINTEREST_ACCESS_TOKEN}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5095/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =============================================================================
+  # P2 - Medium Priority Services (Ports 5100-5105)
+  # =============================================================================
+
+  content-repurposing-engine:
+    build:
+      context: ./content-repurposing-engine
+      dockerfile: Dockerfile
+    ports:
+      - "5100:5100"
+    environment:
+      - NODE_ENV=production
+      - PORT=5100
+      - MONGODB_URI=mongodb://mongo:27017/content_repurposing
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ugc-management-service:
+    build:
+      context: ./ugc-management-service
+      dockerfile: Dockerfile
+    ports:
+      - "5101:5101"
+    environment:
+      - NODE_ENV=production
+      - PORT=5101
+      - MONGODB_URI=mongodb://mongo:27017/ugc_management
+      - INSTAGRAM_ACCESS_TOKEN=${INSTAGRAM_ACCESS_TOKEN}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5101/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  unified-social-inbox:
+    build:
+      context: ./unified-social-inbox
+      dockerfile: Dockerfile
+    ports:
+      - "5102:5102"
+    environment:
+      - NODE_ENV=production
+      - PORT=5102
+      - MONGODB_URI=mongodb://mongo:27017/social_inbox
+      - REDIS_URL=redis://redis:6379
+      - INSTAGRAM_ACCESS_TOKEN=${INSTAGRAM_ACCESS_TOKEN}
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5102/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  crisis-alert-service:
+    build:
+      context: ./crisis-alert-service
+      dockerfile: Dockerfile
+    ports:
+      - "5103:5103"
+    environment:
+      - NODE_ENV=production
+      - PORT=5103
+      - MONGODB_URI=mongodb://mongo:27017/crisis_alerts
+      - REDIS_URL=redis://redis:6379
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5103/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  snapchat-integration:
+    build:
+      context: ./snapchat-integration
+      dockerfile: Dockerfile
+    ports:
+      - "5104:5104"
+    environment:
+      - NODE_ENV=production
+      - PORT=5104
+      - MONGODB_URI=mongodb://mongo:27017/snapchat_integration
+      - SNAPCHAT_CLIENT_ID=${SNAPCHAT_CLIENT_ID}
+      - SNAPCHAT_CLIENT_SECRET=${SNAPCHAT_CLIENT_SECRET}
+      - SNAPCHAT_ACCESS_TOKEN=${SNAPCHAT_ACCESS_TOKEN}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5104/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  social-competitor-tracker:
+    build:
+      context: ./social-competitor-tracker
+      dockerfile: Dockerfile
+    ports:
+      - "5105:5105"
+    environment:
+      - NODE_ENV=production
+      - PORT=5105
+      - MONGODB_URI=mongodb://mongo:27017/competitor_tracker
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5105/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =============================================================================
+  # P3 - Advanced Services (Ports 5110-5113)
+  # =============================================================================
+
+  reddit-integration:
+    build:
+      context: ./reddit-integration
+      dockerfile: Dockerfile
+    ports:
+      - "5110:5110"
+    environment:
+      - NODE_ENV=production
+      - PORT=5110
+      - MONGODB_URI=mongodb://mongo:27017/reddit_integration
+      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
+      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5110/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  influencer-authenticity-check:
+    build:
+      context: ./influencer-authenticity-check
+      dockerfile: Dockerfile
+    ports:
+      - "5111:5111"
+    environment:
+      - NODE_ENV=production
+      - PORT=5111
+      - MONGODB_URI=mongodb://mongo:27017/influencer_auth
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5111/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  brand-partnership-portal:
+    build:
+      context: ./brand-partnership-portal
+      dockerfile: Dockerfile
+    ports:
+      - "5112:5112"
+    environment:
+      - NODE_ENV=production
+      - PORT=5112
+      - MONGODB_URI=mongodb://mongo:27017/brand_portal
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5112/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  content-compliance-ai:
+    build:
+      context: ./content-compliance-ai
+      dockerfile: Dockerfile
+    ports:
+      - "5113:5113"
+    environment:
+      - NODE_ENV=production
+      - PORT=5113
+      - MONGODB_URI=mongodb://mongo:27017/content_compliance
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    depends_on:
+      - mongo
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5113/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =============================================================================
+  # ADMIN DASHBOARD
+  # =============================================================================
+
+  social-automation-dashboard:
+    build:
+      context: ./social-automation-dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+
+  # =============================================================================
+  # INFRASTRUCTURE
+  # =============================================================================
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - social-automation-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# =============================================================================
+# NETWORKS & VOLUMES
+# =============================================================================
+
+networks:
+  social-automation-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  redis-data:

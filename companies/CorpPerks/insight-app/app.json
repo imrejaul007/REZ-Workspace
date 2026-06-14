@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "InsightCampus",
+    "slug": "insight-campus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#10b981"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.corpperks.insightcampus"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#10b981"
+      },
+      "package": "com.corpperks.insightcampus",
+      "permissions": ["NOTIFICATIONS"]
+    },
+    "plugins": [
+      ["expo-notifications", { "icon": "./assets/notification-icon.png", "color": "#10b981" }]
+    ],
+    "extra": { "eas": { "projectId": "insight-campus-app" }}
+  }
+}

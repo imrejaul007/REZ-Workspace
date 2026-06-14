@@ -1,0 +1,17 @@
+{
+  "name": "@bizora/hotel-os",
+  "version": "1.0.0",
+  "description": "BIZORA Hotel OS - Bridge to REZ Merchant Hotel Ecosystem",
+  "main": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'Bridge service - connects to REZ Merchant' && echo 'Use REZ-Merchant/industry-os/hotel-ecosystem for actual implementation'",
+    "build": "echo 'Bridge service - no build needed'",
+    "start": "echo 'Bridge service - connects to REZ Merchant services'"
+  },
+  "keywords": ["bizora", "hotel", "rez-merchant", "bridge"],
+  "author": "RTNM Digital",
+  "license": "MIT",
+  "dependencies": {},
+  "peerDependencies": {}
+}

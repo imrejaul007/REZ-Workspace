@@ -1,0 +1,1 @@
+export { InventorySyncService, inventorySyncService } from './InventorySyncService';

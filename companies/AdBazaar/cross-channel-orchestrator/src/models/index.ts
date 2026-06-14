@@ -1,0 +1,1 @@
+export { CrossChannelCampaignModel, CrossChannelCampaignDocument } from './campaign.model';

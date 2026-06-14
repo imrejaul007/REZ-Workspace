@@ -1,0 +1,405 @@
+# AssetMind Kubernetes Deployment
+# Helm values for production deployment
+
+# Global settings
+global:
+  image:
+    repository: assetmind
+    pullPolicy: IfNotPresent
+    tag: latest
+
+  # Resource limits
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+  # Replicas
+  replicaCount: 2
+
+# =============================================================================
+// CORE SERVICES
+// =============================================================================
+
+asset-universe:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5001
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: api.assetmind.ai
+        paths:
+          - path: /
+            pathType: Prefix
+            service: asset-universe
+            port: 5001
+
+asset-twin:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5002
+
+market-twin:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5003
+
+portfolio-twin:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5004
+
+investor-twin:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5005
+
+intelligence-twin:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5006
+
+# =============================================================================
+// DATA SERVICES
+// =============================================================================
+
+market-data:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5010
+
+news-service:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5013
+
+sentiment-service:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5014
+
+macro-data:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5015
+
+earnings-service:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5012
+
+onchain-service:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5017
+
+economic-calendar:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5023
+
+# =============================================================================
+// INTELLIGENCE SERVICES
+// =============================================================================
+
+financial-intelligence:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5050
+
+risk-intelligence:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5053
+
+sentiment-intelligence:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5052
+
+event-intelligence:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5054
+
+macro-intelligence:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5057
+
+theme-intelligence:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5058
+
+sector-intelligence:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5059
+
+country-intelligence:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5060
+
+# =============================================================================
+// AGENT SERVICES
+// =============================================================================
+
+agent-orchestrator:
+  enabled: true
+  replicaCount: 4
+  service:
+    port: 5090
+
+asset-agent:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5100
+
+research-agent:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5109
+
+discovery-agent:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5111
+
+learning-agent:
+  enabled: true
+  replicaCount: 2
+  service:
+    port: 5112
+
+# =============================================================================
+// USER-FACING SERVICES
+// =============================================================================
+
+decision-engine:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5150
+
+prediction-service:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5160
+
+daily-briefing:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5170
+
+discovery-service:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5180
+
+research-service:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5190
+
+# =============================================================================
+// GATEWAY SERVICES
+// =============================================================================
+
+api-gateway:
+  enabled: true
+  replicaCount: 5
+  service:
+    port: 5260
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: api.assetmind.ai
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: assetmind-api-tls
+        hosts:
+          - api.assetmind.ai
+
+websocket-gateway:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 5261
+
+# =============================================================================
+// DATABASE SERVICES
+// =============================================================================
+
+postgresql:
+  enabled: true
+  architecture: replication
+  auth:
+    database: assetmind
+    username: assetmind
+    passwordSecret: postgresql-secret
+  primary:
+    persistence:
+      size: 100Gi
+      storageClass: gp3
+  readReplicas:
+    replicaCount: 2
+    persistence:
+      size: 100Gi
+      storageClass: gp3
+
+redis:
+  enabled: true
+  architecture: replication
+  auth:
+    enabled: true
+    passwordSecret: redis-secret
+  master:
+    persistence:
+      size: 10Gi
+      storageClass: gp3
+  replica:
+    replicaCount: 2
+    persistence:
+      size: 10Gi
+
+neo4j:
+  enabled: true
+  persistence:
+    size: 50Gi
+    storageClass: gp3
+
+# =============================================================================
+// FRONTEND
+// =============================================================================
+
+frontend:
+  enabled: true
+  replicaCount: 3
+  service:
+    port: 3000
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: app.assetmind.ai
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: assetmind-app-tls
+        hosts:
+          - app.assetmind.ai
+
+# =============================================================================
+// MONITORING
+// =============================================================================
+
+prometheus:
+  enabled: true
+  server:
+    retention: 15d
+    persistentVolume:
+      size: 50Gi
+
+grafana:
+  enabled: true
+  adminPasswordSecret: grafana-secret
+  persistence:
+    size: 10Gi
+
+loki:
+  enabled: true
+  persistence:
+    size: 50Gi
+
+# =============================================================================
+// AUTO-SCALING
+// =============================================================================
+
+# Enable HPA for all services
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# =============================================================================
+// SECRETS
+// =============================================================================
+
+secrets:
+  postgresql:
+    existingSecret: postgresql-secret
+  redis:
+    existingSecret: redis-secret
+  grafana:
+    existingSecret: grafana-secret
+
+# =============================================================================
+// NETWORK POLICIES
+// =============================================================================
+
+networkPolicies:
+  enabled: true
+  policyType: NetworkPolicy
+
+# =============================================================================
+// COMMON SETTINGS
+// =============================================================================
+
+persistence:
+  storageClass: gp3
+
+serviceAccount:
+  create: true
+  name: assetmind
+
+priorityClassName: ""
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

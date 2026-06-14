@@ -1,0 +1,45 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap
+# rez-restaurant-inventory-service
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-restaurant-inventory-service-config
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-inventory-service
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "4056"
+  LOG_LEVEL: "info"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-restaurant-inventory-service"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "https://admin.rez.money,https://rez.money,https://rez-app.vercel.app"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_restaurant_inventory"
+
+  # Redis
+  REDIS_DATABASE: "0"
+
+  # Inventory Settings
+  STOCK_THRESHOLD_LOW: "10"
+  STOCK_THRESHOLD_HIGH: "100"
+  EXPIRING_ALERT_DAYS: "3"
+  LOW_STOCK_ALERT_DAYS: "7"

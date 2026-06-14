@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-hashtag-research
+  labels:
+    app: ad-bazaar-hashtag-research
+    tier: social-automation
+    component: research
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-hashtag-research
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-hashtag-research
+        tier: social-automation
+        component: research
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5090"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/hashtag-research-engine:latest
+        ports:
+        - containerPort: 5090
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: ad-bazaar-hashtag-research-config
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5090
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5090
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3

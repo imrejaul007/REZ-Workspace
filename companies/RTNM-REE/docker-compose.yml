@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  ops-center:
+    build: ./ops-center
+    container_name: ree-ops-center
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - SERVICE_NAME=ops-center
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  trust-platform:
+    build: ./trust-platform
+    container_name: ree-trust-platform
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - SERVICE_NAME=trust-platform
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  growth-engine:
+    build: ./growth-engine
+    container_name: ree-growth-engine
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - SERVICE_NAME=growth-engine
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  logistics-engine:
+    build: ./logistics-engine
+    container_name: ree-logistics-engine
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - SERVICE_NAME=logistics-engine
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  attribution-engine:
+    build: ./attribution-engine
+    container_name: ree-attribution-engine
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - SERVICE_NAME=attribution-engine
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  creative-studio:
+    build: ./creative-studio
+    container_name: ree-creative-studio
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - SERVICE_NAME=creative-studio
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  franchise-mode:
+    build: ./franchise-mode
+    container_name: ree-franchise-mode
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+      - SERVICE_NAME=franchise-mode
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  ai-marketplace:
+    build: ./ai-marketplace
+    container_name: ree-ai-marketplace
+    ports:
+      - "3007:3007"
+    environment:
+      - PORT=3007
+      - SERVICE_NAME=ai-marketplace
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  mind-grocery:
+    build: ./mind-grocery
+    container_name: ree-mind-grocery
+    ports:
+      - "3008:3008"
+    environment:
+      - PORT=3008
+      - SERVICE_NAME=mind-grocery
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  mind-retail:
+    build: ./mind-retail
+    container_name: ree-mind-retail
+    ports:
+      - "3009:3009"
+    environment:
+      - PORT=3009
+      - SERVICE_NAME=mind-retail
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  rto-fraud:
+    build: ./rto-fraud
+    container_name: ree-rto-fraud
+    ports:
+      - "3010:3010"
+    environment:
+      - PORT=3010
+      - SERVICE_NAME=rto-fraud
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+  voice-ai:
+    build: ./voice-ai
+    container_name: ree-voice-ai
+    ports:
+      - "3011:3011"
+    environment:
+      - PORT=3011
+      - SERVICE_NAME=voice-ai
+      - REE_MODE=standalone
+    networks:
+      - ree-network
+    restart: unless-stopped
+
+networks:
+  ree-network:
+    driver: bridge

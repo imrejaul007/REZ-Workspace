@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for rez-kitchen-ai
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-kitchen-ai-config
+  namespace: rez-merchant
+  labels:
+    app: rez-kitchen-ai
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4015"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-kitchen-ai"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez-kitchen-ai"
+  REDIS_DATABASE: "0"

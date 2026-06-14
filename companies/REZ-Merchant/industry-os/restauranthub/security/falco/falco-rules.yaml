@@ -1,0 +1,222 @@
+# Falco Security Rules for RestaurantHub
+
+# Custom rules for RestaurantHub application security
+
+- rule: Detect Unauthorized Network Connections
+  desc: Detect unauthorized network connections from application containers
+  condition: >
+    spawned_process and container and
+    (proc.name in (nc, ncat, netcat, socat, telnet)) and
+    not proc.pname in (restauranthub-api, restauranthub-web)
+  output: >
+    Unauthorized network tool executed in container
+    (user=%user.name command=%proc.cmdline container=%container.name image=%container.image.repository)
+  priority: WARNING
+  tags: [network, container, restauranthub]
+
+- rule: Detect Privilege Escalation
+  desc: Detect attempts to escalate privileges in RestaurantHub containers
+  condition: >
+    spawned_process and container and
+    proc.name in (sudo, su, setuid, setgid) and
+    container.image.repository contains "restauranthub"
+  output: >
+    Privilege escalation attempt detected in RestaurantHub container
+    (user=%user.name command=%proc.cmdline container=%container.name)
+  priority: CRITICAL
+  tags: [privilege_escalation, container, restauranthub]
+
+- rule: Detect Suspicious File Access
+  desc: Detect access to sensitive files in RestaurantHub containers
+  condition: >
+    open_read and container and
+    (fd.name startswith /etc/passwd or
+     fd.name startswith /etc/shadow or
+     fd.name startswith /root/.ssh or
+     fd.name startswith /app/config/secrets) and
+    container.image.repository contains "restauranthub" and
+    not proc.name in (restauranthub-api, restauranthub-web, node)
+  output: >
+    Suspicious file access in RestaurantHub container
+    (file=%fd.name user=%user.name command=%proc.cmdline container=%container.name)
+  priority: HIGH
+  tags: [filesystem, container, restauranthub]
+
+- rule: Detect Database Connection Anomaly
+  desc: Detect unusual database connections from application
+  condition: >
+    outbound and fd.sip exists and
+    fd.sport != 5432 and fd.dport = 5432 and
+    container.image.repository contains "restauranthub" and
+    not proc.name in (restauranthub-api)
+  output: >
+    Unusual database connection from RestaurantHub container
+    (connection=%fd.name user=%user.name command=%proc.cmdline container=%container.name)
+  priority: WARNING
+  tags: [network, database, restauranthub]
+
+- rule: Detect Shell in Container
+  desc: Detect shell execution in production containers
+  condition: >
+    spawned_process and container and
+    proc.name in (bash, sh, zsh, fish, csh, tcsh) and
+    container.image.repository contains "restauranthub" and
+    not proc.pname in (restauranthub-api, restauranthub-web, node)
+  output: >
+    Shell spawned in production container
+    (shell=%proc.name user=%user.name command=%proc.cmdline container=%container.name)
+  priority: HIGH
+  tags: [shell, container, restauranthub]
+
+- rule: Detect Package Manager Usage
+  desc: Detect package manager usage in production containers
+  condition: >
+    spawned_process and container and
+    proc.name in (apt, apt-get, yum, dnf, pip, npm, yarn) and
+    container.image.repository contains "restauranthub"
+  output: >
+    Package manager executed in production container
+    (manager=%proc.name user=%user.name command=%proc.cmdline container=%container.name)
+  priority: WARNING
+  tags: [package_manager, container, restauranthub]
+
+- rule: Detect Crypto Mining
+  desc: Detect potential crypto mining activity
+  condition: >
+    spawned_process and
+    (proc.name in (xmrig, monero, bitcoin, ethminer, cgminer) or
+     proc.cmdline contains "stratum+tcp" or
+     proc.cmdline contains "mining.pool")
+  output: >
+    Potential crypto mining activity detected
+    (command=%proc.cmdline user=%user.name container=%container.name)
+  priority: CRITICAL
+  tags: [crypto_mining, security, restauranthub]
+
+- rule: Detect Container Escape Attempt
+  desc: Detect potential container escape attempts
+  condition: >
+    spawned_process and
+    (proc.name = runc or
+     proc.cmdline contains "nsenter" or
+     proc.cmdline contains "unshare" or
+     proc.cmdline contains "/proc/self/exe")
+  output: >
+    Potential container escape attempt detected
+    (command=%proc.cmdline user=%user.name container=%container.name)
+  priority: CRITICAL
+  tags: [container_escape, security, restauranthub]
+
+- rule: Detect Unauthorized Binary Execution
+  desc: Detect execution of unauthorized binaries in RestaurantHub containers
+  condition: >
+    spawned_process and container and
+    container.image.repository contains "restauranthub" and
+    not proc.name in (
+      node, npm, restauranthub-api, restauranthub-web,
+      curl, wget, cat, ls, ps, grep, awk, sed, find,
+      tail, head, sort, uniq, wc, tr, cut
+    ) and
+    not proc.pname in (node, restauranthub-api, restauranthub-web)
+  output: >
+    Unauthorized binary execution in RestaurantHub container
+    (binary=%proc.name command=%proc.cmdline user=%user.name container=%container.name)
+  priority: WARNING
+  tags: [binary_execution, container, restauranthub]
+
+- rule: Detect Suspicious Network Activity
+  desc: Detect suspicious network activity patterns
+  condition: >
+    (inbound or outbound) and
+    fd.sip exists and
+    (fd.sport in (4444, 5555, 6666, 7777, 8888, 9999) or
+     fd.dport in (4444, 5555, 6666, 7777, 8888, 9999)) and
+    not proc.name in (restauranthub-api, restauranthub-web, prometheus, grafana)
+  output: >
+    Suspicious network activity detected
+    (connection=%fd.name user=%user.name command=%proc.cmdline container=%container.name)
+  priority: HIGH
+  tags: [network, suspicious, restauranthub]
+
+- rule: Detect Configuration File Modification
+  desc: Detect unauthorized modification of configuration files
+  condition: >
+    open_write and container and
+    (fd.name startswith /app/config/ or
+     fd.name startswith /etc/nginx/ or
+     fd.name startswith /etc/postgresql/) and
+    container.image.repository contains "restauranthub" and
+    not proc.name in (restauranthub-api, restauranthub-web, node)
+  output: >
+    Configuration file modification detected
+    (file=%fd.name user=%user.name command=%proc.cmdline container=%container.name)
+  priority: HIGH
+  tags: [filesystem, config, restauranthub]
+
+- rule: Detect Secret File Access
+  desc: Detect access to secret files
+  condition: >
+    open_read and container and
+    (fd.name contains "secret" or
+     fd.name contains "password" or
+     fd.name contains "key" or
+     fd.name contains ".env") and
+    container.image.repository contains "restauranthub" and
+    not proc.name in (restauranthub-api, restauranthub-web, node)
+  output: >
+    Secret file access detected
+    (file=%fd.name user=%user.name command=%proc.cmdline container=%container.name)
+  priority: CRITICAL
+  tags: [secrets, filesystem, restauranthub]
+
+- rule: Detect Reverse Shell
+  desc: Detect potential reverse shell connections
+  condition: >
+    spawned_process and
+    (proc.name in (nc, ncat, netcat, socat) and
+     (proc.cmdline contains " -e " or
+      proc.cmdline contains " -c " or
+      proc.cmdline contains " /bin/sh" or
+      proc.cmdline contains " /bin/bash"))
+  output: >
+    Potential reverse shell detected
+    (command=%proc.cmdline user=%user.name container=%container.name)
+  priority: CRITICAL
+  tags: [reverse_shell, security, restauranthub]
+
+# Macros for RestaurantHub specific conditions
+- macro: restauranthub_containers
+  condition: container.image.repository contains "restauranthub"
+
+- macro: allowed_processes
+  condition: >
+    proc.name in (
+      node, npm, restauranthub-api, restauranthub-web,
+      curl, wget, cat, ls, ps, grep, awk, sed, find,
+      tail, head, sort, uniq, wc, tr, cut, ping, dig,
+      postgres, redis-server, nginx
+    )
+
+- macro: system_directories
+  condition: >
+    fd.name startswith /bin/ or
+    fd.name startswith /sbin/ or
+    fd.name startswith /usr/bin/ or
+    fd.name startswith /usr/sbin/
+
+# Lists for commonly used items
+- list: sensitive_files
+  items: [
+    /etc/passwd, /etc/shadow, /etc/hosts, /etc/hostname,
+    /root/.ssh, /home/*/.ssh, /app/config/secrets,
+    /.env, /app/.env, /config/.env
+  ]
+
+- list: crypto_miners
+  items: [
+    xmrig, monero, bitcoin, ethminer, cgminer, bfgminer,
+    cpuminer, minerd, ccminer, sgminer
+  ]
+
+- list: package_managers
+  items: [apt, apt-get, yum, dnf, pip, pip3, npm, yarn, gem]

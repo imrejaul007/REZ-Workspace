@@ -1,0 +1,351 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restauranthub-api-network-policy
+  namespace: restauranthub
+spec:
+  podSelector:
+    matchLabels:
+      app: restauranthub-api
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from nginx ingress
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-ingress
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow traffic from web service
+  - from:
+    - podSelector:
+        matchLabels:
+          app: restauranthub-web
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow monitoring traffic
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-monitoring
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  # Allow database connections
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-primary
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-replica
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow Redis connections
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis-cluster
+    ports:
+    - protocol: TCP
+      port: 7000
+    - protocol: TCP
+      port: 7001
+    - protocol: TCP
+      port: 7002
+    - protocol: TCP
+      port: 7003
+    - protocol: TCP
+      port: 7004
+    - protocol: TCP
+      port: 7005
+  # Allow external API calls (HTTPS)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restauranthub-web-network-policy
+  namespace: restauranthub
+spec:
+  podSelector:
+    matchLabels:
+      app: restauranthub-web
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from nginx ingress
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-ingress
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow monitoring traffic
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-monitoring
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  # Allow API calls to backend
+  - to:
+    - podSelector:
+        matchLabels:
+          app: restauranthub-api
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow external CDN/API calls
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: database-network-policy
+  namespace: restauranthub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: database
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow connections from API services
+  - from:
+    - podSelector:
+        matchLabels:
+          app: restauranthub-api
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow connections from backup services
+  - from:
+    - podSelector:
+        matchLabels:
+          app: backup-service
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-monitoring
+    ports:
+    - protocol: TCP
+      port: 9187
+  # Allow replication between primary and replica
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/component: database
+    ports:
+    - protocol: TCP
+      port: 5432
+  egress:
+  # Allow replication traffic
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/component: database
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-network-policy
+  namespace: restauranthub
+spec:
+  podSelector:
+    matchLabels:
+      app: redis-cluster
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow connections from API services
+  - from:
+    - podSelector:
+        matchLabels:
+          app: restauranthub-api
+    ports:
+    - protocol: TCP
+      port: 7000
+    - protocol: TCP
+      port: 7001
+    - protocol: TCP
+      port: 7002
+    - protocol: TCP
+      port: 7003
+    - protocol: TCP
+      port: 7004
+    - protocol: TCP
+      port: 7005
+  # Allow monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-monitoring
+    ports:
+    - protocol: TCP
+      port: 9121
+  # Allow cluster communication
+  - from:
+    - podSelector:
+        matchLabels:
+          app: redis-cluster
+    ports:
+    - protocol: TCP
+      port: 17000
+    - protocol: TCP
+      port: 17001
+    - protocol: TCP
+      port: 17002
+    - protocol: TCP
+      port: 17003
+    - protocol: TCP
+      port: 17004
+    - protocol: TCP
+      port: 17005
+  egress:
+  # Allow cluster communication
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis-cluster
+    ports:
+    - protocol: TCP
+      port: 7000
+    - protocol: TCP
+      port: 7001
+    - protocol: TCP
+      port: 7002
+    - protocol: TCP
+      port: 7003
+    - protocol: TCP
+      port: 7004
+    - protocol: TCP
+      port: 7005
+    - protocol: TCP
+      port: 17000
+    - protocol: TCP
+      port: 17001
+    - protocol: TCP
+      port: 17002
+    - protocol: TCP
+      port: 17003
+    - protocol: TCP
+      port: 17004
+    - protocol: TCP
+      port: 17005
+  # Allow DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-network-policy
+  namespace: restauranthub-monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow access from admin users
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-ingress
+    ports:
+    - protocol: TCP
+      port: 9090  # Prometheus
+    - protocol: TCP
+      port: 3000  # Grafana
+    - protocol: TCP
+      port: 9093  # Alertmanager
+  egress:
+  # Allow scraping application metrics
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub
+    ports:
+    - protocol: TCP
+      port: 3000
+    - protocol: TCP
+      port: 9187
+    - protocol: TCP
+      port: 9121
+  # Allow external notifications
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: restauranthub
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress

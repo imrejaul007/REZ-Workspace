@@ -1,0 +1,301 @@
+# Bull Queue Configuration for RestaurantHub
+# Asynchronous job processing with Redis backend
+
+# Queue Configurations
+queues:
+  # High priority queue for time-sensitive operations
+  high_priority:
+    name: "high-priority"
+    redis:
+      host: redis-queue
+      port: 6381
+      password: ${REDIS_QUEUE_PASSWORD}
+      db: 0
+    settings:
+      stalledInterval: 30000
+      maxStalledCount: 1
+      retryProcessDelay: 5000
+    defaultJobOptions:
+      removeOnComplete: 50
+      removeOnFail: 100
+      attempts: 3
+      backoff:
+        type: exponential
+        delay: 2000
+
+  # Standard priority queue for regular operations  
+  standard:
+    name: "standard"
+    redis:
+      host: redis-queue
+      port: 6381
+      password: ${REDIS_QUEUE_PASSWORD}
+      db: 1
+    settings:
+      stalledInterval: 60000
+      maxStalledCount: 1
+      retryProcessDelay: 10000
+    defaultJobOptions:
+      removeOnComplete: 25
+      removeOnFail: 50
+      attempts: 5
+      backoff:
+        type: exponential
+        delay: 5000
+
+  # Low priority queue for background tasks
+  low_priority:
+    name: "low-priority"
+    redis:
+      host: redis-queue
+      port: 6381
+      password: ${REDIS_QUEUE_PASSWORD}
+      db: 2
+    settings:
+      stalledInterval: 300000
+      maxStalledCount: 2
+      retryProcessDelay: 30000
+    defaultJobOptions:
+      removeOnComplete: 10
+      removeOnFail: 25
+      attempts: 10
+      backoff:
+        type: exponential
+        delay: 10000
+
+# Job Types and Processing
+jobs:
+  # Order Processing Jobs
+  order_confirmation:
+    queue: high_priority
+    processor: order-service
+    concurrency: 10
+    description: "Send order confirmation emails and SMS"
+    timeout: 30000
+
+  order_status_update:
+    queue: high_priority
+    processor: notification-service
+    concurrency: 15
+    description: "Notify customers of order status changes"
+    timeout: 15000
+
+  payment_processing:
+    queue: high_priority
+    processor: order-service
+    concurrency: 5
+    description: "Process customer payments"
+    timeout: 60000
+
+  # Communication Jobs
+  email_notifications:
+    queue: standard
+    processor: notification-service
+    concurrency: 20
+    description: "Send email notifications"
+    timeout: 45000
+
+  sms_notifications:
+    queue: standard
+    processor: notification-service
+    concurrency: 10
+    description: "Send SMS notifications"
+    timeout: 30000
+
+  push_notifications:
+    queue: high_priority
+    processor: notification-service
+    concurrency: 25
+    description: "Send push notifications"
+    timeout: 15000
+
+  # Restaurant Management Jobs
+  menu_sync:
+    queue: standard
+    processor: restaurant-service
+    concurrency: 5
+    description: "Synchronize menu items across platforms"
+    timeout: 120000
+
+  image_processing:
+    queue: low_priority
+    processor: restaurant-service
+    concurrency: 3
+    description: "Process and optimize restaurant/food images"
+    timeout: 300000
+
+  # Analytics and Reporting Jobs
+  daily_reports:
+    queue: low_priority
+    processor: analytics-service
+    concurrency: 2
+    description: "Generate daily business reports"
+    timeout: 600000
+    schedule: "0 1 * * *"  # Daily at 1 AM
+
+  weekly_analytics:
+    queue: low_priority
+    processor: analytics-service
+    concurrency: 1
+    description: "Generate weekly analytics reports"
+    timeout: 1800000
+    schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+
+  # Data Cleanup Jobs
+  session_cleanup:
+    queue: low_priority
+    processor: auth-service
+    concurrency: 1
+    description: "Clean up expired sessions"
+    timeout: 300000
+    schedule: "0 3 * * *"  # Daily at 3 AM
+
+  cache_warming:
+    queue: standard
+    processor: api-gateway
+    concurrency: 2
+    description: "Warm up application caches"
+    timeout: 180000
+    schedule: "*/30 * * * *"  # Every 30 minutes
+
+  # Integration Jobs
+  inventory_sync:
+    queue: standard
+    processor: restaurant-service
+    concurrency: 3
+    description: "Sync inventory with external vendors"
+    timeout: 240000
+    schedule: "0 */6 * * *"  # Every 6 hours
+
+  third_party_sync:
+    queue: low_priority
+    processor: integration-service
+    concurrency: 2
+    description: "Sync with third-party delivery platforms"
+    timeout: 300000
+    schedule: "0 */4 * * *"  # Every 4 hours
+
+# Worker Configuration
+workers:
+  # Order Service Workers
+  order_workers:
+    service: order-service
+    instances: 3
+    queues: [high_priority, standard]
+    jobs: [order_confirmation, order_status_update, payment_processing]
+    
+  # Notification Service Workers  
+  notification_workers:
+    service: notification-service
+    instances: 5
+    queues: [high_priority, standard]
+    jobs: [email_notifications, sms_notifications, push_notifications, order_status_update]
+
+  # Restaurant Service Workers
+  restaurant_workers:
+    service: restaurant-service
+    instances: 2
+    queues: [standard, low_priority]
+    jobs: [menu_sync, image_processing, inventory_sync]
+
+  # Analytics Workers
+  analytics_workers:
+    service: analytics-service
+    instances: 1
+    queues: [low_priority]
+    jobs: [daily_reports, weekly_analytics]
+
+  # Auth Service Workers
+  auth_workers:
+    service: auth-service
+    instances: 1
+    queues: [low_priority]
+    jobs: [session_cleanup]
+
+  # Gateway Workers
+  gateway_workers:
+    service: api-gateway
+    instances: 2
+    queues: [standard]
+    jobs: [cache_warming]
+
+# Monitoring and Health Checks
+monitoring:
+  metrics_enabled: true
+  health_check_interval: 30000
+  
+  # Queue metrics to track
+  metrics:
+    - queue_size
+    - completed_jobs
+    - failed_jobs
+    - processing_time
+    - waiting_time
+    - active_jobs
+    - delayed_jobs
+    - stalled_jobs
+
+  # Alerts configuration
+  alerts:
+    queue_size_threshold: 1000
+    failed_jobs_threshold: 50
+    stalled_jobs_threshold: 10
+    processing_time_threshold: 300000  # 5 minutes
+
+# Scaling Configuration
+scaling:
+  auto_scaling: true
+  
+  # Scale up conditions
+  scale_up:
+    queue_size_threshold: 500
+    avg_processing_time_threshold: 60000  # 1 minute
+    min_instances: 1
+    max_instances: 10
+    cooldown_period: 300000  # 5 minutes
+
+  # Scale down conditions  
+  scale_down:
+    queue_size_threshold: 50
+    idle_time_threshold: 600000  # 10 minutes
+    min_instances: 1
+    cooldown_period: 600000  # 10 minutes
+
+# Error Handling
+error_handling:
+  # Retry configuration
+  retry:
+    max_attempts: 5
+    backoff_strategy: exponential
+    initial_delay: 1000
+    max_delay: 300000
+    
+  # Dead letter queue
+  dead_letter_queue:
+    enabled: true
+    name: "failed-jobs"
+    retention_days: 30
+    
+  # Error notifications
+  notifications:
+    enabled: true
+    channels: [email, slack]
+    threshold: 10  # Notify after 10 consecutive failures
+
+# Performance Tuning
+performance:
+  # Connection pooling
+  connection_pool:
+    min: 5
+    max: 20
+    
+  # Memory management
+  memory:
+    max_memory_usage: "2GB"
+    gc_interval: 300000  # 5 minutes
+    
+  # Batch processing
+  batch:
+    enabled: true
+    max_batch_size: 100
+    batch_timeout: 5000

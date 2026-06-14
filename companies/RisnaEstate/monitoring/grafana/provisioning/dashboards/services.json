@@ -1,0 +1,46 @@
+{
+  "dashboard": {
+    "title": "RisnaEstate Services Overview",
+    "tags": ["risnaestate", "services"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Services Health",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          { "expr": "up{job='risna-services'}", "legendFormat": "{{instance}}" }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          { "expr": "rate(http_requests_total[5m])", "legendFormat": "{{service}}" }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Response Time (p99)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          { "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))", "legendFormat": "{{service}}" }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          { "expr": "rate(http_requests_errors_total[5m]) / rate(http_requests_total[5m]) * 100", "legendFormat": "{{service}} %" }
+        ]
+      }
+    ]
+  }
+}

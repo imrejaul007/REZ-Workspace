@@ -1,0 +1,1 @@
+export { localizationRoutes } from './localizationRoutes';

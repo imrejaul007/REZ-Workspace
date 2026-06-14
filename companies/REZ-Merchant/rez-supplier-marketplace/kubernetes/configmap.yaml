@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for rez-supplier-marketplace
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-supplier-marketplace-config
+  namespace: rez-merchant
+  labels:
+    app: rez-supplier-marketplace
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4630"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-supplier-marketplace"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez-supplier-marketplace"
+  REDIS_DATABASE: "0"

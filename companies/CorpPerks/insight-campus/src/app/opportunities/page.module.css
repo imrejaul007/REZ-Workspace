@@ -1,0 +1,463 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  color: white;
+  padding: 32px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+}
+
+.heroContent h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.heroContent p {
+  opacity: 0.9;
+}
+
+.heroStats {
+  display: flex;
+  gap: 24px;
+}
+
+.heroStat {
+  text-align: center;
+  padding: 16px 24px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+}
+
+.statNum {
+  display: block;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.statLabel {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.searchSection {
+  margin-bottom: 32px;
+}
+
+.searchBar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.searchBar input {
+  flex: 1;
+  padding: 16px 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.searchBar button {
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  border: none;
+  border-radius: 10px;
+  font-size: 20px;
+  cursor: pointer;
+  color: white;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.filterBtn:hover {
+  border-color: #8b5cf6;
+}
+
+.filterBtn.active {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.filterCount {
+  background: rgba(0,0,0,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.filterBtn.active .filterCount {
+  background: rgba(255,255,255,0.2);
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+}
+
+.opportunitiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.oppCard {
+  display: flex;
+  gap: 24px;
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.oppCard:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.oppType {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.newBadge {
+  background: #ef4444;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.oppContent {
+  flex: 1;
+}
+
+.oppContent h3 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.org {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.oppMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.oppTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  background: #f9fafb;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.oppSidebar {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.oppValue {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.valueLabel {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.valueNum {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.deadline {
+  text-align: center;
+  padding: 12px;
+  background: #fef2f2;
+  border-radius: 8px;
+}
+
+.deadline span {
+  display: block;
+  font-size: 11px;
+  color: #ef4444;
+}
+
+.deadline strong {
+  font-size: 14px;
+  color: #ef4444;
+}
+
+.oppActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.saveBtn {
+  padding: 10px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saveBtn:hover {
+  border-color: #ef4444;
+}
+
+.saveBtn.saved {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.applyBtn {
+  padding: 12px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.applyBtn:hover {
+  opacity: 0.9;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.section h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.resourceList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resourceItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.resourceItem:hover {
+  background: #e5e7eb;
+}
+
+.resourceIcon {
+  font-size: 24px;
+}
+
+.resourceItem strong {
+  display: block;
+  font-size: 14px;
+}
+
+.resourceItem span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.deadlineList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deadlineItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.deadlineDate {
+  background: #ef4444;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  min-width: 50px;
+}
+
+.deadlineItem strong {
+  display: block;
+  font-size: 13px;
+}
+
+.deadlineItem span {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.savedList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emptyState {
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  padding: 16px;
+}
+
+.savedItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.savedTitle {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.savedItem button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+  }
+
+  .oppCard {
+    flex-direction: column;
+  }
+
+  .oppSidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .oppValue {
+    flex: 1;
+  }
+
+  .deadline {
+    flex: 1;
+  }
+
+  .oppActions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .saveBtn,
+  .applyBtn {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .heroStats {
+    width: 100%;
+    justify-content: center;
+  }
+}

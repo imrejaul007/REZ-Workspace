@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "REZ Driver",
+    "slug": "rez-driver-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "rezdriver",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#007AFF"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.rez.driver",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "REZ Driver needs your location to show nearby deliveries and track your deliveries.",
+        "NSLocationAlwaysUsageDescription": "REZ Driver needs your location to track deliveries even when the app is in the background.",
+        "NSCameraUsageDescription": "REZ Driver needs camera access to take proof of delivery photos.",
+        "NSPhotoLibraryUsageDescription": "REZ Driver needs photo library access to save proof of delivery photos.",
+        "UIBackgroundModes": ["location", "fetch"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#007AFF"
+      },
+      "package": "com.rez.driver",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "FOREGROUND_SERVICE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "REZ Driver needs your location to track deliveries.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

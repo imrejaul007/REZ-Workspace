@@ -1,0 +1,32 @@
+{
+  "name": "rez-merchant",
+  "version": "1.0.0",
+  "description": "Industry OS - Multi-industry merchant platform",
+  "private": true,
+  "workspaces": [
+    "industry-os",
+    "merchant-website-os",
+    "rez-*",
+    "Top-Level-Services/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "start": "npm run start --workspaces --if-present"
+  },
+  "keywords": [
+    "merchant",
+    "pos",
+    "restaurant",
+    "hotel",
+    "retail",
+    "industry",
+    "rez"
+  ],
+  "author": "REZ Merchant",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

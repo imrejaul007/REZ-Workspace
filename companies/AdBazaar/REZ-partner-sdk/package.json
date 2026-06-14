@@ -1,0 +1,23 @@
+{
+  "name": "@rez/partner-sdk",
+  "version": "1.0.0",
+  "description": "Partner SDK for affiliate and referral programs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

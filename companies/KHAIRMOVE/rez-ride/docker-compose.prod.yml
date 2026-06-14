@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # ReZ Ride API - Production
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    container_name: rez-ride-api
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      # RABTUL
+      - REZ_AUTH_SERVICE_URL=${REZ_AUTH_SERVICE_URL}
+      - REZ_WALLET_SERVICE_URL=${REZ_WALLET_SERVICE_URL}
+      - REZ_PAYMENT_SERVICE_URL=${REZ_PAYMENT_SERVICE_URL}
+      - REZ_NOTIFICATIONS_URL=${REZ_NOTIFICATIONS_URL}
+      - REZ_PROFILE_SERVICE_URL=${REZ_PROFILE_SERVICE_URL}
+      - REZ_ANALYTICS_SERVICE_URL=${REZ_ANALYTICS_SERVICE_URL}
+      # Intelligence
+      - REZ_INTELLIGENCE_URL=${REZ_INTELLIGENCE_URL}
+      - REZ_INTENT_URL=${REZ_INTENT_URL}
+      - REZ_PREDICTIVE_URL=${REZ_PREDICTIVE_URL}
+      # Media
+      - REZ_ADS_URL=${REZ_ADS_URL}
+      - REZ_KARMA_URL=${REZ_KARMA_URL}
+      # Maps
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - MAPBOX_ACCESS_TOKEN=${MAPBOX_ACCESS_TOKEN}
+      # Payments
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+      - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
+      # SMS
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    networks:
+      - rez-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: rez-ride-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - rez-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: rez-ride-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    networks:
+      - rez-network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  rez-network:
+    driver: bridge

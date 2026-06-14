@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pharmacy-primary: #22c55e;
+  --pharmacy-secondary: #15803d;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+@layer utilities {
+  .text-pharmacy {
+    @apply text-green-600;
+  }
+  .bg-pharmacy {
+    @apply bg-green-600;
+  }
+}

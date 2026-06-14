@@ -1,0 +1,490 @@
+version: "3.8"
+
+# ============================================================
+# REZ AdBazaar - New Intelligence Services
+# ============================================================
+# Services: REZ-email-validator, REZ-fraud-detection, REZ-creative-ab-testing,
+#           REZ-brand-safety, REZ-viewability-tracker, REZ-attribution-modeling,
+#           REZ-audience-sync, REZ-creative-rotation, REZ-frequency-capping,
+#           REZ-budget-allocator, REZ-churn-predictor, REZ-ltv-calculator,
+#           REZ-next-best-action, REZ-sentiment-analyzer, REZ-competitor-monitor
+# ============================================================
+
+services:
+  # ============================================================
+  # Infrastructure (Shared)
+  # ============================================================
+  mongodb:
+    image: mongo:7.0
+    container_name: adbazaar-mongodb
+    restart: unless-stopped
+    networks:
+      - adbazaar-network
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: adbazaar-redis
+    restart: unless-stopped
+    networks:
+      - adbazaar-network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ============================================================
+  # Ad Intelligence Services (Ports 4810-4819)
+  # ============================================================
+
+  rez-email-validator:
+    build:
+      context: ./AdBazaar/services/REZ-email-validator
+      dockerfile: Dockerfile
+    container_name: adbazaar-email-validator
+    restart: unless-stopped
+    ports:
+      - "4810:4810"
+    environment:
+      - PORT=4810
+      - MONGODB_URI=mongodb://mongodb:27017/rez_email_validator
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4810/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-fraud-detection:
+    build:
+      context: ./AdBazaar/services/REZ-fraud-detection
+      dockerfile: Dockerfile
+    container_name: adbazaar-fraud-detection
+    restart: unless-stopped
+    ports:
+      - "4811:4811"
+    environment:
+      - PORT=4811
+      - MONGODB_URI=mongodb://mongodb:27017/rez_fraud_detection
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4811/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-creative-ab-testing:
+    build:
+      context: ./AdBazaar/services/REZ-creative-ab-testing
+      dockerfile: Dockerfile
+    container_name: adbazaar-creative-ab-testing
+    restart: unless-stopped
+    ports:
+      - "4812:4812"
+    environment:
+      - PORT=4812
+      - MONGODB_URI=mongodb://mongodb:27017/rez_creative_ab_testing
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4812/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-brand-safety:
+    build:
+      context: ./AdBazaar/services/REZ-brand-safety
+      dockerfile: Dockerfile
+    container_name: adbazaar-brand-safety
+    restart: unless-stopped
+    ports:
+      - "4813:4813"
+    environment:
+      - PORT=4813
+      - MONGODB_URI=mongodb://mongodb:27017/rez_brand_safety
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4813/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-viewability-tracker:
+    build:
+      context: ./AdBazaar/services/REZ-viewability-tracker
+      dockerfile: Dockerfile
+    container_name: adbazaar-viewability-tracker
+    restart: unless-stopped
+    ports:
+      - "4814:4814"
+    environment:
+      - PORT=4814
+      - MONGODB_URI=mongodb://mongodb:27017/rez_viewability_tracker
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4814/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-attribution-modeling:
+    build:
+      context: ./AdBazaar/services/REZ-attribution-modeling
+      dockerfile: Dockerfile
+    container_name: adbazaar-attribution-modeling
+    restart: unless-stopped
+    ports:
+      - "4815:4815"
+    environment:
+      - PORT=4815
+      - MONGODB_URI=mongodb://mongodb:27017/rez_attribution_modeling
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4815/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-audience-sync:
+    build:
+      context: ./AdBazaar/services/REZ-audience-sync
+      dockerfile: Dockerfile
+    container_name: adbazaar-audience-sync
+    restart: unless-stopped
+    ports:
+      - "4816:4816"
+    environment:
+      - PORT=4816
+      - MONGODB_URI=mongodb://mongodb:27017/rez_audience_sync
+      - REDIS_URL=redis://redis:6379
+      - LIVERAMP_API_KEY=${LIVERAMP_API_KEY}
+      - SEGMENT_WRITE_KEY=${SEGMENT_WRITE_KEY}
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4816/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-creative-rotation:
+    build:
+      context: ./AdBazaar/services/REZ-creative-rotation
+      dockerfile: Dockerfile
+    container_name: adbazaar-creative-rotation
+    restart: unless-stopped
+    ports:
+      - "4817:4817"
+    environment:
+      - PORT=4817
+      - MONGODB_URI=mongodb://mongodb:27017/rez_creative_rotation
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4817/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-frequency-capping:
+    build:
+      context: ./AdBazaar/services/REZ-frequency-capping
+      dockerfile: Dockerfile
+    container_name: adbazaar-frequency-capping
+    restart: unless-stopped
+    ports:
+      - "4818:4818"
+    environment:
+      - PORT=4818
+      - MONGODB_URI=mongodb://mongodb:27017/rez_frequency_capping
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4818/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rez-budget-allocator:
+    build:
+      context: ./AdBazaar/services/REZ-budget-allocator
+      dockerfile: Dockerfile
+    container_name: adbazaar-budget-allocator
+    restart: unless-stopped
+    ports:
+      - "4819:4819"
+    environment:
+      - PORT=4819
+      - MONGODB_URI=mongodb://mongodb:27017/rez_budget_allocator
+      - REDIS_URL=redis://redis:6379
+      - ML_SERVICE_URL=${ML_SERVICE_URL:-http://localhost:5001}
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4819/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ============================================================
+  # Analytics Services (Ports 4900-4904)
+  # ============================================================
+  # Note: These services are in REZ-Intelligence repo
+  # Build context should be adjusted when deploying
+
+  rez-churn-predictor:
+    image: node:20-alpine
+    container_name: adbazaar-churn-predictor
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "4900:4900"
+    environment:
+      - PORT=4900
+      - MONGODB_URI=mongodb://mongodb:27017/rez_churn_predictor
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    volumes:
+      - ./REZ-Intelligence/services/REZ-churn-predictor:/app
+    command: sh -c "npm install && npm run build && npm start"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4900/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  rez-ltv-calculator:
+    image: node:20-alpine
+    container_name: adbazaar-ltv-calculator
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "4901:4901"
+    environment:
+      - PORT=4901
+      - MONGODB_URI=mongodb://mongodb:27017/rez_ltv_calculator
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    volumes:
+      - ./REZ-Intelligence/services/REZ-ltv-calculator:/app
+    command: sh -c "npm install && npm run build && npm start"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4901/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  rez-next-best-action:
+    image: node:20-alpine
+    container_name: adbazaar-next-best-action
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "4902:4902"
+    environment:
+      - PORT=4902
+      - MONGODB_URI=mongodb://mongodb:27017/rez_next_best_action
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    volumes:
+      - ./REZ-Intelligence/services/REZ-next-best-action:/app
+    command: sh -c "npm install && npm run build && npm start"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4902/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  rez-sentiment-analyzer:
+    image: node:20-alpine
+    container_name: adbazaar-sentiment-analyzer
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "4903:4903"
+    environment:
+      - PORT=4903
+      - MONGODB_URI=mongodb://mongodb:27017/rez_sentiment_analyzer
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    volumes:
+      - ./REZ-Intelligence/services/REZ-sentiment-analyzer:/app
+    command: sh -c "npm install && npm run build && npm start"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4903/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  rez-competitor-monitor:
+    image: node:20-alpine
+    container_name: adbazaar-competitor-monitor
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "4904:4904"
+    environment:
+      - PORT=4904
+      - MONGODB_URI=mongodb://mongodb:27017/rez_competitor_monitor
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    volumes:
+      - ./REZ-Intelligence/services/REZ-competitor-monitor:/app
+    command: sh -c "npm install && npm run build && npm start"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - adbazaar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4904/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# ============================================================
+# Networks
+# ============================================================
+networks:
+  adbazaar-network:
+    driver: bridge
+    name: adbazaar-network
+
+# ============================================================
+# Volumes
+# ============================================================
+volumes:
+  mongodb_data:
+    name: adbazaar-mongodb_data
+  redis_data:
+    name: adbazaar-redis_data

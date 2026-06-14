@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BIZORA Trust Score Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a1a; color: white; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 { font-size: 28px; }
+    .header .subtitle { color: rgba(255,255,255,0.5); margin-top: 5px; }
+
+    /* Trust Score Hero */
+    .trust-hero {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(102,126,234,0.15) 100%);
+      border: 2px solid rgba(34,197,94,0.3);
+      border-radius: 30px;
+      padding: 50px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .score-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+
+    .score-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: conic-gradient(#22c55e 0deg, #22c55e 264deg, #1a1a1a 264deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .score-inner {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: #0a0a1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-value { font-size: 56px; font-weight: 800; color: #22c55e; }
+    .score-label { font-size: 14px; color: rgba(255,255,255,0.5); }
+
+    .score-info h2 { font-size: 48px; color: #22c55e; }
+    .score-info p { color: rgba(255,255,255,0.6); font-size: 18px; }
+    .percentile { margin-top: 20px; display: inline-block; background: rgba(34,197,94,0.2); padding: 10px 25px; border-radius: 50px; }
+
+    /* Grid */
+    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+
+    /* Card */
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .card h3 { font-size: 18px; margin-bottom: 20px; color: rgba(255,255,255,0.9); }
+
+    /* Breakdown */
+    .breakdown-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .breakdown-label { width: 180px; font-size: 14px; color: rgba(255,255,255,0.7); }
+    .breakdown-bar { flex: 1; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; margin: 0 15px; overflow: hidden; }
+    .breakdown-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
+    .breakdown-value { width: 50px; text-align: right; font-weight: 600; }
+
+    /* Factors */
+    .factor {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+
+    .factor-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 15px; }
+    .factor.positive { background: rgba(34,197,94,0.15); }
+    .factor.negative { background: rgba(239,68,68,0.15); }
+
+    .factor-info { flex: 1; }
+    .factor-name { font-size: 15px; font-weight: 500; }
+    .factor-desc { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+    .factor-change { font-weight: 600; }
+    .factor-change.positive { color: #22c55e; }
+    .factor-change.negative { color: #ef4444; }
+
+    /* Eligibility */
+    .eligibility-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .eligibility-info { display: flex; align-items: center; gap: 15px; }
+    .eligibility-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .eligibility-name { font-weight: 600; }
+    .eligibility-desc { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+    .eligibility-amount { font-size: 22px; font-weight: 700; color: #22c55e; }
+    .eligibility-status { font-size: 12px; color: #22c55e; }
+
+    /* Timeline */
+    .timeline { display: flex; justify-content: space-between; align-items: flex-end; padding: 20px 0; }
+    .timeline-point { display: flex; flex-direction: column; align-items: center; position: relative; }
+    .timeline-dot { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.2); margin-bottom: 10px; }
+    .timeline-point.active .timeline-dot { background: #22c55e; box-shadow: 0 0 15px rgba(34,197,94,0.5); }
+    .timeline-label { font-size: 12px; color: rgba(255,255,255,0.5); }
+    .timeline-value { font-size: 14px; font-weight: 600; margin-top: 5px; }
+
+    .timeline-line { position: absolute; top: 7px; left: 50%; width: 100%; height: 2px; background: rgba(255,255,255,0.2); }
+
+    /* Actions */
+    .actions { display: flex; gap: 15px; margin-top: 30px; }
+    .action-btn {
+      flex: 1;
+      padding: 18px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .action-btn.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; }
+    .action-btn.secondary { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); }
+    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+    /* Animations */
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .score-circle { animation: pulse 3s infinite; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <h1>Trust Score</h1>
+        <p class="subtitle">Your business credit rating on BIZORA</p>
+      </div>
+      <div style="text-align: right;">
+        <div style="color: rgba(255,255,255,0.5); font-size: 14px;">Last Updated</div>
+        <div style="font-size: 16px;">May 24, 2026</div>
+      </div>
+    </div>
+
+    <!-- Trust Score Hero -->
+    <div class="trust-hero">
+      <div class="score-display">
+        <div class="score-circle">
+          <div class="score-inner">
+            <span class="score-value">88</span>
+            <span class="score-label">out of 100</span>
+          </div>
+        </div>
+        <div class="score-info">
+          <h2>Grade: AA</h2>
+          <p>Excellent creditworthiness</p>
+          <div class="percentile">
+            <span style="color: #22c55e;">✓</span> Better than <strong>88%</strong> of businesses
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-point">
+          <div class="timeline-line"></div>
+          <div class="timeline-dot"></div>
+          <span class="timeline-label">BBB</span>
+          <span class="timeline-value">70</span>
+        </div>
+        <div class="timeline-point">
+          <div class="timeline-line"></div>
+          <div class="timeline-dot"></div>
+          <span class="timeline-label">A</span>
+          <span class="timeline-value">80</span>
+        </div>
+        <div class="timeline-point active">
+          <div class="timeline-line"></div>
+          <div class="timeline-dot"></div>
+          <span class="timeline-label">AA</span>
+          <span class="timeline-value">88</span>
+        </div>
+        <div class="timeline-point">
+          <div class="timeline-line"></div>
+          <div class="timeline-dot"></div>
+          <span class="timeline-label">AAA</span>
+          <span class="timeline-value">95+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left Column -->
+      <div>
+        <!-- Score Breakdown -->
+        <div class="card">
+          <h3>Score Breakdown</h3>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Payment Behavior</span>
+            <div class="breakdown-bar"><div class="breakdown-fill" style="width: 92%; background: #22c55e;"></div></div>
+            <span class="breakdown-value" style="color: #22c55e;">92</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Compliance History</span>
+            <div class="breakdown-bar"><div class="breakdown-fill" style="width: 95%; background: #22c55e;"></div></div>
+            <span class="breakdown-value" style="color: #22c55e;">95</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Delivery Quality</span>
+            <div class="breakdown-bar"><div class="breakdown-fill" style="width: 88%; background: #22c55e;"></div></div>
+            <span class="breakdown-value" style="color: #22c55e;">88</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Response Time</span>
+            <div class="breakdown-bar"><div class="breakdown-fill" style="width: 80%; background: #f59e0b;"></div></div>
+            <span class="breakdown-value" style="color: #f59e0b;">80</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Customer Satisfaction</span>
+            <div class="breakdown-bar"><div class="breakdown-fill" style="width: 85%; background: #22c55e;"></div></div>
+            <span class="breakdown-value" style="color: #22c55e;">85</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Operational Stability</span>
+            <div class="breakdown-bar"><div class="breakdown-fill" style="width: 82%; background: #22c55e;"></div></div>
+            <span class="breakdown-value" style="color: #22c55e;">82</span>
+          </div>
+        </div>
+
+        <!-- Score Factors -->
+        <div class="card">
+          <h3>What Affects Your Score</h3>
+          <div class="factor positive">
+            <div class="factor-icon positive">↑</div>
+            <div class="factor-info">
+              <div class="factor-name">On-time payments (12 months)</div>
+              <div class="factor-desc">Maintained 100% payment record</div>
+            </div>
+            <div class="factor-change positive">+5</div>
+          </div>
+          <div class="factor positive">
+            <div class="factor-icon positive">↑</div>
+            <div class="factor-info">
+              <div class="factor-name">GST filed on time (24 months)</div>
+              <div class="factor-desc">Perfect compliance streak</div>
+            </div>
+            <div class="factor-change positive">+3</div>
+          </div>
+          <div class="factor positive">
+            <div class="factor-icon positive">↑</div>
+            <div class="factor-info">
+              <div class="factor-name">Customer reviews (4.5/5)</div>
+              <div class="factor-desc">Strong customer satisfaction</div>
+            </div>
+            <div class="factor-change positive">+2</div>
+          </div>
+          <div class="factor negative">
+            <div class="factor-icon negative">↓</div>
+            <div class="factor-info">
+              <div class="factor-name">Delivery delays (3 incidents)</div>
+              <div class="factor-desc">Had 3 late deliveries this quarter</div>
+            </div>
+            <div class="factor-change negative">-2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div>
+        <!-- Finance Eligibility -->
+        <div class="card">
+          <h3>Finance Eligibility</h3>
+          <div class="eligibility-item">
+            <div class="eligibility-info">
+              <div class="eligibility-icon">💰</div>
+              <div>
+                <div class="eligibility-name">Working Capital</div>
+                <div class="eligibility-desc">For growth & operations</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div class="eligibility-amount">₹25L</div>
+              <div class="eligibility-status">@ 1.2%/month</div>
+            </div>
+          </div>
+          <div class="eligibility-item">
+            <div class="eligibility-info">
+              <div class="eligibility-icon">🤝</div>
+              <div>
+                <div class="eligibility-name">Vendor Credit</div>
+                <div class="eligibility-desc">Better supplier terms</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div class="eligibility-amount">₹10L</div>
+              <div class="eligibility-status">@ 1.3%/month</div>
+            </div>
+          </div>
+          <div class="eligibility-item">
+            <div class="eligibility-info">
+              <div class="eligibility-icon">📢</div>
+              <div>
+                <div class="eligibility-name">Ad Financing</div>
+                <div class="eligibility-desc">Scale your marketing</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div class="eligibility-amount">₹5L</div>
+              <div class="eligibility-status">@ 1.5%/month</div>
+            </div>
+          </div>
+          <div class="eligibility-item">
+            <div class="eligibility-info">
+              <div class="eligibility-icon">📄</div>
+              <div>
+                <div class="eligibility-name">Invoice Financing</div>
+                <div class="eligibility-desc">Convert unpaid invoices</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div class="eligibility-amount">₹8L</div>
+              <div class="eligibility-status">@ 1.0%/month</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- How to Improve -->
+        <div class="card">
+          <h3>Improve Your Score</h3>
+          <div style="padding: 15px; background: rgba(102,126,234,0.1); border-radius: 12px; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span style="font-size: 20px;">🎯</span>
+              <strong>Target: AAA (95+)</strong>
+            </div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.6);">
+              <p style="margin-bottom: 8px;">To reach AAA, focus on:</p>
+              <p>• Improve delivery time to under 24 hours</p>
+              <p>• Increase customer review response</p>
+              <p>• Maintain 100% on-time payments</p>
+            </div>
+          </div>
+          <div style="font-size: 13px; color: rgba(255,255,255,0.5);">
+            Estimated time to AAA: <strong style="color: #667eea;">3-4 months</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a href="#" class="action-btn secondary">View History</a>
+      <a href="#" class="action-btn primary">Apply for Finance</a>
+    </div>
+  </div>
+</body>
+</html>

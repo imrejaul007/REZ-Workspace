@@ -1,0 +1,1756 @@
+openapi: 3.0.3
+info:
+  title: REZ Ads Service API
+  description: |
+    Advertising platform microservice for managing ad campaigns, placements, and analytics with intent capture.
+
+    ## Authentication
+    - **Merchant routes** (`/api/ads/*`): Bearer token with merchant identity
+    - **Admin routes** (`/admin/ads/*`): Bearer token with `role: admin`
+    - **Serve routes** (`/api/serve/*`): Bearer token with user identity
+    - **Conversion routes** (`/api/events/*`): Internal service token via `x-internal-token` or `x-internal-key` header
+
+    ## Rate Limits
+    - Impression endpoint: 100 requests/minute per user
+    - Click endpoint: 100 requests/minute per user
+
+    ## Ad Status Lifecycle
+    ```
+    draft -> pending_review -> active -> paused/completed
+                    |
+                    v
+                rejected (can edit and resubmit)
+    ```
+  version: 1.0.0
+  contact:
+    name: REZ Platform Team
+    email: platform@rez.money
+  license:
+    name: MIT
+
+servers:
+  - url: https://rez-ads-service.onrender.com
+    description: Production
+  - url: http://localhost:4007
+    description: Local development
+
+tags:
+  - name: Merchant Ads
+    description: Merchant ad management operations
+  - name: Admin
+    description: Admin operations for ad review and management
+  - name: Serve
+    description: Ad serving and tracking endpoints
+  - name: Events
+    description: Conversion and attribution event ingestion
+
+paths:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # MERCHANT ROUTES (prefix: /api)
+  # ─────────────────────────────────────────────────────────────────────────────
+  /api/ads:
+    get:
+      tags: [Merchant Ads]
+      summary: List merchant ads
+      description: Returns a paginated list of ads belonging to the authenticated merchant.
+      operationId: listMerchantAds
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 50
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [draft, pending_review, active, paused, rejected, completed]
+      responses:
+        '200':
+          description: List of ads
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdCampaign'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                success: true
+                data:
+                  - _id: "60f7b2c9e4b0a1234567890a"
+                    title: "Summer Sale 50% Off"
+                    status: "active"
+                    impressions: 45000
+                    clicks: 180
+                pagination:
+                  page: 1
+                  limit: 20
+                  total: 15
+                  pages: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Merchant Ads]
+      summary: Create a new ad
+      description: |
+        Creates a new ad campaign. The ad starts in `draft` status and must be
+        submitted for review before it can be served.
+
+        **Validation rules:**
+        - `bidAmount` must be >= 0 and <= `dailyBudget`
+        - `dailyBudget` must be >= 0
+        - `totalBudget` must be >= `dailyBudget`
+        - `startDate` must be a valid future date
+        - `placement` must be one of: home_banner, explore_feed, store_listing, search_result
+        - `bidType` must be one of: CPC, CPM
+      operationId: createAd
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdRequest'
+            example:
+              storeId: "60f7b2c9e4b0a1234567890a"
+              title: "Summer Sale 50% Off"
+              headline: "Limited Time Offer"
+              description: "Shop our summer collection with up to 50% off on all items."
+              ctaText: "Shop Now"
+              ctaUrl: "https://store.rez.money/summer-sale"
+              imageUrl: "https://cdn.rez.money/images/summer-sale-banner.jpg"
+              placement: "home_banner"
+              targetSegment: "all"
+              bidType: "CPC"
+              bidAmount: 2.50
+              dailyBudget: 100.00
+              totalBudget: 3000.00
+              startDate: "2026-06-01T00:00:00Z"
+              endDate: "2026-08-31T23:59:59Z"
+      responses:
+        '201':
+          description: Ad created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AdCampaign'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/ads/analytics:
+    get:
+      tags: [Merchant Ads]
+      summary: Get merchant analytics summary
+      description: Returns aggregated metrics for all ads belonging to the authenticated merchant.
+      operationId: getMerchantAnalytics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Analytics summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      totalImpressions:
+                        type: integer
+                        example: 150000
+                      totalClicks:
+                        type: integer
+                        example: 4500
+                      totalSpend:
+                        type: number
+                        example: 11250.00
+                      activeCount:
+                        type: integer
+                        example: 3
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/ads/{id}:
+    get:
+      tags: [Merchant Ads]
+      summary: Get ad details
+      description: Returns detailed information about a specific ad owned by the merchant.
+      operationId: getAdDetails
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: Ad details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AdCampaign'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Merchant Ads]
+      summary: Update an ad
+      description: |
+        Updates an existing ad. Only `draft` or `rejected` ads can be edited.
+        If the ad was previously rejected, updating it resets the status to `draft`.
+      operationId: updateAd
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAdRequest'
+            example:
+              title: "Updated Summer Sale"
+              headline: "Extra 10% Off First Order"
+              bidAmount: 3.00
+      responses:
+        '200':
+          description: Ad updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AdCampaign'
+        '400':
+          description: Invalid status transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Only draft or rejected ads can be edited"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Merchant Ads]
+      summary: Delete an ad
+      description: |
+        Soft-deletes an ad by setting its status to `completed`.
+        Only `draft` or `paused` ads can be deleted.
+      operationId: deleteAd
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: Ad deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Ad removed"
+        '400':
+          description: Invalid status for deletion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Only draft or paused ads can be deleted"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/ads/{id}/submit:
+    patch:
+      tags: [Merchant Ads]
+      summary: Submit ad for review
+      description: Submits a draft ad for admin review. Transitions status from `draft` to `pending_review`.
+      operationId: submitAdForReview
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: Ad submitted for review
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AdCampaign'
+                  message:
+                    type: string
+                    example: "Ad submitted for review"
+        '400':
+          description: Only draft ads can be submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Only draft ads can be submitted for review"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/ads/{id}/pause:
+    patch:
+      tags: [Merchant Ads]
+      summary: Pause an active ad
+      description: Pauses an active ad. The ad stops being served but can be reactivated later.
+      operationId: pauseAd
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: Ad paused successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AdCampaign'
+                  message:
+                    type: string
+                    example: "Ad paused"
+        '400':
+          description: Only active ads can be paused
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Only active ads can be paused"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/ads/{id}/activate:
+    patch:
+      tags: [Merchant Ads]
+      summary: Reactivate a paused ad
+      description: Reactivates a paused ad. The ad becomes eligible for serving again.
+      operationId: activateAd
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: Ad reactivated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AdCampaign'
+                  message:
+                    type: string
+                    example: "Ad reactivated"
+        '400':
+          description: Only paused ads can be reactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Only paused ads can be reactivated"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # ADMIN ROUTES (prefix: /admin)
+  # ─────────────────────────────────────────────────────────────────────────────
+  /admin/ads:
+    get:
+      tags: [Admin]
+      summary: List all ads
+      description: |
+        Returns a paginated list of all ads with optional filters.
+        Populates merchant and store information.
+      operationId: listAllAds
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [draft, pending_review, active, paused, rejected, completed]
+        - name: merchantId
+          in: query
+          description: Filter by merchant ID
+          schema:
+            type: string
+            format: objectid
+        - name: placement
+          in: query
+          description: Filter by placement
+          schema:
+            type: string
+            enum: [home_banner, explore_feed, store_listing, search_result]
+        - name: from
+          in: query
+          description: Filter by creation date (start)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: Filter by creation date (end)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of ads
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/AdCampaign'
+                        - type: object
+                          properties:
+                            merchantId:
+                              type: object
+                              properties:
+                                businessName:
+                                  type: string
+                                  example: "Acme Store"
+                                email:
+                                  type: string
+                                  example: "merchant@acme.com"
+                            storeId:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  example: "Main Store"
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/ads/stats:
+    get:
+      tags: [Admin]
+      summary: Get network-wide statistics
+      description: Returns aggregated statistics across all ads in the network.
+      operationId: getNetworkStats
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Network statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      byStatus:
+                        type: object
+                        additionalProperties:
+                          type: integer
+                        example:
+                          draft: 5
+                          pending_review: 3
+                          active: 12
+                          paused: 4
+                          rejected: 2
+                          completed: 8
+                      totalImpressions:
+                        type: integer
+                        example: 2500000
+                      totalClicks:
+                        type: integer
+                        example: 75000
+                      totalSpend:
+                        type: number
+                        example: 187500.00
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/ads/{id}:
+    get:
+      tags: [Admin]
+      summary: Get ad details (admin view)
+      description: Returns detailed information about a specific ad, including review metadata.
+      operationId: getAdminAdDetails
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: Ad details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/AdCampaign'
+                      - type: object
+                        properties:
+                          reviewedBy:
+                            type: string
+                            format: objectid
+                          reviewedAt:
+                            type: string
+                            format: date-time
+                          rejectionReason:
+                            type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /admin/ads/{id}/review:
+    patch:
+      tags: [Admin]
+      summary: Review an ad (approve or reject)
+      description: |
+        Reviews a pending ad. To approve, simply call this endpoint without a body.
+        To reject, include a `rejectionReason` in the request body.
+
+        - Approved ads transition to `active` status immediately and merchant is notified.
+        - Rejected ads return to the merchant for revision with the provided reason.
+      operationId: reviewAd
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rejectionReason:
+                  type: string
+                  description: Required if rejecting the ad. Provide a clear reason for the merchant.
+                  example: "Image contains prohibited promotional content"
+            examples:
+              approve:
+                summary: Approve ad
+                value: {}
+              reject:
+                summary: Reject ad
+                value:
+                  rejectionReason: "Image contains prohibited promotional content"
+      responses:
+        '200':
+          description: Ad reviewed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AdCampaign'
+                  message:
+                    type: string
+                    example: "Ad approved and set to active"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notPending:
+                  summary: Not pending review
+                  value:
+                    success: false
+                    code: "SRV_001"
+                    message: "Only pending_review ads can be approved"
+                missingReason:
+                  summary: Missing rejection reason
+                  value:
+                    success: false
+                    code: "SRV_001"
+                    message: "rejectionReason is required"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /admin/ads/{id}/pause:
+    patch:
+      tags: [Admin]
+      summary: Force pause an ad
+      description: Admin action to immediately pause an active ad.
+      operationId: adminPauseAd
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad campaign ID
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: Ad paused by admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AdCampaign'
+                  message:
+                    type: string
+                    example: "Ad paused by admin"
+        '400':
+          description: Only active ads can be paused
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                code: "SRV_001"
+                message: "Only active ads can be paused"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # SERVE ROUTES (prefix: /api/serve)
+  # ─────────────────────────────────────────────────────────────────────────────
+  /api/serve/campaigns:
+    get:
+      tags: [Serve]
+      summary: Get active campaigns for serving
+      description: |
+        Serves an active ad for the specified placement to the authenticated consumer.
+
+        The ad selection considers:
+        - User targeting (location, segment, interests from user profile)
+        - Frequency cap (24h default - same ad won't be shown twice)
+        - Budget availability (ad stops when budget exhausted)
+        - Campaign schedule (start/end dates)
+
+        **Rate limit**: 100 requests/minute per user
+      operationId: serveAd
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: placement
+          in: query
+          required: true
+          description: The ad placement location
+          schema:
+            type: string
+            enum: [home_banner, explore_feed, store_listing, search_result]
+            example: home_banner
+      responses:
+        '200':
+          description: Ad to serve
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/ServedAd'
+                  null:
+                    description: No eligible ad available for this placement
+              examples:
+                adFound:
+                  summary: Ad found
+                  value:
+                    success: true
+                    data:
+                      _id: "60f7b2c9e4b0a1234567890a"
+                      title: "Summer Sale 50% Off"
+                      headline: "Limited Time Offer"
+                      description: "Shop our summer collection..."
+                      ctaText: "Shop Now"
+                      ctaUrl: "https://store.rez.money/summer-sale"
+                      imageUrl: "https://cdn.rez.money/images/banner.jpg"
+                      placement: "home_banner"
+                noAd:
+                  summary: No ad available
+                  value:
+                    success: true
+                    data: null
+        '400':
+          description: Missing or invalid placement parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "placement query parameter is required"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /api/serve/impression:
+    post:
+      tags: [Serve]
+      summary: Record an impression
+      description: |
+        Records that an ad was displayed to a user. Atomically updates the ad's
+        impression count and total spent (for CPM campaigns).
+
+        If the budget is exhausted, the ad status transitions to `completed`.
+
+        **Rate limit**: 100 requests/minute per user
+      operationId: recordImpression
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - adId
+              properties:
+                adId:
+                  type: string
+                  format: objectid
+                  description: The ID of the ad that was displayed
+                  example: "60f7b2c9e4b0a1234567890a"
+            example:
+              adId: "60f7b2c9e4b0a1234567890a"
+      responses:
+        '200':
+          description: Impression recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Impression recorded"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Ad not found or inactive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Ad not found or inactive"
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /api/serve/click:
+    post:
+      tags: [Serve]
+      summary: Record a click
+      description: |
+        Records a user click on an ad. Atomically updates the ad's click count and
+        total spent (for CPC campaigns).
+
+        Includes click deduplication (5-minute window) to prevent fraudulent inflation.
+
+        **Rate limit**: 100 requests/minute per user
+      operationId: recordClick
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - adId
+              properties:
+                adId:
+                  type: string
+                  format: objectid
+                  description: The ID of the ad that was clicked
+                  example: "60f7b2c9e4b0a1234567890a"
+            example:
+              adId: "60f7b2c9e4b0a1234567890a"
+      responses:
+        '200':
+          description: Click recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Click recorded"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Ad not found or inactive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Ad not found or not active"
+        '429':
+          description: Rate limit exceeded or duplicate click
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rateLimit:
+                  summary: Rate limited
+                  value:
+                    success: false
+                    message: "Rate limit exceeded"
+                duplicate:
+                  summary: Duplicate click
+                  value:
+                    success: false
+                    message: "Duplicate click detected"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # CONVERSION ROUTES (prefix: /api/events)
+  # ─────────────────────────────────────────────────────────────────────────────
+  /api/events/conversion:
+    post:
+      tags: [Events]
+      summary: Record a conversion event
+      description: |
+        Receives conversion events from other services (e.g., order completion).
+        Used for tracking ad attribution and ROI calculation.
+
+        Requires internal service authentication via `x-internal-token` or `x-internal-key` header.
+      operationId: recordConversion
+      security:
+        - InternalAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - eventType
+                - userId
+              properties:
+                eventType:
+                  type: string
+                  description: Type of conversion event
+                  example: "order_completed"
+                userId:
+                  type: string
+                  description: User ID who completed the conversion
+                  example: "user_123"
+                orderId:
+                  type: string
+                  description: Associated order ID
+                  example: "order_456"
+                value:
+                  type: number
+                  description: Monetary value of the conversion
+                  example: 99.99
+                merchantId:
+                  type: string
+                  format: objectid
+                  description: Merchant ID associated with the conversion
+                campaignId:
+                  type: string
+                  format: objectid
+                  description: Ad campaign that drove the conversion
+            example:
+              eventType: "order_completed"
+              userId: "user_123"
+              orderId: "order_456"
+              value: 149.99
+              merchantId: "60f7b2c9e4b0a1234567890a"
+              campaignId: "60f7b2c9e4b0a1234567890b"
+      responses:
+        '200':
+          description: Conversion recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/events/attribution:
+    post:
+      tags: [Events]
+      summary: Record an attribution event
+      description: |
+        Receives attribution data from other services to track user actions
+        and build conversion attribution models.
+
+        Requires internal service authentication via `x-internal-token` or `x-internal-key` header.
+      operationId: recordAttribution
+      security:
+        - InternalAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: User ID
+                  example: "user_123"
+                source:
+                  type: string
+                  description: Attribution source
+                  example: "home_banner"
+                campaignId:
+                  type: string
+                  format: objectid
+                  description: Campaign ID
+                action:
+                  type: string
+                  description: Action type
+                  example: "add_to_cart"
+            example:
+              userId: "user_123"
+              source: "explore_feed"
+              campaignId: "60f7b2c9e4b0a1234567890b"
+              action: "add_to_cart"
+      responses:
+        '200':
+          description: Attribution recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/events/roi:
+    post:
+      tags: [Events]
+      summary: Record ROI data
+      description: |
+        Receives ROI calculations from billing services to track campaign profitability.
+
+        Requires internal service authentication via `x-internal-token` or `x-internal-key` header.
+      operationId: recordROI
+      security:
+        - InternalAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - campaignId
+                - revenue
+                - cost
+              properties:
+                campaignId:
+                  type: string
+                  format: objectid
+                  description: Campaign ID
+                  example: "60f7b2c9e4b0a1234567890b"
+                revenue:
+                  type: number
+                  description: Total revenue attributed to the campaign
+                  example: 5000.00
+                cost:
+                  type: number
+                  description: Total cost spent on the campaign
+                  example: 1250.00
+            example:
+              campaignId: "60f7b2c9e4b0a1234567890b"
+              revenue: 5000.00
+              cost: 1250.00
+      responses:
+        '200':
+          description: ROI data recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # HEALTH ENDPOINTS
+  # ─────────────────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      summary: Health check
+      description: Returns basic health status of the service.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: rez-ads-service
+                  uptime:
+                    type: number
+                    example: 3600.5
+                  timestamp:
+                    type: string
+                    format: date-time
+        '503':
+          description: Service is degraded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: degraded
+                  service:
+                    type: string
+                    example: rez-ads-service
+                  checks:
+                    type: object
+                    properties:
+                      db:
+                        type: string
+                        example: error
+                      redis:
+                        type: string
+                        example: ok
+
+  /health/detailed:
+    get:
+      summary: Detailed health check
+      description: Returns detailed health status with latency metrics for all dependencies.
+      operationId: detailedHealthCheck
+      responses:
+        '200':
+          description: Detailed health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: rez-ads-service
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  uptime:
+                    type: number
+                  timestamp:
+                    type: string
+                    format: date-time
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: up
+                          latencyMs:
+                            type: integer
+                            example: 5
+                      redis:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: up
+                          latencyMs:
+                            type: integer
+                            example: 2
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics for monitoring.
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP nodejs_heap_size_total_bytes Process heap total
+                  # TYPE nodejs_heap_size_total_bytes gauge
+                  nodejs_heap_size_total_bytes 16777216
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token containing user/merchant/admin identity.
+
+        For merchants: Token must contain `merchant._id` or `merchantId` field.
+        For admins: Token must have `role: admin`.
+        For consumers: Token must contain `userId` field.
+    InternalAuth:
+      type: apiKey
+      in: header
+      name: x-internal-token
+      description: |
+        Internal service authentication token.
+        Also accepts `x-internal-key` header for backward compatibility.
+        Must match `INTERNAL_SERVICE_TOKEN` or `INTERNAL_SERVICE_KEY` environment variable.
+
+  schemas:
+    AdCampaign:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: objectid
+          description: Unique campaign identifier
+          example: "60f7b2c9e4b0a1234567890a"
+        merchantId:
+          type: string
+          format: objectid
+          description: Owner merchant ID
+        storeId:
+          type: string
+          format: objectid
+          description: Associated store ID
+        title:
+          type: string
+          maxLength: 150
+          description: Ad title
+          example: "Summer Sale 50% Off"
+        headline:
+          type: string
+          maxLength: 90
+          description: Ad headline
+          example: "Limited Time Offer"
+        description:
+          type: string
+          maxLength: 200
+          description: Ad description
+          example: "Shop our summer collection with up to 50% off on all items."
+        ctaText:
+          type: string
+          maxLength: 30
+          description: Call-to-action button text
+          example: "Shop Now"
+        ctaUrl:
+          type: string
+          format: uri
+          description: Destination URL for CTA
+          example: "https://store.rez.money/summer-sale"
+        imageUrl:
+          type: string
+          format: uri
+          description: Ad image URL
+          example: "https://cdn.rez.money/images/summer-sale-banner.jpg"
+        placement:
+          type: string
+          enum: [home_banner, explore_feed, store_listing, search_result]
+          description: Where the ad will be displayed
+        targetSegment:
+          type: string
+          enum: [all, new, loyal, lapsed, nearby]
+          default: all
+          description: Target user segment
+        targetLocation:
+          type: object
+          properties:
+            city:
+              type: string
+            radiusKm:
+              type: number
+        targetInterests:
+          type: array
+          items:
+            type: string
+        bidType:
+          type: string
+          enum: [CPC, CPM]
+          description: Cost per click or cost per mille
+        bidAmount:
+          type: number
+          minimum: 0
+          description: Bid amount in INR
+          example: 2.50
+        dailyBudget:
+          type: number
+          minimum: 0
+          description: Maximum daily spend in INR
+          example: 100.00
+        totalBudget:
+          type: number
+          minimum: 0
+          description: Maximum total spend in INR
+          example: 3000.00
+        totalSpent:
+          type: number
+          minimum: 0
+          description: Amount spent so far in INR
+          example: 450.75
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [draft, pending_review, active, paused, rejected, completed]
+          description: Current campaign status
+        rejectionReason:
+          type: string
+          description: Reason for rejection (if status is rejected)
+        impressions:
+          type: integer
+          minimum: 0
+          description: Total impressions received
+          example: 45000
+        clicks:
+          type: integer
+          minimum: 0
+          description: Total clicks received
+          example: 180
+        ctr:
+          type: number
+          description: Click-through rate percentage
+          example: 0.40
+        frequencyCapDays:
+          type: integer
+          minimum: 1
+          description: Days before showing same ad to same user
+          example: 1
+        reviewedBy:
+          type: string
+          format: objectid
+        reviewedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ServedAd:
+      type: object
+      description: Ad served to consumer (subset of AdCampaign fields)
+      properties:
+        _id:
+          type: string
+          format: objectid
+        title:
+          type: string
+        headline:
+          type: string
+        description:
+          type: string
+        ctaText:
+          type: string
+        ctaUrl:
+          type: string
+          format: uri
+        imageUrl:
+          type: string
+          format: uri
+        placement:
+          type: string
+          enum: [home_banner, explore_feed, store_listing, search_result]
+        merchantId:
+          type: string
+          format: objectid
+        storeId:
+          type: string
+          format: objectid
+        targetSegment:
+          type: string
+        targetLocation:
+          type: object
+        targetInterests:
+          type: array
+          items:
+            type: string
+
+    CreateAdRequest:
+      type: object
+      required:
+        - storeId
+        - title
+        - headline
+        - description
+        - ctaText
+        - imageUrl
+        - placement
+        - bidType
+        - bidAmount
+        - dailyBudget
+        - totalBudget
+        - startDate
+      properties:
+        storeId:
+          type: string
+          format: objectid
+          description: Associated store ID
+          example: "60f7b2c9e4b0a1234567890a"
+        title:
+          type: string
+          maxLength: 150
+          description: Ad title
+        headline:
+          type: string
+          maxLength: 90
+          description: Ad headline
+        description:
+          type: string
+          maxLength: 200
+          description: Ad description
+        ctaText:
+          type: string
+          maxLength: 30
+          description: Call-to-action button text
+        ctaUrl:
+          type: string
+          format: uri
+          description: Destination URL for CTA
+        imageUrl:
+          type: string
+          format: uri
+          description: Ad image URL
+        placement:
+          type: string
+          enum: [home_banner, explore_feed, store_listing, search_result]
+          description: Where the ad will be displayed
+        targetSegment:
+          type: string
+          enum: [all, new, loyal, lapsed, nearby]
+          default: all
+          description: Target user segment
+        targetLocation:
+          type: object
+          properties:
+            city:
+              type: string
+            radiusKm:
+              type: number
+        targetInterests:
+          type: array
+          items:
+            type: string
+          description: Target user interests
+        bidType:
+          type: string
+          enum: [CPC, CPM]
+          description: Cost per click (CPC) or cost per mille (CPM)
+        bidAmount:
+          type: number
+          minimum: 0
+          description: Bid amount in INR (must be <= dailyBudget)
+        dailyBudget:
+          type: number
+          minimum: 0
+          description: Maximum daily spend in INR
+        totalBudget:
+          type: number
+          minimum: 0
+          description: Maximum total spend in INR (must be >= dailyBudget)
+        startDate:
+          type: string
+          format: date-time
+          description: Campaign start date (must be valid future date)
+        endDate:
+          type: string
+          format: date-time
+          description: Campaign end date (optional)
+
+    UpdateAdRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 150
+        headline:
+          type: string
+          maxLength: 90
+        description:
+          type: string
+          maxLength: 200
+        ctaText:
+          type: string
+          maxLength: 30
+        ctaUrl:
+          type: string
+          format: uri
+        imageUrl:
+          type: string
+          format: uri
+        placement:
+          type: string
+          enum: [home_banner, explore_feed, store_listing, search_result]
+        targetSegment:
+          type: string
+          enum: [all, new, loyal, lapsed, nearby]
+        targetLocation:
+          type: object
+          properties:
+            city:
+              type: string
+            radiusKm:
+              type: number
+        targetInterests:
+          type: array
+          items:
+            type: string
+        bidType:
+          type: string
+          enum: [CPC, CPM]
+        bidAmount:
+          type: number
+          minimum: 0
+        dailyBudget:
+          type: number
+          minimum: 0
+        totalBudget:
+          type: number
+          minimum: 0
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 150
+        pages:
+          type: integer
+          example: 8
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Error code for programmatic handling
+          example: "SRV_001"
+      required:
+        - success
+        - message
+
+  responses:
+    BadRequest:
+      description: Invalid request payload or parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: "storeId, title, headline, description, ctaText, imageUrl, placement, and bidType are required"
+
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missingToken:
+              summary: Missing token
+              value:
+                success: false
+                message: "Missing authorization token"
+            invalidToken:
+              summary: Invalid token
+              value:
+                success: false
+                message: "Invalid or expired token"
+            missingMerchantId:
+              summary: Merchant ID not found in token
+              value:
+                success: false
+                message: "Merchant identity not found in token"
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: "Admin access required"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: "Ad not found"
+
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: "Rate limit exceeded"

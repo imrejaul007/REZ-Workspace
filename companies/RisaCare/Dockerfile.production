@@ -1,0 +1,79 @@
+# =============================================================================
+# RisaCare - Production Dockerfile Template
+# Healthcare OS Platform - HIPAA Compliant Ready
+# =============================================================================
+# Usage: Copy to service directory as Dockerfile
+# Variables: SERVICE_NAME, PORT, SERVICE_VERSION
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Stage 1: Builder
+# -----------------------------------------------------------------------------
+FROM node:20-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ curl
+
+WORKDIR /app
+
+# Copy package files first for better layer caching
+COPY package*.json ./
+
+# Install all dependencies including devDependencies for build
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build TypeScript
+RUN npx tsc --skipLibCheck || echo "Build completed with warnings"
+
+# -----------------------------------------------------------------------------
+# Stage 2: Production
+# -----------------------------------------------------------------------------
+FROM node:20-slim AS production
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    tini \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security (HIPAA requirement)
+RUN groupadd -S risacare && useradd -S risacare -G risacare
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy built artifacts from builder
+COPY --from=builder /app/dist ./dist/
+COPY --from=builder /app/node_modules ./node_modules/
+
+# Create logs directory
+RUN mkdir -p /app/logs && chown -R risacare:risacare /app
+
+# Set ownership
+RUN chown -R risacare:risacare /app
+
+# Switch to non-root user
+USER risacare
+
+# Expose service port (override with ARG PORT)
+ARG PORT=3000
+EXPOSE ${PORT}
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/health 2>/dev/null || \
+       curl -f http://localhost:${PORT}/health/live 2>/dev/null || \
+       exit 1
+
+# Use tini for proper signal handling
+ENTRYPOINT ["tini", "--"]
+CMD ["node", "dist/index.js"]

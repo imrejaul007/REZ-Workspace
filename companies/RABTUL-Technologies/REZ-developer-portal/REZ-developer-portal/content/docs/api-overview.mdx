@@ -1,0 +1,60 @@
+---
+title: API Overview
+description: Explore all available services and their endpoints
+lastUpdated: May 17, 2026
+order: 4
+---
+
+## Service Architecture
+
+The REZ platform is built on a microservices architecture. Each service handles a specific domain and can be accessed independently.
+
+## Available Services
+
+Here is a complete list of all available services:
+
+| Service | Port | Base URL | Purpose |
+|---------|------|----------|---------|
+| API Gateway | 4000 | api.rez.money | Routing, Rate limiting |
+| Auth Service | 4002 | rez-auth-service.onrender.com | JWT, OTP, MFA, OAuth |
+| Payment Service | 4001 | rez-payment-service.onrender.com | Razorpay, UPI, Webhooks |
+| Wallet Service | 4004 | rez-wallet-service.onrender.com | Coins, Balance, Loyalty |
+| Order Service | 4006 | rez-order-service.onrender.com | Order lifecycle, FSM |
+| Catalog Service | 4007 | rez-catalog-service.onrender.com | Products, Inventory |
+| Search Service | 4008 | rez-search-service.onrender.com | Full-text, Autocomplete |
+| Notifications | 4011 | rez-notifications.onrender.com | Push, SMS, Email, WhatsApp |
+| Analytics | 4016 | rez-analytics-service.onrender.com | Dashboards |
+
+## RABTUL Core Services (4000-4030)
+
+These are the foundational services maintained by RABTUL Technologies:
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| `api-gateway` | 4000 | Routing, Rate limiting |
+| `rez-auth-service` | 4002 | JWT, OTP, MFA, OAuth |
+| `rez-payment-service` | 4001 | Razorpay, UPI, Webhooks |
+| `rez-wallet-service` | 4004 | Coins, Balance, Loyalty |
+| `rez-order-service` | 4006 | Order lifecycle, FSM |
+| `rez-catalog-service` | 4007 | Products, Inventory |
+| `rez-search-service` | 4008 | Full-text, Autocomplete |
+| `rez-delivery-service` | 4009 | Driver tracking |
+| `rez-notifications-service` | 4011 | Push, SMS, Email, WhatsApp |
+| `rez-profile-service` | 4013 | User profiles |
+| `rez-analytics-service` | 4016 | Dashboards |
+| `rez-insights-service` | 4017 | BI, Reports |
+| `rez-booking-service` | 4020 | Reservations |
+
+## Service Communication
+
+All services communicate using internal tokens:
+
+```typescript
+const response = await fetch(`${AUTH_SERVICE_URL}/api/auth/verify`, {
+  method: 'POST',
+  headers: {
+    'X-Internal-Token': process.env.INTERNAL_SERVICE_TOKEN
+  },
+  body: JSON.stringify({ token })
+});
+```

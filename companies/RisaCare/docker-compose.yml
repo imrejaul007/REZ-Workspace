@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  risa-care-api-gateway:
+    build: ./risa-care-api-gateway
+    ports:
+      - "4700:4700"
+    environment:
+      - NODE_ENV=production
+      - PORT=4700
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - risa-care-network
+
+  # Records Service
+  risa-care-records-service:
+    build: ./risa-care-records-service
+    ports:
+      - "4702:4702"
+    environment:
+      - NODE_ENV=production
+      - PORT=4702
+      - MONGODB_URI=mongodb://mongo:27017/risa_care
+    depends_on:
+      - mongo
+    networks:
+      - risa-care-network
+
+  # AI Service
+  risa-care-ai-service:
+    build: ./risa-care-ai-service
+    ports:
+      - "4703:4703"
+    environment:
+      - NODE_ENV=production
+      - PORT=4703
+      - REZ_INTELLIGENCE_URL=http://host.docker.internal:4018
+    networks:
+      - risa-care-network
+
+  # Profile Service
+  risa-care-profile-service:
+    build: ./risa-care-profile-service
+    ports:
+      - "4704:4704"
+    environment:
+      - NODE_ENV=production
+      - PORT=4704
+    networks:
+      - risa-care-network
+
+  # Booking Service
+  risa-care-booking-service:
+    build: ./risa-care-booking-service
+    ports:
+      - "4705:4705"
+    environment:
+      - NODE_ENV=production
+      - PORT=4705
+    networks:
+      - risa-care-network
+
+  # Marketplace Service
+  risa-care-marketplace-service:
+    build: ./risa-care-marketplace-service
+    ports:
+      - "4706:4706"
+    environment:
+      - NODE_ENV=production
+      - PORT=4706
+    networks:
+      - risa-care-network
+
+  # Wellness Service
+  risa-care-wellness-service:
+    build: ./risa-care-wellness-service
+    ports:
+      - "4707:4707"
+    environment:
+      - NODE_ENV=production
+      - PORT=4707
+    networks:
+      - risa-care-network
+
+  # Corporate Service
+  risa-care-corporate-service:
+    build: ./risa-care-corporate-service
+    ports:
+      - "4708:4708"
+    environment:
+      - NODE_ENV=production
+      - PORT=4708
+    networks:
+      - risa-care-network
+
+  # MongoDB
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - risa-care-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - risa-care-network
+
+volumes:
+  mongo_data:
+  redis_data:
+
+networks:
+  risa-care-network:
+    driver: bridge

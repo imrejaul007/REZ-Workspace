@@ -1,0 +1,370 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: restauranthub-ingress
+  namespace: restauranthub
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/limit-connections: "20"
+    nginx.ingress.kubernetes.io/limit-rpm: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://restauranthub.com,https://www.restauranthub.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # Security headers
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header X-Frame-Options DENY always;
+      add_header X-Content-Type-Options nosniff always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';" always;
+    # SSL Configuration
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Caching
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+      }
+      location ~* \.(woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Access-Control-Allow-Origin "*";
+      }
+    # Load balancing
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$remote_addr"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "3600"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "3600"
+    nginx.ingress.kubernetes.io/session-cookie-path: "/"
+spec:
+  tls:
+  - hosts:
+    - restauranthub.com
+    - www.restauranthub.com
+    - api.restauranthub.com
+    secretName: restauranthub-tls
+  rules:
+  # Main website
+  - host: restauranthub.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-web-service
+            port:
+              number: 80
+  - host: www.restauranthub.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-web-service
+            port:
+              number: 80
+
+  # API endpoints
+  - host: api.restauranthub.com
+    http:
+      paths:
+      - path: /api/v1/health
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-api-service
+            port:
+              number: 80
+      - path: /api/v1/auth(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-api-service
+            port:
+              number: 80
+      - path: /api/v1/users(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-api-service
+            port:
+              number: 80
+      - path: /api/v1/restaurants(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-api-service
+            port:
+              number: 80
+      - path: /api/v1/jobs(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-api-service
+            port:
+              number: 80
+      - path: /api/v1/community(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-api-service
+            port:
+              number: 80
+      - path: /api/v1/admin(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: restauranthub-api-service
+            port:
+              number: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-ingress-config
+  namespace: restauranthub-ingress
+data:
+  # Main nginx configuration
+  nginx.conf: |
+    worker_processes auto;
+    worker_rlimit_nofile 65535;
+
+    events {
+        worker_connections 4096;
+        use epoll;
+        multi_accept on;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        # Logging format
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                       '$status $body_bytes_sent "$http_referer" '
+                       '"$http_user_agent" "$http_x_forwarded_for" '
+                       'rt=$request_time uct="$upstream_connect_time" '
+                       'uht="$upstream_header_time" urt="$upstream_response_time"';
+
+        access_log /var/log/nginx/access.log main;
+        error_log /var/log/nginx/error.log warn;
+
+        # Performance settings
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        server_tokens off;
+
+        # Buffer settings
+        client_body_buffer_size 16k;
+        client_header_buffer_size 1k;
+        client_max_body_size 50m;
+        large_client_header_buffers 4 8k;
+
+        # Timeout settings
+        client_body_timeout 30s;
+        client_header_timeout 30s;
+        send_timeout 30s;
+
+        # Gzip compression
+        gzip on;
+        gzip_vary on;
+        gzip_proxied any;
+        gzip_comp_level 6;
+        gzip_types
+            text/plain
+            text/css
+            text/xml
+            text/javascript
+            application/json
+            application/javascript
+            application/xml+rss
+            application/atom+xml
+            image/svg+xml;
+
+        # Rate limiting
+        limit_req_zone $binary_remote_addr zone=api:10m rate=100r/m;
+        limit_req_zone $binary_remote_addr zone=auth:10m rate=5r/m;
+        limit_conn_zone $binary_remote_addr zone=conn_limit_per_ip:10m;
+
+        # SSL settings
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
+        ssl_prefer_server_ciphers off;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_timeout 10m;
+
+        # Security headers
+        add_header X-Frame-Options DENY always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+        # Upstream configurations
+        upstream api_backend {
+            least_conn;
+            server restauranthub-api-service:80 max_fails=3 fail_timeout=30s;
+            keepalive 32;
+        }
+
+        upstream web_backend {
+            least_conn;
+            server restauranthub-web-service:80 max_fails=3 fail_timeout=30s;
+            keepalive 32;
+        }
+
+        # Health check endpoint
+        server {
+            listen 8080;
+            location /health {
+                access_log off;
+                return 200 "healthy\n";
+                add_header Content-Type text/plain;
+            }
+        }
+
+        # Redirect HTTP to HTTPS
+        server {
+            listen 80;
+            server_name _;
+            return 301 https://$host$request_uri;
+        }
+
+        # Main SSL server block
+        server {
+            listen 443 ssl http2;
+            server_name restauranthub.com www.restauranthub.com;
+
+            ssl_certificate /etc/nginx/ssl/tls.crt;
+            ssl_certificate_key /etc/nginx/ssl/tls.key;
+
+            # Security headers
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+            # Static file caching
+            location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+                expires 1y;
+                add_header Cache-Control "public, immutable";
+                add_header Access-Control-Allow-Origin "*";
+            }
+
+            location / {
+                proxy_pass http://web_backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_connect_timeout 30s;
+                proxy_send_timeout 120s;
+                proxy_read_timeout 120s;
+            }
+        }
+
+        # API server block
+        server {
+            listen 443 ssl http2;
+            server_name api.restauranthub.com;
+
+            ssl_certificate /etc/nginx/ssl/tls.crt;
+            ssl_certificate_key /etc/nginx/ssl/tls.key;
+
+            # Rate limiting for auth endpoints
+            location /api/v1/auth {
+                limit_req zone=auth burst=10 nodelay;
+                limit_conn conn_limit_per_ip 5;
+
+                proxy_pass http://api_backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            # General API rate limiting
+            location /api/ {
+                limit_req zone=api burst=50 nodelay;
+                limit_conn conn_limit_per_ip 10;
+
+                proxy_pass http://api_backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            # Health check (no rate limiting)
+            location /api/v1/health {
+                access_log off;
+                proxy_pass http://api_backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+        }
+    }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restauranthub-network-policy
+  namespace: restauranthub
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-ingress
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 3000
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: restauranthub-monitoring
+    ports:
+    - protocol: TCP
+      port: 9187
+    - protocol: TCP
+      port: 9121
+  egress:
+  - {}  # Allow all egress traffic
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restauranthub-web-service
+  namespace: restauranthub
+  labels:
+    app: restauranthub-web
+spec:
+  selector:
+    app: restauranthub-web
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  type: ClusterIP

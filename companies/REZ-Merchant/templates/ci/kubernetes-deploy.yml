@@ -1,0 +1,58 @@
+# ================================================
+# REZ-Merchant GitHub Actions Kubernetes Deploy Template
+# ================================================
+
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  KUBECONFIG: ${{ secrets.KUBECONFIG }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubectl
+        run: |
+          echo "$KUBECONFIG" | base64 -d > kubeconfig
+          echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
+
+      - name: Render Kubernetes manifests
+        run: |
+          for f in k8s/*.yaml; do
+            sed -i "s/\${VERSION}/${{ github.sha }}/g" "$f"
+            sed -i "s/\${NAMESPACE}/${{ inputs.environment == 'production' && 'rez-merchant-prod' || 'rez-merchant-staging' }}/g" "$f"
+          done
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/ --namespace=${{ inputs.environment == 'production' && 'rez-merchant-prod' || 'rez-merchant-staging' }}
+          kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n ${{ inputs.environment == 'production' && 'rez-merchant-prod' || 'rez-merchant-staging' }}
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n ${{ inputs.environment == 'production' && 'rez-merchant-prod' || 'rez-merchant-staging' }} -l app=${{ env.SERVICE_NAME }}
+          kubectl logs -n ${{ inputs.environment == 'production' && 'rez-merchant-prod' || 'rez-merchant-staging' }} -l app=${{ env.SERVICE_NAME }} --tail=20

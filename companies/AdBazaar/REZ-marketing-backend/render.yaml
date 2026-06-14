@@ -1,0 +1,20 @@
+# rez-marketing-backend - Deploys all marketing services together
+services:
+  - type: web
+    name: rez-marketing-backend
+    env: node
+    region: singapore
+    buildCommand: npm install
+    startCommand: bash start.sh
+    healthCheckPath: /health
+    autoDeploy: yes
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false

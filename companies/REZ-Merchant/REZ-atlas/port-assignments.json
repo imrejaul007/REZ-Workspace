@@ -1,0 +1,47 @@
+{
+  "description": "REZ Atlas - Merchant Intelligence Platform - Port Assignments",
+  "version": "1.0.0",
+  "date": "2026-06-06",
+
+  "atlas": {
+    "gateway": {
+      "rez-atlas-gateway": 5150
+    },
+    "core": {
+      "REZ-atlas-discover": 5151,
+      "REZ-atlas-maps": 5152,
+      "REZ-atlas-twin": 5153,
+      "REZ-atlas-score": 5154,
+      "REZ-atlas-signals": 5155
+    },
+    "sales_intelligence": {
+      "REZ-atlas-territory": 5170,
+      "REZ-atlas-routes": 5171,
+      "REZ-atlas-copilot": 5172,
+      "REZ-atlas-graph": 5173
+    },
+    "ui": {
+      "REZ-atlas-dashboard": 5190,
+      "REZ-atlas-field-app": 5191
+    }
+  },
+
+  "ranges": {
+    "atlas_gateway": 5150,
+    "atlas_core": "5151-5155",
+    "atlas_sales": "5170-5179",
+    "atlas_ui": "5190-5199"
+  },
+
+  "external_integrations": {
+    "google_places_api": "https://maps.googleapis.com/maps/api/place",
+    "maps_api": "https://maps.googleapis.com/maps/api"
+  },
+
+  "related_services": {
+    "hojai_merchant_intelligence": 4751,
+    "hojai_lead_service": 3001,
+    "hojai_knowledge_graph": 4786,
+    "hojai_crm": "hojai-ai/hojai-crm"
+  }
+}

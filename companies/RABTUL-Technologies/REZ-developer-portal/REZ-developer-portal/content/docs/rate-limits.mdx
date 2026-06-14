@@ -1,0 +1,82 @@
+---
+title: Rate Limits
+description: Understand request limits and best practices for optimal performance
+lastUpdated: May 17, 2026
+order: 6
+---
+
+## Overview
+
+To ensure fair usage and platform stability, all REZ API endpoints are subject to rate limiting. Limits are applied per API key and per endpoint.
+
+## Rate Limit Tiers
+
+Rate limits vary based on your subscription plan:
+
+| Plan | Requests/minute | Requests/day | Burst |
+|------|-----------------|--------------|-------|
+| Free | 60 | 1,000 | 10 |
+| Pro | 300 | 50,000 | 50 |
+| Enterprise | 1,000 | Unlimited | 200 |
+
+## Rate Limit Headers
+
+Every API response includes rate limit information in headers:
+
+```bash
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1715948460
+```
+
+## Handling Rate Limits
+
+When you exceed the rate limit, you will receive a 429 response:
+
+```json
+{
+  "error": {
+    "code": "rate_limit_exceeded",
+    "message": "Too many requests. Please retry after 30 seconds.",
+    "retry_after": 30
+  }
+}
+```
+
+## Best Practices
+
+Implement these strategies to avoid rate limit issues:
+
+1. **Implement exponential backoff for retries**
+2. **Cache responses when possible**
+3. **Use webhooks instead of polling**
+4. **Batch requests where supported**
+5. **Monitor rate limit headers**
+
+```typescript
+// Example: Implementing retry with exponential backoff
+async function fetchWithRetry(url, options, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    const response = await fetch(url, options);
+
+    if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After') || Math.pow(2, i);
+      await new Promise(r => setTimeout(r, retryAfter * 1000));
+      continue;
+    }
+
+    return response;
+  }
+  throw new Error('Max retries exceeded');
+}
+```
+
+## Endpoint-Specific Limits
+
+Some endpoints have additional limits:
+
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| `/api/auth/otp/send` | 5 | per hour |
+| `/api/auth/register` | 10 | per hour |
+| `/api/payments/create` | 100 | per minute |

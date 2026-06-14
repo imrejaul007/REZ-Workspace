@@ -1,0 +1,26 @@
+{
+  "name": "corpid-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CorpID - Universal Trust, Verification & Reputation Infrastructure",
+  "workspaces": [
+    "services/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "pnpm -r --parallel --stream run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r run clean",
+    "dev:services": "pnpm -r --filter corpid-* run dev"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

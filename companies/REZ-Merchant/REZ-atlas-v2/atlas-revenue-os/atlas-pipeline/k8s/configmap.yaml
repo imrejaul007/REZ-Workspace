@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atlas-pipeline-config
+  namespace: rez-merchant
+  labels:
+    app: atlas-pipeline
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "5181"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "atlas-pipeline"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"

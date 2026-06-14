@@ -1,0 +1,1 @@
+export { UserTwin, UserTwinDocument } from './userTwin.model';

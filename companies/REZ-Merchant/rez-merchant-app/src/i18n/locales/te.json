@@ -1,0 +1,42 @@
+{
+  "common": {
+    "welcome": "స్వాగతం",
+    "login": "లాగిన్",
+    "logout": "లాగ్ అవుట్",
+    "save": "సేవ్",
+    "cancel": "రద్దు",
+    "delete": "తొలగించు",
+    "edit": "సవరించు",
+    "loading": "లోడ్ అవుతోంది...",
+    "error": "లోపం",
+    "success": "విజయం"
+  },
+  "auth": {
+    "email": "ఇమెయిల్",
+    "password": "పాస్‌వర్డ్",
+    "signIn": "సైన్ ఇన్",
+    "forgotPassword": "పాస్‌వర్డ్ మర్చిపోయారా?",
+    "noAccount": "ఖాతా లేదా?",
+    "signUp": "నమోదు"
+  },
+  "dashboard": {
+    "title": "డాష్‌బోర్డ్",
+    "totalSales": "మొత్తం అమ్మకాలు",
+    "orders": "ఆర్డర్లు",
+    "customers": "కస్టమర్లు",
+    "revenue": "ఆదాయం"
+  },
+  "menu": {
+    "home": "హోమ్",
+    "products": "ఉత్పత్తులు",
+    "orders": "ఆర్డర్లు",
+    "settings": "సెట్టింగులు",
+    "profile": "ప్రొఫైల్"
+  },
+  "settings": {
+    "language": "భాష",
+    "selectLanguage": "భాషను ఎంచుకోండి",
+    "notifications": "నోటిఫికేషన్లు",
+    "darkMode": "డార్క్ మోడ్"
+  }
+}

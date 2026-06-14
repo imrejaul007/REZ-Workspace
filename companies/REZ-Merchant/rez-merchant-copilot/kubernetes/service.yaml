@@ -1,0 +1,20 @@
+# Kubernetes Service for rez-merchant-copilot
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-merchant-copilot
+  namespace: rez-merchant
+  labels:
+    app: rez-merchant-copilot
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-merchant-copilot service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4022
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-merchant-copilot

@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "ReZ Ride Driver",
+    "slug": "rez-ride-driver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "rezridedriver",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.rezride.driver",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "ReZ Ride needs your location to accept rides",
+        "NSLocationAlwaysUsageDescription": "ReZ Ride needs background location for ride tracking",
+        "UIBackgroundModes": ["location", "audio"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.rezride.driver",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "CALL_PHONE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow ReZ Ride to use your location for ride tracking"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      },
+      "API_URL": "https://api.rezride.com"
+    }
+  }
+}

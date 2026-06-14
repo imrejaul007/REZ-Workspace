@@ -1,0 +1,425 @@
+# AdBazaar Social Automation Services - K8s Manifests
+# Namespace: adbazaar-social
+
+---
+# 1. instagram-shop-integration (Port 5080)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-instagram-shop
+  namespace: adbazaar-social
+  labels:
+    app: ad-bazaar-instagram-shop
+    tier: social-automation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-instagram-shop
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-instagram-shop
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5080"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/instagram-shop-integration:latest
+        ports:
+        - containerPort: 5080
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5080
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5080
+
+---
+# 2. instagram-insights-service (Port 5082)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-instagram-insights
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-instagram-insights
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-instagram-insights
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5082"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/instagram-insights-service:latest
+        ports:
+        - containerPort: 5082
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5082
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5082
+
+---
+# 3. social-content-publisher (Port 5083)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-social-publisher
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-social-publisher
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-social-publisher
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5083"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/social-content-publisher:latest
+        ports:
+        - containerPort: 5083
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5083
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5083
+
+---
+# 4. hashtag-research-engine (Port 5090)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-hashtag-research
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-hashtag-research
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-hashtag-research
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5090"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/hashtag-research-engine:latest
+        ports:
+        - containerPort: 5090
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5090
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5090
+
+---
+# 5. caption-generator-ai (Port 5091)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-caption-generator
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-caption-generator
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-caption-generator
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5091"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/caption-generator-ai:latest
+        ports:
+        - containerPort: 5091
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5091
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5091
+
+---
+# 6. content-calendar-service (Port 5092)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-content-calendar
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-content-calendar
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-content-calendar
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5092"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/content-calendar-service:latest
+        ports:
+        - containerPort: 5092
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5092
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5092
+
+---
+# 7. follower-growth-tracker (Port 5093)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-follower-growth
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-follower-growth
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-follower-growth
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5093"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/follower-growth-tracker:latest
+        ports:
+        - containerPort: 5093
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5093
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5093
+
+---
+# 8. youtube-integration (Port 5094)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-youtube-integration
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-youtube-integration
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-youtube-integration
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5094"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/youtube-integration:latest
+        ports:
+        - containerPort: 5094
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5094
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5094
+
+---
+# 9. pinterest-integration (Port 5095)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-pinterest-integration
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-pinterest-integration
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-pinterest-integration
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5095"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/pinterest-integration:latest
+        ports:
+        - containerPort: 5095
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5095
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5095
+
+---
+# 10. content-repurposing-engine (Port 5100)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-content-repurposing
+  namespace: adbazaar-social
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-content-repurposing
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-content-repurposing
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5100"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/content-repurposing-engine:latest
+        ports:
+        - containerPort: 5100
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5100
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5100

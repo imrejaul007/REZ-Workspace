@@ -1,0 +1,24 @@
+{
+  "name": "risna-corpperks-bridge",
+  "version": "1.0.0",
+  "description": "RisnaEstate - CorpPerks Bridge Service",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "build": "babel src --out-dir dist --copy-files --config-file ../../babel.config.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "ts-node-dev": "^2.0.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "discovered": "2026-05-27T14:00:56.614Z",
+  "services": {
+    "core": [
+      {
+        "name": "risa-care-api-gateway",
+        "port": 4700,
+        "description": "Main API Gateway"
+      },
+      {
+        "name": "risa-care-records-service",
+        "port": 4702,
+        "description": "Health Records"
+      },
+      {
+        "name": "risa-care-ai-service",
+        "port": 4703,
+        "description": "AI Interpretation"
+      },
+      {
+        "name": "risa-care-profile-service",
+        "port": 4704,
+        "description": "User Profiles"
+      },
+      {
+        "name": "risa-care-booking-service",
+        "port": 4705,
+        "description": "Appointments"
+      },
+      {
+        "name": "risa-care-marketplace-service",
+        "port": 4706,
+        "description": "Labs & Tests"
+      },
+      {
+        "name": "risa-care-wellness-service",
+        "port": 4707,
+        "description": "Wellness Tracking"
+      },
+      {
+        "name": "risa-care-corporate-service",
+        "port": 4708,
+        "description": "Corporate Wellness"
+      }
+    ],
+    "frontend": [
+      {
+        "name": "risa-care-mobile",
+        "platform": "React Native (Expo)",
+        "description": "Mobile App"
+      },
+      {
+        "name": "risa-care-web",
+        "platform": "React + Vite",
+        "description": "Web Dashboard"
+      }
+    ],
+    "shared": [
+      {
+        "name": "shared",
+        "description": "Shared Types, Utils, Errors"
+      },
+      {
+        "name": "integrations",
+        "description": "REZ Intelligence, RABTUL"
+      }
+    ]
+  },
+  "integrations": [
+    {
+      "service": "REZ Intelligence",
+      "port": 4018,
+      "purpose": "Intent Prediction"
+    },
+    {
+      "service": "Health Expert",
+      "port": 3011,
+      "purpose": "Medical Interpretation"
+    },
+    {
+      "service": "Memory Layer",
+      "port": 4201,
+      "purpose": "Health Timeline & History"
+    },
+    {
+      "service": "Signal Aggregator",
+      "port": 4142,
+      "purpose": "Behavioral Signals"
+    },
+    {
+      "service": "RABTUL Auth",
+      "port": 4002,
+      "purpose": "JWT Authentication"
+    },
+    {
+      "service": "RABTUL Payment",
+      "port": 4001,
+      "purpose": "Payments"
+    },
+    {
+      "service": "RABTUL Wallet",
+      "port": 4004,
+      "purpose": "Coins & Cashback"
+    },
+    {
+      "service": "RABTUL Notify",
+      "port": 4011,
+      "purpose": "Push Notifications"
+    }
+  ],
+  "total": {
+    "services": 8,
+    "frontend": 2,
+    "integrations": 8
+  }
+}

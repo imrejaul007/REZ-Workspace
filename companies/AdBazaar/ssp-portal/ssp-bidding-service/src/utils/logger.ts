@@ -1,0 +1,55 @@
+import winston from 'winston';
+
+const { combine, timestamp, printf, colorize, errors } = winston.format;
+
+const logFormat = printf(({ level, message, timestamp, stack, ...metadata }) => {
+  let msg = `${timestamp} [${level}]: ${message}`;
+
+  if (Object.keys(metadata).length > 0) {
+    msg += ` ${JSON.stringify(metadata)}`;
+  }
+
+  if (stack) {
+    msg += `\n${stack}`;
+  }
+
+  return msg;
+});
+
+export const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: combine(
+    errors({ stack: true }),
+    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    logFormat
+  ),
+  defaultMeta: { service: 'ssp-bidding-service' },
+  transports: [
+    new winston.transports.Console({
+      format: combine(
+        colorize(),
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        logFormat
+      ),
+    }),
+    new winston.transports.File({
+      filename: 'logs/error.log',
+      level: 'error',
+      maxsize: 5242880,
+      maxFiles: 5,
+    }),
+    new winston.transports.File({
+      filename: 'logs/combined.log',
+      maxsize: 5242880,
+      maxFiles: 5,
+    }),
+  ],
+});
+
+export const createBidLogger = (bidId: string) => {
+  return logger.child({ bidId });
+};
+
+export const createAuctionLogger = (auctionId: string) => {
+  return logger.child({ auctionId });
+};

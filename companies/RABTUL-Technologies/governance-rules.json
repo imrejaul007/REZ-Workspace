@@ -1,0 +1,288 @@
+{
+  "version": "1.0.0",
+  "description": "RABTUL Governance Rules - Mandatory patterns for all ecosystem services",
+  "lastUpdated": "2026-05-17",
+  "enforcement": {
+    "preCommit": true,
+    "ciRequired": true,
+    "blockingViolations": true
+  },
+
+  "serviceCategories": {
+    "categoryA": {
+      "name": "MUST_USE_RABTUL",
+      "description": "Services that MUST use RABTUL infrastructure - no local implementations allowed",
+      "mandatory": true,
+      "services": [
+        {
+          "name": "Authentication",
+          "keywords": ["auth", "jwt", "otp", "mfa", "oauth", "password", "session", "login", "register", "verify"],
+          "rbtulService": "rez-auth-service",
+          "rbtulPort": 4002,
+          "rbtulEndpoint": "https://rez-auth-service.onrender.com"
+        },
+        {
+          "name": "Payment Processing",
+          "keywords": ["payment", "razorpay", "upi", "wallet-pay", "card-payment", "transaction"],
+          "rbtulService": "rez-payment-service",
+          "rbtulPort": 4001,
+          "rbtulEndpoint": "https://rez-payment-service.onrender.com"
+        },
+        {
+          "name": "Wallet/Loyalty",
+          "keywords": ["wallet", "coin", "balance", "loyalty", "points", "reward", "cashback", "bnpl"],
+          "rbtulService": "rez-wallet-service",
+          "rbtulPort": 4004,
+          "rbtulEndpoint": "https://rez-wallet-service.onrender.com"
+        },
+        {
+          "name": "Analytics",
+          "keywords": ["analytics", "dashboard", "metrics", "stats", "reporting", "kpi"],
+          "rbtulService": "rez-analytics-service",
+          "rbtulPort": 4016,
+          "rbtulEndpoint": "https://rez-analytics-service.onrender.com"
+        }
+      ]
+    },
+    "categoryB": {
+      "name": "SHOULD_USE_RABTUL",
+      "description": "Services that SHOULD use RABTUL infrastructure - local implementations require justification",
+      "mandatory": false,
+      "services": [
+        {
+          "name": "Notifications",
+          "keywords": ["notification", "push", "sms", "email", "whatsapp", "messaging", "alert"],
+          "rbtulService": "rez-notifications-service",
+          "rbtulPort": 4011,
+          "rbtulEndpoint": "https://rez-notifications-service.onrender.com"
+        },
+        {
+          "name": "File Storage",
+          "keywords": ["storage", "upload", "file", "s3", "bucket", "media"],
+          "rbtulService": "RABTUL-storage-service",
+          "rbtulPort": 4014,
+          "rbtulEndpoint": "https://rez-storage-service.onrender.com"
+        },
+        {
+          "name": "Email",
+          "keywords": ["email", "mail", "smtp", "sendgrid", "mailgun"],
+          "rbtulService": "rez-email-service",
+          "rbtulPort": 4015,
+          "rbtulEndpoint": "https://rez-email-service.onrender.com"
+        },
+        {
+          "name": "Search",
+          "keywords": ["search", "elasticsearch", "full-text", "autocomplete"],
+          "rbtulService": "rez-search-service",
+          "rbtulPort": 4008,
+          "rbtulEndpoint": "https://rez-search-service.onrender.com"
+        }
+      ]
+    }
+  },
+
+  "prohibitedPatterns": {
+    "critical": [
+      {
+        "id": "LOCAL_RAZORPAY",
+        "severity": "CRITICAL",
+        "description": "Local Razorpay implementation - must use RABTUL payment service",
+        "patterns": [
+          "razorpay.ts",
+          "razorpay.service.ts",
+          "razorpayCardService.ts",
+          "razorpayWebhook.ts",
+          "razorpay-webhook"
+        ],
+        "exceptions": ["RABTUL-Technologies/rez-payment-service"],
+        "filePatterns": [
+          "*razorpay*.ts",
+          "*razorpay*.js"
+        ],
+        "remediation": "Replace with RABTUL payment service integration"
+      },
+      {
+        "id": "LOCAL_AUTH",
+        "severity": "CRITICAL",
+        "description": "Local authentication implementation - must use RABTUL auth service",
+        "patterns": [
+          "auth.service.ts",
+          "auth.middleware.ts",
+          "local-auth.ts",
+          "auth-context.ts",
+          "auth-handler.ts"
+        ],
+        "exceptions": [
+          "RABTUL-Technologies/rez-auth-service",
+          "RTNM-Group/rez-security-middleware"
+        ],
+        "filePatterns": [
+          "*auth*.ts",
+          "*auth*.js",
+          "*session*.ts",
+          "*session*.js"
+        ],
+        "keywords": [
+          "bcrypt",
+          "jsonwebtoken",
+          "jwt.sign",
+          "jwt.verify",
+          "password.*hash",
+          "comparePassword"
+        ],
+        "remediation": "Replace with RABTUL auth service or use @rez/auth package"
+      },
+      {
+        "id": "LOCAL_WALLET",
+        "severity": "CRITICAL",
+        "description": "Local wallet implementation - must use RABTUL wallet service",
+        "patterns": [
+          "wallet.service.ts",
+          "coin.service.ts",
+          "balance.service.ts",
+          "loyalty.service.ts"
+        ],
+        "exceptions": ["RABTUL-Technologies/rez-wallet-service"],
+        "filePatterns": [
+          "*wallet*.ts",
+          "*coin*.ts",
+          "*balance*.ts"
+        ],
+        "remediation": "Replace with RABTUL wallet service integration"
+      }
+    ],
+    "high": [
+      {
+        "id": "HARDCODED_SECRETS",
+        "severity": "HIGH",
+        "description": "Hardcoded secrets in code",
+        "patterns": [
+          "RAZORPAY_KEY_ID",
+          "RAZORPAY_KEY_SECRET",
+          "STRIPE_SECRET",
+          "AWS_SECRET",
+          "PRIVATE_KEY"
+        ],
+        "filePatterns": ["*.ts", "*.js", "*.json"],
+        "exclusions": ["*.test.ts", "*.spec.ts", "node_modules"],
+        "remediation": "Move to environment variables or RABTUL secrets manager"
+      },
+      {
+        "id": "RAW_MONGODB_QUERIES",
+        "severity": "HIGH",
+        "description": "Raw MongoDB queries without proper sanitization",
+        "patterns": [
+          "\\$\\{.*req\\..*\\}",
+          "collection\\.find.*\\+",
+          "collection\\.insertOne.*\\+"
+        ],
+        "filePatterns": ["*.ts", "*.js"],
+        "remediation": "Use parameterized queries or ORM"
+      }
+    ],
+    "medium": [
+      {
+        "id": "CATEGORY_B_LOCAL_IMPL",
+        "severity": "MEDIUM",
+        "description": "Local implementation of Category B services",
+        "requiresJustification": true,
+        "patterns": [
+          "notification.service.ts",
+          "email.service.ts",
+          "storage.service.ts"
+        ],
+        "filePatterns": [
+          "*notification*.ts",
+          "*email*.ts",
+          "*storage*.ts"
+        ],
+        "remediation": "Consider using RABTUL infrastructure or document justification"
+      },
+      {
+        "id": "DUPLICATE_LOGIC",
+        "severity": "MEDIUM",
+        "description": "Duplicate logic that exists in RABTUL services",
+        "patterns": [
+          "retry.*logic",
+          "circuit.*breaker",
+          "rate.*limit",
+          "cache.*logic"
+        ],
+        "filePatterns": ["*.ts", "*.js"],
+        "remediation": "Use RABTUL infrastructure services (REZ-circuit-breaker, REZ-retry-service)"
+      }
+    ]
+  },
+
+  "portRanges": {
+    "rbtulCore": {
+      "range": [4000, 4030],
+      "description": "RABTUL core services",
+      "services": {
+        "api-gateway": 4000,
+        "rez-payment-service": 4001,
+        "rez-auth-service": 4002,
+        "rez-wallet-service": 4004,
+        "rez-order-service": 4006,
+        "rez-catalog-service": 4007,
+        "rez-search-service": 4008,
+        "rez-delivery-service": 4009,
+        "rez-notifications-service": 4011,
+        "rez-profile-service": 4013,
+        "rez-analytics-service": 4016,
+        "rez-insights-service": 4017,
+        "rez-booking-service": 4020
+      }
+    },
+    "rbtulInfrastructure": {
+      "range": [4030, 4060],
+      "description": "RABTUL infrastructure services",
+      "services": {
+        "REZ-circuit-breaker": 4030,
+        "REZ-retry-service": 4031,
+        "REZ-dlq-service": 4032,
+        "REZ-idempotency-service": 4033,
+        "REZ-policy-engine": 4034,
+        "REZ-secrets-manager": 4035,
+        "REZ-scheduler-service": 4038,
+        "rez-gamification-service": 4041,
+        "REZ-workflow-builder": 4045,
+        "REZ-ai-agent-studio": 4046,
+        "REZ-checkout-optimization": 4050,
+        "REZ-woocommerce-connector": 4051,
+        "REZ-logistics-aggregator": 4052
+      }
+    }
+  },
+
+  "allowedCompanies": [
+    "RABTUL-Technologies",
+    "REZ-Intelligence",
+    "REZ-Consumer",
+    "REZ-Merchant",
+    "REZ-Media",
+    "StayOwn-Hospitality",
+    "CorpPerks",
+    "RTNM-Group",
+    "RTNM-Digital"
+  ],
+
+  "enforcementRules": {
+    "failOnCritical": true,
+    "failOnHigh": true,
+    "failOnMedium": false,
+    "allowJustifications": true,
+    "justificationFile": ".governance-justification.md"
+  },
+
+  "exceptions": {
+    "archived": {
+      "path": "Archive/",
+      "reason": "Archived services - no enforcement"
+    },
+    "backups": {
+      "pathPattern": "*.backup",
+      "reason": "Backup copies - no enforcement"
+    }
+  }
+}

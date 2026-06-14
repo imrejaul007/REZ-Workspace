@@ -1,0 +1,118 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 48px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo span {
+  font-size: 56px;
+}
+
+.logo h1 {
+  margin: 12px 0 0;
+  background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.roleSelect p, .form h2, .form p {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.roles {
+  display: grid;
+  gap: 16px;
+}
+
+.roleCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: #f9fafb;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.roleCard:hover {
+  border-color: #8b5cf6;
+  background: #f3f4f6;
+}
+
+.roleCard span:first-child {
+  font-size: 40px;
+}
+
+.roleCard h3 {
+  margin: 0;
+  color: #1f2937;
+}
+
+.roleCard p {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.phoneInput {
+  display: flex;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.phoneInput span {
+  padding: 14px 16px;
+  background: #f9fafb;
+  color: #6b7280;
+  border-right: 1px solid #e5e7eb;
+}
+
+.phoneInput input {
+  flex: 1;
+  padding: 14px 16px;
+  border: none;
+  font-size: 15px;
+}
+
+.phoneInput input:focus {
+  outline: none;
+}
+
+.btn {
+  padding: 14px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}

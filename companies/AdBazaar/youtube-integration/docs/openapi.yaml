@@ -1,0 +1,1232 @@
+openapi: 3.0.3
+info:
+  title: YouTube Integration Service
+  description: |
+    YouTube API integration service for video publishing and management.
+    Connect channels, upload videos, manage playlists, handle comments, and stream live.
+  version: 1.0.0
+  contact:
+    name: AdBazaar Support
+    email: support@adBazaar.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:5094
+    description: Local development server
+  - url: https://api.adBazaar.com/youtube
+    description: Production server
+
+tags:
+  - name: Channels
+    description: YouTube channel management
+  - name: Videos
+    description: Video upload and management
+  - name: Playlists
+    description: Playlist management
+  - name: Comments
+    description: Comment moderation
+  - name: Live
+    description: Live streaming
+  - name: Auth
+    description: OAuth authentication
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the service is running and healthy
+      tags:
+        - Utilities
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: youtube-integration
+                  version:
+                    type: string
+                    example: 1.0.0
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/auth/oauth:
+    get:
+      summary: Initiate OAuth flow
+      description: Start the YouTube OAuth authentication flow
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: redirect_uri
+          in: query
+          description: OAuth redirect URI
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to YouTube OAuth
+          headers:
+            Location:
+              schema:
+                type: string
+              description: YouTube OAuth URL
+
+  /api/auth/callback:
+    get:
+      summary: OAuth callback
+      description: Handle OAuth callback from YouTube
+      tags:
+        - Auth
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: OAuth authorization code
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: State parameter for CSRF protection
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OAuth successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      expires_in:
+                        type: integer
+
+  /api/auth/connect:
+    post:
+      summary: Connect channel with tokens
+      description: Connect a YouTube channel using existing tokens
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - youtubeChannelId
+                - accessToken
+              properties:
+                youtubeChannelId:
+                  type: string
+                accessToken:
+                  type: string
+                refreshToken:
+                  type: string
+      responses:
+        '201':
+          description: Channel connected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubeChannel'
+
+  /api/channels:
+    get:
+      summary: List connected channels
+      description: Get all YouTube channels connected to this account
+      tags:
+        - Channels
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Channels retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/YouTubeChannel'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Connect new channel
+      description: Connect a new YouTube channel
+      tags:
+        - Channels
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - youtubeChannelId
+                - accessToken
+              properties:
+                youtubeChannelId:
+                  type: string
+                accessToken:
+                  type: string
+                refreshToken:
+                  type: string
+            example:
+              youtubeChannelId: "UC123456789"
+              accessToken: "ya29.xxx"
+              refreshToken: "1//xxx"
+      responses:
+        '201':
+          description: Channel connected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubeChannel'
+
+  /api/channels/{id}:
+    get:
+      summary: Get channel details
+      description: Get details of a specific YouTube channel
+      tags:
+        - Channels
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Channel ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Channel retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubeChannel'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Disconnect channel
+      description: Disconnect a YouTube channel
+      tags:
+        - Channels
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Channel ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Channel disconnected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Channel disconnected successfully"
+
+  /api/channels/{id}/refresh:
+    post:
+      summary: Refresh channel stats
+      description: Refresh subscriber count and channel statistics
+      tags:
+        - Channels
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Channel ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Channel stats refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubeChannel'
+
+  /api/channels/search:
+    get:
+      summary: Search channels
+      description: Search for YouTube channels
+      tags:
+        - Channels
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/YouTubeChannelSearchResult'
+
+  /api/videos:
+    post:
+      summary: Upload video
+      description: Upload a video to YouTube
+      tags:
+        - Videos
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - video
+                - youtubeChannelId
+                - title
+              properties:
+                video:
+                  type: string
+                  format: binary
+                  description: Video file
+                youtubeChannelId:
+                  type: string
+                title:
+                  type: string
+                  maxLength: 100
+                description:
+                  type: string
+                  maxLength: 5000
+                tags:
+                  type: string
+                  description: Comma-separated tags
+                categoryId:
+                  type: string
+                privacyStatus:
+                  type: string
+                  enum: [public, unlisted, private]
+                  default: private
+      responses:
+        '201':
+          description: Video uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubeVideo'
+
+    get:
+      summary: List videos
+      description: List videos from connected channels
+      tags:
+        - Videos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: youtubeChannelId
+          in: query
+          description: Filter by channel ID
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [processing, ready, failed]
+      responses:
+        '200':
+          description: Videos retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/YouTubeVideo'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /api/videos/{id}:
+    get:
+      summary: Get video details
+      description: Get details of a specific video
+      tags:
+        - Videos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Video ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Video retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubeVideo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update video
+      description: Update video metadata
+      tags:
+        - Videos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Video ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                categoryId:
+                  type: string
+                privacyStatus:
+                  type: string
+                  enum: [public, unlisted, private]
+      responses:
+        '200':
+          description: Video updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubeVideo'
+
+    delete:
+      summary: Delete video
+      description: Delete a video from YouTube
+      tags:
+        - Videos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Video ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Video deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Video deleted successfully"
+
+  /api/videos/{id}/analytics:
+    get:
+      summary: Get video analytics
+      description: Get analytics for a specific video
+      tags:
+        - Videos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Video ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/VideoAnalytics'
+
+  /api/videos/{id}/thumbnail:
+    post:
+      summary: Set video thumbnail
+      description: Upload a custom thumbnail for a video
+      tags:
+        - Videos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Video ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - thumbnail
+              properties:
+                thumbnail:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Thumbnail set successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubeVideo'
+
+  /api/playlists:
+    post:
+      summary: Create playlist
+      description: Create a new YouTube playlist
+      tags:
+        - Playlists
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - youtubeChannelId
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                youtubeChannelId:
+                  type: string
+                privacyStatus:
+                  type: string
+                  enum: [public, unlisted, private]
+                  default: private
+            example:
+              title: "My Best Videos"
+              description: "A collection of my best work"
+              youtubeChannelId: "UC123456789"
+              privacyStatus: unlisted
+      responses:
+        '201':
+          description: Playlist created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/YouTubePlaylist'
+
+    get:
+      summary: List playlists
+      description: List all playlists from connected channels
+      tags:
+        - Playlists
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: youtubeChannelId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Playlists retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/YouTubePlaylist'
+
+  /api/playlists/{id}/videos:
+    post:
+      summary: Add video to playlist
+      description: Add a video to a playlist
+      tags:
+        - Playlists
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Playlist ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - videoId
+              properties:
+                videoId:
+                  type: string
+            example:
+              videoId: "vid_abc123"
+      responses:
+        '200':
+          description: Video added to playlist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+
+  /api/comments:
+    get:
+      summary: List comments
+      description: List comments from videos
+      tags:
+        - Comments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: videoId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [published, heldForReview, likelySpam]
+      responses:
+        '200':
+          description: Comments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/YouTubeComment'
+
+    post:
+      summary: Moderate comment
+      description: Approve, hold, or spam-mark a comment
+      tags:
+        - Comments
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - commentId
+                - action
+              properties:
+                commentId:
+                  type: string
+                action:
+                  type: string
+                  enum: [approve, hold, spam]
+            example:
+              commentId: "comment_123"
+              action: "approve"
+      responses:
+        '200':
+          description: Comment moderated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+
+  /api/live/start:
+    post:
+      summary: Start live stream
+      description: Start a live broadcast
+      tags:
+        - Live
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - youtubeChannelId
+                - title
+              properties:
+                youtubeChannelId:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+                privacyStatus:
+                  type: string
+                  enum: [public, unlisted, private]
+                streamKey:
+                  type: string
+            example:
+              youtubeChannelId: "UC123456789"
+              title: "Live Q&A Session"
+              description: "Join us for a live Q&A"
+              privacyStatus: public
+      responses:
+        '201':
+          description: Live stream started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/LiveStream'
+
+  /api/live/end:
+    post:
+      summary: End live stream
+      description: End an active live broadcast
+      tags:
+        - Live
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - streamId
+              properties:
+                streamId:
+                  type: string
+            example:
+              streamId: "live_abc123"
+      responses:
+        '200':
+          description: Live stream ended
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/LiveStream'
+
+  /api/live/stats:
+    get:
+      summary: Get live stream stats
+      description: Get statistics for active or recent live streams
+      tags:
+        - Live
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: streamId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Live stats retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/LiveStreamStats'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from REZ Auth Service
+
+  schemas:
+    YouTubeChannel:
+      type: object
+      properties:
+        id:
+          type: string
+        youtubeChannelId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        customUrl:
+          type: string
+        subscriberCount:
+          type: integer
+        videoCount:
+          type: integer
+        viewCount:
+          type: integer
+        thumbnailUrl:
+          type: string
+        bannerUrl:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    YouTubeChannelSearchResult:
+      type: object
+      properties:
+        youtubeChannelId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        subscriberCount:
+          type: integer
+        videoCount:
+          type: integer
+        thumbnailUrl:
+          type: string
+
+    YouTubeVideo:
+      type: object
+      properties:
+        id:
+          type: string
+        youtubeVideoId:
+          type: string
+        youtubeChannelId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        categoryId:
+          type: string
+        privacyStatus:
+          type: string
+          enum: [public, unlisted, private]
+        status:
+          type: string
+          enum: [processing, ready, failed]
+        thumbnailUrl:
+          type: string
+        duration:
+          type: string
+        viewCount:
+          type: integer
+        likeCount:
+          type: integer
+        commentCount:
+          type: integer
+        publishedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    VideoAnalytics:
+      type: object
+      properties:
+        videoId:
+          type: string
+        views:
+          type: integer
+        watchTimeMinutes:
+          type: number
+        averageViewDuration:
+          type: number
+        impressions:
+          type: integer
+        clickThroughRate:
+          type: number
+        likes:
+          type: integer
+        dislikes:
+          type: integer
+        comments:
+          type: integer
+        shares:
+          type: integer
+
+    YouTubePlaylist:
+      type: object
+      properties:
+        id:
+          type: string
+        youtubePlaylistId:
+          type: string
+        youtubeChannelId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        privacyStatus:
+          type: string
+          enum: [public, unlisted, private]
+        itemCount:
+          type: integer
+        thumbnailUrl:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    YouTubeComment:
+      type: object
+      properties:
+        id:
+          type: string
+        youtubeCommentId:
+          type: string
+        youtubeVideoId:
+          type: string
+        authorName:
+          type: string
+        authorChannelUrl:
+          type: string
+        textDisplay:
+          type: string
+        textOriginal:
+          type: string
+        likeCount:
+          type: integer
+        replyCount:
+          type: integer
+        publishedAt:
+          type: string
+          format: date-time
+        moderationStatus:
+          type: string
+          enum: [published, heldForReview, likelySpam]
+
+    LiveStream:
+      type: object
+      properties:
+        id:
+          type: string
+        youtubeBroadcastId:
+          type: string
+        youtubeChannelId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [created, testing, live, complete, failed]
+        privacyStatus:
+          type: string
+        streamKey:
+          type: string
+        rtmpUrl:
+          type: string
+        thumbnailUrl:
+          type: string
+        actualStartTime:
+          type: string
+          format: date-time
+        actualEndTime:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    LiveStreamStats:
+      type: object
+      properties:
+        streamId:
+          type: string
+        concurrentViewers:
+          type: integer
+        peakViewers:
+          type: integer
+        totalViews:
+          type: integer
+        chatMessages:
+          type: integer
+        likes:
+          type: integer
+        averageBitrate:
+          type: integer
+        droppedFrames:
+          type: number
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        code:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "Missing required field"
+            code: "MISSING_TITLE"
+
+    Unauthorized:
+      description: Unauthorized - missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "Unauthorized"
+
+    NotFound:
+      description: Not found - resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "Video not found"
+            code: "VIDEO_NOT_FOUND"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "Internal server error"

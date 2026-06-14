@@ -1,0 +1,28 @@
+{
+  "name": "@rez/intelligence-connectors",
+  "version": "1.0.0",
+  "description": "REZ Intelligence Event Connectors - Hook into existing services to emit events",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    },
+    "./commerce": "./src/orderConnector.js",
+    "./auth": "./src/authConnector.js",
+    "./payment": "./src/paymentConnector.js",
+    "./notification": "./src/notificationConnector.js"
+  }
+}

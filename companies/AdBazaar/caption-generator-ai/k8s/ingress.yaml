@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-caption-generator
+  labels:
+    app: ad-bazaar-caption-generator
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - caption-generator.adbazaar.internal
+    secretName: ad-bazaar-caption-generator-tls
+  rules:
+  - host: caption-generator.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-caption-generator
+            port:
+              number: 80

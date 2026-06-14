@@ -1,0 +1,347 @@
+version: '3.8'
+
+services:
+  # ===========================================
+  # CORE TWIN PLATFORM
+  # ===========================================
+
+  twin-hub:
+    build: ./codebase/assetmind-twin-hub
+    ports:
+      - "5252:5252"
+    environment:
+      - SERVICE_NAME=twin-hub
+      - PORT=5252
+    networks:
+      - assetmind-network
+
+  decision-twin:
+    build: ./codebase/assetmind-decision-twin
+    ports:
+      - "5250:5250"
+    environment:
+      - SERVICE_NAME=decision-twin
+      - PORT=5250
+    networks:
+      - assetmind-network
+
+  reaction-engine:
+    build: ./codebase/assetmind-reaction-engine
+    ports:
+      - "5255:5255"
+    environment:
+      - SERVICE_NAME=reaction-engine
+      - PORT=5255
+    networks:
+      - assetmind-network
+
+  voice-bridge:
+    build: ./codebase/assetmind-voice-bridge
+    ports:
+      - "5265:5265"
+    environment:
+      - SERVICE_NAME=voice-bridge
+      - PORT=5265
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # ASSET TWINS
+  # ===========================================
+
+  asset-twin:
+    build: ./codebase/assetmind-asset-twin
+    ports:
+      - "5002:5002"
+    environment:
+      - SERVICE_NAME=asset-twin
+      - PORT=5002
+    networks:
+      - assetmind-network
+
+  portfolio-twin:
+    build: ./codebase/assetmind-portfolio-twin
+    ports:
+      - "5004:5004"
+    networks:
+      - assetmind-network
+
+  investor-twin:
+    build: ./codebase/assetmind-investor-twin
+    ports:
+      - "5005:5005"
+    networks:
+      - assetmind-network
+
+  economic-twin:
+    build: ./codebase/assetmind-economic-twin
+    ports:
+      - "5041:5041"
+    networks:
+      - assetmind-network
+
+  competitor-twin:
+    build: ./codebase/assetmind-competitor-twin
+    ports:
+      - "5258:5258"
+    networks:
+      - assetmind-network
+
+  analyst-twin:
+    build: ./codebase/assetmind-analyst-twin
+    ports:
+      - "5260:5260"
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # INTELLIGENCE
+  # ===========================================
+
+  kronos:
+    build: ./codebase/assetmind-kronos
+    ports:
+      - "5165:5165"
+    networks:
+      - assetmind-network
+
+  intelligence:
+    build: ./codebase/assetmind-intelligence
+    ports:
+      - "5160:5160"
+    networks:
+      - assetmind-network
+
+  reasoning:
+    build: ./codebase/assetmind-reasoning
+    ports:
+      - "5055:5055"
+    networks:
+      - assetmind-network
+
+  copilot:
+    build: ./codebase/assetmind-copilot
+    ports:
+      - "5295:5295"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    networks:
+      - assetmind-network
+
+  multiagent:
+    build: ./codebase/assetmind-multiagent
+    ports:
+      - "5195:5195"
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # DATA & INFRASTRUCTURE
+  # ===========================================
+
+  knowledge-graph:
+    build: ./codebase/assetmind-knowledge-graph
+    ports:
+      - "5040:5040"
+    networks:
+      - assetmind-network
+
+  financial-memory:
+    build: ./codebase/assetmind-financial-memory
+    ports:
+      - "5031:5031"
+    networks:
+      - assetmind-network
+
+  event-intelligence:
+    build: ./codebase/assetmind-event-intelligence
+    ports:
+      - "5052:5052"
+    networks:
+      - assetmind-network
+
+  api:
+    build: ./codebase/assetmind-api
+    ports:
+      - "5010:5010"
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # F2.AI PRIVATE MARKET SUITE
+  # ===========================================
+
+  deal-room:
+    build: ./codebase/assetmind-deal-room
+    ports:
+      - "5280:5280"
+    networks:
+      - assetmind-network
+
+  underwriting:
+    build: ./codebase/assetmind-underwriting
+    ports:
+      - "5281:5281"
+    networks:
+      - assetmind-network
+
+  covenant:
+    build: ./codebase/assetmind-covenant
+    ports:
+      - "5282:5282"
+    networks:
+      - assetmind-network
+
+  excel-engine:
+    build: ./codebase/assetmind-excel-engine
+    ports:
+      - "5283:5283"
+    networks:
+      - assetmind-network
+
+  diligence:
+    build: ./codebase/assetmind-diligence
+    ports:
+      - "5284:5284"
+    networks:
+      - assetmind-network
+
+  memo-writer:
+    build: ./codebase/assetmind-memo-writer
+    ports:
+      - "5285:5285"
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # TRADING & ANALYTICS
+  # ===========================================
+
+  trading-engine:
+    build: ./codebase/assetmind-trading-engine
+    ports:
+      - "5303:5303"
+    networks:
+      - assetmind-network
+
+  portfolio-analytics:
+    build: ./codebase/assetmind-portfolio-analytics
+    ports:
+      - "5301:5301"
+    networks:
+      - assetmind-network
+
+  broker-api:
+    build: ./codebase/assetmind-broker-api
+    ports:
+      - "5270:5270"
+    environment:
+      - ZERODHA_API_KEY=${ZERODHA_API_KEY}
+      - ZERODHA_API_SECRET=${ZERODHA_API_SECRET}
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # MARKET INTELLIGENCE
+  # ===========================================
+
+  market-intelligence:
+    build: ./codebase/assetmind-market-intelligence
+    ports:
+      - "5304:5304"
+    networks:
+      - assetmind-network
+
+  news:
+    build: ./codebase/assetmind-news
+    ports:
+      - "5030:5030"
+    networks:
+      - assetmind-network
+
+  yfinance:
+    build: ./codebase/assetmind-yfinance
+    ports:
+      - "5011:5011"
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # REPORTING & UI
+  # ===========================================
+
+  report-generator:
+    build: ./codebase/assetmind-report-generator
+    ports:
+      - "5302:5302"
+    networks:
+      - assetmind-network
+
+  dashboard:
+    build: ./codebase/assetmind-dashboard
+    ports:
+      - "5290:5290"
+    networks:
+      - assetmind-network
+
+  frontend:
+    build: ./codebase/assetmind-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - assetmind-network
+
+  mobile-api:
+    build: ./codebase/assetmind-mobile
+    ports:
+      - "3001:3001"
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # SECURITY & INFRASTRUCTURE
+  # ===========================================
+
+  security:
+    build: ./codebase/assetmind-security
+    ports:
+      - "5305:5305"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - assetmind-network
+
+  gateway:
+    build: ./codebase/assetmind-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - API_KEY=${API_KEY}
+    networks:
+      - assetmind-network
+
+  # ===========================================
+  # MONITORING
+  # ===========================================
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./codebase/k8s/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - assetmind-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - assetmind-network
+
+networks:
+  assetmind-network:
+    driver: bridge

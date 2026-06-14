@@ -1,0 +1,11 @@
+{
+  "name": "@rez/video-service",
+  "version": "1.0.0",
+  "description": "REZ Video - Loom competitor for async video messaging",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  }
+}

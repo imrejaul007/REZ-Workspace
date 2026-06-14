@@ -1,0 +1,21 @@
+# Profile Service - Render Deployment
+services:
+  - type: web
+    name: rez-profile-service
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: AUTH_SERVICE_URL
+        value: https://rez-auth-service.onrender.com
+      - key: WALLET_SERVICE_URL
+        value: https://rez-wallet-service-36vo.onrender.com
+      - key: REE_SERVICE_URL
+        value: https://rez-economic-engine.onrender.com

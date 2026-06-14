@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-gift-card-service
+  namespace: rez-merchant
+  labels:
+    app: rez-gift-card-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-gift-card-service service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4047
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-gift-card-service
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-gift-card-service-internal
+  namespace: rez-merchant
+  labels:
+    app: rez-gift-card-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-gift-card-service internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4047
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-gift-card-service

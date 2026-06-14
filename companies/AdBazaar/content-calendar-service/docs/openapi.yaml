@@ -1,0 +1,1220 @@
+openapi: 3.0.3
+info:
+  title: Content Calendar Service
+  description: |
+    Visual drag-drop content calendar for AdBazaar social media management.
+    Schedule, manage, and track content across multiple social platforms.
+  version: 1.0.0
+  contact:
+    name: AdBazaar Support
+    email: support@adBazaar.com
+ license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:5092
+    description: Local development server
+  - url: https://api.adBazaar.com/calendar
+    description: Production server
+
+tags:
+  - name: Calendar
+    description: Calendar view and event management
+  - name: Events
+    description: Individual content event operations
+  - name: Settings
+    description: Calendar settings and preferences
+  - name: Utilities
+    description: Export, import, and utility endpoints
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the service is running and healthy
+      tags:
+        - Utilities
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: healthy
+                      service:
+                        type: string
+                        example: content-calendar-service
+                      version:
+                        type: string
+                        example: 1.0.0
+                      port:
+                        type: integer
+                        example: 5092
+                      uptime:
+                        type: number
+ mongodb:
+                        type: string
+                        enum: [connected, disconnected]
+                      timestamp:
+                        type: string
+                        format: date-time
+
+  /api/calendar:
+    get:
+      summary: Get calendar view
+      description: Retrieve calendar events for a date range with optional filters
+      tags:
+        - Calendar
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: date
+          in: query
+          description: Reference date (YYYY-MM-DD) - defaults to current month
+          schema:
+            type: string
+            format: date
+        - name: startDate
+          in: query
+          description: Start date for custom range
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End date for custom range
+          schema:
+            type: string
+            format: date
+        - name: platform
+          in: query
+          description: Filter by platform
+          schema:
+            type: string
+            enum: [instagram, facebook, twitter, linkedin, youtube, tiktok, pinterest]
+        - name: status
+          in: query
+          description: Filter by event status
+          schema:
+            type: string
+            enum: [draft, scheduled, published, failed]
+      responses:
+        '200':
+          description: Calendar view retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      summary: Create calendar event
+      description: Create a new content calendar event
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventInput'
+            example:
+              title: "Product Launch Post"
+              description: "Announcing our new product line"
+              platform: instagram
+              date: "2026-06-15T10:00:00Z"
+              time: "10:00"
+              contentType: image
+              mediaUrls:
+                - "https://cdn.adBazaar.com/images/product-launch.jpg"
+              hashtags:
+                - "#productlaunch"
+                - "#newarrival"
+              mentions:
+                - "@partnerbrand"
+              status: scheduled
+              metadata:
+                campaignId: "camp_123"
+                targetAudience: "young_professionals"
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarEvent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/calendar/week:
+    get:
+      summary: Get week view
+      description: Retrieve calendar events for a specific week
+      tags:
+        - Calendar
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: date
+          in: query
+          description: Reference date for the week
+          schema:
+            type: string
+            format: date
+        - name: direction
+          in: query
+          description: Navigate to next or previous week
+          schema:
+            type: string
+            enum: [next, prev]
+      responses:
+        '200':
+          description: Week view retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/day:
+    get:
+      summary: Get day view
+      description: Retrieve calendar events for a specific day
+      tags:
+        - Calendar
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: date
+          in: query
+          description: Reference date for the day
+          schema:
+            type: string
+            format: date
+        - name: direction
+          in: query
+          description: Navigate to next or previous day
+          schema:
+            type: string
+            enum: [next, prev]
+      responses:
+        '200':
+          description: Day view retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/events/{id}:
+    get:
+      summary: Get event by ID
+      description: Retrieve a single calendar event by its ID
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Event ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update event
+      description: Update an existing calendar event
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Event ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEventInput'
+            example:
+              title: "Updated Product Launch Post"
+              date: "2026-06-16T14:00:00Z"
+              status: draft
+      responses:
+        '200':
+          description: Event updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarEvent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete event
+      description: Delete a calendar event
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Event ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Event deleted successfully"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/calendar/bulk-move:
+    post:
+      summary: Bulk move events
+      description: Move multiple events to a new date
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkMoveInput'
+            example:
+              eventIds:
+                - "evt_abc123"
+                - "evt_def456"
+ newDate: "2026-06-20T10:00:00Z"
+      responses:
+        '200':
+          description: Events moved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      moved:
+                        type: integer
+                        example: 2
+                      events:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CalendarEvent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/conflicts:
+    get:
+      summary: Check scheduling conflicts
+      description: Check for scheduling conflicts at a specific date and time
+      tags:
+        - Calendar
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: Date to check
+          schema:
+            type: string
+            format: date
+        - name: time
+          in: query
+          required: true
+          description: Time slot to check (HH:mm)
+          schema:
+            type: string
+        - name: excludeId
+          in: query
+          description: Event ID to exclude from conflict check
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conflict check completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      hasConflicts:
+                        type: boolean
+                        example: false
+                      conflicts:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CalendarEvent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/export:
+    get:
+      summary: Export calendar
+      description: Export calendar events in various formats
+      tags:
+        - Utilities
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: format
+          in: query
+          description: Export format
+          schema:
+            type: string
+            enum: [ical, csv, json]
+            default: json
+        - name: startDate
+          in: query
+          description: Start date for export range
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End date for export range
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Calendar exported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarView'
+            text/calendar:
+              schema:
+                type: string
+                example: |
+                  BEGIN:VCALENDAR
+                  VERSION:2.0
+                  BEGIN:VEVENT
+                  SUMMARY:Product Launch Post
+                  DTSTART:20260615T100000Z
+                  END:VEVENT
+                  END:VCALENDAR
+            text/csv:
+              schema:
+                type: string
+                example: |
+                  title,platform,date,time,status
+                  "Product Launch Post",instagram,2026-06-15,10:00,scheduled
+
+  /api/calendar/import:
+    post:
+      summary: Import calendar from CSV
+      description: Import calendar events from CSV data
+      tags:
+        - Utilities
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - csvData
+              properties:
+                csvData:
+                  type: string
+                  description: CSV data to import
+                  example: |
+                    title,platform,date,time,status
+                    "Product Launch Post",instagram,2026-06-15,10:00,scheduled
+                    "Sale Announcement",facebook,2026-06-16,14:00,draft
+      responses:
+        '200':
+          description: Import completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      imported:
+                        type: integer
+                        example: 2
+                      failed:
+                        type: integer
+                        example: 0
+                      errors:
+                        type: array
+                        items:
+                          type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/stats:
+    get:
+      summary: Get calendar statistics
+      description: Get statistics about scheduled content
+      tags:
+        - Calendar
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          description: Start date for stats
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End date for stats
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      scheduled:
+                        type: integer
+                      published:
+                        type: integer
+                      failed:
+                        type: integer
+                      draft:
+                        type: integer
+                      byPlatform:
+                        type: object
+                        additionalProperties:
+                          type: integer
+                      overdue:
+                        type: integer
+                      overdueEvents:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CalendarEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/suggestions:
+    get:
+      summary: Get content suggestions
+      description: Get AI-powered content suggestions for a platform
+      tags:
+        - Calendar
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platform
+          in: query
+          required: true
+          description: Platform to get suggestions for
+          schema:
+            type: string
+            enum: [instagram, facebook, twitter, linkedin, youtube, tiktok, pinterest]
+        - name: count
+          in: query
+          description: Number of suggestions to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 5
+      responses:
+        '200':
+          description: Suggestions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContentSuggestion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/settings:
+    get:
+      summary: Get calendar settings
+      description: Get user calendar settings
+      tags:
+        - Settings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      summary: Update calendar settings
+      description: Update user calendar settings
+      tags:
+        - Settings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSettingsInput'
+ example:
+              defaultView: week
+              weekStartsOn: monday
+              defaultPlatform: instagram
+              notificationEnabled: true
+              notificationTime: "09:00"
+      responses:
+        '200':
+          description: Settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarSettings'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/settings/blackout-dates:
+    post:
+      summary: Add blackout date
+      description: Add a date when no content should be scheduled
+      tags:
+        - Settings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - date
+              properties:
+                date:
+                  type: string
+                  format: date
+                  example: "2026-12-25"
+      responses:
+        '200':
+          description: Blackout date added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarSettings'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/settings/blackout-dates/{date}:
+    delete:
+      summary: Remove blackout date
+      description: Remove a date from blackout dates
+      tags:
+        - Settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          description: Blackout date to remove
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Blackout date removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/settings/platform-colors/{platform}:
+    patch:
+      summary: Update platform color
+      description: Customize the color for a platform in the calendar
+      tags:
+        - Settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          description: Platform to update color for
+          schema:
+            type: string
+            enum: [instagram, facebook, twitter, linkedin, youtube, tiktok, pinterest]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - color
+              properties:
+                color:
+                  type: string
+                  description: Hex color code
+                  example: "#E1306C"
+      responses:
+        '200':
+          description: Platform color updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarSettings'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/calendar/settings/reset:
+    post:
+      summary: Reset settings to defaults
+      description: Reset all calendar settings to default values
+      tags:
+        - Settings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Settings reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CalendarSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from REZ Auth Service
+
+  schemas:
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "evt_abc123"
+        userId:
+          type: string
+          example: "user_xyz789"
+        title:
+          type: string
+          example: "Product Launch Post"
+        description:
+          type: string
+          example: "Announcing our new product line"
+        platform:
+          type: string
+          enum: [instagram, facebook, twitter, linkedin, youtube, tiktok, pinterest]
+          example: instagram
+        date:
+          type: string
+          format: date-time
+          example: "2026-06-15T10:00:00Z"
+        time:
+          type: string
+          example: "10:00"
+        contentType:
+          type: string
+          enum: [text, image, video, carousel, story, reel, poll]
+          example: image
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          example:
+            - "https://cdn.adBazaar.com/images/product-launch.jpg"
+        hashtags:
+          type: array
+          items:
+            type: string
+          example:
+            - "#productlaunch"
+            - "#newarrival"
+        mentions:
+          type: array
+          items:
+            type: string
+          example:
+            - "@partnerbrand"
+        status:
+          type: string
+          enum: [draft, scheduled, published, failed]
+          example: scheduled
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+
+ CalendarView:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        view:
+          type: string
+          enum: [month, week, day]
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarEvent'
+        stats:
+          type: object
+          properties:
+            total:
+              type: integer
+            byStatus:
+              type: object
+              additionalProperties:
+                type: integer
+            byPlatform:
+              type: object
+              additionalProperties:
+                type: integer
+
+    CreateEventInput:
+      type: object
+      required:
+        - title
+        - platform
+        - date
+        - time
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        platform:
+          type: string
+          enum: [instagram, facebook, twitter, linkedin, youtube, tiktok, pinterest]
+        date:
+          type: string
+          format: date-time
+        time:
+          type: string
+        contentType:
+          type: string
+          enum: [text, image, video, carousel, story, reel, poll]
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+        hashtags:
+          type: array
+          items:
+            type: string
+        mentions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, scheduled]
+          default: draft
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UpdateEventInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        platform:
+          type: string
+          enum: [instagram, facebook, twitter, linkedin, youtube, tiktok, pinterest]
+        date:
+          type: string
+          format: date-time
+        time:
+          type: string
+        contentType:
+          type: string
+          enum: [text, image, video, carousel, story, reel, poll]
+        mediaUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+        hashtags:
+          type: array
+          items:
+            type: string
+        mentions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, scheduled, published, failed]
+        metadata:
+          type: object
+          additionalProperties: true
+
+    BulkMoveInput:
+      type: object
+      required:
+        - eventIds
+        - newDate
+      properties:
+        eventIds:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        newDate:
+          type: string
+          format: date-time
+
+    ContentSuggestion:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [hashtag, caption, timing, topic]
+        content:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        reason:
+          type: string
+
+    CalendarSettings:
+      type: object
+      properties:
+        userId:
+          type: string
+        defaultView:
+          type: string
+          enum: [month, week, day]
+          example: month
+        weekStartsOn:
+          type: string
+          enum: [sunday, monday]
+          example: monday
+        defaultPlatform:
+          type: string
+          enum: [instagram, facebook, twitter, linkedin, youtube, tiktok, pinterest]
+        notificationEnabled:
+          type: boolean
+        notificationTime:
+          type: string
+          example: "09:00"
+        blackoutDates:
+          type: array
+          items:
+            type: string
+            format: date
+        platformColors:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            instagram: "#E1306C"
+            facebook: "#1877F2"
+            twitter: "#1DA1F2"
+
+    UpdateSettingsInput:
+      type: object
+      properties:
+        defaultView:
+          type: string
+          enum: [month, week, day]
+        weekStartsOn:
+          type: string
+          enum: [sunday, monday]
+        defaultPlatform:
+          type: string
+          enum: [instagram, facebook, twitter, linkedin, youtube, tiktok, pinterest]
+        notificationEnabled:
+          type: boolean
+        notificationTime:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            statusCode:
+              type: integer
+            details:
+              type: array
+              items:
+                type: object
+
+ responses:
+    BadRequest:
+      description: Bad request - invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              message: "Invalid request body"
+              statusCode: 400
+
+    Unauthorized:
+      description: Unauthorized - missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              message: "Unauthorized"
+              statusCode: 401
+
+    NotFound:
+      description: Not found - resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              message: "Event not found"
+              statusCode: 404
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              message: "Internal server error"
+              statusCode: 500

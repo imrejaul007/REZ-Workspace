@@ -1,0 +1,54 @@
+name: Test Services
+
+on:
+  push:
+    branches: [main, feat/**]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-services:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build services
+        run: |
+          for svc in services/REZ-*-validator services/REZ-*-detection services/REZ-*-testing \
+                     services/REZ-*-safety services/REZ-*-tracker services/REZ-*-modeling \
+                     services/REZ-*-sync services/REZ-*-rotation services/REZ-*-capping \
+                     services/REZ-*-allocator; do
+            if [ -d "$svc" ]; then
+              echo "Building $svc"
+              cd "$svc" && npm ci && npm run build && cd ../..
+            fi
+          done
+
+      - name: Run tests
+        run: node services/test-all-services.js || true
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+        if: always()

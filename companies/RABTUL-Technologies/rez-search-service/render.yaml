@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: rez-search-service
+    runtime: node
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '4003'
+      - key: HEALTH_PORT
+        value: '4103'
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      # JWT_SECRET must match rez-auth-service and rezbackend exactly.
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: SENTRY_TRACES_SAMPLE_RATE
+        value: '0.1'

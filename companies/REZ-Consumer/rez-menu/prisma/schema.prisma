@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  address     String?
+  phone       String?
+  images      String[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  categories  Category[]
+  items      MenuItem[]
+  orders     Order[]
+  tables     Table[]
+  @@map("stores")
+}
+
+model Category {
+  id       String @id @default(uuid())
+  storeId  String
+  name     String
+  sortOrder Int    @default(0)
+
+  store    Store @relation(fields: [storeId], references: [id])
+  items    MenuItem[]
+  @@map("categories")
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  categoryId  String
+  name        String
+  description String?
+  price       Decimal
+  images      String[]
+  dietary     Json?    // { veg, vegan, glutenFree, allergens }
+  nutrition   Json?    // { calories, protein, carbs, fat }
+  modifiers   Json?    // [{ name, options, price }]
+  available  Boolean  @default(true)
+  prepTime   Int      @default(15)
+  popular    Boolean  @default(false)
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+  @@map("menu_items")
+}
+
+model Table {
+  id       String @id @default(uuid())
+  storeId  String
+  code     String
+  capacity Int     @default(4)
+
+  store    Store @relation(fields: [storeId], references: [id])
+  sessions TableSession[]
+  @@map("tables")
+}
+
+model TableSession {
+  id         String   @id @default(uuid())
+  tableId   String
+  hostId    String
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  table     Table @relation(fields: [tableId], references: [id])
+  members   SessionMember[]
+  items     SessionItem[]
+  @@map("table_sessions")
+}
+
+model SessionMember {
+  id        String    @id @default(uuid())
+  sessionId String
+  userId    String
+  name      String
+  joinedAt  DateTime  @default(now())
+
+  session   TableSession @relation(fields: [sessionId], references: [id])
+  @@map("session_members")
+}
+
+model SessionItem {
+  id        String   @id @default(uuid())
+  sessionId String
+  userId    String
+  itemId   String
+  quantity  Int      @default(1)
+  addedAt  DateTime @default(now())
+
+  session   TableSession @relation(fields: [sessionId], references: [id])
+  item     MenuItem @relation(fields: [itemId], references: [id])
+  @@map("session_items")
+}
+
+// Order status enum - must match canonical ORDER_STATUS
+enum OrderStatus {
+  placed
+  confirmed
+  preparing
+  ready
+  dispatched
+  out_for_delivery
+  delivered
+  cancelled
+  cancelling
+  returned
+  refunded
+}
+
+// Fulfillment type enum
+enum FulfillmentType {
+  delivery
+  pickup
+  drive_thru
+  dine_in
+}
+
+// Payment method enum
+enum OrderPaymentMethod {
+  wallet
+  card
+  upi
+  cod
+  netbanking
+  razorpay
+  stripe
+}
+
+// Payment status enum
+enum OrderPaymentStatus {
+  pending
+  awaiting_payment
+  processing
+  authorized
+  paid
+  partially_refunded
+  refunded
+  failed
+}
+
+// Delivery method enum
+enum OrderDeliveryMethod {
+  standard
+  express
+  pickup
+  drive_thru
+  dine_in
+  scheduled
+}
+
+// Delivery status enum
+enum OrderDeliveryStatus {
+  pending
+  confirmed
+  preparing
+  ready
+  dispatched
+  out_for_delivery
+  delivered
+  failed
+  returned
+}
+
+model Order {
+  // Core fields
+  id            String          @id @default(uuid())
+  orderNumber   String         @unique
+  userId        String
+  storeId       String
+  tableId       String?
+  status        OrderStatus    @default(placed)
+  fulfillmentType FulfillmentType @default(delivery)
+  couponCode    String?
+
+  // Items (relation)
+  items         OrderItem[]
+
+  // Totals (flat for Prisma simplicity)
+  subtotal      Decimal        @db.Decimal(10, 2)
+  tax           Decimal        @db.Decimal(10, 2)
+  deliveryFee   Decimal        @db.Decimal(10, 2) @default(0)
+  discount      Decimal        @db.Decimal(10, 2) @default(0)
+  lockFeeDiscount Decimal      @db.Decimal(10, 2) @default(0)
+  cashback      Decimal        @db.Decimal(10, 2) @default(0)
+  total         Decimal        @db.Decimal(10, 2)
+  platformFee   Decimal        @db.Decimal(10, 2) @default(0)
+  merchantPayout Decimal       @db.Decimal(10, 2) @default(0)
+
+  // Payment
+  paymentMethod  OrderPaymentMethod?
+  paymentStatus  OrderPaymentStatus?
+  paymentId     String?
+  transactionId  String?
+  paidAt        DateTime?
+
+  // Delivery
+  deliveryMethod   OrderDeliveryMethod?
+  deliveryStatus    OrderDeliveryStatus?
+  deliveryAddress   Json?  // { name, phone, addressLine1, addressLine2, city, state, pincode, country, coordinates }
+  deliveryPartner   String?
+  trackingId       String?
+  deliveryOTP       String?
+  estimatedTime     DateTime?
+  dispatchedAt      DateTime?
+  deliveredAt       DateTime?
+  deliveryInstructions String?
+
+  // Metadata
+  specialInstructions String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  store          Store        @relation(fields: [storeId], references: [id])
+
+  @@index([userId])
+  @@index([storeId])
+  @@index([status])
+  @@map("orders")
+}
+
+// Item type enum
+enum OrderItemType {
+  product
+  service
+  event
+}
+
+model OrderItem {
+  id              String        @id @default(uuid())
+  orderId         String
+  itemId          String        // Reference to MenuItem
+
+  // Item details (denormalized for query performance)
+  storeId         String        // Store reference
+  storeName       String?
+  name            String
+  image           String?
+  itemType        OrderItemType @default(product)
+
+  // Pricing
+  quantity        Int           @default(1)
+  price           Decimal       @db.Decimal(10, 2)
+  originalPrice  Decimal?      @db.Decimal(10, 2)
+  discount        Decimal       @db.Decimal(10, 2) @default(0)
+  subtotal        Decimal       @db.Decimal(10, 2)
+
+  // Variant info
+  variant         Json?        // { type, value }
+
+  // Additional info
+  sku             String?
+  specialInstructions String?
+
+  status          String        @default("pending")
+
+  // Relations
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  item            MenuItem      @relation(fields: [itemId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}

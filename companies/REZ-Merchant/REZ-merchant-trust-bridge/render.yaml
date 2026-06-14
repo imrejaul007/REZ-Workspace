@@ -1,0 +1,29 @@
+# Render Blueprint for REZ-merchant-trust-bridge
+# Deploy at: https://dashboard.render.com/blueprints
+
+services:
+  - type: web
+    name: rez-merchant-trust-bridge
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4041
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: RABTUL_AUTH_URL
+        value: https://rabtul-auth.onrender.com
+      - key: RABTUL_PAYMENT_URL
+        value: https://rabtul-payment.onrender.com
+      - key: RABTUL_WALLET_URL
+        value: https://rabtul-wallet.onrender.com

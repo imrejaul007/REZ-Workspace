@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for rez-kitchen-display
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-kitchen-display-config
+  namespace: rez-merchant
+  labels:
+    app: rez-kitchen-display
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4014"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-kitchen-display"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez-kitchen-display"
+  REDIS_DATABASE: "0"

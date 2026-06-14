@@ -1,0 +1,87 @@
+---
+title: Quick Start
+description: Make your first API call in under 5 minutes
+lastUpdated: May 17, 2026
+order: 3
+---
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- Node.js 18+ installed
+- A REZ API key (get one from the Developer Portal)
+- Basic familiarity with REST APIs
+
+## Step 1: Install the SDK
+
+Install the official REZ SDK using npm or yarn:
+
+```bash
+npm install @rez/sdk
+
+# or
+
+yarn add @rez/sdk
+
+# or
+
+pnpm add @rez/sdk
+```
+
+## Step 2: Initialize the Client
+
+Create a new client instance with your API key:
+
+```typescript
+import { ReZClient } from '@rez/sdk';
+
+const client = new ReZClient({
+  apiKey: process.env.REZ_API_KEY,
+  environment: 'sandbox' // or 'production'
+});
+```
+
+## Step 3: Make Your First Request
+
+Verify a JWT token to ensure everything is working:
+
+```typescript
+const result = await client.auth.verifyToken({
+  token: 'your-jwt-token-here'
+});
+
+if (result.valid) {
+  console.log('Authentication successful!');
+  console.log('User:', result.user);
+} else {
+  console.log('Invalid token');
+}
+```
+
+## Step 4: Create a Payment
+
+Now let us create your first payment:
+
+```typescript
+const payment = await client.payments.create({
+  amount: 49900, // Amount in paise (499 INR)
+  currency: 'INR',
+  receipt: 'order_001',
+  customer: {
+    name: 'Rahul Sharma',
+    email: 'rahul@example.com',
+    phone: '+919876543210'
+  },
+  description: 'Premium subscription'
+});
+
+console.log('Payment ID:', payment.id);
+console.log('Status:', payment.status);
+```
+
+## What is Next?
+
+- Explore the [API Reference](/api-reference) for all available endpoints
+- Learn about [Webhooks](/docs/webhooks) for real-time notifications
+- Check out [SDK Documentation](/sdks) for your preferred language

@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "KHAIRMOVE",
+    "slug": "khaimove-user",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "khaimove",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#3B82F6"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.khaimove.user",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "KHAIRMOVE needs your location to find nearby rides.",
+        "NSLocationAlwaysUsageDescription": "KHAIRMOVE needs your location for ride tracking.",
+        "NSCameraUsageDescription": "KHAIRMOVE needs camera access for document verification.",
+        "NSFaceIDUsageDescription": "KHAIRMOVE uses Face ID for secure authentication."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#3B82F6"
+      },
+      "package": "com.khaimove.user",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CALL_PHONE"
+      ]
+    },
+    "plugins": [
+      "expo-location",
+      "expo-notifications",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "KHAIRMOVE needs camera access for document verification."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "khaimove-user-app"
+      },
+      "API_URL": "https://api.khaimove.com",
+      "SOCKET_URL": "wss://api.khaimove.com",
+      "environment": "production"
+    }
+  }
+}

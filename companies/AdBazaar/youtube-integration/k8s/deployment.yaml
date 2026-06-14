@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-youtube-integration
+  labels:
+    app: ad-bazaar-youtube-integration
+    tier: social-automation
+    component: youtube
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-youtube-integration
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-youtube-integration
+        tier: social-automation
+        component: youtube
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5094"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/youtube-integration:latest
+        ports:
+        - containerPort: 5094
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: ad-bazaar-youtube-integration-config
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5094
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5094
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3

@@ -1,0 +1,46 @@
+{
+  "name": "rez-verify-qr-service",
+  "version": "2.0.0",
+  "description": "ReZ Verify QR - Product authenticity, warranty, service booking, express replacement, ML centers",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node -r tsx src/index.ts",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "compile": "tsc"
+  },
+  "dependencies": {
+    "@sentry/node": "^7.90.0",
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.0",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.3.0",
+    "mongoose": "^8.0.0",
+    "rate-limit-redis": "^4.2.0",
+    "socket.io": "^4.6.0",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/crypto-js": "^4.2.1",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.10.0",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

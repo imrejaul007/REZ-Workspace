@@ -1,0 +1,32 @@
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+export default function Landing() {
+  const router = useRouter();
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}><Text style={styles.logo}>🛒 REZ Retail</Text><Text style={styles.tagline}>Smart Store Management</Text></View>
+      <View style={styles.features}>
+        <Text style={styles.featureTitle}>Complete Retail Operations</Text>
+        <Text style={styles.featureItem}>📦 Inventory Management</Text>
+        <Text style={styles.featureItem}>💳 POS & Billing</Text>
+        <Text style={styles.featureItem}>🎁 Loyalty Programs</Text>
+        <Text style={styles.featureItem}>📊 Sales Analytics</Text>
+      </View>
+      <View style={styles.buttons}>
+        <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push("/(tabs)")}><Text style={styles.primaryBtnText}>Get Started</Text></TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff", padding: 24 },
+  header: { alignItems: "center", marginTop: 60 },
+  logo: { fontSize: 32, fontWeight: "bold", color: "#7c3aed" },
+  tagline: { fontSize: 16, color: "#666", marginTop: 8 },
+  features: { marginTop: 48, padding: 24, backgroundColor: "#ede9fe", borderRadius: 16 },
+  featureTitle: { fontSize: 18, fontWeight: "600", marginBottom: 16 },
+  featureItem: { fontSize: 16, marginVertical: 8, color: "#5b21b6" },
+  buttons: { marginTop: "auto", gap: 12 },
+  primaryBtn: { backgroundColor: "#7c3aed", padding: 16, borderRadius: 12, alignItems: "center" },
+  primaryBtnText: { color: "#fff", fontSize: 18, fontWeight: "600" },
+});

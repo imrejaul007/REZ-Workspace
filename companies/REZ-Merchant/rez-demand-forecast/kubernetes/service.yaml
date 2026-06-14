@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-demand-forecast
+  namespace: rez-merchant
+  labels:
+    app: rez-demand-forecast
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-demand-forecast service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3055
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-demand-forecast
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-demand-forecast-internal
+  namespace: rez-merchant
+  labels:
+    app: rez-demand-forecast
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-demand-forecast internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 3055
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-demand-forecast

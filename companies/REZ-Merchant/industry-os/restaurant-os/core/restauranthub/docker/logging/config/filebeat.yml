@@ -1,0 +1,235 @@
+filebeat.inputs:
+# Application logs
+- type: log
+  enabled: true
+  paths:
+    - /logs/api/*.log
+    - /logs/web/*.log
+    - /logs/services/*.log
+  fields:
+    logtype: application
+    service: restauranthub
+  fields_under_root: true
+  multiline.pattern: '^\d{4}-\d{2}-\d{2}'
+  multiline.negate: true
+  multiline.match: after
+  scan_frequency: 10s
+
+# Error logs
+- type: log
+  enabled: true
+  paths:
+    - /logs/errors/*.log
+    - /logs/**/error.log
+  fields:
+    logtype: error
+    service: restauranthub
+  fields_under_root: true
+  multiline.pattern: '^Error:|^Exception:'
+  multiline.negate: true
+  multiline.match: after
+
+# Access logs
+- type: log
+  enabled: true
+  paths:
+    - /logs/access/*.log
+    - /logs/**/access.log
+  fields:
+    logtype: access
+    service: restauranthub
+  fields_under_root: true
+
+# Database logs
+- type: log
+  enabled: true
+  paths:
+    - /logs/database/*.log
+    - /logs/**/db.log
+  fields:
+    logtype: database
+    service: restauranthub
+  fields_under_root: true
+
+# Security logs
+- type: log
+  enabled: true
+  paths:
+    - /logs/security/*.log
+    - /logs/**/security.log
+  fields:
+    logtype: security
+    service: restauranthub
+  fields_under_root: true
+
+# Performance logs
+- type: log
+  enabled: true
+  paths:
+    - /logs/performance/*.log
+    - /logs/**/perf.log
+  fields:
+    logtype: performance
+    service: restauranthub
+  fields_under_root: true
+
+# Backup logs
+- type: log
+  enabled: true
+  paths:
+    - /logs/backup*.log
+    - /logs/backup/*.log
+  fields:
+    logtype: backup
+    service: restauranthub
+  fields_under_root: true
+
+# Docker container logs
+- type: container
+  enabled: true
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+  containers.ids:
+    - '*'
+  containers.path: "/var/lib/docker/containers"
+  containers.stream: "all"
+  processors:
+    - add_docker_metadata:
+        host: "unix:///var/run/docker.sock"
+    - decode_json_fields:
+        fields: ["message"]
+        target: ""
+        overwrite_keys: true
+
+# System logs
+- type: syslog
+  enabled: true
+  protocol.udp:
+    host: "0.0.0.0:514"
+  fields:
+    logtype: system
+  fields_under_root: true
+
+# Processors
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~
+
+  # Drop empty lines
+  - drop_event:
+      when:
+        regexp:
+          message: '^\s*$'
+
+  # Add timestamp
+  - timestamp:
+      field: '@timestamp'
+      layouts:
+        - '2006-01-02T15:04:05.000Z'
+        - '2006-01-02 15:04:05'
+      test:
+        - '2023-12-01T10:30:45.123Z'
+
+  # Parse JSON messages
+  - decode_json_fields:
+      fields: ['message']
+      target: ''
+      overwrite_keys: true
+      when:
+        regexp:
+          message: '^\s*\{.*\}\s*$'
+
+# Output configuration
+output.logstash:
+  hosts: ["logstash:5044"]
+
+  # Load balancing
+  loadbalance: true
+
+  # Compression
+  compression_level: 3
+
+  # Bulk settings
+  bulk_max_size: 2048
+
+  # Connection settings
+  timeout: 30
+
+# Fallback output to file if Logstash is unavailable
+output.file:
+  enabled: false
+  path: "/tmp/filebeat"
+  filename: filebeat
+  rotate_every_kb: 10000
+  number_of_files: 7
+  permissions: 0600
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+# Monitoring
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+
+# Setup configuration
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+  index.refresh_interval: 5s
+
+setup.ilm.enabled: true
+setup.ilm.rollover_alias: "filebeat"
+setup.ilm.pattern: "{now/d}-000001"
+setup.ilm.policy: "filebeat-policy"
+
+# Index lifecycle management policy
+setup.ilm.policy: |
+  {
+    "policy": {
+      "phases": {
+        "hot": {
+          "actions": {
+            "rollover": {
+              "max_size": "50GB",
+              "max_age": "30d"
+            }
+          }
+        },
+        "warm": {
+          "min_age": "30d",
+          "actions": {
+            "allocate": {
+              "number_of_replicas": 0
+            }
+          }
+        },
+        "cold": {
+          "min_age": "90d",
+          "actions": {
+            "allocate": {
+              "number_of_replicas": 0
+            }
+          }
+        },
+        "delete": {
+          "min_age": "365d"
+        }
+      }
+    }
+  }
+
+# Queue configuration
+queue.mem:
+  events: 4096
+  flush.min_events: 512
+  flush.timeout: 1s

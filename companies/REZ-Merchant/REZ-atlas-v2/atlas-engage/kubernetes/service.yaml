@@ -1,0 +1,14 @@
+# Atlas Engage - Kubernetes Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: atlas-engage
+  namespace: rez-merchant
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5165
+      targetPort: 5165
+  selector:
+    app: atlas-engage

@@ -1,0 +1,1 @@
+export { PricingService, pricingService } from './PricingService';

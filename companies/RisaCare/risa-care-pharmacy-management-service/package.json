@@ -1,0 +1,29 @@
+{
+  "name": "risa-care-pharmacy-management",
+  "version": "1.0.0",
+  "description": "B2B Pharmacy Management Service for RisaCare - Retail and Hospital Pharmacies",
+  "port": 4743,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/uuid": "^9.0.7",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2",
+    "tsx": "^4.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

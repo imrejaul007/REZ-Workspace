@@ -1,0 +1,37 @@
+{
+  "name": "rez-mart",
+  "version": "1.0.0",
+  "description": "Quick Commerce Platform - Groceries & Essentials",
+  "private": true,
+  "workspaces": [
+    "rez-mart-gateway",
+    "rez-mart-driver-service",
+    "rez-mart-tracking-service",
+    "rez-mart-store-service",
+    "rez-mart-product-service",
+    "rez-mart-order-service",
+    "rez-mart-delivery-service",
+    "rez-mart-inventory-service",
+    "rez-mart-cart-service",
+    "rez-mart-offer-service",
+    "rez-mart-subscription-service",
+    "rez-mart-analytics-service"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "start": "npm run start --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "keywords": [
+    "quick-commerce",
+    "grocery",
+    "delivery",
+    "rez"
+  ],
+  "author": "REZ-Consumer",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,195 @@
+name: KHAIRMOVE CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/khaimove
+
+jobs:
+  # ============================================
+  # LINT & TYPE CHECK
+  # ============================================
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install service dependencies
+        run: |
+          npm install --workspaces --if-present
+
+      - name: Type check all services
+        run: |
+          for svc in khaimove-api-gateway khaimove-ride-service khaimove-fleet-service \
+                     khaimove-delivery-service khaimove-logistics-aggregator \
+                     khaimove-rental-service buzzlocal-rides-integration; do
+            echo "Checking $svc..."
+            cd "$svc" && npx tsc --noEmit && cd ..
+          done
+
+  # ============================================
+  # UNIT TESTS
+  # ============================================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run all tests
+        run: npm test --workspaces --if-present
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+
+  # ============================================
+  # BUILD DOCKER IMAGES
+  # ============================================
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    strategy:
+      matrix:
+        service:
+          - name: api-gateway
+            path: khaimove-api-gateway
+          - name: ride-service
+            path: khaimove-ride-service
+          - name: fleet-service
+            path: khaimove-fleet-service
+          - name: delivery-service
+            path: khaimove-delivery-service
+          - name: logistics-aggregator
+            path: khaimove-logistics-aggregator
+          - name: rental-service
+            path: khaimove-rental-service
+          - name: buzzlocal-integration
+            path: buzzlocal-rides-integration
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.service.name }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service.path }}
+          push: false
+          tags: ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # DEPLOY TO STAGING
+  # ============================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Add deployment commands here
+          # e.g., kubectl apply -f k8s/staging/
+
+      - name: Notify deployment
+        run: |
+          echo "Deployment to staging completed"
+
+  # ============================================
+  # BUILD MOBILE APPS
+  # ============================================
+  mobile-build:
+    name: Build Mobile Apps
+    runs-on: ubuntu-latest
+    needs: lint
+    strategy:
+      matrix:
+        app:
+          - user-app
+          - driver-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd khaimove-${{ matrix.app }}
+          npm ci
+          npx expo install --check
+
+      - name: Build Android
+        run: |
+          cd khaimove-${{ matrix.app }}
+          npx expo prebuild --platform android
+          cd android && ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-android
+          path: khaimove-${{ matrix.app }}/android/app/build/outputs/apk/debug/*.apk
+
+  # ============================================
+  # SECURITY SCAN
+  # ============================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'

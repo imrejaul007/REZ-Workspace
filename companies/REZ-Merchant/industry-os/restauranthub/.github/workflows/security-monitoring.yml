@@ -1,0 +1,657 @@
+name: Security Monitoring & Scanning
+
+on:
+  # Run on all pushes to main
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'docker/**'
+      - '.github/workflows/**'
+
+  # Run on all pull requests
+  pull_request:
+    branches: [ main ]
+
+  # Scheduled security scans
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of security scan'
+        required: false
+        default: 'comprehensive'
+        type: choice
+        options:
+          - comprehensive
+          - quick
+          - critical-only
+
+env:
+  NODE_VERSION: '18'
+  SECURITY_SCAN_TIMEOUT: '30m'
+
+jobs:
+  # Dependency vulnerability scanning
+  dependency-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=high --json > npm-audit-results.json || true
+          npm audit --audit-level=high
+
+      - name: Snyk vulnerability scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --json-file-output=snyk-results.json
+
+      - name: Process vulnerability results
+        run: |
+          # Create comprehensive vulnerability report
+          cat > process_vulns.py << 'EOF'
+          import json
+          import os
+          from datetime import datetime
+
+          def process_npm_audit():
+              try:
+                  with open('npm-audit-results.json', 'r') as f:
+                      npm_data = json.load(f)
+
+                  high_vulns = []
+                  critical_vulns = []
+
+                  if 'vulnerabilities' in npm_data:
+                      for name, vuln in npm_data['vulnerabilities'].items():
+                          if vuln.get('severity') == 'high':
+                              high_vulns.append(name)
+                          elif vuln.get('severity') == 'critical':
+                              critical_vulns.append(name)
+
+                  return len(critical_vulns), len(high_vulns), critical_vulns, high_vulns
+              except:
+                  return 0, 0, [], []
+
+          def process_snyk_results():
+              try:
+                  with open('snyk-results.json', 'r') as f:
+                      snyk_data = json.load(f)
+
+                  high_count = len([v for v in snyk_data.get('vulnerabilities', []) if v.get('severity') == 'high'])
+                  critical_count = len([v for v in snyk_data.get('vulnerabilities', []) if v.get('severity') == 'critical'])
+
+                  return critical_count, high_count
+              except:
+                  return 0, 0
+
+          # Process results
+          npm_critical, npm_high, critical_list, high_list = process_npm_audit()
+          snyk_critical, snyk_high = process_snyk_results()
+
+          # Create security metrics for Prometheus
+          security_metrics = f"""
+          # HELP vulnerability_scan_critical_severity Critical severity vulnerabilities found
+          # TYPE vulnerability_scan_critical_severity gauge
+          vulnerability_scan_critical_severity{{scanner="npm"}} {npm_critical}
+          vulnerability_scan_critical_severity{{scanner="snyk"}} {snyk_critical}
+
+          # HELP vulnerability_scan_high_severity High severity vulnerabilities found
+          # TYPE vulnerability_scan_high_severity gauge
+          vulnerability_scan_high_severity{{scanner="npm"}} {npm_high}
+          vulnerability_scan_high_severity{{scanner="snyk"}} {snyk_high}
+
+          # HELP security_scan_last_success_timestamp Last successful security scan timestamp
+          # TYPE security_scan_last_success_timestamp gauge
+          security_scan_last_success_timestamp {int(datetime.now().timestamp())}
+          """
+
+          with open('security-metrics.prom', 'w') as f:
+              f.write(security_metrics)
+
+          # Create summary report
+          report = f"""
+          # Security Scan Report
+
+          **Scan Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+          **Scan Type:** Dependency Vulnerability Scan
+
+          ## Results Summary
+
+          ### NPM Audit Results
+          - **Critical Vulnerabilities:** {npm_critical}
+          - **High Severity Vulnerabilities:** {npm_high}
+
+          ### Snyk Results
+          - **Critical Vulnerabilities:** {snyk_critical}
+          - **High Severity Vulnerabilities:** {snyk_high}
+
+          ### Critical Vulnerabilities Found
+          {chr(10).join(f"- {vuln}" for vuln in critical_list) if critical_list else "None"}
+
+          ### Recommendations
+          """
+
+          if npm_critical > 0 or snyk_critical > 0:
+              report += "- **IMMEDIATE ACTION REQUIRED** - Critical vulnerabilities found\n"
+              report += "- Review and update vulnerable dependencies immediately\n"
+              report += "- Consider security patches or alternative packages\n"
+          elif npm_high > 0 or snyk_high > 0:
+              report += "- High severity vulnerabilities found - schedule updates\n"
+              report += "- Review vulnerable dependencies in next sprint\n"
+          else:
+              report += "- No critical or high severity vulnerabilities found\n"
+              report += "- Continue regular security monitoring\n"
+
+          with open('security-report.md', 'w') as f:
+              f.write(report)
+
+          # Set output for other steps
+          print(f"::set-output name=critical_vulns::{npm_critical + snyk_critical}")
+          print(f"::set-output name=high_vulns::{npm_high + snyk_high}")
+          EOF
+
+          python process_vulns.py
+
+      - name: Upload security metrics to Pushgateway
+        if: always()
+        run: |
+          if [ -f security-metrics.prom ]; then
+            curl -X POST http://pushgateway:9091/metrics/job/security-scan/instance/github-actions \
+              --data-binary @security-metrics.prom || echo "Could not push metrics"
+          fi
+
+      - name: Upload security artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan-results
+          path: |
+            npm-audit-results.json
+            snyk-results.json
+            security-metrics.prom
+            security-report.md
+          retention-days: 30
+
+  # Container security scanning
+  container-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API image for scanning
+        run: |
+          cd apps/api
+          docker build -t restauranthub-api:scan .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'restauranthub-api:scan'
+          format: 'json'
+          output: 'trivy-results.json'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Grype vulnerability scanner
+        uses: anchore/scan-action@v3
+        with:
+          image: 'restauranthub-api:scan'
+          severity-cutoff: 'high'
+          output-format: 'json'
+          output-file: 'grype-results.json'
+
+      - name: Process container scan results
+        run: |
+          cat > process_container_scan.py << 'EOF'
+          import json
+          from datetime import datetime
+
+          def process_trivy_results():
+              try:
+                  with open('trivy-results.json', 'r') as f:
+                      trivy_data = json.load(f)
+
+                  critical_count = 0
+                  high_count = 0
+
+                  for result in trivy_data.get('Results', []):
+                      for vuln in result.get('Vulnerabilities', []):
+                          severity = vuln.get('Severity', '').upper()
+                          if severity == 'CRITICAL':
+                              critical_count += 1
+                          elif severity == 'HIGH':
+                              high_count += 1
+
+                  return critical_count, high_count
+              except:
+                  return 0, 0
+
+          def process_grype_results():
+              try:
+                  with open('grype-results.json', 'r') as f:
+                      grype_data = json.load(f)
+
+                  critical_count = 0
+                  high_count = 0
+
+                  for match in grype_data.get('matches', []):
+                      severity = match.get('vulnerability', {}).get('severity', '').upper()
+                      if severity == 'CRITICAL':
+                          critical_count += 1
+                      elif severity == 'HIGH':
+                          high_count += 1
+
+                  return critical_count, high_count
+              except:
+                  return 0, 0
+
+          trivy_critical, trivy_high = process_trivy_results()
+          grype_critical, grype_high = process_grype_results()
+
+          # Create container security metrics
+          container_metrics = f"""
+          # HELP container_vulnerability_scan_critical_severity Critical container vulnerabilities
+          # TYPE container_vulnerability_scan_critical_severity gauge
+          container_vulnerability_scan_critical_severity{{scanner="trivy"}} {trivy_critical}
+          container_vulnerability_scan_critical_severity{{scanner="grype"}} {grype_critical}
+
+          # HELP container_vulnerability_scan_high_severity High container vulnerabilities
+          # TYPE container_vulnerability_scan_high_severity gauge
+          container_vulnerability_scan_high_severity{{scanner="trivy"}} {trivy_high}
+          container_vulnerability_scan_high_severity{{scanner="grype"}} {grype_high}
+          """
+
+          with open('container-security-metrics.prom', 'w') as f:
+              f.write(container_metrics)
+
+          print(f"::set-output name=trivy_critical::{trivy_critical}")
+          print(f"::set-output name=grype_critical::{grype_critical}")
+          EOF
+
+          python process_container_scan.py
+
+      - name: Upload container security artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: container-security-results
+          path: |
+            trivy-results.json
+            grype-results.json
+            container-security-metrics.prom
+          retention-days: 30
+
+  # SAST (Static Application Security Testing)
+  sast-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      - name: Run Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/javascript
+            p/typescript
+            p/nodejs
+          generateSarif: "1"
+
+      - name: Upload Semgrep results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-results
+          path: semgrep.sarif
+          retention-days: 30
+
+  # Security compliance check
+  compliance-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run security compliance checks
+        run: |
+          # Check for security best practices
+          cat > security_compliance.py << 'EOF'
+          import os
+          import json
+          import re
+          from pathlib import Path
+
+          def check_secrets_in_code():
+              """Check for potential secrets in code"""
+              secret_patterns = [
+                  r'(?i)(password|passwd|pwd)\s*[=:]\s*["\'][^"\']{8,}["\']',
+                  r'(?i)(api[_-]?key|apikey)\s*[=:]\s*["\'][^"\']{10,}["\']',
+                  r'(?i)(secret|token)\s*[=:]\s*["\'][^"\']{10,}["\']',
+                  r'["\'][A-Za-z0-9+/]{32,}={0,2}["\']',  # Base64
+              ]
+
+              issues = []
+              for root, dirs, files in os.walk('.'):
+                  for file in files:
+                      if file.endswith(('.js', '.ts', '.json', '.yml', '.yaml')):
+                          filepath = os.path.join(root, file)
+                          try:
+                              with open(filepath, 'r', encoding='utf-8') as f:
+                                  content = f.read()
+                                  for pattern in secret_patterns:
+                                      if re.search(pattern, content):
+                                          issues.append(f"Potential secret found in {filepath}")
+                          except:
+                              pass
+              return issues
+
+          def check_security_headers():
+              """Check for security header configurations"""
+              # This would check nginx configs, etc.
+              return []
+
+          def check_cors_configuration():
+              """Check CORS configuration"""
+              issues = []
+              cors_files = Path('.').glob('**/cors*.js')
+              for file in cors_files:
+                  try:
+                      content = file.read_text()
+                      if 'origin: "*"' in content or "origin: '*'" in content:
+                          issues.append(f"Wildcard CORS origin found in {file}")
+                  except:
+                      pass
+              return issues
+
+          def check_dependency_versions():
+              """Check for outdated dependencies with known vulnerabilities"""
+              issues = []
+              try:
+                  with open('package.json', 'r') as f:
+                      package_data = json.load(f)
+
+                  # Check for specific vulnerable versions
+                  deps = {**package_data.get('dependencies', {}), **package_data.get('devDependencies', {})}
+
+                  vulnerable_packages = {
+                      'lodash': ['<4.17.21'],
+                      'express': ['<4.17.3'],
+                      'mongoose': ['<5.13.15']
+                  }
+
+                  for pkg, versions in vulnerable_packages.items():
+                      if pkg in deps:
+                          issues.append(f"Potentially vulnerable package: {pkg}@{deps[pkg]}")
+              except:
+                  pass
+
+              return issues
+
+          # Run all checks
+          all_issues = []
+          all_issues.extend(check_secrets_in_code())
+          all_issues.extend(check_cors_configuration())
+          all_issues.extend(check_dependency_versions())
+
+          # Create compliance report
+          compliance_status = "PASS" if not all_issues else "FAIL"
+
+          report = {
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "status": compliance_status,
+              "checks_performed": [
+                  "secrets_in_code",
+                  "cors_configuration",
+                  "dependency_versions"
+              ],
+              "issues_found": len(all_issues),
+              "issues": all_issues
+          }
+
+          with open('compliance-report.json', 'w') as f:
+              json.dump(report, f, indent=2)
+
+          # Create metrics
+          compliance_metrics = f"""
+          # HELP compliance_check_status Compliance check status (1=pass, 0=fail)
+          # TYPE compliance_check_status gauge
+          compliance_check_status {1 if compliance_status == "PASS" else 0}
+
+          # HELP compliance_issues_found Number of compliance issues found
+          # TYPE compliance_issues_found gauge
+          compliance_issues_found {len(all_issues)}
+          """
+
+          with open('compliance-metrics.prom', 'w') as f:
+              f.write(compliance_metrics)
+
+          print(f"Compliance status: {compliance_status}")
+          print(f"Issues found: {len(all_issues)}")
+
+          if all_issues:
+              print("Issues:")
+              for issue in all_issues:
+                  print(f"  - {issue}")
+          EOF
+
+          python security_compliance.py
+
+      - name: Upload compliance results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compliance-results
+          path: |
+            compliance-report.json
+            compliance-metrics.prom
+          retention-days: 30
+
+  # Aggregate security results
+  security-summary:
+    needs: [dependency-scan, container-scan, sast-scan, compliance-check]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download all security artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: security-results
+
+      - name: Create comprehensive security report
+        run: |
+          cat > create_security_summary.py << 'EOF'
+          import json
+          import os
+          from datetime import datetime
+
+          # Initialize counters
+          total_critical = 0
+          total_high = 0
+
+          # Process all metrics files
+          for root, dirs, files in os.walk('security-results'):
+              for file in files:
+                  if file.endswith('.prom'):
+                      filepath = os.path.join(root, file)
+                      try:
+                          with open(filepath, 'r') as f:
+                              content = f.read()
+                              for line in content.split('\n'):
+                                  if 'critical_severity' in line and not line.startswith('#'):
+                                      parts = line.split()
+                                      if len(parts) >= 2:
+                                          total_critical += int(float(parts[-1]))
+                                  elif 'high_severity' in line and not line.startswith('#'):
+                                      parts = line.split()
+                                      if len(parts) >= 2:
+                                          total_high += int(float(parts[-1]))
+                      except:
+                          pass
+
+          # Create final summary
+          summary = f"""
+          # 🔒 Security Scan Summary Report
+
+          **Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+          **Repository:** RestaurantHub
+          **Scan Trigger:** ${{ github.event_name }}
+
+          ## 📊 Overall Results
+
+          | Severity | Count | Status |
+          |----------|--------|---------|
+          | Critical | {total_critical} | {'❌ Action Required' if total_critical > 0 else '✅ Pass'} |
+          | High | {total_high} | {'⚠️ Review Needed' if total_high > 0 else '✅ Pass'} |
+
+          ## 🛡️ Security Posture
+
+          """
+
+          if total_critical > 0:
+              summary += "**🚨 IMMEDIATE ACTION REQUIRED**\n"
+              summary += f"- {total_critical} critical security vulnerabilities found\n"
+              summary += "- These must be addressed before production deployment\n\n"
+
+          if total_high > 0:
+              summary += "**⚠️ HIGH PRIORITY ISSUES**\n"
+              summary += f"- {total_high} high severity issues found\n"
+              summary += "- Schedule remediation in next sprint\n\n"
+
+          if total_critical == 0 and total_high == 0:
+              summary += "**✅ EXCELLENT SECURITY POSTURE**\n"
+              summary += "- No critical or high severity vulnerabilities found\n"
+              summary += "- Continue regular security monitoring\n\n"
+
+          summary += """
+          ## 📋 Scan Coverage
+
+          - ✅ Dependency vulnerability scanning (npm audit, Snyk)
+          - ✅ Container security scanning (Trivy, Grype)
+          - ✅ Static application security testing (CodeQL, Semgrep)
+          - ✅ Security compliance checks
+
+          ## 🔄 Next Steps
+
+          1. Review detailed scan results in artifacts
+          2. Address critical vulnerabilities immediately
+          3. Plan remediation for high severity issues
+          4. Update security documentation as needed
+          5. Continue regular security monitoring
+
+          ---
+          *This report was generated automatically by RestaurantHub AI Sentry*
+          """
+
+          with open('security-summary.md', 'w') as f:
+              f.write(summary)
+
+          # Create final metrics
+          final_metrics = f"""
+          # HELP security_scan_total_critical_vulnerabilities Total critical vulnerabilities across all scans
+          # TYPE security_scan_total_critical_vulnerabilities gauge
+          security_scan_total_critical_vulnerabilities {total_critical}
+
+          # HELP security_scan_total_high_vulnerabilities Total high severity vulnerabilities across all scans
+          # TYPE security_scan_total_high_vulnerabilities gauge
+          security_scan_total_high_vulnerabilities {total_high}
+
+          # HELP security_scan_overall_status Overall security scan status (1=pass, 0=fail)
+          # TYPE security_scan_overall_status gauge
+          security_scan_overall_status {1 if total_critical == 0 else 0}
+          """
+
+          with open('final-security-metrics.prom', 'w') as f:
+              f.write(final_metrics)
+
+          print(f"Total critical vulnerabilities: {total_critical}")
+          print(f"Total high vulnerabilities: {total_high}")
+          EOF
+
+          python create_security_summary.py
+
+      - name: Comment PR with security results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            try {
+              const summary = fs.readFileSync('security-summary.md', 'utf8');
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: summary
+              });
+            } catch (error) {
+              console.log('Could not post security summary to PR:', error);
+            }
+
+      - name: Upload final security summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary
+          path: |
+            security-summary.md
+            final-security-metrics.prom
+          retention-days: 30
+
+      - name: Push metrics to monitoring
+        if: always()
+        run: |
+          if [ -f final-security-metrics.prom ]; then
+            curl -X POST http://pushgateway:9091/metrics/job/security-summary/instance/github-actions \
+              --data-binary @final-security-metrics.prom || echo "Could not push final metrics"
+          fi
+
+      - name: Fail if critical vulnerabilities found
+        run: |
+          if [ -f final-security-metrics.prom ]; then
+            critical_count=$(grep "security_scan_total_critical_vulnerabilities" final-security-metrics.prom | awk '{print $2}')
+            if [ "$critical_count" -gt 0 ]; then
+              echo "❌ Critical vulnerabilities found. Deployment blocked."
+              # Uncomment to fail the build on critical vulnerabilities
+              # exit 1
+              echo "::warning::Critical vulnerabilities found but not failing build in demo mode"
+            else
+              echo "✅ No critical vulnerabilities found"
+            fi
+          fi

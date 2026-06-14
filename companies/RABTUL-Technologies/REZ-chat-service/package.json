@@ -1,0 +1,11 @@
+{
+  "name": "@rez/chat-service",
+  "version": "1.0.0",
+  "description": "REZ Chat - Intercom competitor for live chat",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  }
+}

@@ -1,0 +1,80 @@
+# =============================================================================
+# Render Blueprint - REZ Corporate Service
+# =============================================================================
+# Deploy at: https://dashboard.render.com/blueprints
+# =============================================================================
+
+services:
+  - type: web
+    name: rez-corporate-service
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    healthCheckInterval: 30s
+    healthCheckThreshold: 3
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4030"
+
+      # MongoDB
+      - key: MONGODB_URI
+        sync: false
+
+      # Authentication
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+      # RABTUL Integration
+      - key: RABTUL_AUTH_URL
+        sync: false
+      - key: RABTUL_WALLET_URL
+        sync: false
+      - key: RABTUL_PAYMENT_URL
+        sync: false
+
+      # CorpPerks API
+      - key: CORPPERKS_API_URL
+        value: https://corpperks-api.onrender.com
+
+      # TBO Travel
+      - key: TBO_API_URL
+        sync: false
+      - key: TBO_API_KEY
+        sync: false
+      - key: TBO_API_SECRET
+        sync: false
+      - key: TBO_CLIENT_ID
+        sync: false
+
+      # Razorpay
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+
+      # GST
+      - key: GST_EINVOICE_URL
+        sync: false
+      - key: COMPANY_GSTIN
+        sync: false
+      - key: COMPANY_PAN
+        sync: false
+
+      # CORS
+      - key: CORS_ORIGIN
+        value: https://peopleos.corpperks.com,https://admin.corpperks.com
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info

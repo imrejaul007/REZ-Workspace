@@ -1,0 +1,20 @@
+// Simple logger for Node.js environment
+const logger = {
+  info: (message: string, ...args: unknown[]) => {
+    console.log(`[INFO] ${message}`, ...args);
+  },
+  error: (message: string, ...args: unknown[]) => {
+    console.error(`[ERROR] ${message}`, ...args);
+  },
+  warn: (message: string, ...args: unknown[]) => {
+    console.warn(`[WARN] ${message}`, ...args);
+  },
+  debug: (message: string, ...args: unknown[]) => {
+    if (process.env.DEBUG) {
+      console.debug(`[DEBUG] ${message}`, ...args);
+    }
+  },
+};
+
+export default logger;
+export { logger };

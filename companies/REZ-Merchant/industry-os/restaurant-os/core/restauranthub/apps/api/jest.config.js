@@ -1,0 +1,61 @@
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/test'],
+  testMatch: ['**/*.test.js', '**/*.spec.js', '**/*.test.ts', '**/*.spec.ts'],
+  transform: {
+    '^.+\\.ts$': ['ts-jest', {
+      useESM: false,
+    }],
+    '^.+\\.js$': 'babel-jest',
+  },
+  clearMocks: true,
+  resetMocks: true,
+  restoreMocks: true,
+  collectCoverageFrom: [
+    'src/**/*.{ts,js}',
+    '!src/**/*.d.ts',
+    '!src/main.ts',
+    '!src/**/*.module.ts',
+    '!src/**/*.interface.ts',
+    '!src/**/*.dto.ts',
+    '!src/**/*.entity.ts',
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html'],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+    './src/modules/auth/**/*.ts': {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+    './src/modules/users/**/*.ts': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+  },
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@common/(.*)$': '<rootDir>/../../packages/common/src/$1',
+    '^@db/(.*)$': '<rootDir>/../../packages/db/src/$1',
+  },
+  setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
+  testTimeout: 30000,
+  maxWorkers: '50%',
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/dist/',
+  ],
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  globalSetup: '<rootDir>/test/global-setup.ts',
+  globalTeardown: '<rootDir>/test/global-teardown.ts',
+};

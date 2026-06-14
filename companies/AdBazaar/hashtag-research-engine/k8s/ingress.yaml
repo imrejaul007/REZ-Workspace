@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-hashtag-research
+  labels:
+    app: ad-bazaar-hashtag-research
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - hashtag-research.adbazaar.internal
+    secretName: ad-bazaar-hashtag-research-tls
+  rules:
+  - host: hashtag-research.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-hashtag-research
+            port:
+              number: 80

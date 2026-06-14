@@ -1,0 +1,308 @@
+openapi: 3.0.3
+info:
+  title: Notifications Service API
+  description: Push, SMS, Email, and WhatsApp notifications
+  version: 1.0.0
+
+servers:
+  - url: https://notifications.rez.money
+
+paths:
+  /api/v1/notifications/send:
+    post:
+      tags: [Notifications]
+      summary: Send notification
+      security:
+        - InternalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendNotificationRequest'
+      responses:
+        '200':
+          description: Notification queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+
+  /api/v1/notifications/batch:
+    post:
+      tags: [Notifications]
+      summary: Send batch notifications
+      security:
+        - InternalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - notifications
+              properties:
+                notifications:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SendNotificationRequest'
+      responses:
+        '200':
+          description: Batch queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  queued:
+                    type: integer
+                  failed:
+                    type: integer
+
+  /api/v1/notifications/{userId}:
+    get:
+      tags: [Notifications]
+      summary: List user notifications
+      security:
+        - InternalToken: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Notifications list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  unreadCount:
+                    type: integer
+
+  /api/v1/notifications/{id}/read:
+    put:
+      tags: [Notifications]
+      summary: Mark as read
+      security:
+        - InternalToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Marked as read
+
+  /api/v1/notifications/{userId}/read-all:
+    put:
+      tags: [Notifications]
+      summary: Mark all as read
+      security:
+        - InternalToken: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: All marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+
+  /api/v1/notifications/templates:
+    get:
+      tags: [Templates]
+      summary: List templates
+      security:
+        - InternalToken: []
+      responses:
+        '200':
+          description: Templates list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationTemplate'
+
+    post:
+      tags: [Templates]
+      summary: Create template
+      security:
+        - InternalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+      responses:
+        '201':
+          description: Template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationTemplate'
+
+components:
+  securitySchemes:
+    InternalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+
+  schemas:
+    SendNotificationRequest:
+      type: object
+      required:
+        - userId
+        - type
+        - title
+        - body
+      properties:
+        userId:
+          type: string
+        type:
+          type: string
+          enum: [push, email, sms, whatsapp]
+        title:
+          type: string
+        body:
+          type: string
+        data:
+          type: object
+          description: Additional payload for push notifications
+        templateId:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+          description: Schedule for later delivery
+        preferences:
+          type: object
+          properties:
+            respectQuietHours:
+              type: boolean
+              default: true
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+          enum: [push, email, sms, whatsapp]
+        title:
+          type: string
+        body:
+          type: string
+        data:
+          type: object
+        status:
+          type: string
+          enum: [pending, sent, delivered, failed]
+        read:
+          type: boolean
+        readAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+
+    NotificationTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [push, email, sms, whatsapp]
+        subject:
+          type: string
+          description: For email notifications
+        body:
+          type: string
+        variables:
+          type: array
+          items:
+            type: string
+          description: Required variables in template
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateTemplateRequest:
+      type: object
+      required:
+        - name
+        - type
+        - body
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [push, email, sms, whatsapp]
+        subject:
+          type: string
+        body:
+          type: string
+        variables:
+          type: array
+          items:
+            type: string

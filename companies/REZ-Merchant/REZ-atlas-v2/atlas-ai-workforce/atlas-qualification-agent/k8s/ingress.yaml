@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: atlas-qualification-agent
+  namespace: rez-merchant
+  labels:
+    app: atlas-qualification-agent
+    managed-by: rez-merchant
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  tls:
+    - hosts:
+        - api.rezmerchant.com
+      secretName: atlas-qualification-agent-tls
+  rules:
+    - host: api.rezmerchant.com
+      http:
+        paths:
+          - path: /api/qualification
+            pathType: Prefix
+            backend:
+              service:
+                name: atlas-qualification-agent
+                port:
+                  number: 5175

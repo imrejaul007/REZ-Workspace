@@ -1,0 +1,29 @@
+# Exclude native folders - EAS runs prebuild on server to generate fresh
+# Prevents tar extraction errors from Windows-generated gradle/symlink issues
+android/
+ios/
+
+# Exclude other apps in the monorepo
+../REZ-assistant/
+../REZ-assistant-ui/
+../REZ-bills/
+../REZ-expense/
+../REZ-expense-ui/
+../REZ-inbox/
+../REZ-inbox-ui/
+../REZ-nearby/
+../REZ-nearby-ui/
+../REZ-save/
+../REZ-scan/
+../REZ-scan-ui/
+../rez-creator-qr/
+../rez-driver/
+../rez-menu/
+../rez-now/
+../rez-shared/
+../rez-unified-service/
+../rez-ride/
+../Rendez/
+../REZ-CONSUMER-COMPREHENSIVE-AUDIT.md
+../REZ-CONSUMER-COMPREHENSIVE-SECURITY-AUDIT.md
+../REZ-CONSUMER-COMPREHENSIVE-AUDIT.md

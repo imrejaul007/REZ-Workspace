@@ -1,0 +1,66 @@
+# =============================================================================
+# Render Blueprint - REZ Merchant CorpPerks Bridge
+# =============================================================================
+
+services:
+  - type: web
+    name: rez-merchant-bridge
+    region: singapore
+    plan: starter
+    runtime: node
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    healthCheckInterval: 30s
+    healthCheckThreshold: 3
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4096"
+
+      # MongoDB
+      - key: MONGODB_URI
+        sync: false
+
+      # Authentication
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+      # REZ Merchant
+      - key: REZ_MERCHANT_BASE_URL
+        value: https://rez-merchant.onrender.com
+      - key: REZ_MERCHANT_API_KEY
+        sync: false
+
+      # CorpPerks API
+      - key: CORPPERKS_API_URL
+        value: https://corpperks-api.onrender.com
+      - key: CORPPERKS_API_KEY
+        sync: false
+
+      # CORS
+      - key: CORS_ORIGIN
+        value: https://peopleos.corpperks.com
+
+      # GST
+      - key: GST_API_URL
+        sync: false
+      - key: GST_USERNAME
+        sync: false
+      - key: GST_PASSWORD
+        sync: false
+      - key: GST_CLIENT_ID
+        sync: false
+      - key: GST_CLIENT_SECRET
+        sync: false
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "60000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info

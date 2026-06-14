@@ -1,0 +1,23 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-multi-property-dashboard
+  namespace: rez-merchant
+  labels:
+    app: rez-multi-property-dashboard
+    managed-by: rez-merchant
+  annotations:
+    description: "Multi-Property Dashboard for Hotel Chains"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4046
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-multi-property-dashboard

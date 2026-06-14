@@ -1,0 +1,57 @@
+{
+  "name": "@rez/schedule-sdk",
+  "version": "1.0.0",
+  "description": "Official JavaScript/TypeScript SDK for REZ Schedule - Universal Scheduling Platform",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react/index.mjs",
+      "require": "./dist/react/index.js",
+      "types": "./dist/react/index.d.ts"
+    },
+    "./nextjs": {
+      "import": "./dist/nextjs/index.mjs",
+      "require": "./dist/nextjs/index.js",
+      "types": "./dist/nextjs/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest"
+  },
+  "keywords": [
+    "scheduling",
+    "booking",
+    "calendar",
+    "appointments",
+    "calendly",
+    "rez"
+  ],
+  "author": "REZ Technologies",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "next": ">=12.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "eslint": "^8.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

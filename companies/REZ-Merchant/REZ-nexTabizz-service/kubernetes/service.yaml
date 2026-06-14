@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-nexTabizz-service
+  namespace: rez-merchant
+  labels:
+    app: REZ-nexTabizz-service
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-nexTabizz-service service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4063
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-nexTabizz-service
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-nexTabizz-service-internal
+  namespace: rez-merchant
+  labels:
+    app: REZ-nexTabizz-service
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-nexTabizz-service internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4063
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-nexTabizz-service

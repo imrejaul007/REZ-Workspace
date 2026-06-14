@@ -1,0 +1,23 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-mind-hotel-service
+  namespace: rez-merchant
+  labels:
+    app: rez-mind-hotel-service
+    managed-by: rez-merchant
+  annotations:
+    description: "Mind Hotel Service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4017
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-mind-hotel-service

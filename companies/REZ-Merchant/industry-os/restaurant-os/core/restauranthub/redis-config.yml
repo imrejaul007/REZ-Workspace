@@ -1,0 +1,192 @@
+# Redis Configuration for RestaurantHub Microservices
+# Multi-instance Redis setup with clustering and caching strategies
+
+# Primary Redis instance for session management and real-time data
+redis-primary:
+  image: redis:7-alpine
+  container_name: redis-primary
+  ports:
+    - "6379:6379"
+  volumes:
+    - ./redis/primary.conf:/etc/redis/redis.conf
+    - redis-primary-data:/data
+  command: ["redis-server", "/etc/redis/redis.conf"]
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+  environment:
+    - REDIS_REPLICATION_MODE=master
+    - REDIS_PASSWORD=${REDIS_PASSWORD}
+  networks:
+    - restauranthub-network
+
+# Redis cache instance for application-level caching
+redis-cache:
+  image: redis:7-alpine
+  container_name: redis-cache
+  ports:
+    - "6380:6379"
+  volumes:
+    - ./redis/cache.conf:/etc/redis/redis.conf
+    - redis-cache-data:/data
+  command: ["redis-server", "/etc/redis/redis.conf"]
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+  environment:
+    - REDIS_MAXMEMORY=2gb
+    - REDIS_MAXMEMORY_POLICY=allkeys-lru
+    - REDIS_PASSWORD=${REDIS_CACHE_PASSWORD}
+  networks:
+    - restauranthub-network
+
+# Redis queue instance for Bull job processing
+redis-queue:
+  image: redis:7-alpine
+  container_name: redis-queue
+  ports:
+    - "6381:6379"
+  volumes:
+    - ./redis/queue.conf:/etc/redis/redis.conf
+    - redis-queue-data:/data
+  command: ["redis-server", "/etc/redis/redis.conf"]
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+  environment:
+    - REDIS_MAXMEMORY=1gb
+    - REDIS_MAXMEMORY_POLICY=noeviction
+    - REDIS_PASSWORD=${REDIS_QUEUE_PASSWORD}
+  networks:
+    - restauranthub-network
+
+# Redis Sentinel for high availability
+redis-sentinel-1:
+  image: redis:7-alpine
+  container_name: redis-sentinel-1
+  ports:
+    - "26379:26379"
+  volumes:
+    - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  depends_on:
+    - redis-primary
+  networks:
+    - restauranthub-network
+
+redis-sentinel-2:
+  image: redis:7-alpine
+  container_name: redis-sentinel-2
+  ports:
+    - "26380:26379"
+  volumes:
+    - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  depends_on:
+    - redis-primary
+  networks:
+    - restauranthub-network
+
+redis-sentinel-3:
+  image: redis:7-alpine
+  container_name: redis-sentinel-3
+  ports:
+    - "26381:26379"
+  volumes:
+    - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  depends_on:
+    - redis-primary
+  networks:
+    - restauranthub-network
+
+# Redis Cluster Configuration (Alternative setup)
+redis-cluster:
+  image: redis:7-alpine
+  container_name: redis-cluster
+  ports:
+    - "7000-7005:7000-7005"
+  volumes:
+    - ./redis/cluster:/etc/redis
+  command: |
+    sh -c "
+    redis-server /etc/redis/redis-7000.conf &
+    redis-server /etc/redis/redis-7001.conf &
+    redis-server /etc/redis/redis-7002.conf &
+    redis-server /etc/redis/redis-7003.conf &
+    redis-server /etc/redis/redis-7004.conf &
+    redis-server /etc/redis/redis-7005.conf &
+    sleep 10 &&
+    redis-cli --cluster create 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 --cluster-replicas 1 --cluster-yes
+    wait"
+  networks:
+    - restauranthub-network
+
+# Redis Commander for monitoring (development only)
+redis-commander:
+  image: rediscommander/redis-commander:latest
+  container_name: redis-commander
+  ports:
+    - "8081:8081"
+  environment:
+    - REDIS_HOSTS=primary:redis-primary:6379:0:${REDIS_PASSWORD},cache:redis-cache:6380:0:${REDIS_CACHE_PASSWORD},queue:redis-queue:6381:0:${REDIS_QUEUE_PASSWORD}
+    - HTTP_USER=admin
+    - HTTP_PASSWORD=${REDIS_COMMANDER_PASSWORD}
+  depends_on:
+    - redis-primary
+    - redis-cache
+    - redis-queue
+  networks:
+    - restauranthub-network
+  profiles:
+    - development
+
+volumes:
+  redis-primary-data:
+    driver: local
+  redis-cache-data:
+    driver: local
+  redis-queue-data:
+    driver: local
+
+networks:
+  restauranthub-network:
+    external: true
+
+---
+
+# Redis Caching Strategies Configuration
+
+# Cache Keys Structure:
+# - user:{userId}                    -> User profile data (TTL: 1 hour)
+# - session:{sessionId}              -> User session data (TTL: 24 hours)
+# - restaurant:{restaurantId}        -> Restaurant details (TTL: 6 hours)
+# - menu:{restaurantId}              -> Menu items (TTL: 2 hours)
+# - orders:user:{userId}             -> User orders cache (TTL: 30 minutes)
+# - search:{query_hash}              -> Search results (TTL: 15 minutes)
+# - location:{city}:{state}          -> Location-based results (TTL: 1 hour)
+# - popular:restaurants              -> Popular restaurants list (TTL: 4 hours)
+# - trending:items                   -> Trending menu items (TTL: 2 hours)
+# - notifications:{userId}           -> User notifications (TTL: 1 hour)
+# - analytics:{date}                 -> Daily analytics data (TTL: 24 hours)
+
+# Cache Invalidation Patterns:
+# - On user profile update: DELETE user:{userId}
+# - On restaurant update: DELETE restaurant:{restaurantId}, menu:{restaurantId}
+# - On order creation: DELETE orders:user:{userId}
+# - On menu item update: DELETE menu:{restaurantId}
+# - On location change: DELETE location:*
+# - Scheduled cleanup: Popular/trending data refreshed every hour
+
+# Redis Pub/Sub Channels:
+# - order:created                    -> New order notifications
+# - order:updated                    -> Order status updates  
+# - restaurant:updated               -> Restaurant data changes
+# - user:notification                -> Real-time notifications
+# - system:cache:invalidate          -> Cache invalidation events

@@ -1,0 +1,45 @@
+{
+  "name": "festival-graph-service",
+  "version": "1.0.0",
+  "description": "Festival Graph Service - Track festivals and predict impact on nearby merchants",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.2.0",
+    "winston": "^3.11.0",
+    "prom-client": "^15.1.0",
+    "zod": "^3.22.4",
+    "dotenv": "^16.4.5",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "axios": "^1.6.8",
+    "date-fns": "^3.6.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.30",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5",
+    "typescript": "^5.4.3",
+    "tsx": "^4.7.1",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "ts-jest": "^29.1.2",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

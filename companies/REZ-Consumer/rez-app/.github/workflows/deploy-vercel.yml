@@ -1,0 +1,45 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Clear corrupted npm cache and reinstall
+        run: |
+          rm -rf ~/.npm/_cacache
+          npm ci || npm ci --force
+
+      - name: Reinstall known-corrupted packages
+        run: npm install source-map@0.6.1 hermes-parser@0.35.0 @expo/vector-icons @expo/metro-runtime --force
+
+      - name: Build web app
+        run: npm run build:render
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ vars.VERCEL_CONSUMER_PROJECT_ID }}
+          vercel-args: '--prod=true'
+        continue-on-error: true

@@ -1,0 +1,368 @@
+# AssetMind Docker Compose - Complete Platform
+# Version: 2.0
+# Updated: June 9, 2026
+
+version: '3.8'
+
+services:
+  # =========================================================================
+  # CORE TIER (5001-5006)
+  # =========================================================================
+
+  asset-universe:
+    build: ./assetmind-asset-universe
+    ports:
+      - "5001:5001"
+    networks:
+      - assetmind
+
+  asset-twin:
+    build: ./assetmind-twin-engine
+    ports:
+      - "5002:5002"
+    networks:
+      - assetmind
+
+  market-twin:
+    build: ./assetmind-twin-engine
+    ports:
+      - "5003:5003"
+    networks:
+      - assetmind
+
+  portfolio-twin:
+    build: ./assetmind-twin-engine
+    ports:
+      - "5004:5004"
+    networks:
+      - assetmind
+
+  investor-twin:
+    build: ./assetmind-twin-engine
+    ports:
+      - "5005:5005"
+    networks:
+      - assetmind
+
+  intelligence-twin:
+    build: ./assetmind-twin-engine
+    ports:
+      - "5006:5006"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # DATA TIER (5010-5023)
+  # =========================================================================
+
+  market-data:
+    build: ./assetmind-data
+    ports:
+      - "5010:5010"
+    networks:
+      - assetmind
+
+  news-service:
+    build: ./assetmind-data
+    ports:
+      - "5012:5012"
+    networks:
+      - assetmind
+
+  social-service:
+    build: ./assetmind-data
+    ports:
+      - "5013:5013"
+    networks:
+      - assetmind
+
+  macro-data:
+    build: ./assetmind-data
+    ports:
+      - "5014:5014"
+    networks:
+      - assetmind
+
+  crypto-data:
+    build: ./assetmind-data
+    ports:
+      - "5018:5018"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # KNOWLEDGE GRAPH (5040-5043)
+  # =========================================================================
+
+  knowledge-graph:
+    build: ./assetmind-knowledge-graph
+    ports:
+      - "5040:5040"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # INTELLIGENCE (5050-5060)
+  # =========================================================================
+
+  financial-intelligence:
+    build: ./assetmind-intelligence
+    ports:
+      - "5050:5050"
+    networks:
+      - assetmind
+
+  risk-intelligence:
+    build: ./assetmind-intelligence
+    ports:
+      - "5053:5053"
+    networks:
+      - assetmind
+
+  sentiment-intelligence:
+    build: ./assetmind-intelligence
+    ports:
+      - "5052:5052"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # SCORING (5070-5078)
+  # =========================================================================
+
+  scoring-engine:
+    build: ./assetmind-scoring
+    ports:
+      - "5070:5070"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # AGENTS (5090-5112)
+  # =========================================================================
+
+  agent-orchestrator:
+    build: ./assetmind-agents
+    ports:
+      - "5090:5090"
+    networks:
+      - assetmind
+
+  portfolio-agent:
+    build: ./assetmind-agents
+    ports:
+      - "5091:5091"
+    networks:
+      - assetmind
+
+  risk-agent:
+    build: ./assetmind-agents
+    ports:
+      - "5092:5092"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # KRONOS FORECASTING (5160)
+  # =========================================================================
+
+  kronos:
+    build: ./assetmind-kronos
+    ports:
+      - "5160:5160"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # DISCOVERY (5120)
+  # =========================================================================
+
+  discovery:
+    build: ./assetmind-discovery
+    ports:
+      - "5120:5120"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # RESEARCH (5130)
+  # =========================================================================
+
+  research:
+    build: ./assetmind-research
+    ports:
+      - "5130:5130"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # SIMULATION (5140)
+  # =========================================================================
+
+  simulation:
+    build: ./assetmind-simulation
+    ports:
+      - "5140:5140"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # TRADER (5150)
+  # =========================================================================
+
+  trader:
+    build: ./assetmind-trader
+    ports:
+      - "5150:5150"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # CAPITAL FLOW (5183)
+  # =========================================================================
+
+  capital-flow:
+    build: ./assetmind-capital-flow
+    ports:
+      - "5183:5183"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # BRIEFING (5200)
+  # =========================================================================
+
+  briefing:
+    build: ./assetmind-briefing
+    ports:
+      - "5200:5200"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # MEMORY (5030)
+  # =========================================================================
+
+  memory:
+    build: ./assetmind-memory
+    ports:
+      - "5030:5030"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # EXECUTION (5160)
+  # =========================================================================
+
+  execution:
+    build: ./assetmind-execution
+    ports:
+      - "5161:5161"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # ENTERPRISE (5250-5251)
+  # =========================================================================
+
+  enterprise:
+    build: ./assetmind-enterprise
+    ports:
+      - "5250:5250"
+    networks:
+      - assetmind
+
+  admin:
+    build: ./assetmind-admin
+    ports:
+      - "5251:5251"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # MARKETPLACE (5270)
+  # =========================================================================
+
+  marketplace:
+    build: ./assetmind-marketplace
+    ports:
+      - "5270:5270"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # API GATEWAY (5260)
+  # =========================================================================
+
+  api-gateway:
+    build: ./assetmind-api-gateway
+    ports:
+      - "5260:5260"
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # FRONTEND (3000)
+  # =========================================================================
+
+  frontend:
+    build: ./assetmind-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api-gateway:5260
+    depends_on:
+      - api-gateway
+    networks:
+      - assetmind
+
+  # =========================================================================
+  # DATABASES
+  # =========================================================================
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: assetmind
+      POSTGRES_PASSWORD: assetmind
+      POSTGRES_DB: assetmind
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - assetmind
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - assetmind
+
+  neo4j:
+    image: neo4j:5
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/assetmind
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - assetmind
+
+# =========================================================================
+# VOLUMES & NETWORKS
+# =========================================================================
+
+volumes:
+  postgres_data:
+  redis_data:
+  neo4j_data:
+
+networks:
+  assetmind:
+    driver: bridge

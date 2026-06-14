@@ -1,0 +1,118 @@
+name: Build Mobile App
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Build iOS
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd mobile
+          npm ci
+
+      - name: Install iOS dependencies
+        run: |
+          cd mobile
+          npx expo install --fix
+
+      - name: Prebuild iOS
+        run: |
+          cd mobile
+          npx expo prebuild --platform ios --clean
+
+      - name: Build iOS
+        run: |
+          cd mobile/ios
+          xcodebuild -workspace RisnaEstate.xcworkspace -scheme RisnaEstate -configuration Release -archivePath build/RisnaEstate.xcarchive archive
+
+      - name: Upload iOS Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: mobile/ios/build/RisnaEstate.xcarchive
+          retention-days: 7
+
+  # Build Android
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd mobile
+          npm ci
+
+      - name: Install Android dependencies
+        run: |
+          cd mobile
+          npx expo install --fix
+
+      - name: Prebuild Android
+        run: |
+          cd mobile
+          npx expo prebuild --platform android --clean
+
+      - name: Build Android
+        run: |
+          cd mobile/android
+          ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 7
+
+  # Upload to TestFlight (iOS)
+  testflight:
+    runs-on: macos-latest
+    needs: ios
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download iOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-build
+
+      - name: Upload to TestFlight
+        run: |
+          xcrun altool --upload-app -f build/RisnaEstate.xcarchive -t ios -u ${{ secrets.APPLE_ID }} -p ${{ secrets.APPLE_APP_PASSWORD }}
+
+  # Upload to Google Play (Android)
+  play-store:
+    runs-on: ubuntu-latest
+    needs: android
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+
+      - name: Upload to Google Play
+        run: |
+          echo "Upload to Google Play Console"
+          # gcloud app deploy app-release.apk

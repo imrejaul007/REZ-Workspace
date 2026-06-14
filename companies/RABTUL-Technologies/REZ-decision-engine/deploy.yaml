@@ -1,0 +1,65 @@
+# REZ Decision Engine - Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rez-decision-engine
+  labels:
+    app: rez-decision-engine
+    tier: intelligence
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rez-decision-engine
+  template:
+    metadata:
+      labels:
+        app: rez-decision-engine
+        tier: intelligence
+    spec:
+      containers:
+      - name: decision-engine
+        image: rez/decision-engine:latest
+        ports:
+        - containerPort: 4128
+        env:
+        - name: PORT
+          value: "4128"
+        - name: NODE_ENV
+          value: "production"
+        - name: FEATURE_STORE_URL
+          value: "http://rez-feature-store:4127"
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: rez-secrets
+              key: redis-url
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4128
+          initialDelaySeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 4128
+          initialDelaySeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-decision-engine
+spec:
+  selector:
+    app: rez-decision-engine
+  ports:
+  - port: 4128
+    targetPort: 4128
+  type: ClusterIP

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ad-bazaar-instagram-insights-config
+  labels:
+    app: ad-bazaar-instagram-insights
+data:
+  NODE_ENV: "production"
+  PORT: "5082"
+  LOG_LEVEL: "info"
+  MONGODB_URI: "mongodb://mongo-cluster.mongodb.svc.cluster.local:27017/instagram_insights"
+  REDIS_URL: "redis://redis-cluster.redis.svc.cluster.local:6379"
+  INSIGHTS_CACHE_TTL: "3600"
+  METRICS_BATCH_SIZE: "100"

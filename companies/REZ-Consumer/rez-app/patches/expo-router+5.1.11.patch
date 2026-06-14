@@ -1,0 +1,106 @@
+diff --git a/node_modules/expo-router/build/matchers.js b/node_modules/expo-router/build/matchers.js
+--- a/node_modules/expo-router/build/matchers.js
++++ b/node_modules/expo-router/build/matchers.js
+@@ -45,6 +45,7 @@ function matchArrayGroupName(name) {
+     return name.match(/(?:[^\\()])*?\(([^\\/]+,[^\\/]+)\)/)?.[1];
+ }
+ function getNameFromFilePath(name) {
++    if (typeof name !== 'string') return '';
+     return removeSupportedExtensions(removeFileSystemDots(name));
+ }
+ function getContextKey(name) {
+@@ -58,18 +59,22 @@ function getContextKey(name) {
+ }
+ /** Remove `.js`, `.ts`, `.jsx`, `.tsx`, and the +api suffix */
+ function removeSupportedExtensions(name) {
++    if (typeof name !== 'string') return '';
+     return name.replace(/(\+api)?\.[jt]sx?$/g, '');
+ }
+ /** Remove `.js`, `.ts`, `.jsx`, `.tsx` */
+ function removeFileSystemExtensions(name) {
++    if (typeof name !== 'string') return '';
+     return name.replace(/\.[jt]sx?$/g, '');
+ }
+ // Remove any amount of `./` and `../` from the start of the string
+ function removeFileSystemDots(filePath) {
++    if (typeof filePath !== 'string') return '';
+     return filePath.replace(/^(?:\.\.?\/)+/g, '');
+ }
+ function stripGroupSegmentsFromPath(path) {
+-    return path
++    if (typeof path !== 'string') return '';
++    return (path || '')
+         .split('/')
+         .reduce((acc, v) => {
+         if (matchGroupName(v) == null) {
+@@ -80,7 +85,7 @@ function stripGroupSegmentsFromPath(path) {
+         .join('/');
+ }
+ function stripInvisibleSegmentsFromPath(path) {
+-    return stripGroupSegmentsFromPath(path).replace(/\/?index$/, '');
++    return stripGroupSegmentsFromPath(path || '').replace(/\/?index$/, '');
+ }
+ /**
+  * Match:
+@@ -88,6 +93,7 @@ function stripInvisibleSegmentsFromPath(path) {
+  *  - Routes can still use `+`, but it cannot be in the last segment.
+  */
+ function isTypedRoute(name) {
++    if (typeof name !== 'string') return false;
+     return !name.startsWith('+') && name.match(/(_layout|[^/]*?\+[^/]*?)\.[tj]sx?$/) === null;
+ }
+ //# sourceMappingURL=matchers.js.map
+diff --git a/node_modules/expo-router/build/getServerManifest.js b/node_modules/expo-router/build/getServerManifest.js
+--- a/node_modules/expo-router/build/getServerManifest.js
++++ b/node_modules/expo-router/build/getServerManifest.js
+@@ -31,10 +31,10 @@ function getServerManifest(route) {
+         // copies should be rendered. However, an API route is always the same regardless of parent segments.
+         let key;
+         if (route.type.includes('api')) {
+-            key = (0, matchers_1.getContextKey)(route.contextKey).replace(/\/index$/, '') ?? '/';
++            key = ((0, matchers_1.getContextKey)(route.contextKey) || '').replace(/\/index$/, '') || '/';
+         }
+         else {
+-            key = (0, matchers_1.getContextKey)(absoluteRoute).replace(/\/index$/, '') ?? '/';
++            key = ((0, matchers_1.getContextKey)(absoluteRoute) || '').replace(/\/index$/, '') || '/';
+         }
+         return [[key, '/' + absoluteRoute, route]];
+     }
+@@ -128,6 +128,7 @@ function buildGetSafeRouteKey() {
+     };
+ }
+ function removeTrailingSlash(route) {
++    if (typeof route !== 'string') return '/';
+     return route.replace(/\/$/, '') || '/';
+ }
+ function getNamedParametrizedRoute(route) {
+@@ -144,7 +145,7 @@ function getNamedParametrizedRoute(route) {
+                 const { name, optional, repeat } = parseParameter(segment);
+                 // replace any non-word characters since they can break
+                 // the named regex
+-                let cleanedKey = name.replace(/\W/g, '');
++                let cleanedKey = (name || '').replace(/\W/g, '');
+                 let invalidKey = false;
+                 // check if the key is still invalid and fallback to using a known
+                 // safe key
+@@ -169,7 +170,11 @@ function getNamedParametrizedRoute(route) {
+                     : `/(?<${cleanedKey}>[^/]+?)`;
+             }
+             else if (/^\(.*\)$/.test(segment)) {
+-                const groupName = (0, matchers_1.matchGroupName)(segment)
++                const matchedGroup = (0, matchers_1.matchGroupName)(segment);
++                if (!matchedGroup) {
++                    return '';
++                }
++                const groupName = matchedGroup
+                     .split(',')
+                     .map((group) => group.trim())
+                     .filter(Boolean);
+@@ -196,6 +201,7 @@ const reHasRegExp = /[|\\{}()[\]^$+*?.-]/;
+ const reReplaceRegExp = /[|\\{}()[\]^$+*?.-]/g;
+ function escapeStringRegexp(str) {
+     // see also: https://github.com/lodash/lodash/blob/2da024c3b4f9947a48517639de7560457cd4ec6c/escapeRegExp.js#L23
++    if (typeof str !== 'string') return '';
+     if (reHasRegExp.test(str)) {
+         return str.replace(reReplaceRegExp, '\\$&');
+     }

@@ -1,0 +1,288 @@
+groups:
+- name: database.rules
+  rules:
+
+  # ============================================================================
+  # POSTGRESQL ALERTS
+  # ============================================================================
+
+  # PostgreSQL Down
+  - alert: PostgreSQLDown
+    expr: pg_up == 0
+    for: 1m
+    labels:
+      severity: critical
+      team: database
+      component: postgresql
+    annotations:
+      summary: "CRITICAL: PostgreSQL database is down"
+      description: "PostgreSQL database has been unreachable for more than 1 minute"
+      runbook_url: "https://runbooks.restauranthub.com/database/postgresql-down"
+
+  # High Database Connections
+  - alert: HighDatabaseConnections
+    expr: (pg_stat_database_numbackends / pg_settings_max_connections) * 100 > 80
+    for: 5m
+    labels:
+      severity: warning
+      team: database
+      component: postgresql
+    annotations:
+      summary: "High database connection usage"
+      description: "Database connection usage is above 80% ({{ $value }}%)"
+      runbook_url: "https://runbooks.restauranthub.com/database/high-connections"
+
+  # Critical Database Connections
+  - alert: CriticalDatabaseConnections
+    expr: (pg_stat_database_numbackends / pg_settings_max_connections) * 100 > 95
+    for: 2m
+    labels:
+      severity: critical
+      team: database
+      component: postgresql
+    annotations:
+      summary: "CRITICAL: Database connection usage critically high"
+      description: "Database connection usage is above 95% ({{ $value }}%). Risk of connection exhaustion."
+      runbook_url: "https://runbooks.restauranthub.com/database/critical-connections"
+
+  # Slow Queries
+  - alert: PostgreSQLSlowQueries
+    expr: rate(pg_stat_activity_max_tx_duration{datname!=""}[5m]) > 60
+    for: 5m
+    labels:
+      severity: warning
+      team: database
+      component: postgresql
+    annotations:
+      summary: "Slow queries detected in PostgreSQL"
+      description: "Queries taking more than 60 seconds detected in database {{ $labels.datname }}"
+      runbook_url: "https://runbooks.restauranthub.com/database/slow-queries"
+
+  # Database Lock Waits
+  - alert: DatabaseLockWaits
+    expr: pg_locks_count > 50
+    for: 5m
+    labels:
+      severity: warning
+      team: database
+      component: postgresql
+    annotations:
+      summary: "High number of database locks"
+      description: "More than 50 database locks detected ({{ $value }} locks)"
+      runbook_url: "https://runbooks.restauranthub.com/database/lock-waits"
+
+  # Database Deadlocks
+  - alert: DatabaseDeadlocks
+    expr: rate(pg_stat_database_deadlocks[5m]) > 0
+    for: 2m
+    labels:
+      severity: warning
+      team: database
+      component: postgresql
+    annotations:
+      summary: "Database deadlocks detected"
+      description: "Deadlocks detected in database {{ $labels.datname }} ({{ $value }} deadlocks/second)"
+      runbook_url: "https://runbooks.restauranthub.com/database/deadlocks"
+
+  # High Database Disk Usage
+  - alert: HighDatabaseDiskUsage
+    expr: (pg_database_size_bytes / (1024*1024*1024)) > 50
+    for: 10m
+    labels:
+      severity: warning
+      team: database
+      component: postgresql
+    annotations:
+      summary: "High database disk usage"
+      description: "Database {{ $labels.datname }} is using more than 50GB of disk space ({{ $value }}GB)"
+      runbook_url: "https://runbooks.restauranthub.com/database/high-disk-usage"
+
+  # Database Replication Lag
+  - alert: DatabaseReplicationLag
+    expr: pg_replication_lag > 10
+    for: 5m
+    labels:
+      severity: warning
+      team: database
+      component: postgresql
+    annotations:
+      summary: "Database replication lag detected"
+      description: "Replication lag is more than 10 seconds ({{ $value }} seconds)"
+      runbook_url: "https://runbooks.restauranthub.com/database/replication-lag"
+
+  # Database WAL Files High
+  - alert: DatabaseWALFilesHigh
+    expr: pg_wal_files > 100
+    for: 10m
+    labels:
+      severity: warning
+      team: database
+      component: postgresql
+    annotations:
+      summary: "High number of WAL files"
+      description: "More than 100 WAL files detected ({{ $value }} files)"
+      runbook_url: "https://runbooks.restauranthub.com/database/high-wal-files"
+
+  # Database Cache Hit Ratio Low
+  - alert: DatabaseCacheHitRatioLow
+    expr: (pg_stat_database_blks_hit / (pg_stat_database_blks_hit + pg_stat_database_blks_read)) * 100 < 95
+    for: 10m
+    labels:
+      severity: warning
+      team: database
+      component: postgresql
+    annotations:
+      summary: "Low database cache hit ratio"
+      description: "Cache hit ratio is below 95% for database {{ $labels.datname }} ({{ $value }}%)"
+      runbook_url: "https://runbooks.restauranthub.com/database/low-cache-hit"
+
+  # ============================================================================
+  # REDIS ALERTS
+  # ============================================================================
+
+  # Redis Down
+  - alert: RedisDown
+    expr: redis_up == 0
+    for: 1m
+    labels:
+      severity: critical
+      team: database
+      component: redis
+    annotations:
+      summary: "CRITICAL: Redis server is down"
+      description: "Redis server has been unreachable for more than 1 minute"
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-down"
+
+  # High Redis Memory Usage
+  - alert: HighRedisMemoryUsage
+    expr: (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 80
+    for: 5m
+    labels:
+      severity: warning
+      team: database
+      component: redis
+    annotations:
+      summary: "High Redis memory usage"
+      description: "Redis memory usage is above 80% ({{ $value }}%)"
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-high-memory"
+
+  # Critical Redis Memory Usage
+  - alert: CriticalRedisMemoryUsage
+    expr: (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 95
+    for: 2m
+    labels:
+      severity: critical
+      team: database
+      component: redis
+    annotations:
+      summary: "CRITICAL: Redis memory usage critically high"
+      description: "Redis memory usage is above 95% ({{ $value }}%). Risk of evictions."
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-critical-memory"
+
+  # Redis Connection Rejected
+  - alert: RedisConnectionRejected
+    expr: rate(redis_rejected_connections_total[5m]) > 0
+    for: 2m
+    labels:
+      severity: warning
+      team: database
+      component: redis
+    annotations:
+      summary: "Redis connections being rejected"
+      description: "Redis is rejecting connections ({{ $value }} rejections/second)"
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-rejected-connections"
+
+  # Redis Keyspace Misses High
+  - alert: RedisKeyspaceMissesHigh
+    expr: (rate(redis_keyspace_misses_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))) * 100 > 20
+    for: 10m
+    labels:
+      severity: warning
+      team: database
+      component: redis
+    annotations:
+      summary: "High Redis cache miss ratio"
+      description: "Redis cache miss ratio is above 20% ({{ $value }}%)"
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-high-misses"
+
+  # Redis Slow Queries
+  - alert: RedisSlowQueries
+    expr: rate(redis_slowlog_length[5m]) > 0
+    for: 5m
+    labels:
+      severity: warning
+      team: database
+      component: redis
+    annotations:
+      summary: "Redis slow queries detected"
+      description: "Slow queries detected in Redis ({{ $value }} slow queries/second)"
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-slow-queries"
+
+  # Redis Expired Keys High
+  - alert: RedisExpiredKeysHigh
+    expr: rate(redis_expired_keys_total[5m]) > 100
+    for: 10m
+    labels:
+      severity: warning
+      team: database
+      component: redis
+    annotations:
+      summary: "High Redis key expiration rate"
+      description: "Redis key expiration rate is above 100 keys/second ({{ $value }} keys/s)"
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-high-expiration"
+
+  # Redis Evicted Keys
+  - alert: RedisEvictedKeys
+    expr: rate(redis_evicted_keys_total[5m]) > 0
+    for: 5m
+    labels:
+      severity: warning
+      team: database
+      component: redis
+    annotations:
+      summary: "Redis keys being evicted"
+      description: "Redis is evicting keys due to memory pressure ({{ $value }} evictions/second)"
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-evictions"
+
+  # Redis Master-Slave Sync Issues
+  - alert: RedisMasterSlaveSyncIssues
+    expr: redis_master_repl_offset - redis_slave_repl_offset > 1000000
+    for: 5m
+    labels:
+      severity: warning
+      team: database
+      component: redis
+    annotations:
+      summary: "Redis master-slave sync lag"
+      description: "Redis slave is lagging behind master by more than 1MB ({{ $value }} bytes)"
+      runbook_url: "https://runbooks.restauranthub.com/database/redis-sync-lag"
+
+  # ============================================================================
+  # DATABASE BACKUP ALERTS
+  # ============================================================================
+
+  # Database Backup Failed
+  - alert: DatabaseBackupFailed
+    expr: time() - database_backup_last_success_timestamp > 86400
+    for: 0m
+    labels:
+      severity: critical
+      team: database
+      component: backup
+    annotations:
+      summary: "CRITICAL: Database backup failed"
+      description: "Database backup has not completed successfully for more than 24 hours"
+      runbook_url: "https://runbooks.restauranthub.com/database/backup-failed"
+
+  # Database Backup Warning
+  - alert: DatabaseBackupWarning
+    expr: time() - database_backup_last_success_timestamp > 43200
+    for: 0m
+    labels:
+      severity: warning
+      team: database
+      component: backup
+    annotations:
+      summary: "Database backup overdue"
+      description: "Database backup has not completed successfully for more than 12 hours"
+      runbook_url: "https://runbooks.restauranthub.com/database/backup-overdue"

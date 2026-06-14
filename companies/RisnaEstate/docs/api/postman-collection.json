@@ -1,0 +1,874 @@
+{
+  "info": {
+    "name": "REZ RisnaEstate API",
+    "description": "Real Estate Transaction Management Platform - Complete API collection for managing leads, properties, deals, agreements, handovers, and documents.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Leads",
+      "description": "Lead management operations - Create, read, update, and qualify leads",
+      "item": [
+        {
+          "name": "List Leads",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/leads?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "leads"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Filter by status: new, contacted, qualified, converted, lost",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by name, email, or phone",
+                  "disabled": true
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Get Lead by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/leads/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "leads", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Lead ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Create Lead",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/leads",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "leads"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+91-9876543210\",\n  \"source\": \"website\",\n  \"notes\": \"Interested in 3BHK apartments in Whitefield\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Lead",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/leads/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "leads", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Lead ID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"qualified\",\n  \"budget\": 5000000,\n  \"timeline\": \"3_6_months\",\n  \"propertyType\": \"apartment\",\n  \"preferredLocations\": [\"Whitefield\", \"Marathahalli\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "Qualify Lead",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/leads/:id/qualify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "leads", ":id", "qualify"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Lead ID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"budget\": 5000000,\n  \"timeline\": \"3_6_months\",\n  \"propertyType\": \"apartment\",\n  \"preferredLocations\": [\"Whitefield\", \"Marathahalli\"]\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Properties",
+      "description": "Property management operations - Manage property listings and inventory",
+      "item": [
+        {
+          "name": "List Properties",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/properties?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "properties"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "apartment, villa, plot, commercial, industrial",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "available, sold, reserved, unavailable",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "",
+                  "description": "Minimum price filter",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "",
+                  "description": "Maximum price filter",
+                  "disabled": true
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Get Property by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/properties/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "properties", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Property ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Create Property",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/properties",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "properties"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"3BHK Luxury Apartment in Whitefield\",\n  \"type\": \"apartment\",\n  \"price\": 8500000,\n  \"location\": {\n    \"address\": \"Prestige Technology Park, Whitefield\",\n    \"city\": \"Bangalore\",\n    \"state\": \"Karnataka\",\n    \"pincode\": \"560066\"\n  },\n  \"specifications\": {\n    \"bedrooms\": 3,\n    \"bathrooms\": 2,\n    \"area\": 1800,\n    \"areaUnit\": \"sqft\"\n  },\n  \"amenities\": [\"Swimming Pool\", \"Gym\", \"Club House\", \"24/7 Security\", \"Parking\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Property",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/properties/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "properties", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Property ID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"reserved\",\n  \"price\": 8200000\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deals",
+      "description": "Deal pipeline management - Track and manage real estate transactions through stages",
+      "item": [
+        {
+          "name": "List Deals",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/deals?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "deals"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "stage",
+                  "value": "",
+                  "description": "inquiry, site_visit, offer_made, negotiation, agreement, registry, closed_won, closed_lost",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "active, won, lost, on_hold",
+                  "disabled": true
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Get Deal by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/deals/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "deals", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Deal ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Create Deal",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/deals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "deals"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leadId\": \"65abc123def456...\",\n  \"propertyId\": \"65def789abc012...\",\n  \"expectedPrice\": 8500000,\n  \"notes\": \"Customer interested, scheduling site visit\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Deal",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/deals/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "deals", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Deal ID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedPrice\": 8200000,\n  \"probability\": 75,\n  \"notes\": \"Customer negotiated, offering discount\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Move Deal to Next Stage",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/deals/:id/stage",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "deals", ":id", "stage"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Deal ID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stage\": \"negotiation\",\n  \"notes\": \"Customer agreed to site visit, moving to negotiation phase\",\n  \"expectedCloseDate\": \"2026-07-15\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Close Deal",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/deals/:id/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "deals", ":id", "close"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Deal ID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"won\",\n  \"finalPrice\": 8000000,\n  \"reason\": \"Customer accepted final offer\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agreements",
+      "description": "Agreement generation and management - Create and manage sale/rental agreements",
+      "item": [
+        {
+          "name": "List Agreements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/agreements?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "agreements"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "sale_agreement, rental_agreement, nri_agreement, commercial_lease",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "draft, pending_signature, signed, executed, cancelled",
+                  "disabled": true
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Get Agreement by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/agreements/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "agreements", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Agreement ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Create Agreement",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/agreements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "agreements"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dealId\": \"65xyz789abc012...\",\n  \"type\": \"sale_agreement\",\n  \"terms\": {\n    \"price\": 8000000,\n    \"paymentSchedule\": [\n      {\n        \"milestone\": \"Booking Amount\",\n        \"amount\": 800000,\n        \"dueDate\": \"2026-06-20\"\n      },\n      {\n        \"milestone\": \"Registry\",\n        \"amount\": 7200000,\n        \"dueDate\": \"2026-07-15\"\n      }\n    ],\n    \"possessionDate\": \"2026-09-30\",\n    \"agreementDate\": \"2026-06-15\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Generate Agreement PDF",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/agreements/:id/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "agreements", ":id", "generate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Agreement ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Sign Agreement",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/agreements/:id/sign",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "agreements", ":id", "sign"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Agreement ID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"signatureData\": \"base64_encoded_signature_image\",\n  \"signerRole\": \"buyer\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Handovers",
+      "description": "Property handover operations - Schedule and manage property handovers to buyers",
+      "item": [
+        {
+          "name": "List Handovers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/handovers?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "handovers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "scheduled, in_progress, completed, cancelled",
+                  "disabled": true
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Get Handover by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/handovers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "handovers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Handover ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Schedule Handover",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/handovers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "handovers"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dealId\": \"65xyz789abc012...\",\n  \"propertyId\": \"65def789abc012...\",\n  \"scheduledDate\": \"2026-09-30T10:00:00Z\",\n  \"checklist\": [\n    {\n      \"item\": \"Keys handed over\",\n      \"completed\": false\n    },\n    {\n      \"item\": \"Documents verified\",\n      \"completed\": false\n    },\n    {\n      \"item\": \"Property inspection completed\",\n      \"completed\": false\n    }\n  ],\n  \"notes\": \"Buyer requested morning slot for handover\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Handover Status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/handovers/:id/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "handovers", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Handover ID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"notes\": \"Handover completed successfully. All keys and documents handed over.\",\n  \"completedItems\": [\n    \"Keys handed over\",\n    \"Documents verified\",\n    \"Property inspection completed\"\n  ],\n  \"pendingItems\": []\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "description": "Document management - Upload, retrieve, and download property and transaction documents",
+      "item": [
+        {
+          "name": "List Documents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "documents"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "agreement, title_deed, noc, tax_receipt, insurance, other",
+                  "disabled": true
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Get Document by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "documents", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Document ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "documents"]
+            },
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Document file to upload"
+                },
+                {
+                  "key": "type",
+                  "value": "title_deed",
+                  "description": "Document type"
+                },
+                {
+                  "key": "relatedTo",
+                  "value": "",
+                  "description": "Related entity ID (deal, agreement, etc.)",
+                  "disabled": true
+                },
+                {
+                  "key": "relatedType",
+                  "value": "property",
+                  "description": "Related entity type"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download Document",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/:id/download",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "documents", ":id", "download"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Document ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "documents", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Document ID"
+                }
+              ]
+            },
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "description": "Analytics endpoints - Get insights and statistics",
+      "item": [
+        {
+          "name": "Get Deal Analytics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/deals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "analytics", "deals"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01",
+                  "description": "Start date for analytics period",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-12-31",
+                  "description": "End date for analytics period",
+                  "disabled": true
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "Get Property Analytics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/properties",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "analytics", "properties"]
+            },
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoints",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "header": []
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "common": {
+    "welcome": "स्वागत",
+    "login": "लॉगिन",
+    "logout": "लॉगआउट",
+    "save": "सेव",
+    "cancel": "रद्द",
+    "delete": "हटवा",
+    "edit": "संपादित",
+    "loading": "लोड होत आहे...",
+    "error": "त्रुटी",
+    "success": "यश"
+  },
+  "auth": {
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "signIn": "साइन इन",
+    "forgotPassword": "पासवर्ड विसरलात?",
+    "noAccount": "खाते नाही?",
+    "signUp": "साइन अप"
+  },
+  "dashboard": {
+    "title": "डॅशबोर्ड",
+    "totalSales": "एकूण विक्री",
+    "orders": "ऑर्डर",
+    "customers": "ग्राहक",
+    "revenue": "महसूल"
+  },
+  "menu": {
+    "home": "होम",
+    "products": "उत्पादने",
+    "orders": "ऑर्डर",
+    "settings": "सेटिंग्ज",
+    "profile": "प्रोफाइल"
+  },
+  "settings": {
+    "language": "भाषा",
+    "selectLanguage": "भाषा निवडा",
+    "notifications": "सूचना",
+    "darkMode": "डार्क मोड"
+  }
+}

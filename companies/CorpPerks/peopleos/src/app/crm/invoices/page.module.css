@@ -1,0 +1,212 @@
+.page {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.subtitle {
+  color: var(--gray-500);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.statIcon {
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-100);
+  border-radius: 10px;
+}
+
+.statValue {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.statLabel {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.searchInput {
+  flex: 1;
+  max-width: 400px;
+  padding: 10px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  border-color: var(--primary);
+}
+
+.filterSelect {
+  padding: 10px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Invoice List */
+.invoiceList {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 150px 1.5fr 120px 100px 150px 120px;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--gray-50);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 150px 1.5fr 120px 100px 150px 120px;
+  gap: 16px;
+  padding: 16px 20px;
+  align-items: center;
+  border-bottom: 1px solid var(--gray-100);
+  transition: background 0.2s;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background: var(--gray-50);
+}
+
+.invoiceNumber {
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: 14px;
+}
+
+.clientName {
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+.amount {
+  font-weight: 700;
+  color: var(--gray-900);
+  font-size: 14px;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+.dueDate {
+  font-size: 13px;
+  color: var(--gray-600);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.paidDate {
+  font-size: 11px;
+  color: #10b981;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--gray-100);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.actionBtn:hover {
+  background: var(--gray-200);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px;
+  color: var(--gray-500);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 1fr 1fr 80px 80px;
+  }
+
+  .tableHeader span:nth-child(5),
+  .tableRow > span:nth-child(5) {
+    display: none;
+  }
+}

@@ -1,0 +1,467 @@
+name: Performance Tests
+
+on:
+  # Run on PR to main branch
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'tests/performance/**'
+
+  # Run on main branch pushes
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/api/**'
+      - 'packages/**'
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      test_duration:
+        description: 'Test duration in minutes'
+        required: false
+        default: '10'
+      max_vus:
+        description: 'Maximum virtual users'
+        required: false
+        default: '100'
+      test_environment:
+        description: 'Test environment'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+  # Scheduled nightly performance tests
+  schedule:
+    - cron: '0 2 * * *'  # 2 AM UTC daily
+
+env:
+  NODE_VERSION: '18'
+  REDIS_PASSWORD: restauranthub_redis_secret
+
+jobs:
+  # Job to set up test environment
+  setup-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      api-url: ${{ steps.deploy.outputs.api-url }}
+      test-id: ${{ steps.test-id.outputs.test-id }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate test ID
+        id: test-id
+        run: echo "test-id=perf-test-$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start Redis for testing
+        run: |
+          docker run -d \
+            --name redis-test \
+            -p 6379:6379 \
+            redis:7-alpine \
+            redis-server --requirepass ${{ env.REDIS_PASSWORD }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd apps/api && npm ci
+
+      - name: Build API
+        run: |
+          cd apps/api
+          npm run build
+
+      - name: Start API server
+        id: deploy
+        run: |
+          cd apps/api
+          REDIS_ENABLED=true \
+          REDIS_HOST=localhost \
+          REDIS_PORT=6379 \
+          REDIS_PASSWORD=${{ env.REDIS_PASSWORD }} \
+          NODE_ENV=test \
+          API_PORT=3000 \
+          npm start &
+
+          # Wait for server to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/v1/auth/health; do sleep 2; done'
+
+          echo "api-url=http://localhost:3000" >> $GITHUB_OUTPUT
+
+      - name: Verify API health
+        run: |
+          curl -f http://localhost:3000/api/v1/auth/health
+          curl -f http://localhost:3000/api/v1/auth/redis-health
+
+  # Artillery.js load tests
+  artillery-tests:
+    needs: setup-environment
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'  # Skip on scheduled runs to save resources
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Artillery
+        run: npm install -g artillery@latest
+
+      - name: Run Artillery load tests
+        env:
+          API_URL: ${{ needs.setup-environment.outputs.api-url }}
+          TEST_ID: ${{ needs.setup-environment.outputs.test-id }}
+        run: |
+          cd tests/performance
+          artillery run \
+            --target $API_URL \
+            --output artillery-report-$TEST_ID.json \
+            artillery-config.yml
+
+      - name: Generate Artillery HTML report
+        env:
+          TEST_ID: ${{ needs.setup-environment.outputs.test-id }}
+        run: |
+          cd tests/performance
+          artillery report artillery-report-$TEST_ID.json \
+            --output artillery-report-$TEST_ID.html
+
+      - name: Upload Artillery reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: artillery-performance-reports
+          path: |
+            tests/performance/artillery-report-*.json
+            tests/performance/artillery-report-*.html
+          retention-days: 30
+
+  # k6 load tests
+  k6-tests:
+    needs: setup-environment
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        test-type: [load, spike, stress]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run k6 load tests
+        env:
+          BASE_URL: ${{ needs.setup-environment.outputs.api-url }}
+          TEST_ID: ${{ needs.setup-environment.outputs.test-id }}
+          TEST_DURATION: ${{ github.event.inputs.test_duration || '5' }}
+          MAX_VUS: ${{ github.event.inputs.max_vus || '50' }}
+        run: |
+          cd tests/performance
+          k6 run \
+            --out json=k6-results-${{ matrix.test-type }}-$TEST_ID.json \
+            --out csv=k6-results-${{ matrix.test-type }}-$TEST_ID.csv \
+            --quiet \
+            k6-load-test.js
+
+      - name: Process k6 results
+        env:
+          TEST_ID: ${{ needs.setup-environment.outputs.test-id }}
+        run: |
+          cd tests/performance
+
+          # Extract key metrics from k6 results
+          echo "## k6 Performance Test Results - ${{ matrix.test-type }}" >> k6-summary-${{ matrix.test-type }}-$TEST_ID.md
+          echo "### Test Configuration" >> k6-summary-${{ matrix.test-type }}-$TEST_ID.md
+          echo "- Test Type: ${{ matrix.test-type }}" >> k6-summary-${{ matrix.test-type }}-$TEST_ID.md
+          echo "- Date: $(date)" >> k6-summary-${{ matrix.test-type }}-$TEST_ID.md
+          echo "- API URL: ${{ needs.setup-environment.outputs.api-url }}" >> k6-summary-${{ matrix.test-type }}-$TEST_ID.md
+          echo "" >> k6-summary-${{ matrix.test-type }}-$TEST_ID.md
+
+          # Parse JSON results for key metrics
+          if [ -f k6-results-${{ matrix.test-type }}-$TEST_ID.json ]; then
+            echo "### Key Metrics" >> k6-summary-${{ matrix.test-type }}-$TEST_ID.md
+
+            # Extract metrics using jq
+            METRICS=$(tail -1 k6-results-${{ matrix.test-type }}-$TEST_ID.json | jq -r '
+              "- Total Requests: " + (.metrics.http_reqs.values.count | tostring) +
+              "\n- Failed Requests: " + (.metrics.http_req_failed.values.rate * 100 | tostring | .[0:5]) + "%" +
+              "\n- Average Response Time: " + (.metrics.http_req_duration.values.avg | tostring | .[0:6]) + "ms" +
+              "\n- 95th Percentile Response Time: " + (.metrics.http_req_duration.values["p(95)"] | tostring | .[0:6]) + "ms" +
+              "\n- 99th Percentile Response Time: " + (.metrics.http_req_duration.values["p(99)"] | tostring | .[0:6]) + "ms" +
+              "\n- Requests per Second: " + (.metrics.http_reqs.values.rate | tostring | .[0:6])
+            ')
+
+            echo "$METRICS" >> k6-summary-${{ matrix.test-type }}-$TEST_ID.md
+          fi
+
+      - name: Upload k6 reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-performance-reports-${{ matrix.test-type }}
+          path: |
+            tests/performance/k6-results-*.json
+            tests/performance/k6-results-*.csv
+            tests/performance/k6-summary-*.md
+          retention-days: 30
+
+  # Performance analysis and reporting
+  performance-analysis:
+    needs: [setup-environment, k6-tests]
+    runs-on: ubuntu-latest
+    if: always() && needs.setup-environment.result == 'success'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download k6 reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: k6-performance-reports-*
+          path: performance-results
+          merge-multiple: true
+
+      - name: Set up Python for analysis
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install analysis dependencies
+        run: |
+          pip install pandas matplotlib seaborn jinja2
+
+      - name: Analyze performance results
+        env:
+          TEST_ID: ${{ needs.setup-environment.outputs.test-id }}
+        run: |
+          cd performance-results
+
+          # Create performance analysis script
+          cat > analyze_performance.py << 'EOF'
+          import json
+          import pandas as pd
+          import matplotlib.pyplot as plt
+          import seaborn as sns
+          from datetime import datetime
+          import glob
+
+          # Load k6 results
+          json_files = glob.glob('k6-results-*.json')
+          results = []
+
+          for file in json_files:
+              try:
+                  with open(file, 'r') as f:
+                      # k6 outputs multiple JSON lines, we want the last one (summary)
+                      lines = f.readlines()
+                      if lines:
+                          data = json.loads(lines[-1])
+                          test_type = file.split('-')[2]  # Extract test type from filename
+
+                          metrics = data.get('metrics', {})
+                          result = {
+                              'test_type': test_type,
+                              'timestamp': datetime.now().isoformat(),
+                              'total_requests': metrics.get('http_reqs', {}).get('values', {}).get('count', 0),
+                              'failure_rate': metrics.get('http_req_failed', {}).get('values', {}).get('rate', 0) * 100,
+                              'avg_response_time': metrics.get('http_req_duration', {}).get('values', {}).get('avg', 0),
+                              'p95_response_time': metrics.get('http_req_duration', {}).get('values', {}).get('p(95)', 0),
+                              'p99_response_time': metrics.get('http_req_duration', {}).get('values', {}).get('p(99)', 0),
+                              'requests_per_sec': metrics.get('http_reqs', {}).get('values', {}).get('rate', 0),
+                              'data_received': metrics.get('data_received', {}).get('values', {}).get('count', 0) / (1024*1024),  # Convert to MB
+                          }
+                          results.append(result)
+              except Exception as e:
+                  print(f"Error processing {file}: {e}")
+
+          if not results:
+              print("No performance data found")
+              exit(0)
+
+          # Create DataFrame
+          df = pd.DataFrame(results)
+
+          # Generate performance report
+          report = f"""
+          # Performance Test Report
+
+          **Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+          **Test ID:** {os.environ.get('TEST_ID', 'N/A')}
+
+          ## Summary
+
+          """
+
+          for _, row in df.iterrows():
+              report += f"""
+          ### {row['test_type'].title()} Test Results
+          - **Total Requests:** {int(row['total_requests']):,}
+          - **Failure Rate:** {row['failure_rate']:.2f}%
+          - **Avg Response Time:** {row['avg_response_time']:.1f}ms
+          - **95th Percentile:** {row['p95_response_time']:.1f}ms
+          - **99th Percentile:** {row['p99_response_time']:.1f}ms
+          - **Requests/sec:** {row['requests_per_sec']:.1f}
+          - **Data Processed:** {row['data_received']:.1f} MB
+
+          """
+
+          # Performance thresholds check
+          report += """
+          ## Performance Thresholds Analysis
+
+          """
+
+          for _, row in df.iterrows():
+              status_p95 = "✅ PASS" if row['p95_response_time'] < 2000 else "❌ FAIL"
+              status_p99 = "✅ PASS" if row['p99_response_time'] < 3000 else "❌ FAIL"
+              status_failure = "✅ PASS" if row['failure_rate'] < 5 else "❌ FAIL"
+
+              report += f"""
+          ### {row['test_type'].title()} Test
+          - **P95 < 2000ms:** {status_p95} ({row['p95_response_time']:.1f}ms)
+          - **P99 < 3000ms:** {status_p99} ({row['p99_response_time']:.1f}ms)
+          - **Failure Rate < 5%:** {status_failure} ({row['failure_rate']:.2f}%)
+
+          """
+
+          # Save report
+          with open('performance-report.md', 'w') as f:
+              f.write(report)
+
+          # Create simple visualization if matplotlib is available
+          try:
+              fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
+
+              # Response times
+              ax1.bar(df['test_type'], df['avg_response_time'], label='Average', alpha=0.7)
+              ax1.bar(df['test_type'], df['p95_response_time'], label='95th Percentile', alpha=0.7)
+              ax1.set_title('Response Times by Test Type')
+              ax1.set_ylabel('Time (ms)')
+              ax1.legend()
+              ax1.tick_params(axis='x', rotation=45)
+
+              # Failure rates
+              ax2.bar(df['test_type'], df['failure_rate'])
+              ax2.set_title('Failure Rates by Test Type')
+              ax2.set_ylabel('Failure Rate (%)')
+              ax2.tick_params(axis='x', rotation=45)
+
+              # Requests per second
+              ax3.bar(df['test_type'], df['requests_per_sec'])
+              ax3.set_title('Throughput by Test Type')
+              ax3.set_ylabel('Requests/sec')
+              ax3.tick_params(axis='x', rotation=45)
+
+              # Total requests
+              ax4.bar(df['test_type'], df['total_requests'])
+              ax4.set_title('Total Requests by Test Type')
+              ax4.set_ylabel('Total Requests')
+              ax4.tick_params(axis='x', rotation=45)
+
+              plt.tight_layout()
+              plt.savefig('performance-charts.png', dpi=300, bbox_inches='tight')
+              print("Performance charts saved")
+
+          except Exception as e:
+              print(f"Could not generate charts: {e}")
+
+          print("Performance analysis completed")
+          EOF
+
+          python analyze_performance.py
+
+      - name: Upload performance analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-analysis
+          path: |
+            performance-results/performance-report.md
+            performance-results/performance-charts.png
+          retention-days: 30
+
+      - name: Comment PR with performance results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            try {
+              const report = fs.readFileSync('performance-results/performance-report.md', 'utf8');
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🚀 Performance Test Results\n\n${report}\n\n*This comment was automatically generated by the performance testing workflow.*`
+              });
+            } catch (error) {
+              console.log('Could not post performance results to PR:', error);
+            }
+
+      - name: Performance regression check
+        if: github.event_name == 'pull_request'
+        env:
+          TEST_ID: ${{ needs.setup-environment.outputs.test-id }}
+        run: |
+          cd performance-results
+
+          # Simple regression check - fail if any critical thresholds are exceeded
+          if [ -f performance-report.md ]; then
+            # Check for FAIL markers in the report
+            if grep -q "❌ FAIL" performance-report.md; then
+              echo "❌ Performance regression detected!"
+              echo "Some performance thresholds were exceeded. Check the performance report for details."
+
+              # Don't fail the build on performance regression in this example
+              # In a real environment, you might want to fail the build
+              # exit 1
+
+              echo "::warning::Performance thresholds exceeded. Review performance report."
+            else
+              echo "✅ All performance thresholds passed!"
+            fi
+          else
+            echo "::warning::Performance report not found"
+          fi
+
+  # Cleanup
+  cleanup:
+    needs: [setup-environment, k6-tests, artillery-tests, performance-analysis]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Cleanup test environment
+        run: |
+          # Stop any running containers
+          docker stop redis-test || true
+          docker rm redis-test || true
+
+          echo "Test environment cleanup completed"

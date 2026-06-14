@@ -1,0 +1,19 @@
+{
+  "name": "@rez/pos-intelligence",
+  "version": "1.0.0",
+  "description": "POS → Offline Tracker Connector for REZ Intelligence",
+  "main": "src/posConnector.ts",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}

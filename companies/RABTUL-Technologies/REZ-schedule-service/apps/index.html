@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReZ Schedule - Apps Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .gradient-bg { background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Header -->
+  <header class="gradient-bg text-white">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <i class="fas fa-calendar-check text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">ReZ Schedule</h1>
+            <p class="text-white/80">Universal Booking Platform</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="px-3 py-1 bg-white/20 rounded-full text-sm">
+            <i class="fas fa-circle text-green-400 mr-2"></i>5 Services Running
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-12">
+
+    <!-- Services Grid -->
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Services</h2>
+    <div class="grid grid-cols-3 gap-6 mb-12">
+
+      <!-- ReZ Schedule -->
+      <a href="../admin/index.html" class="card-hover bg-white rounded-2xl p-6 shadow-sm border-2 border-transparent hover:border-purple-200">
+        <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+          <i class="fas fa-calendar-alt text-purple-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">ReZ Schedule</h3>
+        <p class="text-sm text-gray-500 mb-3">Universal booking API</p>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="px-2 py-1 bg-gray-100 rounded">Port 4090</span>
+          <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Running</span>
+        </div>
+      </a>
+
+      <!-- Healthcare -->
+      <a href="../healthcare/index.html" class="card-hover bg-white rounded-2xl p-6 shadow-sm border-2 border-transparent hover:border-blue-200">
+        <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+          <i class="fas fa-hospital text-blue-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">Healthcare</h3>
+        <p class="text-sm text-gray-500 mb-3">Doctor consultations</p>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="px-2 py-1 bg-gray-100 rounded">Port 4091</span>
+          <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Ready</span>
+        </div>
+      </a>
+
+      <!-- Restaurant -->
+      <a href="../restaurant/index.html" class="card-hover bg-white rounded-2xl p-6 shadow-sm border-2 border-transparent hover:border-orange-200">
+        <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+          <i class="fas fa-utensils text-orange-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">Restaurant</h3>
+        <p class="text-sm text-gray-500 mb-3">Table reservations</p>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="px-2 py-1 bg-gray-100 rounded">Port 4092</span>
+          <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Ready</span>
+        </div>
+      </a>
+
+      <!-- Home Services -->
+      <a href="../home-services/index.html" class="card-hover bg-white rounded-2xl p-6 shadow-sm border-2 border-transparent hover:border-yellow-200">
+        <div class="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center mb-4">
+          <i class="fas fa-home text-yellow-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">Home Services</h3>
+        <p class="text-sm text-gray-500 mb-3">Cleaning, plumbing, etc.</p>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="px-2 py-1 bg-gray-100 rounded">Port 4093</span>
+          <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Ready</span>
+        </div>
+      </a>
+
+      <!-- Professional -->
+      <a href="../professional/index.html" class="card-hover bg-white rounded-2xl p-6 shadow-sm border-2 border-transparent hover:border-indigo-200">
+        <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+          <i class="fas fa-briefcase text-indigo-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">Professional</h3>
+        <p class="text-sm text-gray-500 mb-3">Legal, tax, consulting</p>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="px-2 py-1 bg-gray-100 rounded">Port 4094</span>
+          <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Ready</span>
+        </div>
+      </a>
+
+      <!-- Admin Dashboard -->
+      <a href="./admin-bookings/index.html" class="card-hover bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-2xl p-6 shadow-sm">
+        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+          <i class="fas fa-chart-line text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold mb-1">Admin Dashboard</h3>
+        <p class="text-sm text-white/80 mb-3">All services overview</p>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="px-2 py-1 bg-white/20 rounded">All Bookings</span>
+          <span class="px-2 py-1 bg-white/20 rounded">Analytics</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Quick Links -->
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Quick Links</h2>
+    <div class="grid grid-cols-4 gap-4">
+
+      <a href="./landing/index.html" class="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md">
+        <i class="fas fa-globe text-purple-600"></i>
+        <span>Landing Page</span>
+      </a>
+
+      <a href="./web/index.html" class="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md">
+        <i class="fas fa-desktop text-blue-600"></i>
+        <span>Booking Widget Demo</span>
+      </a>
+
+      <a href="../../integrations/API-INTEGRATION-GUIDE.md" class="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md">
+        <i class="fas fa-book text-green-600"></i>
+        <span>Integration Guide</span>
+      </a>
+
+      <a href="../../docs/API-REFERENCE.md" class="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md">
+        <i class="fas fa-code text-orange-600"></i>
+        <span>API Reference</span>
+      </a>
+
+    </div>
+
+    <!-- Embed Code -->
+    <div class="mt-12 bg-white rounded-2xl p-8 shadow-sm">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">
+        <i class="fas fa-code mr-2"></i>Embed in Your Website
+      </h2>
+      <div class="bg-gray-900 rounded-xl p-4 overflow-x-auto">
+        <pre class="text-sm text-gray-100"><code>&lt;script src="https://cdn.rez.money/schedule/widget.js"&gt;&lt;/script&gt;
+&lt;div id="booking"&gt;&lt;/div&gt;
+&lt;script&gt;
+  ReZSchedule.init({
+    container: '#booking',
+    username: 'your-username',
+    slug: 'your-event-slug',
+    theme: 'light',
+    primaryColor: '#6366f1'
+  });
+&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- Services Status -->
+    <div class="mt-8 bg-white rounded-2xl p-6 shadow-sm">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">
+        <i class="fas fa-server mr-2"></i>Services Status
+      </h2>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+            <span>ReZ Schedule</span>
+            <code class="text-sm text-gray-500">localhost:4090</code>
+          </div>
+          <span class="text-green-600 text-sm">Running</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+            <span>Healthcare</span>
+            <code class="text-sm text-gray-500">localhost:4091</code>
+          </div>
+          <span class="text-blue-600 text-sm">Ready</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 bg-orange-500 rounded-full"></span>
+            <span>Restaurant</span>
+            <code class="text-sm text-gray-500">localhost:4092</code>
+          </div>
+          <span class="text-orange-600 text-sm">Ready</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+            <span>Home Services</span>
+            <code class="text-sm text-gray-500">localhost:4093</code>
+          </div>
+          <span class="text-yellow-600 text-sm">Ready</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 bg-indigo-500 rounded-full"></span>
+            <span>Professional</span>
+            <code class="text-sm text-gray-500">localhost:4094</code>
+          </div>
+          <span class="text-indigo-600 text-sm">Ready</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,369 @@
+{
+  "description": "REZ Ecosystem Port Registry - Complete - June 7, 2026 - PORT CONFLICTS RESOLVED",
+  "version": "5.0.0",
+  "lastUpdated": "2026-06-07",
+  "changelog": "Resolved 3 port conflicts between RABTUL and REZ-Merchant",
+
+  "ecosystem": {
+    "description": "Cross-company port assignments for entire REZ ecosystem",
+    "rabtul": "RABTUL-TECHNOLOGIES - Auth/Wallet/Payment core",
+    "hojai": "HOJAI-AI - AI infrastructure",
+    "rez-intelligence": "REZ-Intelligence - ML/AI services",
+    "rez-merchant": "REZ-Merchant - Industry OS",
+    "lawgens": "LawGens - Legal AI Platform (Harvey AI competitor)"
+  },
+
+  "services": {
+    "rez-merchant-service": 4005,
+    "safe-qr-service": 4001,
+    "verify-qr-service": 4003,
+
+    "nexTabizz-service": 4200,
+    "REZ-b2b-integration": 4201,
+    "REZ-dashboard": 4202,
+    "REZ-multi-warehouse": 4203,
+    "merchant-referral-portal": 4204,
+    "rez-business-copilot": 4205,
+    "rez-inventory-v2-ui": 4206,
+    "rez-merchant-app": 4207,
+    "rez-staff-ui": 4208,
+    "rez-staff-web": 4209,
+    "verify-qr-admin": 4210,
+    "rez-table-booking-service": 4211,
+    "rez-unified-dashboard": 4212,
+
+    "rez-merchant-intelligence-service": 4011,
+    "rez-kitchen-display": 4014,
+
+    "rez-pos-service": 4013,
+    "rez-kitchen-ai": 4015,
+
+    "rez-menu-service": 4030,
+    "rez-pos-inventory-sync": 4031,
+
+    "REZ-inbox": 3010,
+    "REZ-assistant": 3011,
+    "REZ-bills": 3012,
+    "REZ-expense": 3013,
+    "REZ-menu-qr": 3014,
+    "REZ-nearby": 3015,
+    "REZ-save": 3016,
+    "REZ-scan": 3017,
+
+    "REZ-franchise-management": 4025,
+    "rez-cross-merchant-service": 4027,
+    "rez-store-onboarding": 4032,
+    "rez-merchant-integrations": 4040,
+    "REZ-merchant-trust-bridge": 4041,
+
+    "rabtul_reexported_services": {
+      "description": "RABTUL services - reexported in REZ-Merchant namespace (prevents conflicts)",
+      "REZ-event-bus": 4075,
+      "REZ-circuit-breaker": 4076,
+      "REZ-dlq-service": 4077
+    },
+
+    "REZ-competitive-intelligence": 4631,
+    "rez-payroll": 4610,
+    "rez-warranty": 4620,
+    "rez-inventory-alerts": 4625,
+    "rez-supplier-marketplace": 4630,
+    "rez-merchant-loans-service": 3081,
+    "rez-white-label-service": 3083,
+    "REZ-merchant-corpperks-bridge": 3005
+  },
+
+  "services_automotive": {
+    "rez-automotive-service": 4600,
+    "rez-automotive-booking-service": 4633
+  },
+
+  "services_location": {
+    "rez-multi-location": 4632
+  },
+
+  "industry_os": {
+    "hotel": {
+      "rez-hotel-service": 4020,
+      "rez-hotel-housekeeping-service": 4021,
+      "rez-hotel-maintenance-service": 4022,
+      "rez-hotel-reviews-service": 4023,
+      "rez-hotel-messaging-service": 4024,
+      "rez-hotel-analytics-service": 4025,
+      "rez-virtual-concierge-service": 4026,
+      "rez-room-service": 4027,
+      "rez-guest-mobile-app": 4028,
+      "rez-multi-property-dashboard": 4029
+    },
+    "retail": {
+      "rez-retail-service": 4160,
+      "rez-retail-crm-service": 4161,
+      "rez-retail-loyalty-service": 4162,
+      "rez-retail-inventory-service": 4163,
+      "rez-retail-pos-service": 4164,
+      "rez-retail-analytics-service": 4165
+    },
+
+    "rez_mart": {
+      "description": "REZ-Mart Quick Commerce Platform",
+      "rez-mart-gateway": 4100,
+      "rez-mart-driver-service": 4101,
+      "rez-mart-tracking-service": 4102,
+      "rez-mart-store-service": 4103,
+      "rez-mart-product-service": 4104,
+      "rez-mart-order-service": 4105,
+      "rez-mart-delivery-service": 4106,
+      "rez-mart-inventory-service": 4107,
+      "rez-mart-cart-service": 4108,
+      "rez-mart-offer-service": 4109,
+      "rez-mart-subscription-service": 4110,
+      "rez-mart-analytics-service": 4112
+    },
+
+    "retail_ai": {
+      "shopflow": 4830,
+      "groceryiq": 4131
+    },
+    "salon": {
+      "rez-salon-service": 4110,
+      "rez-salon-booking-service": 4111,
+      "rez-salon-inventory-service": 4112,
+      "rez-salon-membership-service": 4113,
+      "rez-salon-crm-service": 4114,
+      "rez-salon-whatsapp-service": 4115
+    },
+    "gym": {
+      "rez-gym-service": 4120,
+      "rez-gym-attendance-service": 4121,
+      "rez-gym-class-service": 4122,
+      "rez-gym-scheduler-service": 4123,
+      "rez-gym-analytics-service": 4124
+    },
+    "spa": {
+      "rez-spa-service": 4400,
+      "rez-spa-booking-service": 4401,
+      "rez-spa-inventory-service": 4402,
+      "rez-spa-web": 4403
+    },
+    "automotive": {
+      "rez-automotive-service": 4600,
+      "rez-automotive-booking-service": 4633
+    },
+    "fashion": {
+      "rez-fashion-service": 4700,
+      "rez-fashion-catalog-service": 4701,
+      "rez-fashion-web": 4702
+    },
+    "grocery": {
+      "rez-grocery-service": 4800,
+      "rez-grocery-inventory-service": 4801,
+      "rez-grocery-delivery-service": 4802,
+      "rez-grocery-web": 4803
+    },
+    "pharmacy": {
+      "rez-pharmacy-service": 4900,
+      "rez-pharmacy-prescription-service": 4901,
+      "rez-pharmacy-inventory-service": 4902,
+      "rez-pharmacy-web": 4903
+    }
+  },
+
+  "hojai_industry_ai": {
+    "waitron": 4820,
+    "staybot": 4840,
+    "glamai": 4860,
+    "carecode": 4102,
+    "fitmind": 4801,
+    "shopflow": 4830,
+    "ledgerai": 4815,
+    "fleetiq": 4814,
+    "neighborai": 4806,
+    "propflow": 4807,
+    "eduspark": 4808,
+    "spabeat": 4809
+  },
+
+  "hojai_legal_ai": {
+    "hojai-legal-ai": 4780,
+    "hojai-legal-workflows": 4781,
+    "hojai-tax-ai": 4782,
+    "hojai-legal-reasoning": 4783,
+    "hojai-regulatory-feed": 4784,
+    "hojai-fine-tuning-studio": 4785,
+    "hojai-knowledge-graph": 4786,
+    "hojai-case-law": 4787,
+    "hojai-enterprise-ready": 4788,
+    "hojai-legal-integrations": 4789,
+    "hojai-identity": 4634,
+    "hojai-governance": 4630
+  },
+
+  "hojai_legal_new": {
+    "hojai-court-intelligence": 4850,
+    "hojai-ediscovery": 4851,
+    "hojai-corporate-intelligence": 4852,
+    "hojai-litigation-workspace": 4853,
+    "hojai-arbitration-platform": 4854,
+    "hojai-legal-ops": 4855,
+    "hojai-rti-generator": 4856
+  },
+
+  "ranges": {
+    "rabtul_core": "4000-4099",
+    "rez_intelligence": "4100-4199",
+    "rez_merchant_ui": "4200-4299",
+    "ad_bazaar_ssp": "4520-4529",
+    "industry_os_new": "4400-4499",
+    "rez_consumer": "3000-3099",
+    "hojai_ai": "4500-4699",
+    "hojai_legal": "4780-4789",
+    "hojai_legal_new": "4850-4859",
+    "hojai_industry": "4800-4899",
+    "hojai_hr": "4940-4977",
+    "lawgens": "5098-5123",
+    "rez_atlas": "5150-5199",
+    "retail_industry": "4160-4169"
+  },
+
+  "hojai_hr_intelligence": {
+    "workforce-graph-service": 4940,
+    "employee-digital-twin-service": 4941,
+    "skills-intelligence-service": 4942,
+    "talent-marketplace-service": 4943,
+    "organization-intelligence-service": 4944,
+    "succession-service": 4945,
+    "career-intelligence-service": 4946,
+    "workforce-planning-service": 4947,
+    "workforce-prediction-engine": 4948,
+    "universal-employee-agent": 4949,
+    "workforce-memory-platform": 4950,
+    "workforce-knowledge-graph": 4951,
+    "manager-copilot-agent": 4952,
+    "workforce-analyst-agent": 4953,
+    "workforce-simulation-engine": 4954,
+    "chro-intelligence-agent": 4955,
+    "career-coach-agent": 4956,
+    "talent-network-platform": 4957,
+    "lms-service": 4965,
+    "feedback-360-service": 4966
+  },
+
+  "hojai_finance_intelligence": {
+    "hojai-finance-controller-agent": 4910,
+    "hojai-ap-agent": 4912,
+    "hojai-human-in-the-loop": 4913,
+    "hojai-bill-pay": 4914,
+    "hojai-corporate-card": 4915,
+    "hojai-tax-engine": 4916,
+    "hojai-finance-explainability": 4911,
+    "hojai-cfo-brain": 4920,
+    "hojai-policy-learning": 4921,
+    "hojai-vendor-intelligence": 4922,
+    "hojai-accounting-agent": 4923,
+    "hojai-finance-digital-twin": 4924,
+    "hojai-finance-nl-interface": 4925,
+    "hojai-treasury-agent": 4926,
+    "hojai-fpa-agent": 4927,
+    "hojai-risk-agent": 4928,
+    "hojai-investment-agent": 4929,
+    "hojai-finance-hub": 4930
+  },
+
+  "ad_bazaar_ssp": {
+    "description": "AdBazaar SSP Portal - Supply Side Platform",
+    "ssp-gateway": 4520,
+    "ssp-screen-service": 4521,
+    "ssp-inventory-service": 4522,
+    "ssp-bidding-service": 4523,
+    "ssp-revenue-service": 4524,
+    "ssp-analytics-service": 4525
+  },
+
+  "rez_atlas": {
+    "description": "REZ Atlas v2 - Revenue Intelligence Platform (Apollo/Clay/ZoomInfo Competitor)",
+    "v1": {
+      "description": "Atlas v1 - Map-First Sales Intelligence",
+      "gateway": 5150,
+      "discover": 5151,
+      "maps": 5152,
+      "twin": 5153,
+      "score": 5154,
+      "signals": 5155,
+      "territory": 5170,
+      "routes": 5171,
+      "copilot": 5172,
+      "graph": 5173,
+      "dashboard": 5190,
+      "field_app": 5191
+    },
+    "v2": {
+      "description": "Atlas v2 - Revenue Intelligence (5 Pillars: Discover, Intelligence, Engage, AI Workforce, Revenue OS)",
+      "discover_layer": {
+        "atlas-discover": 5150,
+        "atlas-contact-finder": 5151,
+        "atlas-data-enrichment": 5152,
+        "atlas-search": 5153,
+        "atlas-deduplication": 5154
+      },
+      "gateway": 5155,
+      "intelligence_layer": {
+        "atlas-company-twin": 5156,
+        "atlas-person-twin": 5157,
+        "atlas-research-agent": 5158,
+        "atlas-intent-engine": 5159,
+        "atlas-enrichment": 5160
+      },
+      "engage_layer": {
+        "atlas-email-service": 5161,
+        "atlas-whatsapp-service": 5162,
+        "atlas-sms-service": 5163,
+        "atlas-call-service": 5164,
+        "atlas-deliverability": 5165
+      },
+      "shared": {
+        "atlas-webhook": 5170,
+        "atlas-storage": 5171,
+        "atlas-notification": 5172,
+        "atlas-analytics": 5173
+      },
+      "ai_workforce": {
+        "atlas-sdr-agent": 5174,
+        "atlas-qualification-agent": 5175,
+        "atlas-meeting-agent": 5176,
+        "atlas-followup-agent": 5177
+      },
+      "revenue_os": {
+        "atlas-crm-core": 5180,
+        "atlas-pipeline": 5181,
+        "atlas-forecast": 5182,
+        "atlas-conversation-intel": 5183
+      },
+      "gtm": {
+        "description": "Atlas GTM - Autonomous Go-To-Market Module (Explee Competitor)",
+        "atlas-gtm-service": 5200,
+        "gtm-ui": 3003
+      },
+      "ui": {
+        "dashboard": 3001,
+        "field_app": 3002
+      }
+    }
+  },
+
+  "lawgens": {
+    "description": "LawGens - Legal AI Platform (Harvey AI competitor)",
+    "lawgens-integration": 5098,
+    "lawgens-gateway": 5099,
+    "lawgens-legal-brain": 5100,
+    "lawgens-contract-service": 5101,
+    "lawgens-compliance-service": 5103,
+    "lawgens-document-service": 5104,
+    "lawgens-corporate-service": 5110,
+    "lawgens-court-service": 5120,
+    "lawgens-arbitration-service": 5121,
+    "lawgens-ediscovery-service": 5123,
+    "lawgens-web": 3001,
+    "lawgens-biz": 3002,
+    "lawgens-pro": 3003
+  }
+}

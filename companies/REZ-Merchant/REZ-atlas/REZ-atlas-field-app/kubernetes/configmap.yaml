@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for REZ-atlas-field-app
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: REZ-atlas-field-app-config
+  namespace: rez-merchant
+  labels:
+    app: REZ-atlas-field-app
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "5191"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "REZ-atlas-field-app"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "REZ-atlas-field-app"
+  REDIS_DATABASE: "0"

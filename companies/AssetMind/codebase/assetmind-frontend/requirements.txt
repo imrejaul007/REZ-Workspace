@@ -1,0 +1,3 @@
+# Frontend dependencies - use package manager instead
+# For Node.js projects:
+# npm install

@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for rez-inventory-alerts
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-inventory-alerts-config
+  namespace: rez-merchant
+  labels:
+    app: rez-inventory-alerts
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4625"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-inventory-alerts"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez-inventory-alerts"
+  REDIS_DATABASE: "0"

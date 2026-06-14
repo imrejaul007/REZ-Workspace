@@ -1,0 +1,257 @@
+groups:
+- name: application.rules
+  rules:
+
+  # ============================================================================
+  # SERVICE AVAILABILITY ALERTS
+  # ============================================================================
+
+  # Service Down Critical
+  - alert: ServiceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: critical
+      team: engineering
+      component: service
+    annotations:
+      summary: "CRITICAL: Service {{ $labels.job }} is down"
+      description: "Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+      runbook_url: "https://runbooks.restauranthub.com/services/service-down"
+
+  # API Service Down
+  - alert: RestaurantHubAPIDown
+    expr: up{job="restauranthub-api"} == 0
+    for: 30s
+    labels:
+      severity: critical
+      team: backend
+      component: api
+    annotations:
+      summary: "CRITICAL: RestaurantHub API is down"
+      description: "Main API service has been down for more than 30 seconds"
+      runbook_url: "https://runbooks.restauranthub.com/api/service-down"
+
+  # Web App Down
+  - alert: RestaurantHubWebDown
+    expr: up{job="restauranthub-web"} == 0
+    for: 30s
+    labels:
+      severity: critical
+      team: frontend
+      component: web
+    annotations:
+      summary: "CRITICAL: RestaurantHub Web App is down"
+      description: "Web application has been down for more than 30 seconds"
+      runbook_url: "https://runbooks.restauranthub.com/web/service-down"
+
+  # ============================================================================
+  # PERFORMANCE ALERTS
+  # ============================================================================
+
+  # Critical Response Time
+  - alert: CriticalResponseTime
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job, method, route)) > 5
+    for: 2m
+    labels:
+      severity: critical
+      team: engineering
+      component: performance
+    annotations:
+      summary: "CRITICAL: Very high response time on {{ $labels.job }}"
+      description: "95th percentile response time is above 5 seconds for {{ $labels.job }} {{ $labels.method }} {{ $labels.route }}"
+      runbook_url: "https://runbooks.restauranthub.com/performance/high-response-time"
+
+  # High Response Time Warning
+  - alert: HighResponseTime
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job, method, route)) > 2
+    for: 5m
+    labels:
+      severity: warning
+      team: engineering
+      component: performance
+    annotations:
+      summary: "High response time on {{ $labels.job }}"
+      description: "95th percentile response time is above 2 seconds for {{ $labels.job }} {{ $labels.method }} {{ $labels.route }}"
+      runbook_url: "https://runbooks.restauranthub.com/performance/high-response-time"
+
+  # Critical Error Rate
+  - alert: CriticalErrorRate
+    expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job)) * 100 > 10
+    for: 2m
+    labels:
+      severity: critical
+      team: engineering
+      component: reliability
+    annotations:
+      summary: "CRITICAL: Very high error rate on {{ $labels.job }}"
+      description: "Error rate is above 10% for {{ $labels.job }} ({{ $value }}%)"
+      runbook_url: "https://runbooks.restauranthub.com/reliability/high-error-rate"
+
+  # High Error Rate Warning
+  - alert: HighErrorRate
+    expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job)) * 100 > 5
+    for: 5m
+    labels:
+      severity: warning
+      team: engineering
+      component: reliability
+    annotations:
+      summary: "High error rate on {{ $labels.job }}"
+      description: "Error rate is above 5% for {{ $labels.job }} ({{ $value }}%)"
+      runbook_url: "https://runbooks.restauranthub.com/reliability/high-error-rate"
+
+  # High Request Rate
+  - alert: HighRequestRate
+    expr: sum(rate(http_requests_total[5m])) by (job) > 1000
+    for: 10m
+    labels:
+      severity: warning
+      team: engineering
+      component: performance
+    annotations:
+      summary: "High request rate on {{ $labels.job }}"
+      description: "Request rate is above 1000 requests/second for {{ $labels.job }} ({{ $value }} req/s)"
+      runbook_url: "https://runbooks.restauranthub.com/performance/high-request-rate"
+
+  # ============================================================================
+  # APPLICATION HEALTH ALERTS
+  # ============================================================================
+
+  # Health Check Failures
+  - alert: HealthCheckFailure
+    expr: probe_success{job="blackbox-http"} == 0
+    for: 3m
+    labels:
+      severity: critical
+      team: engineering
+      component: health
+    annotations:
+      summary: "Health check failing for {{ $labels.instance }}"
+      description: "Health check has been failing for {{ $labels.instance }} for more than 3 minutes"
+      runbook_url: "https://runbooks.restauranthub.com/health/check-failure"
+
+  # SSL Certificate Expiry Warning
+  - alert: SSLCertificateExpiry
+    expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 7
+    for: 0m
+    labels:
+      severity: warning
+      team: platform
+      component: security
+    annotations:
+      summary: "SSL certificate expiring soon for {{ $labels.instance }}"
+      description: "SSL certificate for {{ $labels.instance }} expires in less than 7 days"
+      runbook_url: "https://runbooks.restauranthub.com/security/ssl-expiry"
+
+  # SSL Certificate Expiry Critical
+  - alert: SSLCertificateExpiryCritical
+    expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 3
+    for: 0m
+    labels:
+      severity: critical
+      team: platform
+      component: security
+    annotations:
+      summary: "CRITICAL: SSL certificate expiring very soon for {{ $labels.instance }}"
+      description: "SSL certificate for {{ $labels.instance }} expires in less than 3 days"
+      runbook_url: "https://runbooks.restauranthub.com/security/ssl-expiry"
+
+  # ============================================================================
+  # BUSINESS LOGIC ALERTS
+  # ============================================================================
+
+  # High Authentication Failures
+  - alert: HighAuthenticationFailures
+    expr: sum(rate(auth_failures_total[5m])) > 10
+    for: 5m
+    labels:
+      severity: warning
+      team: security
+      component: authentication
+    annotations:
+      summary: "High authentication failure rate"
+      description: "Authentication failure rate is above 10 failures/second ({{ $value }} failures/s)"
+      runbook_url: "https://runbooks.restauranthub.com/security/auth-failures"
+
+  # User Registration Anomaly
+  - alert: UserRegistrationAnomaly
+    expr: rate(user_registrations_total[1h]) > 2 * rate(user_registrations_total[24h] offset 24h)
+    for: 30m
+    labels:
+      severity: warning
+      team: business
+      component: registration
+    annotations:
+      summary: "Unusual user registration rate"
+      description: "User registration rate is more than 2x the rate from 24 hours ago"
+      runbook_url: "https://runbooks.restauranthub.com/business/registration-anomaly"
+
+  # Job Application Processing Delay
+  - alert: JobApplicationProcessingDelay
+    expr: job_application_processing_duration_seconds > 300
+    for: 10m
+    labels:
+      severity: warning
+      team: business
+      component: jobs
+    annotations:
+      summary: "Job application processing taking too long"
+      description: "Job applications are taking more than 5 minutes to process"
+      runbook_url: "https://runbooks.restauranthub.com/business/job-processing-delay"
+
+  # ============================================================================
+  # MICROSERVICE HEALTH
+  # ============================================================================
+
+  # Auth Service Issues
+  - alert: AuthServiceIssues
+    expr: up{job="auth-service"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      team: backend
+      component: auth-service
+    annotations:
+      summary: "CRITICAL: Authentication service is down"
+      description: "Authentication service has been down for more than 1 minute"
+      runbook_url: "https://runbooks.restauranthub.com/microservices/auth-service-down"
+
+  # Notification Service Issues
+  - alert: NotificationServiceIssues
+    expr: up{job="notification-service"} == 0
+    for: 2m
+    labels:
+      severity: warning
+      team: backend
+      component: notification-service
+    annotations:
+      summary: "Notification service is down"
+      description: "Notification service has been down for more than 2 minutes"
+      runbook_url: "https://runbooks.restauranthub.com/microservices/notification-service-down"
+
+  # Order Service Issues
+  - alert: OrderServiceIssues
+    expr: up{job="order-service"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      team: backend
+      component: order-service
+    annotations:
+      summary: "CRITICAL: Order service is down"
+      description: "Order service has been down for more than 1 minute"
+      runbook_url: "https://runbooks.restauranthub.com/microservices/order-service-down"
+
+  # Restaurant Service Issues
+  - alert: RestaurantServiceIssues
+    expr: up{job="restaurant-service"} == 0
+    for: 2m
+    labels:
+      severity: warning
+      team: backend
+      component: restaurant-service
+    annotations:
+      summary: "Restaurant service is down"
+      description: "Restaurant service has been down for more than 2 minutes"
+      runbook_url: "https://runbooks.restauranthub.com/microservices/restaurant-service-down"

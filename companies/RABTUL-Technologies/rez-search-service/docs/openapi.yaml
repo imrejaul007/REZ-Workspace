@@ -1,0 +1,751 @@
+openapi: 3.0.0
+info:
+  title: ReZ Search Service API
+  version: 1.0.0
+  description: |
+    ReZ Search Service provides product and store search, autocomplete, recommendations,
+    homepage sections, and search history management.
+  contact:
+    name: ReZ API Support
+    email: api-support@rez.money
+  license:
+    name: Proprietary
+    url: https://rez.money/terms
+
+servers:
+  - url: https://api.rez.money
+    description: Production
+  - url: https://staging-api.rez.money
+    description: Staging
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Search
+    description: Store and product search
+  - name: Recommendations
+    description: Personalized recommendations
+  - name: Homepage
+    description: Homepage feed and sections
+  - name: History
+    description: Search history management
+
+paths:
+  # Search Routes
+  /search/stores:
+    get:
+      summary: Search Stores
+      description: |
+        Searches for stores by name, location, or category.
+        Supports geolocation-based search with radius filter.
+      tags: [Search]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search query
+        - name: lat
+          in: query
+          schema:
+            type: number
+          description: Latitude for geolocation
+        - name: lng
+          in: query
+          schema:
+            type: number
+          description: Longitude for geolocation
+        - name: radius
+          in: query
+          schema:
+            type: integer
+          description: Search radius in meters
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Category filter
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      stores:
+                        type: array
+                        items:
+                          type: object
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+
+  /search/products:
+    get:
+      summary: Search Products
+      description: Searches for products with optional filters.
+      tags: [Search]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search query
+        - name: storeId
+          in: query
+          schema:
+            type: string
+          description: Filter by store ID
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Category slug filter
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+          description: Category ObjectId filter
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+          description: Minimum price filter
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+          description: Maximum price filter
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '400':
+          description: Invalid categoryId
+
+  /search/filters:
+    get:
+      summary: Get Product Filters
+      description: Returns available categories and price range for product filtering UI.
+      tags: [Search]
+      responses:
+        '200':
+          description: Filters retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+
+  /search/trending:
+    get:
+      summary: Get Trending Stores
+      description: Returns top trending stores based on recent activity.
+      tags: [Search]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 20
+      responses:
+        '200':
+          description: Trending stores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+
+  /search/trending-by-category:
+    get:
+      summary: Get Trending by Category
+      description: Returns trending stores grouped by category (top 5 categories, top 3 stores each).
+      tags: [Search]
+      responses:
+        '200':
+          description: Trending stores by category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+
+  /search/suggestions:
+    get:
+      summary: Get Search Suggestions
+      description: |
+        Fast prefix-match autocomplete for store and category names.
+        Returns up to 8 results. Requires minimum 2 characters.
+        In-memory cached for 60 seconds.
+      tags: [Search]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query (minimum 2 characters)
+      responses:
+        '200':
+          description: Suggestions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [store, category]
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        logo:
+                          type: string
+        '400':
+          description: Query too short
+
+  /search/suggest:
+    get:
+      summary: Autocomplete Search
+      description: |
+        Fuzzy autocomplete with category-aware results.
+        Returns stores, categories, and products in separate arrays.
+        Redis cached for 5 minutes.
+      tags: [Search]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+            maximum: 20
+      responses:
+        '200':
+          description: Autocomplete results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      stores:
+                        type: array
+                      categories:
+                        type: array
+                      products:
+                        type: array
+
+  /search/click:
+    post:
+      summary: Track Search Click
+      description: Logs when a user clicks on a search result.
+      tags: [Search]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+                - itemId
+                - position
+              properties:
+                query:
+                  type: string
+                itemId:
+                  type: string
+                position:
+                  type: integer
+                type:
+                  type: string
+                  enum: [store, product, category]
+                  default: store
+      responses:
+        '200':
+          description: Click logged
+        '400':
+          description: Missing required fields
+
+  # API Compatibility Routes (monolith paths)
+  /api/stores/search:
+    get:
+      summary: Search Stores (Compatibility)
+      description: Alias for /search/stores with monolith path compatibility.
+      tags: [Search]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+        - name: radius
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Search results
+
+  /api/products/search:
+    get:
+      summary: Search Products (Compatibility)
+      description: Alias for /search/products with monolith path compatibility.
+      tags: [Search]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: storeId
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Search results
+
+  /api/stores/nearby:
+    get:
+      summary: Nearby Stores
+      description: Returns stores near a location without search query.
+      tags: [Search]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: radius
+          in: query
+          schema:
+            type: integer
+          description: Radius in meters (default 5000)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Nearby stores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+
+  /api/stores/trending:
+    get:
+      summary: Trending Stores (Compatibility)
+      description: Alias for /search/trending with monolith path compatibility.
+      tags: [Search]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Trending stores
+
+  # Recommendations Routes
+  /recommend/personalized:
+    get:
+      summary: Personalized Recommendations
+      description: Returns personalized product recommendations based on user history.
+      tags: [Recommendations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Recommendations retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+
+  /recommend/store/{storeId}:
+    get:
+      summary: Store Recommendations
+      description: Returns product recommendations for a specific store.
+      tags: [Recommendations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Store recommendations
+
+  /recommend/trending:
+    get:
+      summary: Trending Recommendations
+      description: Returns trending products across the platform.
+      tags: [Recommendations]
+      responses:
+        '200':
+          description: Trending products
+
+  /recommend/picked-for-you:
+    get:
+      summary: Picked For You
+      description: Returns curated picks based on user preferences.
+      tags: [Recommendations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Picks retrieved
+
+  # Homepage Routes
+  /home/feed:
+    get:
+      summary: Home Feed
+      description: Returns personalized homepage feed content.
+      tags: [Homepage]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Home feed retrieved
+
+  /home/sections:
+    get:
+      summary: Home Sections
+      description: Returns structured homepage sections.
+      tags: [Homepage]
+      responses:
+        '200':
+          description: Sections retrieved
+
+  # Search History Routes
+  /search/history:
+    get:
+      summary: Get Search History
+      description: Returns user's recent search queries.
+      tags: [History]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Search history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+
+  /search/history/popular:
+    get:
+      summary: Get Popular Searches
+      description: Returns popular search queries across the platform.
+      tags: [History]
+      responses:
+        '200':
+          description: Popular searches
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+
+  # API Compatibility for recommendations
+  /api/recommendations/products/personalized:
+    get:
+      summary: Personalized Products (Compatibility)
+      tags: [Recommendations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Recommendations
+
+  /api/recommendations/store/{storeId}:
+    get:
+      summary: Store Recommendations (Compatibility)
+      tags: [Recommendations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recommendations
+
+  /api/recommendations/trending:
+    get:
+      summary: Trending Products (Compatibility)
+      tags: [Recommendations]
+      responses:
+        '200':
+          description: Trending
+
+  /api/recommendations/picked-for-you:
+    get:
+      summary: Picked For You (Compatibility)
+      tags: [Recommendations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Picks
+
+  # API Compatibility for homepage
+  /api/homepage:
+    get:
+      summary: Home Feed (Compatibility)
+      tags: [Homepage]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Home feed
+
+  /api/homepage/sections:
+    get:
+      summary: Home Sections (Compatibility)
+      tags: [Homepage]
+      responses:
+        '200':
+          description: Sections
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+
+    Store:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        logo:
+          type: string
+        category:
+          type: string
+        location:
+          type: object
+        distance:
+          type: number
+        isActive:
+          type: boolean
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        image:
+          type: string
+        store:
+          type: string
+        category:
+          type: string
+
+    SearchFilters:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: object
+        priceRange:
+          type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+
+    Suggestion:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [store, category, product]
+        id:
+          type: string
+        name:
+          type: string
+        logo:
+          type: string
+
+    AutocompleteResult:
+      type: object
+      properties:
+        stores:
+          type: array
+          items:
+            type: object
+        categories:
+          type: array
+          items:
+            type: object
+        products:
+          type: array
+          items:
+            type: object

@@ -1,0 +1,81 @@
+# ReZ Upsell Shopify App Configuration
+
+name: rez-upsell
+version: 1.0.0
+
+# Shopify App Settings
+shopify:
+  api_key: ${SHOPIFY_API_KEY}
+  api_secret: ${SHOPIFY_API_SECRET}
+  app_url: ${APP_URL}
+  scopes:
+    - read_orders
+    - write_orders
+    - read_products
+    - write_products
+    - read_customers
+    - write_customers
+
+# Webhooks to register
+webhooks:
+  products:
+    - products/create
+    - products/update
+    - products/delete
+  orders:
+    - orders/create
+    - orders/updated
+    - orders/fulfilled
+  app:
+    - app/uninstalled
+
+# App Capabilities
+capabilities:
+  checkout_ui_extensions: true
+  checkout_blocks: true
+  post_purchase_extensions: true
+
+# Embedded App Settings
+embedded:
+  enable: true
+  require_custom_layout: false
+
+# Access Scopes
+access_scopes:
+  storefront:
+    - unauthenticated_read_product_listings
+    - unauthenticated_write_checkouts
+  admin:
+    - read_orders
+    - write_orders
+    - read_products
+    - write_products
+    - read_customers
+    - write_customers
+
+# App Pricing
+pricing:
+  model: subscription
+  plans:
+    - name: Starter
+      price: 999
+      currency: INR
+      features:
+        - checkout_upsells
+        - basic_analytics
+    - name: Growth
+      price: 1999
+      currency: INR
+      features:
+        - checkout_upsells
+        - cart_upsells
+        - advanced_analytics
+        - custom_branding
+    - name: Scale
+      price: 4999
+      currency: INR
+      features:
+        - all_features
+        - ai_recommendations
+        - ab_testing
+        - priority_support

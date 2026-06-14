@@ -1,0 +1,116 @@
+# APM Server configuration for RestaurantHub
+
+# Network settings
+apm-server:
+  host: "0.0.0.0:8200"
+
+  # CORS settings for browser agents
+  rum:
+    enabled: true
+    event_rate.limit: 300
+    event_rate.lru_size: 1000
+    allow_origins: ['*']
+    library_pattern: "node_modules|bower_components|~"
+    exclude_from_grouping: "^/webpack"
+    source_mapping:
+      cache:
+        expiration: 5m
+      index_pattern: "apm-*-sourcemap*"
+
+  # Server settings
+  max_header_size: 1048576
+  idle_timeout: 45s
+  read_timeout: 30s
+  write_timeout: 30s
+  shutdown_timeout: 5s
+  max_event_size: 307200
+
+  # Agent configuration
+  agent:
+    config:
+      cache:
+        expiration: 30s
+
+# Elasticsearch output
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  protocol: "http"
+
+  # Index settings
+  indices:
+    - index: "apm-%{[observer.version]}-sourcemap"
+      when.contains:
+        processor.event: "sourcemap"
+
+    - index: "apm-%{[observer.version]}-error-%{+yyyy.MM.dd}"
+      when.contains:
+        processor.event: "error"
+
+    - index: "apm-%{[observer.version]}-transaction-%{+yyyy.MM.dd}"
+      when.contains:
+        processor.event: "transaction"
+
+    - index: "apm-%{[observer.version]}-span-%{+yyyy.MM.dd}"
+      when.contains:
+        processor.event: "span"
+
+    - index: "apm-%{[observer.version]}-metric-%{+yyyy.MM.dd}"
+      when.contains:
+        processor.event: "metric"
+
+    - index: "apm-%{[observer.version]}-profile-%{+yyyy.MM.dd}"
+      when.contains:
+        processor.event: "profile"
+
+  # Template settings
+  template.enabled: true
+  template.settings:
+    index:
+      number_of_shards: 1
+      number_of_replicas: 0
+      refresh_interval: 5s
+      max_result_window: 10000
+
+# Kibana settings
+setup.kibana:
+  host: "kibana:5601"
+
+# Dashboard and template setup
+setup.dashboards.enabled: true
+setup.template.enabled: true
+
+# ILM settings
+setup.ilm.enabled: true
+
+# Logging
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/apm-server
+  name: apm-server
+  keepfiles: 7
+  permissions: 0644
+
+# Monitoring
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+
+# Processors
+processors:
+  - add_host_metadata: ~
+  - add_docker_metadata: ~
+  - add_cloud_metadata: ~
+
+  # Add custom fields
+  - add_fields:
+      target: ''
+      fields:
+        service_name: restauranthub
+        environment: ${ENVIRONMENT:development}
+
+# Queue settings
+queue.mem:
+  events: 4096
+  flush.min_events: 8
+  flush.timeout: 1s

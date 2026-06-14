@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-follower-growth
+  labels:
+    app: ad-bazaar-follower-growth
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - follower-growth.adbazaar.internal
+    secretName: ad-bazaar-follower-growth-tls
+  rules:
+  - host: follower-growth.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-follower-growth
+            port:
+              number: 80

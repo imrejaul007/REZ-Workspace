@@ -1,0 +1,43 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap
+# rez-restaurant-loyalty-service
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-restaurant-loyalty-service-config
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-loyalty-service
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "4007"
+  LOG_LEVEL: "info"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-restaurant-loyalty-service"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "*"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_restaurant_loyalty"
+
+  # Redis
+  REDIS_DATABASE: "0"
+
+  # Loyalty Settings
+  POINTS_EXPIRY_DAYS: "365"
+  TIER_UPGRADE_THRESHOLD: "1000"

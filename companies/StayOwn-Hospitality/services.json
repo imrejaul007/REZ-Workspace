@@ -1,0 +1,81 @@
+{
+  "name": "StayOwn-Hospitality",
+  "tagline": "Hospitality OS - Hotels, Vacation Rentals, Habixo",
+  "version": "1.0.0",
+  "category": "hospitality",
+  "parent": "RTNM Digital",
+  "services": [
+    {
+      "name": "stayown-api-gateway",
+      "port": 4801,
+      "description": "Unified API entry point for StayOwn",
+      "docker": "stayown-api-gateway",
+      "depends_on": ["hotel", "booking", "habixo", "room-qr"]
+    },
+    {
+      "name": "stayown-hotel-service",
+      "port": 4802,
+      "description": "Hotel management and OTA integration",
+      "docker": "stayown-hotel-service",
+      "db": "stayown-hotels",
+      "integrations": ["unified-hub", "hojai-memory", "hojai-agents"]
+    },
+    {
+      "name": "stayown-booking-service",
+      "port": 4803,
+      "description": "Reservation and booking management",
+      "docker": "stayown-booking-service",
+      "db": "stayown-bookings",
+      "integrations": ["unified-hub", "rabtul-wallet", "rabtul-auth"]
+    },
+    {
+      "name": "stayown-habixo",
+      "port": 4804,
+      "description": "Vacation rental platform",
+      "docker": "stayown-habixo",
+      "db": "stayown-habixo",
+      "integrations": ["unified-hub", "hojai-intelligence"]
+    },
+    {
+      "name": "stayown-room-qr",
+      "port": 4805,
+      "description": "Room service QR ordering",
+      "docker": "stayown-room-qr",
+      "integrations": ["rabtul-order", "rabtul-wallet"]
+    }
+  ],
+  "integrations": {
+    "unified-hub": {
+      "port": 4600,
+      "purpose": "Connect to all ecosystem services"
+    },
+    "hojai-memory": {
+      "port": 4520,
+      "purpose": "Store guest preferences and history"
+    },
+    "hojai-agents": {
+      "port": 4550,
+      "purpose": "AI concierge and guest assistance"
+    },
+    "hojai-intelligence": {
+      "port": 4750,
+      "purpose": "Pricing optimization and demand forecasting"
+    },
+    "rabtul-auth": {
+      "port": 4002,
+      "purpose": "Guest authentication"
+    },
+    "rabtul-wallet": {
+      "port": 4004,
+      "purpose": "Payment and loyalty points"
+    },
+    "rabtul-booking": {
+      "port": 4020,
+      "purpose": "Cross-company booking sync"
+    },
+    "event-bus": {
+      "port": 4025,
+      "purpose": "Event streaming for bookings"
+    }
+  }
+}

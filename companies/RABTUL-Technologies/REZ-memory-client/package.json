@@ -1,0 +1,37 @@
+{
+  "name": "@rez/memory-client",
+  "version": "1.0.0",
+  "description": "REZ Memory Cloud SDK - Easy integration for AI memory infrastructure",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && node scripts/build-mjs.js",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "keywords": [
+    "ai",
+    "memory",
+    "supermemory",
+    "vector-search",
+    "embeddings",
+    "knowledge-graph"
+  ],
+  "author": "RABTUL Technologies",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}

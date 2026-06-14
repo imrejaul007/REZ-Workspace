@@ -1,0 +1,1296 @@
+openapi: 3.0.3
+info:
+  title: RestaurantHub API
+  description: |
+    Comprehensive API for the RestaurantHub platform - A complete restaurant management and job marketplace system.
+
+    ## Features
+    - **Authentication & Authorization**: JWT-based authentication with role-based access control
+    - **Job Management**: Create, manage, and apply for restaurant jobs
+    - **User Management**: Multi-role user system (Admin, Restaurant, Employee, Vendor)
+    - **Community Features**: Social networking for restaurant industry professionals
+    - **Analytics**: Performance monitoring and business intelligence
+    - **Real-time Features**: Live notifications and updates
+
+    ## Authentication
+    Most endpoints require authentication via JWT Bearer token. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+
+    ## Rate Limiting
+    API endpoints are rate-limited to ensure fair usage and system stability.
+
+    ## Error Handling
+    The API uses conventional HTTP response codes to indicate success or failure of requests.
+
+  version: 1.0.0
+  contact:
+    name: RestaurantHub API Support
+    email: api-support@restauranthub.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3001
+    description: Development server
+  - url: https://api.restauranthub.com
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Jobs
+    description: Job posting and application management
+  - name: Users
+    description: User profile and account management
+  - name: Community
+    description: Social features and community interaction
+  - name: Analytics
+    description: Performance tracking and business intelligence
+  - name: Health
+    description: System health and monitoring
+
+paths:
+  # Authentication Endpoints
+  /auth/signup:
+    post:
+      tags: [Authentication]
+      summary: User registration
+      description: Register a new user account with email and password
+      operationId: signUp
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+            examples:
+              restaurant_owner:
+                summary: Restaurant Owner Registration
+                value:
+                  email: "restaurant@example.com"
+                  password: "SecurePass123!"
+                  role: "RESTAURANT"
+                  firstName: "John"
+                  lastName: "Doe"
+                  companyName: "John's Restaurant"
+              employee:
+                summary: Employee Registration
+                value:
+                  email: "employee@example.com"
+                  password: "SecurePass123!"
+                  role: "EMPLOYEE"
+                  firstName: "Jane"
+                  lastName: "Smith"
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /auth/signin:
+    post:
+      tags: [Authentication]
+      summary: User login
+      description: Authenticate user and return JWT tokens
+      operationId: signIn
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+            examples:
+              basic_login:
+                summary: Basic Login
+                value:
+                  email: "user@example.com"
+                  password: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: Generate new access token using refresh token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      description: Invalidate current session and optionally all user sessions
+      operationId: logout
+      parameters:
+        - name: all
+          in: query
+          description: Logout from all devices
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/forgot-password:
+    post:
+      tags: [Authentication]
+      summary: Request password reset
+      description: Send password reset link to user's email
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Reset link sent if email exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/reset-password:
+    post:
+      tags: [Authentication]
+      summary: Reset password with token
+      description: Reset user password using reset token
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/change-password:
+    post:
+      tags: [Authentication]
+      summary: Change password
+      description: Change user password (requires current password)
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Current password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/verify-email:
+    post:
+      tags: [Authentication]
+      summary: Verify email address
+      description: Verify user email using verification token
+      operationId: verifyEmail
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Email verification token
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid verification token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user profile
+      description: Get authenticated user's profile information
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  # Job Management Endpoints
+  /jobs:
+    get:
+      tags: [Jobs]
+      summary: Get all job postings
+      description: Retrieve paginated list of job postings with optional filters
+      operationId: getJobs
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: location
+          in: query
+          description: Filter by job location
+          required: false
+          schema:
+            type: string
+        - name: jobType
+          in: query
+          description: Filter by job type
+          required: false
+          schema:
+            type: string
+            enum: [FULL_TIME, PART_TIME, CONTRACT, TEMPORARY]
+        - name: skills
+          in: query
+          description: Filter by required skills (comma-separated)
+          required: false
+          schema:
+            type: string
+        - name: experienceMin
+          in: query
+          description: Minimum experience required (years)
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: salaryMin
+          in: query
+          description: Minimum salary
+          required: false
+          schema:
+            type: number
+        - name: salaryMax
+          in: query
+          description: Maximum salary
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Jobs retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobListResponse'
+
+    post:
+      tags: [Jobs]
+      summary: Create a new job posting
+      description: Create a new job posting (Restaurant owners and Admins only)
+      operationId: createJob
+      parameters:
+        - name: restaurantId
+          in: query
+          description: Restaurant ID (for admins creating jobs for specific restaurants)
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobRequest'
+            examples:
+              restaurant_job:
+                summary: Restaurant Job Posting
+                value:
+                  title: "Senior Chef"
+                  description: "Looking for an experienced chef to lead our kitchen team"
+                  requirements:
+                    - "5+ years of experience in fine dining"
+                    - "Culinary degree preferred"
+                    - "Leadership experience"
+                  skills:
+                    - "French cuisine"
+                    - "Team management"
+                    - "Menu planning"
+                  experienceMin: 5
+                  experienceMax: 15
+                  salaryMin: 50000
+                  salaryMax: 80000
+                  location: "New York, NY"
+                  jobType: "FULL_TIME"
+                  validTill: "2024-12-31T23:59:59Z"
+      responses:
+        '201':
+          description: Job posting created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /jobs/search:
+    get:
+      tags: [Jobs]
+      summary: Search job postings
+      description: Search for jobs using text query and filters
+      operationId: searchJobs
+      parameters:
+        - name: q
+          in: query
+          description: Search query
+          required: true
+          schema:
+            type: string
+        - name: location
+          in: query
+          description: Filter by location
+          required: false
+          schema:
+            type: string
+        - name: jobType
+          in: query
+          description: Filter by job type
+          required: false
+          schema:
+            type: string
+            enum: [FULL_TIME, PART_TIME, CONTRACT, TEMPORARY]
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSearchResponse'
+
+  /jobs/my-jobs:
+    get:
+      tags: [Jobs]
+      summary: Get jobs posted by current restaurant
+      description: Get all jobs posted by the authenticated restaurant owner
+      operationId: getMyJobs
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Items per page
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          description: Filter by job status
+          required: false
+          schema:
+            $ref: '#/components/schemas/JobStatus'
+      responses:
+        '200':
+          description: Restaurant jobs retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobListResponse'
+
+  /jobs/{id}:
+    get:
+      tags: [Jobs]
+      summary: Get a specific job posting
+      description: Retrieve detailed information about a specific job
+      operationId: getJobById
+      parameters:
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job posting retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '404':
+          description: Job posting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      tags: [Jobs]
+      summary: Update a job posting
+      description: Update job posting details (Restaurant owners and Admins only)
+      operationId: updateJob
+      parameters:
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobRequest'
+      responses:
+        '200':
+          description: Job posting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '404':
+          description: Job posting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Jobs]
+      summary: Delete a job posting
+      description: Close/delete a job posting (Restaurant owners and Admins only)
+      operationId: deleteJob
+      parameters:
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Job posting deleted successfully
+        '404':
+          description: Job posting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /jobs/{id}/apply:
+    post:
+      tags: [Jobs]
+      summary: Apply for a job
+      description: Submit application for a job posting (Employees only, requires verification)
+      operationId: applyForJob
+      parameters:
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobApplicationRequest'
+      responses:
+        '201':
+          description: Application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobApplicationResponse'
+        '403':
+          description: Verification required or access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Job posting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # User Management Endpoints
+  /users/profile:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      description: Get the authenticated user's profile information
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+    put:
+      tags: [Users]
+      summary: Update current user profile
+      description: Update the authenticated user's profile information
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  /users/stats:
+    get:
+      tags: [Users]
+      summary: Get user statistics
+      description: Get statistics and metrics for the current user
+      operationId: getUserStats
+      responses:
+        '200':
+          description: User stats retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatsResponse'
+
+  # Community Endpoints
+  /community/posts:
+    get:
+      tags: [Community]
+      summary: Get community posts
+      description: Retrieve community posts and discussions
+      operationId: getCommunityPosts
+      responses:
+        '200':
+          description: Community posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPostsResponse'
+
+  # Analytics Endpoints
+  /analytics/performance:
+    post:
+      tags: [Analytics]
+      summary: Track performance metrics
+      description: Submit performance metrics for analysis
+      operationId: trackPerformance
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformanceMetricsRequest'
+      responses:
+        '204':
+          description: Metrics processed successfully
+
+  /analytics/events:
+    post:
+      tags: [Analytics]
+      summary: Track user events
+      description: Track user interaction events
+      operationId: trackEvent
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventTrackingRequest'
+      responses:
+        '204':
+          description: Event tracked successfully
+
+  /analytics/errors:
+    post:
+      tags: [Analytics]
+      summary: Track application errors
+      description: Report application errors for monitoring
+      operationId: trackError
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorTrackingRequest'
+      responses:
+        '204':
+          description: Error tracked successfully
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Authentication Schemas
+    SignUpRequest:
+      type: object
+      required:
+        - email
+        - password
+        - role
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          minLength: 8
+          description: Password (minimum 8 characters)
+        role:
+          $ref: '#/components/schemas/UserRole'
+        firstName:
+          type: string
+          description: User's first name
+        lastName:
+          type: string
+          description: User's last name
+        companyName:
+          type: string
+          description: Company name (required for restaurant and vendor roles)
+        phone:
+          type: string
+          description: Phone number
+
+    SignInRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - password
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 8
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: JWT refresh token
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        expiresAt:
+          type: string
+          format: date-time
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    # User Schemas
+    UserRole:
+      type: string
+      enum: [ADMIN, RESTAURANT, EMPLOYEE, VENDOR]
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        isActive:
+          type: boolean
+        isVerified:
+          type: boolean
+        profile:
+          type: object
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+            avatar:
+              type: string
+            bio:
+              type: string
+            address:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            country:
+              type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        bio:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        pincode:
+          type: string
+
+    UserStatsResponse:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+        activeApplications:
+          type: integer
+        completedJobs:
+          type: integer
+        profileViews:
+          type: integer
+        rating:
+          type: number
+          format: float
+
+    # Job Schemas
+    JobStatus:
+      type: string
+      enum: [DRAFT, OPEN, CLOSED, FILLED]
+
+    JobType:
+      type: string
+      enum: [FULL_TIME, PART_TIME, CONTRACT, TEMPORARY]
+
+    CreateJobRequest:
+      type: object
+      required:
+        - title
+        - description
+        - location
+        - jobType
+        - validTill
+      properties:
+        title:
+          type: string
+          description: Job title
+        description:
+          type: string
+          description: Job description
+        requirements:
+          type: array
+          items:
+            type: string
+          description: Job requirements
+        skills:
+          type: array
+          items:
+            type: string
+          description: Required skills
+        experienceMin:
+          type: integer
+          minimum: 0
+          description: Minimum experience in years
+        experienceMax:
+          type: integer
+          description: Maximum experience in years
+        salaryMin:
+          type: number
+          description: Minimum salary
+        salaryMax:
+          type: number
+          description: Maximum salary
+        location:
+          type: string
+          description: Job location
+        jobType:
+          $ref: '#/components/schemas/JobType'
+        validTill:
+          type: string
+          format: date-time
+          description: Job posting expiry date
+
+    UpdateJobRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceMin:
+          type: integer
+          minimum: 0
+        experienceMax:
+          type: integer
+        salaryMin:
+          type: number
+        salaryMax:
+          type: number
+        location:
+          type: string
+        jobType:
+          $ref: '#/components/schemas/JobType'
+        validTill:
+          type: string
+          format: date-time
+
+    JobResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceMin:
+          type: integer
+        experienceMax:
+          type: integer
+        salaryMin:
+          type: number
+        salaryMax:
+          type: number
+        location:
+          type: string
+        jobType:
+          $ref: '#/components/schemas/JobType'
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        validTill:
+          type: string
+          format: date-time
+        viewCount:
+          type: integer
+        applicationCount:
+          type: integer
+        restaurant:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            logo:
+              type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    JobListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobResponse'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    JobSearchResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobResponse'
+        total:
+          type: integer
+        searchQuery:
+          type: string
+        filters:
+          type: object
+
+    JobApplicationRequest:
+      type: object
+      properties:
+        coverLetter:
+          type: string
+          description: Cover letter text
+        resume:
+          type: string
+          description: Resume file URL or text
+
+    JobApplicationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, REVIEWED, SHORTLISTED, ACCEPTED, REJECTED]
+        appliedAt:
+          type: string
+          format: date-time
+
+    # Analytics Schemas
+    PerformanceMetricsRequest:
+      type: object
+      required:
+        - sessionId
+        - timestamp
+        - url
+        - userAgent
+        - metrics
+      properties:
+        sessionId:
+          type: string
+        timestamp:
+          type: integer
+        url:
+          type: string
+        userAgent:
+          type: string
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: number
+              timestamp:
+                type: integer
+              rating:
+                type: string
+                enum: [good, needs-improvement, poor]
+
+    EventTrackingRequest:
+      type: object
+      required:
+        - event
+        - properties
+      properties:
+        event:
+          type: string
+        properties:
+          type: object
+        userId:
+          type: string
+        sessionId:
+          type: string
+        timestamp:
+          type: integer
+
+    ErrorTrackingRequest:
+      type: object
+      required:
+        - message
+        - url
+        - userAgent
+      properties:
+        message:
+          type: string
+        stack:
+          type: string
+        url:
+          type: string
+        userAgent:
+          type: string
+        userId:
+          type: string
+        sessionId:
+          type: string
+        timestamp:
+          type: integer
+
+    # Community Schemas
+    CommunityPostsResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              content:
+                type: string
+              author:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  avatar:
+                    type: string
+              createdAt:
+                type: string
+                format: date-time
+
+    # Common Schemas
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        error:
+          type: string
+        statusCode:
+          type: integer
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+        statusCode:
+          type: integer
+          example: 400

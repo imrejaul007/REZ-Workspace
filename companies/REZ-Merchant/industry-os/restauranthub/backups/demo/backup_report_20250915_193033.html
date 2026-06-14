@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RestaurantHub Backup Test Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background-color: #f0f0f0; padding: 10px; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RestaurantHub Backup Test Report</h1>
+        <p>Generated: Mon Sep 15 19:30:33 IST 2025</p>
+        <p>Test Environment: Demo Mode</p>
+    </div>
+
+    <h2>Test Summary</h2>
+    <table>
+        <tr><th>Test</th><th>Status</th><th>Details</th></tr>
+        <tr><td>Database Setup</td><td class="success">✓ PASSED</td><td>Demo database created with sample data</td></tr>
+        <tr><td>Backup Creation</td><td class="success">✓ PASSED</td><td>SQL backup created successfully</td></tr>
+        <tr><td>Backup Integrity</td><td class="success">✓ PASSED</td><td>Backup contains valid schema and data</td></tr>
+        <tr><td>Database Restoration</td><td class="success">✓ PASSED</td><td>Database restored from backup</td></tr>
+        <tr><td>Data Verification</td><td class="success">✓ PASSED</td><td>All data restored correctly</td></tr>
+        <tr><td>Incremental Backup</td><td class="success">✓ PASSED</td><td>Incremental changes captured</td></tr>
+        <tr><td>Point-in-Time Recovery</td><td class="success">✓ PASSED</td><td>Recovery to specific point successful</td></tr>
+        <tr><td>Backup Compression</td><td class="success">✓ PASSED</td><td>Compression reduces file size</td></tr>
+        <tr><td>Backup Validation</td><td class="success">✓ PASSED</td><td>Automated validation checks passed</td></tr>
+    </table>
+
+    <h2>Backup Files</h2>
+    <table>
+        <tr><th>File</th><th>Size</th><th>Created</th><th>Type</th></tr>
+        <tr><td>checkpoint_backup.sql</td><td>4.0K</td><td>2025-09-15 19:30:33</td><td>SQL Backup</td></tr>
+        <tr><td>demo_backup_20250915_193033.sql</td><td>4.0K</td><td>2025-09-15 19:30:33</td><td>SQL Backup</td></tr>
+        <tr><td>demo_schema.sql</td><td>4.0K</td><td>2025-09-15 19:30:33</td><td>SQL Backup</td></tr>
+        <tr><td>incremental_backup_20250915_193033.sql</td><td>4.0K</td><td>2025-09-15 19:30:33</td><td>SQL Backup</td></tr>
+        <tr><td>demo_backup_compressed.tar.gz</td><td>4.0K</td><td>2025-09-15 19:30:33</td><td>Compressed Backup</td></tr>
+    </table>
+
+    <h2>Recommendations</h2>
+    <ul>
+        <li class="success">✓ All backup tests passed successfully</li>
+        <li>Consider implementing automated daily backups</li>
+        <li>Set up off-site backup storage (S3, etc.)</li>
+        <li>Establish backup retention policies</li>
+        <li>Schedule regular restoration testing</li>
+        <li>Monitor backup sizes and completion times</li>
+    </ul>
+
+    <h2>Next Steps</h2>
+    <ul>
+        <li>Deploy backup automation to production</li>
+        <li>Configure monitoring and alerting</li>
+        <li>Document recovery procedures</li>
+        <li>Train operations team on backup processes</li>
+    </ul>
+</body>
+</html>

@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-room-service
+  namespace: rez-merchant
+  labels:
+    app: rez-room-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-room-service service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4043
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-room-service
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-room-service-internal
+  namespace: rez-merchant
+  labels:
+    app: rez-room-service
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-room-service internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4043
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-room-service

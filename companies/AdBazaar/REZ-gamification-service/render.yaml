@@ -1,0 +1,4 @@
+services:
+  - name: rez-gamification-service
+    buildCommand: npm ci && npm run build
+    startCommand: npm start

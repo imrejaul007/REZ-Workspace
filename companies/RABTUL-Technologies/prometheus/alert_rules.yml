@@ -1,0 +1,170 @@
+groups:
+  - name: rez_services
+    rules:
+      # ─────────────────────────────────────────────
+      # Critical Alerts
+      # ─────────────────────────────────────────────
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.service }} is down"
+          description: "{{ $labels.service }} has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} error rate is {{ $value | humanizePercentage }}"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency on {{ $labels.service }}"
+          description: "p99 latency is {{ $value }}s"
+
+      # ─────────────────────────────────────────────
+      # Payment & Financial Alerts
+      # ─────────────────────────────────────────────
+
+      - alert: PaymentServiceDown
+        expr: up{job="rez-payment-service"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Payment service is down"
+          description: "Payment service has been down for more than 30 seconds. All payment processing is affected."
+
+      - alert: WalletServiceDown
+        expr: up{job="rez-wallet-service"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Wallet service is down"
+          description: "Wallet service has been down. Balance inquiries and transactions are affected."
+
+      - alert: PaymentFailureRate
+        expr: rate(payment_failures_total[5m]) / rate(payments_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Payment failure rate is above 5%"
+          description: "Current payment failure rate is {{ $value | humanizePercentage }}"
+
+      # ─────────────────────────────────────────────
+      # Infrastructure Alerts
+      # ─────────────────────────────────────────────
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache service is unavailable."
+
+      - alert: MongoDBDown
+        expr: up{job="mongodb"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB database service is unavailable."
+
+      - alert: DLQBacklogGrowing
+        expr: dlq_messages_total - dlq_messages_processed_total > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Dead Letter Queue backlog is growing"
+          description: "DLQ has {{ $value }} unprocessed messages"
+
+      # ─────────────────────────────────────────────
+      # Authentication Alerts
+      # ─────────────────────────────────────────────
+
+      - alert: AuthServiceDown
+        expr: up{job="rez-auth-service"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Authentication service is down"
+          description: "Auth service unavailable. User logins will fail."
+
+      - alert: HighAuthFailureRate
+        expr: rate(auth_failures_total[5m]) / rate(auth_attempts_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Auth failure rate is {{ $value | humanizePercentage }}. Possible brute force attack."
+
+      # ─────────────────────────────────────────────
+      # BuzzLocal Alerts
+      # ─────────────────────────────────────────────
+
+      - alert: BuzzLocalFeedServiceDown
+        expr: up{job="buzzlocal-feed-service"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BuzzLocal feed service is down"
+          description: "Feed service unavailable. Users cannot see posts."
+
+      - alert: BuzzLocalPaymentServiceDown
+        expr: up{job="buzzlocal-payment-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BuzzLocal payment service is down"
+          description: "BuzzLocal payments are not processing."
+
+      # ─────────────────────────────────────────────
+      # Capacity Alerts
+      # ─────────────────────────────────────────────
+
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.service }}"
+          description: "Memory usage is at {{ $value | humanizePercentage }} of limit"
+
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.8
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.service }}"
+          description: "CPU usage is above 80%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space is low"
+          description: "Disk space on {{ $labels.instance }} is below 10%"

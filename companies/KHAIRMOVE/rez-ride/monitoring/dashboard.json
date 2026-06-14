@@ -1,0 +1,89 @@
+{
+  "dashboard": {
+    "title": "ReZ Ride - Operations Dashboard",
+    "tags": ["rez-ride", "operations"],
+    "timezone": "Asia/Kolkata",
+    "panels": [
+      {
+        "title": "Active Rides",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {"expr": "rez_ride_active_rides_total"}
+        ]
+      },
+      {
+        "title": "Online Drivers",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {"expr": "rez_ride_online_drivers_total"}
+        ]
+      },
+      {
+        "title": "Today's Rides",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {"expr": "rez_ride_rides_completed_total"}
+        ]
+      },
+      {
+        "title": "Today's Revenue",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {"expr": "rez_ride_revenue_total"}
+        ]
+      },
+      {
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {"expr": "rate(rez_ride_requests_total[5m]"}
+        ]
+      },
+      {
+        "title": "Response Time (p95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {"expr": "histogram_quantile(0.95, rez_ride_request_duration_seconds_bucket)"}
+        ]
+      },
+      {
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {"expr": "rate(rez_ride_errors_total[5m])"}
+        ]
+      },
+      {
+        "title": "Active Surge Zones",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 12},
+        "targets": [
+          {"expr": "rez_ride_surge_zones_active"}
+        ]
+      },
+      {
+        "title": "Queue Length",
+        "type": "graph",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 12},
+        "targets": [
+          {"expr": "rez_ride_queue_length"}
+        ]
+      },
+      {
+        "title": "Top 10 Zones by Demand",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+        "targets": [
+          {"expr": "rez_ride_zone_demand", "format": "table"}
+        ]
+      }
+    ]
+  }
+}

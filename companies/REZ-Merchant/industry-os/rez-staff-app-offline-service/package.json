@@ -1,0 +1,19 @@
+{
+  "name": "rez-staff-app-offline-service",
+  "version": "1.0.0",
+  "description": "Staff App Offline Sync Service - Queue, Sync, Conflict Resolution",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "mongoose": "^8.0.3",
+    "zod": "^3.22.4",
+    "uuid": "^9.0.0"
+  }
+}

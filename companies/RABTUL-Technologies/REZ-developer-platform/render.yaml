@@ -1,0 +1,20 @@
+# Render Blueprint for REZ Developer Platform
+# Deploy with: render-blueprints create
+
+services:
+  - type: web
+    name: rez-developer-platform
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: REDIS_URL
+        sync: false

@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for rez-self-checkout
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-self-checkout-config
+  namespace: rez-merchant
+  labels:
+    app: rez-self-checkout
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4092"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-self-checkout"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez-self-checkout"
+  REDIS_DATABASE: "0"

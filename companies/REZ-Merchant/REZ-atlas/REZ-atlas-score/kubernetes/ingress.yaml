@@ -1,0 +1,38 @@
+# ================================================
+# REZ Atlas Score - Kubernetes Ingress
+# ================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rez-atlas-score
+  namespace: rez-merchant
+  labels:
+    app: rez-atlas-score
+    managed-by: rez-merchant
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Request-ID $request_id";
+spec:
+  tls:
+    - hosts:
+        - api.rezmerchant.com
+      secretName: rez-atlas-score-tls
+  rules:
+    - host: api.rezmerchant.com
+      http:
+        paths:
+          - path: /api/score
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-atlas-score
+                port:
+                  number: 5154

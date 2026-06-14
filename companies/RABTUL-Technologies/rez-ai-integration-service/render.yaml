@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: rez-ai-integration-service
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4100"
+      - key: MONGODB_URI
+        sync: false

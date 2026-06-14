@@ -1,0 +1,62 @@
+# REZ Intelligence Hub - Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rez-intelligence-hub
+  labels:
+    app: rez-intelligence-hub
+    tier: intelligence
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rez-intelligence-hub
+  template:
+    metadata:
+      labels:
+        app: rez-intelligence-hub
+        tier: intelligence
+    spec:
+      containers:
+      - name: intelligence-hub
+        image: rez/intelligence-hub:latest
+        ports:
+        - containerPort: 4131
+        env:
+        - name: PORT
+          value: "4131"
+        - name: NODE_ENV
+          value: "production"
+        - name: EVENT_BUS_URL
+          value: "http://rez-event-bus:4025"
+        - name: INTENT_SERVICE_URL
+          value: "http://rez-central-intent:4018"
+        - name: FEATURE_STORE_URL
+          value: "http://rez-feature-store:4127"
+        - name: DECISION_ENGINE_URL
+          value: "http://rez-decision-engine:4128"
+        - name: GRAPH_SERVICE_URL
+          value: "http://rez-commerce-graph:4129"
+        - name: PROFILE_SERVICE_URL
+          value: "http://rez-realtime-profile:4013"
+        - name: OBSERVABILITY_URL
+          value: "http://rez-ml-observability:4130"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-intelligence-hub
+spec:
+  selector:
+    app: rez-intelligence-hub
+  ports:
+  - port: 4131
+    targetPort: 4131
+  type: ClusterIP

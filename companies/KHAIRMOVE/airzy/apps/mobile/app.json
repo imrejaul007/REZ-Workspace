@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "Airzy",
+    "slug": "airzy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6366F1"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rez.airzy",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Airzy needs camera access to scan QR codes for lounge check-in and ticket scanning.",
+        "NSLocationWhenInUseUsageDescription": "Airzy needs your location to find nearby airport services and provide personalized recommendations.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Airzy needs your location to track your airport journey and provide timely notifications.",
+        "NSFaceIDUsageDescription": "Airzy uses Face ID for secure authentication."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6366F1"
+      },
+      "package": "com.rez.airzy",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Airzy to use your location to track airport journeys."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#6366F1"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "airzy-app"
+      }
+    }
+  }
+}

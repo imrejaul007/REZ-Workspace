@@ -1,0 +1,49 @@
+# render.yaml - Render.com deployment configuration
+# https://render.com/docs/deploy-yaml
+
+services:
+  - type: web
+    name: do-backend
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run dev
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: REZ_GATEWAY_URL
+        sync: false
+      - key: REZ_AUTH_SERVICE_URL
+        sync: false
+      - key: REZ_WALLET_SERVICE_URL
+        sync: false
+      - key: REZ_ORDER_SERVICE_URL
+        sync: false
+      - key: REZ_CATALOG_SERVICE_URL
+        sync: false
+      - key: REZ_GAMIFICATION_SERVICE_URL
+        sync: false
+      - key: REZ_SEARCH_SERVICE_URL
+        sync: false
+      - key: REZ_INTENT_CAPTURE_URL
+        sync: false
+      - key: REZ_MERCHANT_SERVICE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: REDIS_URL
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: MSG91_API_KEY
+        sync: false
+      - key: MSG91_SENDER_ID
+        value: DOAPP

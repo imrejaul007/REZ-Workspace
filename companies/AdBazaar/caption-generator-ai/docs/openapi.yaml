@@ -1,0 +1,1116 @@
+openapi: 3.0.0
+info:
+  title: Caption Generator AI API
+  version: 1.0.0
+  description: |
+    AI-powered caption generation service for social media.
+    Generates creative captions, hashtags, CTAs, and content variations
+    with brand voice adaptation and multi-language support.
+  contact:
+    name: AdBazaar Support
+    email: support@adbazaar.com
+  license:
+    name: Proprietary
+    url: https://adbazaar.com/license
+
+servers:
+  - url: http://localhost:5091
+    description: Local development server
+  - url: https://api.adbazaar.com/captions/v1
+    description: Production server
+
+tags:
+  - name: System
+    description: System health and monitoring
+  - name: Generation
+    description: Caption generation
+  - name: Variations
+    description: A/B content variations
+  - name: Templates
+    description: Caption templates
+  - name: Styles
+    description: Caption styles and brand voice
+  - name: Translation
+    description: Caption translation
+  - name: Hooks
+    description: Story hook generation
+  - name: Hashtags
+    description: Hashtag generation
+  - name: CTA
+    description: Call-to-action generation
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the current health status of the service
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                service: caption-generator-ai
+                mongodb: connected
+                openai: configured
+                timestamp: "2026-06-08T10:30:00.000Z"
+
+        '503':
+          description: Service is degraded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /ready:
+    get:
+      summary: Readiness check
+      description: Checks if the service is ready to accept requests
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ready:
+                    type: boolean
+        '503':
+          description: Service not ready
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics
+      tags:
+        - System
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  # ============ CAPTION GENERATION ============
+  /api/captions/generate:
+    post:
+      summary: Generate captions
+      description: Generate AI-powered captions with various options
+      tags:
+        - Generation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateCaptionRequest'
+            example:
+              content: "Just launched our new summer collection! Beautiful florals and breezy fabrics perfect for the season."
+              brandVoice: "elegant, approachable, confident"
+              style: casual
+              tone: friendly
+              length: medium
+              includeHashtags: true
+              includeCTA: true
+              platforms:
+                - instagram
+                - facebook
+              variations: 3
+      responses:
+        '200':
+          description: Captions generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneratedCaptionsResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '500':
+          description: Generation failed
+
+  # ============ VARIATIONS ============
+  /api/captions/variations:
+    post:
+      summary: Generate A/B variations
+      description: Generate multiple variations of content for testing
+      tags:
+        - Variations
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: Original content to create variations from
+                count:
+                  type: integer
+                  default: 2
+                  minimum: 2
+                  maximum: 5
+                  description: Number of variations to generate
+                style:
+                  type: string
+                  description: Style for variations
+            example:
+              content: "Our new coffee blend is here! Rich, smooth, and sustainably sourced."
+              count: 3
+              style: engaging
+      responses:
+        '200':
+          description: Variations generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariationsResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Generation failed
+
+  # ============ TEMPLATES ============
+  /api/captions/templates:
+    get:
+      summary: List templates
+      description: Get all caption templates with filtering
+      tags:
+        - Templates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: style
+          in: query
+          schema:
+            type: string
+          description: Filter by style
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Templates retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateListResponse'
+        '500':
+          description: Failed to list templates
+
+    post:
+      summary: Create template
+      description: Create a new caption template
+      tags:
+        - Templates
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+            example:
+              name: "Product Launch Template"
+              style: professional
+              template: "Introducing {product_name}! {description}. {cta}"
+              variables:
+                - product_name
+                - description
+                - cta
+              createdBy: "user_123"
+      responses:
+        '201':
+          description: Template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Failed to create template
+
+  /api/captions/templates/{id}:
+    get:
+      summary: Get template
+      description: Get a specific template by ID
+      tags:
+        - Templates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Template ID
+      responses:
+        '200':
+          description: Template retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        '404':
+          description: Template not found
+
+    put:
+      summary: Update template
+      description: Update an existing template
+      tags:
+        - Templates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Template ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTemplateRequest'
+      responses:
+        '200':
+          description: Template updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        '404':
+          description: Template not found
+
+    delete:
+      summary: Delete template
+      description: Delete a template
+      tags:
+        - Templates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Template ID
+      responses:
+        '200':
+          description: Template deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '404':
+          description: Template not found
+
+  /api/captions/templates/{id}/use:
+    patch:
+      summary: Increment template usage
+      description: Track when a template is used
+      tags:
+        - Templates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Template ID
+      responses:
+        '200':
+          description: Usage tracked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        '404':
+          description: Template not found
+
+  # ============ STYLES ============
+  /api/captions/styles:
+    get:
+      summary: Get available styles
+      description: Get all available caption styles, tones, and lengths
+      tags:
+        - Styles
+      responses:
+        '200':
+          description: Styles retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StylesResponse'
+              example:
+                success: true
+                data:
+                  styles:
+                    - id: casual
+                      name: Casual
+                      description: Relaxed, conversational tone
+                      emoji: "😊"
+                    - id: professional
+                      name: Professional
+                      description: Polished, business-appropriate
+                      emoji: "💼"
+                  tones:
+                    - id: friendly
+                      name: Friendly
+                      emoji: "🤝"
+                    - id: bold
+                      name: Bold
+                      emoji: "🔥"
+                  lengths:
+                    - id: short
+                      name: Short
+                      maxChars: 150
+                      description: Quick, punchy captions
+                    - id: medium
+                      name: Medium
+                      maxChars: 300
+                    - id: long
+                      name: Long
+                      maxChars: 500
+
+  # ============ BRAND VOICE ============
+  /api/captions/brand-voice:
+    post:
+      summary: Set brand voice
+      description: Create or update brand voice settings
+      tags:
+        - Styles
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetBrandVoiceRequest'
+            example:
+              brandId: "brand_123"
+              name: "Premium Fashion Brand"
+              style: elegant
+              tone: luxury
+              commonPhrases:
+                - "Timeless elegance"
+                - "Crafted with care"
+              avoidPhrases:
+                - "cheap"
+                - "bargain"
+              personality: sophisticated, warm, confident
+      responses:
+        '200':
+          description: Brand voice set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandVoiceResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Failed to set brand voice
+
+  /api/captions/brand-voice/{brandId}:
+    get:
+      summary: Get brand voice
+      description: Get brand voice settings by brand ID
+      tags:
+        - Styles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: brandId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Brand ID
+      responses:
+        '200':
+          description: Brand voice retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandVoiceResponse'
+        '404':
+          description: Brand voice not found
+
+  # ============ TRANSLATION ============
+  /api/captions/translate:
+    post:
+      summary: Translate caption
+      description: Translate captions to other languages
+      tags:
+        - Translation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslateCaptionRequest'
+            example:
+              caption: "Check out our new collection! #fashion #style"
+              targetLanguage: es
+              preserveEmojis: true
+      responses:
+        '200':
+          description: Caption translated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Translation failed
+
+  # ============ STORY HOOKS ============
+  /api/captions/hooks:
+    post:
+      summary: Generate story hooks
+      description: Generate engaging story hooks for content
+      tags:
+        - Hooks
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - topic
+              properties:
+                topic:
+                  type: string
+                  description: Topic to generate hooks for
+                count:
+                  type: integer
+                  default: 3
+                  minimum: 1
+                  maximum: 10
+                style:
+                  type: string
+                  description: Hook style
+            example:
+              topic: "Product launch announcement"
+              count: 5
+              style: intriguing
+      responses:
+        '200':
+          description: Hooks generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HooksResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Generation failed
+
+  # ============ HASHTAGS ============
+  /api/captions/hashtags:
+    post:
+      summary: Generate hashtags
+      description: Generate hashtag suggestions for content
+      tags:
+        - Hashtags
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: Content to generate hashtags for
+                count:
+                  type: integer
+                  default: 10
+                  minimum: 1
+                  maximum: 30
+                includeTrending:
+                  type: boolean
+                  default: false
+                  description: Include trending hashtags
+            example:
+              content: "Beach day vibes! Summer is here."
+              count: 15
+              includeTrending: true
+      responses:
+        '200':
+          description: Hashtags generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagSuggestionsResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Generation failed
+
+  # ============ CTA ============
+  /api/captions/cta:
+    post:
+      summary: Generate CTAs
+      description: Generate call-to-action suggestions
+      tags:
+        - CTA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - context
+              properties:
+                context:
+                  type: string
+                  description: Context for CTA generation
+                count:
+                  type: integer
+                  default: 3
+                  minimum: 1
+                  maximum: 10
+                style:
+                  type: string
+                  description: CTA style
+            example:
+              context: "Product showcase post"
+              count: 4
+              style: urgent
+      responses:
+        '200':
+          description: CTAs generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CTAResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Generation failed
+
+# ============ COMPONENTS ============
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded]
+        service:
+          type: string
+        mongodb:
+          type: string
+          enum: [connected, disconnected]
+        openai:
+          type: string
+          enum: [configured, not configured]
+        timestamp:
+          type: string
+          format: date-time
+
+    GenerateCaptionRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: Content to generate caption for
+        brandVoice:
+          type: string
+          description: Brand voice description
+        style:
+          type: string
+          enum: [casual, professional, witty, inspirational, educational]
+          description: Caption style
+        tone:
+          type: string
+          enum: [friendly, bold, luxury, playful, professional]
+          description: Caption tone
+        length:
+          type: string
+          enum: [short, medium, long]
+          description: Caption length
+        includeHashtags:
+          type: boolean
+          default: false
+        includeCTA:
+          type: boolean
+          default: false
+        platforms:
+          type: array
+          items:
+            type: string
+          description: Target platforms
+        variations:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 5
+          description: Number of caption variations
+
+    GeneratedCaption:
+      type: object
+      properties:
+        text:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        cta:
+          type: string
+        characterCount:
+          type: integer
+        platformOptimized:
+          type: array
+          items:
+            type: string
+
+    GeneratedCaptionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            captions:
+              type: array
+              items:
+                $ref: '#/components/schemas/GeneratedCaption'
+            meta:
+              type: object
+              properties:
+                generationTime:
+                  type: number
+                  description: Generation time in milliseconds
+                style:
+                  type: string
+                variations:
+                  type: integer
+
+    Variation:
+      type: object
+      properties:
+        id:
+          type: string
+        caption:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        type:
+          type: string
+          enum: [A, B, C, D, E]
+
+    VariationsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            variations:
+              type: array
+              items:
+                $ref: '#/components/schemas/Variation'
+            meta:
+              type: object
+              properties:
+                originalContent:
+                  type: string
+                count:
+                  type: integer
+
+    CaptionTemplate:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        style:
+          type: string
+        template:
+          type: string
+        variables:
+          type: array
+          items:
+            type: string
+        usageCount:
+          type: integer
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TemplateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/CaptionTemplate'
+
+    TemplateListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaptionTemplate'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreateTemplateRequest:
+      type: object
+      required:
+        - name
+        - style
+        - template
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        style:
+          type: string
+        template:
+          type: string
+        variables:
+          type: array
+          items:
+            type: string
+        createdBy:
+          type: string
+
+    UpdateTemplateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        style:
+          type: string
+        template:
+          type: string
+        variables:
+          type: array
+          items:
+            type: string
+
+    CaptionStyle:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        emoji:
+          type: string
+
+    CaptionTone:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        emoji:
+          type: string
+
+    CaptionLength:
+      type: object
+      properties:
+        id:
+          type: string
+          enum: [short, medium, long]
+        name:
+          type: string
+        maxChars:
+          type: integer
+        description:
+          type: string
+
+    StylesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            styles:
+              type: array
+              items:
+                $ref: '#/components/schemas/CaptionStyle'
+            tones:
+              type: array
+              items:
+                $ref: '#/components/schemas/CaptionTone'
+            lengths:
+              type: array
+              items:
+                $ref: '#/components/schemas/CaptionLength'
+
+    BrandVoice:
+      type: object
+      properties:
+        brandId:
+          type: string
+        name:
+          type: string
+        style:
+          type: string
+        tone:
+          type: string
+        commonPhrases:
+          type: array
+          items:
+            type: string
+        avoidPhrases:
+          type: array
+          items:
+            type: string
+        personality:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BrandVoiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/BrandVoice'
+
+    SetBrandVoiceRequest:
+      type: object
+      required:
+        - brandId
+        - name
+      properties:
+        brandId:
+          type: string
+        name:
+          type: string
+        style:
+          type: string
+        tone:
+          type: string
+        commonPhrases:
+          type: array
+          items:
+            type: string
+        avoidPhrases:
+          type: array
+          items:
+            type: string
+        personality:
+          type: string
+
+    TranslateCaptionRequest:
+      type: object
+      required:
+        - caption
+        - targetLanguage
+      properties:
+        caption:
+          type: string
+        targetLanguage:
+          type: string
+          description: Target language code (en, es, fr, de, etc.)
+        preserveEmojis:
+          type: boolean
+          default: true
+
+    TranslationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            original:
+              type: string
+            translated:
+              type: string
+            language:
+              type: string
+            preserveEmojis:
+              type: boolean
+
+    StoryHook:
+      type: object
+      properties:
+        id:
+          type: integer
+        hook:
+          type: string
+        type:
+          type: string
+          enum: [question, statement, teaser, challenge, reveal]
+        engagement:
+          type: string
+          description: Expected engagement type
+
+    HooksResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            topic:
+              type: string
+            hooks:
+              type: array
+              items:
+                $ref: '#/components/schemas/StoryHook'
+
+    HashtagSuggestion:
+      type: object
+      properties:
+        tag:
+          type: string
+        relevance:
+          type: number
+        trending:
+          type: boolean
+        reach:
+          type: integer
+
+    HashtagSuggestionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            hashtags:
+              type: array
+              items:
+                $ref: '#/components/schemas/HashtagSuggestion'
+            totalReaches:
+              type: integer
+
+    CTA:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+          enum: [link, shop, learn, subscribe, contact]
+        urgency:
+          type: string
+          enum: [low, medium, high]
+
+    CTAResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            ctas:
+              type: array
+              items:
+                $ref: '#/components/schemas/CTA'
+
+    DeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        pages:
+          type: integer

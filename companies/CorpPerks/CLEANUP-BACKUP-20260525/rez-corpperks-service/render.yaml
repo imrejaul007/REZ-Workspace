@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: rez-corpperks-service
+    runtime: node
+    buildCommand: npm install
+    startCommand: node src/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      # DATABASE
+      - key: MONGODB_URI
+        sync: false
+      # CACHE
+      - key: REDIS_URL
+        sync: false
+      # SECURITY
+      - key: INTERNAL_SERVICE_TOKENS_JSON
+        sync: false
+      # CORS
+      - key: CORS_ORIGIN
+        sync: false
+      # OBSERVABILITY
+      - key: SENTRY_DSN
+        sync: false
+      - key: OTEL_SERVICE_NAME
+        value: rez-corpperks-service

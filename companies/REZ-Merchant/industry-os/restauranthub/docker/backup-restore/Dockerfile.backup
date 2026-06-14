@@ -1,0 +1,35 @@
+FROM postgres:15-alpine
+
+# Install required tools
+RUN apk add --no-cache \
+    bash \
+    curl \
+    aws-cli \
+    gzip \
+    tar \
+    bc \
+    dcron \
+    supercronic
+
+# Create backup user and directories
+RUN adduser -D -s /bin/bash backup
+RUN mkdir -p /backups /scripts /logs /var/spool/cron/crontabs
+RUN chown -R backup:backup /backups /scripts /logs
+
+# Copy backup scripts
+COPY scripts/backup-scheduler.sh /scripts/
+COPY scripts/backup-restore-test.sh /scripts/
+COPY scripts/backup-daemon.sh /scripts/
+COPY scripts/s3-sync.sh /scripts/
+
+# Make scripts executable
+RUN chmod +x /scripts/*.sh
+
+# Switch to backup user
+USER backup
+
+# Set working directory
+WORKDIR /scripts
+
+# Default command
+CMD ["./backup-daemon.sh"]

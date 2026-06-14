@@ -1,0 +1,707 @@
+name: Enhanced Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, release/*]
+  pull_request:
+    branches: [main, develop]
+  release:
+    types: [published]
+  schedule:
+    - cron: '0 2 * * *'  # Daily security scans
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  NODE_VERSION: '18'
+  HELM_VERSION: 'v3.12.0'
+  KUBECTL_VERSION: 'v1.28.0'
+  COSIGN_VERSION: 'v2.2.0'
+
+# Global security context
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  id-token: write
+  packages: write
+
+jobs:
+  # ========================================================================================
+  # SECURITY AND COMPLIANCE CHECKS
+  # ========================================================================================
+
+  security-baseline:
+    name: Security Baseline Assessment
+    runs-on: ubuntu-latest
+    outputs:
+      security-cleared: ${{ steps.security-check.outputs.cleared }}
+
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+        disable-sudo: true
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci --audit --fund false
+
+    - name: Dependency vulnerability scan
+      run: |
+        npm audit --audit-level=moderate
+        npm audit --json > audit-results.json
+
+    - name: License compliance check
+      uses: fossa-contrib/fossa-action@v2
+      with:
+        api-key: ${{ secrets.FOSSA_API_KEY }}
+
+    - name: Secrets detection
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+    - name: SAST with CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript, typescript
+        queries: security-extended,security-and-quality
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+    - name: SAST with Semgrep
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/secrets
+          p/owasp-top-ten
+          p/nodejs
+
+    - name: Security check result
+      id: security-check
+      run: |
+        echo "cleared=true" >> $GITHUB_OUTPUT
+
+  # ========================================================================================
+  # COMPREHENSIVE CODE QUALITY
+  # ========================================================================================
+
+  code-quality-extended:
+    name: Extended Code Quality Analysis
+    runs-on: ubuntu-latest
+    needs: security-baseline
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: ESLint with security rules
+      run: |
+        npm run lint -- --format=sarif --output-file=eslint-results.sarif
+
+    - name: TypeScript strict checks
+      run: npx tsc --noEmit --strict
+
+    - name: Complexity analysis
+      run: npx complexity-report --format=json --output=complexity-report.json src/
+
+    - name: Bundle size analysis
+      run: |
+        npm run build
+        npx bundlesize
+
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: Upload ESLint results to GitHub
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: eslint-results.sarif
+
+  # ========================================================================================
+  # ADVANCED TESTING PIPELINE
+  # ========================================================================================
+
+  comprehensive-testing:
+    name: Comprehensive Testing Suite
+    runs-on: ubuntu-latest
+    needs: [security-baseline, code-quality-extended]
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [api, web]
+        test-type: [unit, integration, e2e]
+        node-version: [18, 20]
+        exclude:
+          - service: web
+            test-type: integration
+          - node-version: 20
+            test-type: e2e
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: restauranthub_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Setup test database
+      if: matrix.test-type != 'e2e'
+      run: |
+        npm run db:migrate:test
+        npm run db:seed:test
+
+    - name: Run ${{ matrix.test-type }} tests for ${{ matrix.service }}
+      run: |
+        case "${{ matrix.test-type }}" in
+          "unit")
+            npm run test:unit --workspace=@restauranthub/${{ matrix.service }} -- --coverage
+            ;;
+          "integration")
+            npm run test:integration --workspace=@restauranthub/${{ matrix.service }}
+            ;;
+          "e2e")
+            npx playwright install --with-deps
+            docker-compose -f docker-compose.test.yml up -d
+            sleep 30
+            npm run test:e2e
+            ;;
+        esac
+      env:
+        NODE_ENV: test
+        DATABASE_URL: postgresql://postgres:test@localhost:5432/restauranthub_test
+        REDIS_URL: redis://localhost:6379/1
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.service }}-${{ matrix.test-type }}-node${{ matrix.node-version }}
+        path: |
+          test-results/
+          coverage/
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: matrix.test-type == 'unit'
+      with:
+        file: apps/${{ matrix.service }}/coverage/lcov.info
+        flags: ${{ matrix.service }},node${{ matrix.node-version }}
+
+  # ========================================================================================
+  # PERFORMANCE AND LOAD TESTING
+  # ========================================================================================
+
+  performance-testing:
+    name: Performance and Load Testing
+    runs-on: ubuntu-latest
+    needs: comprehensive-testing
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Start application stack
+      run: |
+        docker-compose -f docker-compose.performance.yml up -d
+        sleep 60  # Wait for services to be ready
+
+    - name: Install K6
+      run: |
+        curl https://github.com/grafana/k6/releases/download/v0.46.0/k6-v0.46.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+        sudo mv k6 /usr/local/bin/
+
+    - name: Run load tests
+      run: |
+        k6 run tests/performance/load-test.js \
+          --out json=load-test-results.json \
+          --out influxdb=http://localhost:8086/k6
+
+    - name: Run stress tests
+      run: |
+        k6 run tests/performance/stress-test.js \
+          --out json=stress-test-results.json
+
+    - name: Run spike tests
+      run: |
+        k6 run tests/performance/spike-test.js \
+          --out json=spike-test-results.json
+
+    - name: Performance regression analysis
+      run: |
+        node scripts/performance-analysis.js \
+          --current=load-test-results.json \
+          --baseline=baseline-results.json \
+          --threshold=10
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results
+        path: |
+          *-test-results.json
+          performance-report.html
+
+  # ========================================================================================
+  # SECURITY CONTAINER SCANNING
+  # ========================================================================================
+
+  container-security-scanning:
+    name: Container Security Scanning
+    runs-on: ubuntu-latest
+    needs: comprehensive-testing
+    strategy:
+      matrix:
+        service: [api, web]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build container for scanning
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./apps/${{ matrix.service }}/Dockerfile
+        push: false
+        tags: restauranthub/${{ matrix.service }}:scan
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'restauranthub/${{ matrix.service }}:scan'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run Grype vulnerability scanner
+      uses: anchore/scan-action@v3
+      with:
+        image: "restauranthub/${{ matrix.service }}:scan"
+        fail-build: false
+        severity-cutoff: high
+
+    - name: Docker Scout scan
+      uses: docker/scout-action@v1
+      with:
+        command: cves
+        image: restauranthub/${{ matrix.service }}:scan
+        only-severities: critical,high
+        sarif-file: scout-results.sarif
+
+    - name: Upload Scout results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: scout-results.sarif
+
+  # ========================================================================================
+  # BUILD AND PUSH WITH ATTESTATION
+  # ========================================================================================
+
+  build-and-push:
+    name: Build and Push with Attestation
+    runs-on: ubuntu-latest
+    needs: [security-baseline, container-security-scanning, performance-testing]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    strategy:
+      matrix:
+        service: [api, web]
+
+    outputs:
+      image-digest-api: ${{ steps.build-api.outputs.digest }}
+      image-digest-web: ${{ steps.build-web.outputs.digest }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@v3
+      with:
+        cosign-release: ${{ env.COSIGN_VERSION }}
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=stable,enable=${{ github.event_name == 'release' }}
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+
+    - name: Build and push Docker image
+      id: build-${{ matrix.service }}
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./apps/${{ matrix.service }}/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+        provenance: true
+        sbom: true
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0
+      with:
+        image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}@${{ steps.build-${{ matrix.service }}.outputs.digest }}
+        output-file: sbom-${{ matrix.service }}.spdx.json
+
+    - name: Sign image and SBOM
+      run: |
+        cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}@${{ steps.build-${{ matrix.service }}.outputs.digest }}
+        cosign attest --predicate sbom-${{ matrix.service }}.spdx.json --type spdxjson \
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}@${{ steps.build-${{ matrix.service }}.outputs.digest }}
+
+    - name: Upload SBOM
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-${{ matrix.service }}
+        path: sbom-${{ matrix.service }}.spdx.json
+
+  # ========================================================================================
+  # DEPLOYMENT TO STAGING
+  # ========================================================================================
+
+  deploy-staging:
+    name: Deploy to Staging Environment
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+      url: https://staging.restauranthub.com
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+        role-to-assume: ${{ secrets.AWS_STAGING_ROLE_ARN }}
+        role-session-name: RestaurantHubStagingDeploy
+
+    - name: Setup tools
+      run: |
+        # Install Helm
+        curl https://get.helm.sh/helm-${{ env.HELM_VERSION }}-linux-amd64.tar.gz -L | tar xvz
+        sudo mv linux-amd64/helm /usr/local/bin/
+
+        # Install kubectl
+        curl -LO "https://dl.k8s.io/release/${{ env.KUBECTL_VERSION }}/bin/linux/amd64/kubectl"
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig --region us-east-1 --name restauranthub-staging
+
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install restauranthub-staging ./helm/restauranthub \
+          --namespace restauranthub-staging \
+          --create-namespace \
+          --set image.tag=${{ github.sha }} \
+          --set environment=staging \
+          --set replicas.api=2 \
+          --set replicas.web=2 \
+          --values helm/values-staging.yaml \
+          --wait \
+          --timeout=10m
+
+    - name: Run smoke tests
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/restauranthub-api -n restauranthub-staging
+        kubectl wait --for=condition=available --timeout=300s deployment/restauranthub-web -n restauranthub-staging
+
+        # Health checks
+        curl -f https://staging.restauranthub.com/api/v1/health
+        curl -f https://staging.restauranthub.com/health
+
+  # ========================================================================================
+  # PRODUCTION DEPLOYMENT WITH BLUE-GREEN
+  # ========================================================================================
+
+  deploy-production:
+    name: Blue-Green Production Deployment
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    environment:
+      name: production
+      url: https://restauranthub.com
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+        role-to-assume: ${{ secrets.AWS_PRODUCTION_ROLE_ARN }}
+        role-session-name: RestaurantHubProductionDeploy
+
+    - name: Setup tools
+      run: |
+        curl https://get.helm.sh/helm-${{ env.HELM_VERSION }}-linux-amd64.tar.gz -L | tar xvz
+        sudo mv linux-amd64/helm /usr/local/bin/
+        curl -LO "https://dl.k8s.io/release/${{ env.KUBECTL_VERSION }}/bin/linux/amd64/kubectl"
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig --region us-east-1 --name restauranthub-production
+
+    - name: Create pre-deployment backup
+      run: |
+        kubectl exec -n restauranthub-production $(kubectl get pods -n restauranthub-production -l app=postgres-primary -o jsonpath='{.items[0].metadata.name}') -- \
+          pg_dump -U postgres restauranthub | gzip > backup-$(date +%Y%m%d-%H%M%S).sql.gz
+        aws s3 cp backup-*.sql.gz s3://${{ secrets.BACKUP_BUCKET }}/pre-deployment/
+
+    - name: Deploy to Green environment
+      run: |
+        helm upgrade --install restauranthub-green ./helm/restauranthub \
+          --namespace restauranthub-green \
+          --create-namespace \
+          --set image.tag=${{ github.sha }} \
+          --set environment=production \
+          --set service.type=ClusterIP \
+          --set ingress.enabled=false \
+          --values helm/values-production.yaml \
+          --wait \
+          --timeout=15m
+
+    - name: Validate Green deployment
+      run: |
+        kubectl wait --for=condition=available --timeout=600s deployment/restauranthub-api -n restauranthub-green
+        kubectl wait --for=condition=available --timeout=600s deployment/restauranthub-web -n restauranthub-green
+
+        # Run comprehensive health checks
+        ./scripts/health-check.sh restauranthub-green
+
+    - name: Switch traffic to Green
+      run: |
+        # Update ingress to point to green environment
+        kubectl patch ingress restauranthub-ingress -n restauranthub \
+          --type=merge \
+          -p='{"spec":{"rules":[{"host":"restauranthub.com","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"restauranthub-web","port":{"number":80},"namespace":"restauranthub-green"}}}]}},{"host":"api.restauranthub.com","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"restauranthub-api","port":{"number":80},"namespace":"restauranthub-green"}}}]}}]}}'
+
+        # Wait and verify production traffic
+        sleep 30
+        curl -f https://restauranthub.com/health
+        curl -f https://api.restauranthub.com/api/v1/health
+
+    - name: Cleanup Blue environment
+      run: |
+        # Keep blue environment for quick rollback capability
+        kubectl label namespace restauranthub-blue deployment-status=standby --overwrite || true
+
+  # ========================================================================================
+  # POST-DEPLOYMENT VALIDATION
+  # ========================================================================================
+
+  post-deployment-validation:
+    name: Post-Deployment Validation
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: always() && needs.deploy-production.result == 'success'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install testing tools
+      run: |
+        # Install K6 for load testing
+        curl https://github.com/grafana/k6/releases/download/v0.46.0/k6-v0.46.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+        sudo mv k6 /usr/local/bin/
+
+    - name: Run production health checks
+      run: |
+        ./scripts/production-health-check.sh
+
+    - name: Run production load test
+      run: |
+        k6 run tests/performance/production-load-test.js \
+          --env API_URL=https://api.restauranthub.com \
+          --env WEB_URL=https://restauranthub.com \
+          --out json=production-test-results.json
+
+    - name: Security scan production endpoints
+      uses: zaproxy/action-full-scan@v0.7.0
+      with:
+        target: 'https://restauranthub.com'
+        fail_action: false
+        cmd_options: '-a'
+
+    - name: Upload validation results
+      uses: actions/upload-artifact@v4
+      with:
+        name: post-deployment-validation
+        path: |
+          production-test-results.json
+          report_html.html
+
+    - name: Performance threshold validation
+      run: |
+        node scripts/validate-performance-thresholds.js production-test-results.json
+
+  # ========================================================================================
+  # NOTIFICATIONS AND MONITORING
+  # ========================================================================================
+
+  notify-deployment:
+    name: Deployment Notifications
+    runs-on: ubuntu-latest
+    needs: [deploy-production, post-deployment-validation]
+    if: always()
+
+    steps:
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+
+    - name: Notify Microsoft Teams
+      if: failure()
+      uses: skitionek/notify-microsoft-teams@master
+      with:
+        webhook_url: ${{ secrets.TEAMS_WEBHOOK }}
+        title: "Production Deployment Failed"
+        summary: "RestaurantHub production deployment failed"
+        theme_color: "FF0000"
+
+    - name: Create incident on failure
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `🚨 Production deployment failed - ${context.sha.substring(0, 7)}`,
+            body: `Production deployment failed for commit ${context.sha}.
+
+            **Workflow:** ${context.workflow}
+            **Run ID:** ${context.runId}
+            **Actor:** ${context.actor}
+
+            Please investigate immediately.`,
+            labels: ['incident', 'production', 'deployment-failure', 'priority-high']
+          })
+
+    - name: Update deployment status
+      run: |
+        echo "Deployment completed with status: ${{ job.status }}"
+        # Update external monitoring systems if needed

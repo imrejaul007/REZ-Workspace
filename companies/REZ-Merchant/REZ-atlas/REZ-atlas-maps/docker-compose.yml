@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rez-atlas-maps
+    restart: unless-stopped
+    ports:
+      - "5152:5152"
+    environment:
+      NODE_ENV: production
+      PORT: 5152
+      MONGODB_URI: mongodb://mongodb:27017/rez-atlas-maps
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5152/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rez-network
+    volumes:
+      - app-logs:/app/logs
+
+  mongodb:
+    image: mongo:6-alpine
+    container_name: rez-atlas-maps-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - rez-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: rez-atlas-maps-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rez-network
+
+networks:
+  rez-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+  redis-data:
+  app-logs:

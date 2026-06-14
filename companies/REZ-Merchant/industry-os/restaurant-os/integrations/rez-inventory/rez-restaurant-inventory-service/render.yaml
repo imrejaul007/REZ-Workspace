@@ -1,0 +1,27 @@
+# ================================================
+# REZ-Merchant Render Blueprint
+# rez-restaurant-inventory-service
+# ================================================
+
+services:
+  - type: web
+    name: rez-restaurant-inventory-service
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4056
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+      - key: CORS_ORIGINS
+        value: https://admin.rez.money,https://rez.money,https://rez-app.vercel.app

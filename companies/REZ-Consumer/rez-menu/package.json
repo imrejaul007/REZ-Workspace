@@ -1,0 +1,42 @@
+{
+  "name": "rez-workspace",
+  "private": true,
+  "workspaces": [
+    "rez-shared",
+    "rez-auth-service",
+    "rez-wallet-service",
+    "rez-order-service",
+    "rez-payment-service",
+    "rez-merchant-service",
+    "rez-catalog-service",
+    "rez-search-service",
+    "rez-gamification-service",
+    "rez-ads-service",
+    "rez-marketing-service"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:shared": "npm run build --workspace=rez-shared",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present"
+  },
+  "overrides": {
+    "@types/node": "^22.0.0",
+    "express": "^4.21.2",
+    "@types/express": "^4.17.21",
+    "typescript": "^5.9.3",
+    "mongoose": "^8.17.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "mongoose": "^8.17.2",
+    "typescript": "^5.9.3",
+    "uuid": "^10.0.0"
+  }
+}

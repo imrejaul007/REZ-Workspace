@@ -1,0 +1,56 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap Template
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: REZ-merchant-referral-portal-config
+  namespace: rez-merchant
+  labels:
+    app: REZ-merchant-referral-portal
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "4062"
+  LOG_LEVEL: "${LOG_LEVEL:-info}"
+
+  # Service Discovery
+  SERVICE_NAME: "REZ-merchant-referral-portal"
+  SERVICE_VERSION: "v1.0.0"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "${CORS_ORIGINS:-https://app.rezmerchant.com,https://admin.rezmerchant.com}"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_merchant_referral_portal"
+
+  # Redis
+  REDIS_DATABASE: "0"
+
+---
+
+# Production ConfigMap with higher limits
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: REZ-merchant-referral-portal-config-prod
+  namespace: rez-merchant
+  labels:
+    app: REZ-merchant-referral-portal
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4062"
+  LOG_LEVEL: "${LOG_LEVEL:-info}"
+  RATE_LIMIT_MAX: "200"
+  RATE_LIMIT_WINDOW_MS: "60000"

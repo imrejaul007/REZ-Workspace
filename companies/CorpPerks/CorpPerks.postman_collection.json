@@ -1,0 +1,177 @@
+{
+  "info": {
+    "name": "CorpPerks API",
+    "description": "CorpPerks API Collection for testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4013"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Benefits",
+      "item": [
+        {
+          "name": "List Benefits",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/corp/benefits",
+            "header": []
+          }
+        },
+        {
+          "name": "Create Benefit",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/corp/benefits",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Benefit\",\n  \"type\": \"meal\",\n  \"amount\": 5000,\n  \"frequency\": \"monthly\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employees",
+      "item": [
+        {
+          "name": "List Employees",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/corp/employees",
+            "header": []
+          }
+        },
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/corp/employees",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@company.com\",\n  \"department\": \"Engineering\",\n  \"level\": \"L3\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rewards",
+      "item": [
+        {
+          "name": "Get My Rewards",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/rewards/summary",
+            "header": []
+          }
+        },
+        {
+          "name": "Get Reward Catalog",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/rewards/catalog",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "GST",
+      "item": [
+        {
+          "name": "Calculate GST",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/gst/calculate",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10000,\n  \"gstRate\": 18\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Finance",
+      "item": [
+        {
+          "name": "Get Wallet",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/wallet/C001",
+            "header": []
+          }
+        },
+        {
+          "name": "Get Cards",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/cards/C001",
+            "header": []
+          }
+        },
+        {
+          "name": "Get BNPL Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/bnpl/C001",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Campaigns",
+      "item": [
+        {
+          "name": "List Campaigns",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/campaigns",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/analytics/dashboard/C001",
+            "header": []
+          }
+        }
+      ]
+    }
+  ]
+}

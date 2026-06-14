@@ -1,0 +1,24 @@
+// ReZ Ride Routes Index
+export { default as authRoutes } from './auth.routes';
+export { default as ridesRouter } from './rides.routes';
+export { default as driverRoutes } from './driver.routes';
+export { default as faresRoutes } from './fares.routes';
+export { default as voucherRoutes } from './voucher.routes';
+export { default as webhookRoutes } from './webhooks.routes';
+export { default as adminRoutes } from './admin.routes';
+export { default as payoutRoutes } from './payout.routes';
+export { default as surgeRoutes } from './surge.routes';
+export { default as cityRoutes } from './city.routes';
+export { default as scheduledRoutes } from './scheduled.routes';
+export { default as corporateRoutes } from './corporate.routes';
+export { default as questsRoutes } from './quests.routes';
+export { default as airportRoutes } from './airport.routes';
+export { default as giftCardRoutes } from './gift-cards.routes';
+export { default as quickRideRoutes } from './quick-ride.routes';
+export { default as greenRoutes } from './green.routes';
+export { default as voiceRoutes } from './voice.routes';
+export { default as aiRoutes } from './ai.routes';
+export { default as reportsRoutes } from './reports.routes';
+export { default as chatRoutes } from './chat.routes';
+export { default as ticketRoutes } from './tickets.routes';
+export { default as commerceRoutes } from './commerce.routes';

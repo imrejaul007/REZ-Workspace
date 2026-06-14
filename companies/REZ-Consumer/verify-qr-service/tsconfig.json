@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": [
+      "ES2022"
+    ],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "noImplicitReturns": true,
+    "strictNullChecks": true
+  },
+  "include": [
+    "src/index.ts",
+    "src/service.ts",
+    "src/merchant.ts",
+    "src/merchantIntegration.ts",
+    "src/models.ts",
+    "src/events.ts",
+    "src/ownershipPassport.ts",
+    "src/extendedWarranty.ts",
+    "src/expressReplacement.ts",
+    "src/oemDashboard.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests"
+  ]
+}

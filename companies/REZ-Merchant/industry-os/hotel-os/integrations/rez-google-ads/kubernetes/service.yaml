@@ -1,0 +1,23 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-google-hotel-ads-service
+  namespace: rez-merchant
+  labels:
+    app: rez-google-hotel-ads-service
+    managed-by: rez-merchant
+  annotations:
+    description: "Google Hotel Ads Service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4024
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-google-hotel-ads-service

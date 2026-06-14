@@ -1,0 +1,23 @@
+{
+  "name": "rez-event-bus-bridge",
+  "version": "1.0.0",
+  "description": "Bridge between RABTUL Event Bus and HOJAI Event Bus",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "npx tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

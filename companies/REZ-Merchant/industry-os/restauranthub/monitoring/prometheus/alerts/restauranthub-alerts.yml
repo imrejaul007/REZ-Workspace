@@ -1,0 +1,463 @@
+groups:
+  # System Health Alerts
+  - name: system-health
+    rules:
+      - alert: APIServiceDown
+        expr: up{app="restauranthub-api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: api
+          team: backend
+        annotations:
+          summary: "RestaurantHub API service is down"
+          description: "The RestaurantHub API service has been down for more than 30 seconds."
+          runbook_url: "https://docs.restauranthub.com/runbooks/api-service-down"
+          dashboard_url: "https://grafana.restauranthub.com/d/system-overview"
+
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: database
+          team: backend
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL database has been unreachable for more than 30 seconds."
+          runbook_url: "https://docs.restauranthub.com/runbooks/postgres-down"
+          dashboard_url: "https://grafana.restauranthub.com/d/database-performance"
+
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: cache
+          team: backend
+        annotations:
+          summary: "Redis cache service is down"
+          description: "Redis cache service has been unreachable for more than 30 seconds."
+          runbook_url: "https://docs.restauranthub.com/runbooks/redis-down"
+          dashboard_url: "https://grafana.restauranthub.com/d/cache-performance"
+
+  # Performance Alerts
+  - name: performance-alerts
+    rules:
+      - alert: HighAPIResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{app="restauranthub-api"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+          category: performance
+        annotations:
+          summary: "High API response time detected"
+          description: "95th percentile API response time is {{ $value }}s, which is above the 1s threshold."
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-response-time"
+          dashboard_url: "https://grafana.restauranthub.com/d/api-performance"
+
+      - alert: CriticalAPIResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{app="restauranthub-api"}[5m])) > 2
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+          category: performance
+        annotations:
+          summary: "Critical API response time detected"
+          description: "95th percentile API response time is {{ $value }}s, which is critically high."
+          runbook_url: "https://docs.restauranthub.com/runbooks/critical-response-time"
+          dashboard_url: "https://grafana.restauranthub.com/d/api-performance"
+
+      - alert: HighErrorRate
+        expr: (rate(http_requests_total{app="restauranthub-api",status_code=~"4..|5.."}[5m]) / rate(http_requests_total{app="restauranthub-api"}[5m])) * 100 > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+          category: performance
+        annotations:
+          summary: "High error rate detected"
+          description: "API error rate is {{ $value }}%, which is above the 5% threshold."
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-error-rate"
+          dashboard_url: "https://grafana.restauranthub.com/d/api-performance"
+
+      - alert: CriticalErrorRate
+        expr: (rate(http_requests_total{app="restauranthub-api",status_code=~"4..|5.."}[5m]) / rate(http_requests_total{app="restauranthub-api"}[5m])) * 100 > 15
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+          category: performance
+        annotations:
+          summary: "Critical error rate detected"
+          description: "API error rate is {{ $value }}%, which is critically high."
+          runbook_url: "https://docs.restauranthub.com/runbooks/critical-error-rate"
+          dashboard_url: "https://grafana.restauranthub.com/d/api-performance"
+
+  # Resource Alerts
+  - name: resource-alerts
+    rules:
+      - alert: HighMemoryUsage
+        expr: (node_memory_usage_bytes{type="heap_used"} / node_memory_usage_bytes{type="heap_total"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+          category: performance
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}%, which is above the 85% threshold."
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-memory-usage"
+          dashboard_url: "https://grafana.restauranthub.com/d/system-overview"
+
+      - alert: CriticalMemoryUsage
+        expr: (node_memory_usage_bytes{type="heap_used"} / node_memory_usage_bytes{type="heap_total"}) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+          category: performance
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is {{ $value }}%, which is critically high."
+          runbook_url: "https://docs.restauranthub.com/runbooks/critical-memory-usage"
+          dashboard_url: "https://grafana.restauranthub.com/d/system-overview"
+
+      - alert: HighEventLoopDelay
+        expr: event_loop_delay_seconds{app="restauranthub-api"} > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+          category: performance
+        annotations:
+          summary: "High event loop delay detected"
+          description: "Event loop delay is {{ $value }}s, which indicates potential blocking operations."
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-event-loop-delay"
+          dashboard_url: "https://grafana.restauranthub.com/d/system-overview"
+
+      - alert: HighEventLoopUtilization
+        expr: event_loop_utilization_ratio{app="restauranthub-api"} > 0.9
+        for: 3m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+          category: performance
+        annotations:
+          summary: "High event loop utilization detected"
+          description: "Event loop utilization is {{ $value }}, which indicates high CPU usage."
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-event-loop-utilization"
+          dashboard_url: "https://grafana.restauranthub.com/d/system-overview"
+
+  # Database Performance Alerts
+  - name: database-performance
+    rules:
+      - alert: HighDatabaseConnections
+        expr: db_connections_active{app="restauranthub-api"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+          team: backend
+          category: performance
+        annotations:
+          summary: "High database connection count"
+          description: "Active database connections: {{ $value }}, which is above the threshold."
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-db-connections"
+          dashboard_url: "https://grafana.restauranthub.com/d/database-performance"
+
+      - alert: SlowDatabaseQueries
+        expr: histogram_quantile(0.95, rate(db_operation_duration_seconds_bucket{app="restauranthub-api"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+          team: backend
+          category: performance
+        annotations:
+          summary: "Slow database queries detected"
+          description: "95th percentile database query time is {{ $value }}s."
+          runbook_url: "https://docs.restauranthub.com/runbooks/slow-db-queries"
+          dashboard_url: "https://grafana.restauranthub.com/d/database-performance"
+
+      - alert: DatabaseErrorRate
+        expr: rate(db_query_errors_total{app="restauranthub-api"}[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: database
+          team: backend
+          category: performance
+        annotations:
+          summary: "High database error rate"
+          description: "Database error rate is {{ $value }} errors/sec."
+          runbook_url: "https://docs.restauranthub.com/runbooks/db-error-rate"
+          dashboard_url: "https://grafana.restauranthub.com/d/database-performance"
+
+      - alert: LowCacheHitRatio
+        expr: cache_hit_ratio{app="restauranthub-api"} < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          service: cache
+          team: backend
+          category: performance
+        annotations:
+          summary: "Low cache hit ratio"
+          description: "Cache hit ratio is {{ $value }}, which is below the 80% threshold."
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-cache-hit-ratio"
+          dashboard_url: "https://grafana.restauranthub.com/d/cache-performance"
+
+  # Business Metrics Alerts
+  - name: business-metrics
+    rules:
+      - alert: LowUserRegistrations
+        expr: increase(user_registrations_total[1h]) < 5
+        for: 2h
+        labels:
+          severity: warning
+          service: business
+          team: product
+          category: business
+        annotations:
+          summary: "Low user registration rate"
+          description: "Only {{ $value }} user registrations in the last hour, which is below expected levels."
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-user-registrations"
+          dashboard_url: "https://grafana.restauranthub.com/d/business-metrics"
+
+      - alert: HighUserChurnRate
+        expr: conversion_rate_percent{funnel_stage="user_retention"} < 70
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: product
+          category: business
+        annotations:
+          summary: "High user churn rate detected"
+          description: "User retention rate is {{ $value }}%, which is below the 70% threshold."
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-churn-rate"
+          dashboard_url: "https://grafana.restauranthub.com/d/business-metrics"
+
+      - alert: LowJobApplicationSuccessRate
+        expr: conversion_rate_percent{funnel_stage="job_application"} < 15
+        for: 1h
+        labels:
+          severity: warning
+          service: business
+          team: product
+          category: business
+        annotations:
+          summary: "Low job application success rate"
+          description: "Job application success rate is {{ $value }}%, which indicates potential matching issues."
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-job-success-rate"
+          dashboard_url: "https://grafana.restauranthub.com/d/business-metrics"
+
+      - alert: LowOrderCompletionRate
+        expr: conversion_rate_percent{funnel_stage="order_completion"} < 85
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: product
+          category: business
+        annotations:
+          summary: "Low order completion rate"
+          description: "Order completion rate is {{ $value }}%, which indicates fulfillment issues."
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-order-completion"
+          dashboard_url: "https://grafana.restauranthub.com/d/business-metrics"
+
+      - alert: NoRecentRevenue
+        expr: increase(revenue_total_cents[4h]) == 0
+        for: 4h
+        labels:
+          severity: critical
+          service: business
+          team: payments
+          category: business
+        annotations:
+          summary: "No revenue generated in the last 4 hours"
+          description: "No payment transactions have been completed in the last 4 hours."
+          runbook_url: "https://docs.restauranthub.com/runbooks/no-revenue"
+          dashboard_url: "https://grafana.restauranthub.com/d/business-metrics"
+
+  # Security Alerts
+  - name: security-alerts
+    rules:
+      - alert: HighAuthenticationFailures
+        expr: increase(errors_total{error_type="authentication_failed"}[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+          service: security
+          team: security
+          category: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "{{ $value }} authentication failures in the last 5 minutes."
+          runbook_url: "https://docs.restauranthub.com/runbooks/auth-failures"
+          dashboard_url: "https://grafana.restauranthub.com/d/security"
+
+      - alert: SuspiciousAuthenticationActivity
+        expr: increase(errors_total{error_type="authentication_failed"}[1m]) > 20
+        for: 0s
+        labels:
+          severity: critical
+          service: security
+          team: security
+          category: security
+        annotations:
+          summary: "Suspicious authentication activity detected"
+          description: "{{ $value }} authentication failures in the last minute - possible brute force attack."
+          runbook_url: "https://docs.restauranthub.com/runbooks/brute-force"
+          dashboard_url: "https://grafana.restauranthub.com/d/security"
+
+      - alert: HighRateLimitHits
+        expr: increase(errors_total{error_type="rate_limit_exceeded"}[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+          team: security
+          category: security
+        annotations:
+          summary: "High rate limit violations"
+          description: "{{ $value }} rate limit violations in the last 5 minutes."
+          runbook_url: "https://docs.restauranthub.com/runbooks/rate-limit-hits"
+          dashboard_url: "https://grafana.restauranthub.com/d/security"
+
+  # Payment System Alerts
+  - name: payment-alerts
+    rules:
+      - alert: HighPaymentFailureRate
+        expr: (rate(payment_transactions_total{status="failed"}[5m]) / rate(payment_transactions_total[5m])) * 100 > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: payments
+          team: payments
+          category: business
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is {{ $value }}%, which is above the 10% threshold."
+          runbook_url: "https://docs.restauranthub.com/runbooks/payment-failures"
+          dashboard_url: "https://grafana.restauranthub.com/d/payments"
+
+      - alert: CriticalPaymentFailureRate
+        expr: (rate(payment_transactions_total{status="failed"}[5m]) / rate(payment_transactions_total[5m])) * 100 > 25
+        for: 2m
+        labels:
+          severity: critical
+          service: payments
+          team: payments
+          category: business
+        annotations:
+          summary: "Critical payment failure rate"
+          description: "Payment failure rate is {{ $value }}%, which is critically high."
+          runbook_url: "https://docs.restauranthub.com/runbooks/critical-payment-failures"
+          dashboard_url: "https://grafana.restauranthub.com/d/payments"
+
+      - alert: PaymentProcessingDown
+        expr: rate(payment_transactions_total[5m]) == 0 and rate(http_requests_total{route=~".*payment.*"}[5m]) > 0
+        for: 10m
+        labels:
+          severity: critical
+          service: payments
+          team: payments
+          category: business
+        annotations:
+          summary: "Payment processing appears to be down"
+          description: "No payment transactions processed while payment requests are being made."
+          runbook_url: "https://docs.restauranthub.com/runbooks/payment-processing-down"
+          dashboard_url: "https://grafana.restauranthub.com/d/payments"
+
+  # Monitoring System Health
+  - name: monitoring-health
+    rules:
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: monitoring
+          team: devops
+        annotations:
+          summary: "Prometheus monitoring system is down"
+          description: "Prometheus has been down for more than 1 minute."
+          runbook_url: "https://docs.restauranthub.com/runbooks/prometheus-down"
+
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: monitoring
+          team: devops
+        annotations:
+          summary: "Grafana visualization system is down"
+          description: "Grafana has been down for more than 5 minutes."
+          runbook_url: "https://docs.restauranthub.com/runbooks/grafana-down"
+
+      - alert: AlertmanagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: monitoring
+          team: devops
+        annotations:
+          summary: "Alertmanager is down"
+          description: "Alertmanager has been down for more than 2 minutes."
+          runbook_url: "https://docs.restauranthub.com/runbooks/alertmanager-down"
+
+  # Custom Business Logic Alerts
+  - name: business-logic-alerts
+    rules:
+      - alert: UnusuallyHighJobApplicationVolume
+        expr: rate(job_applications_total[10m]) > 10
+        for: 10m
+        labels:
+          severity: warning
+          service: business
+          team: product
+          category: business
+        annotations:
+          summary: "Unusually high job application volume"
+          description: "Job application rate is {{ $value }}/10min, which is unusually high."
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-job-applications"
+
+      - alert: UnusuallyLowOrderVolume
+        expr: rate(order_creations_total[30m]) < 0.1 and hour() >= 11 and hour() <= 14
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+          team: product
+          category: business
+        annotations:
+          summary: "Unusually low order volume during peak hours"
+          description: "Order creation rate is {{ $value }}/30min during peak lunch hours."
+          runbook_url: "https://docs.restauranthub.com/runbooks/low-order-volume"
+
+      - alert: RestaurantOnboardingStalled
+        expr: increase(restaurant_registrations_total[24h]) == 0
+        for: 24h
+        labels:
+          severity: warning
+          service: business
+          team: product
+          category: business
+        annotations:
+          summary: "No restaurant registrations in the last 24 hours"
+          description: "Restaurant onboarding has stalled - no new registrations."
+          runbook_url: "https://docs.restauranthub.com/runbooks/stalled-onboarding"

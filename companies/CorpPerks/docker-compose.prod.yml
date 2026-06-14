@@ -1,0 +1,693 @@
+# CorpPerks Production Docker Compose
+# =====================================
+# Complete production deployment for all CorpPerks services
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # INFRASTRUCTURE SERVICES
+  # ==========================================================================
+
+  mongodb:
+    image: mongo:7.0
+    container_name: corperks-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./config/mongodb/mongod.conf:/etc/mongod.conf
+    environment:
+      - MONGO_INITDB_DATABASE=corpperks
+    command: mongod --config /etc/mongod.conf
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - corperks-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: corperks-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis-dev-password}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - corperks-network
+
+  # ==========================================================================
+  # CORE BACKEND SERVICES
+  # ==========================================================================
+
+  corperks-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: corperks-api
+    restart: unless-stopped
+    ports:
+      - "4006:4006"
+    environment:
+      - NODE_ENV=production
+      - PORT=4006
+      - MONGODB_URI=mongodb://mongodb:27017/corpperks
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis-dev-password}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - RABTUL_AUTH_URL=${RABTUL_AUTH_URL}
+      - RABTUL_PROFILE_URL=${RABTUL_PROFILE_URL}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  corpperks-intelligence:
+    build:
+      context: ./corpperks-intelligence
+      dockerfile: Dockerfile
+    container_name: corpperks-intelligence
+    restart: unless-stopped
+    ports:
+      - "4135:4135"
+    environment:
+      - NODE_ENV=production
+      - PORT=4135
+      - MONGODB_URI=mongodb://mongodb:27017/corpperks_intel
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis-dev-password}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4135/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  projectos-service:
+    build:
+      context: ./projectos-service
+      dockerfile: Dockerfile
+    container_name: projectos-service
+    restart: unless-stopped
+    ports:
+      - "4715:4715"
+    environment:
+      - NODE_ENV=production
+      - PORT=4715
+      - MONGODB_URI=mongodb://mongodb:27017/projectos
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis-dev-password}
+      - CORS_ORIGINS=${CORS_ORIGIN}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - CORPID_SERVICE_URL=http://corpid-api-gateway:4700
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4715/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+
+  # ==========================================================================
+  # REZ INTEGRATION SERVICES
+  # ==========================================================================
+
+  REZ-merchant-corpperks-bridge:
+    build:
+      context: ./REZ-merchant-corpperks-bridge
+      dockerfile: Dockerfile
+    container_name: rez-merchant-bridge
+    restart: unless-stopped
+    ports:
+      - "4008:4008"
+    environment:
+      - NODE_ENV=production
+      - PORT=4008
+      - MONGODB_URI=mongodb://mongodb:27017/rez_merchant
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - REZ_MERCHANT_API_URL=${REZ_MERCHANT_API_URL:-https://rez-merchant.onrender.com}
+      - CORPPERKS_API_URL=http://corperks-api:4006
+      - GST_API_KEY=${GST_API_KEY}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  rez-corporate-service:
+    build:
+      context: ./rez-corporate-service
+      dockerfile: Dockerfile
+    container_name: rez-corporate-service
+    restart: unless-stopped
+    ports:
+      - "4030:4030"
+    environment:
+      - NODE_ENV=production
+      - PORT=4030
+      - MONGODB_URI=mongodb://mongodb:27017/rez_corporate
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - CORPPERKS_API_URL=http://corperks-api:4006
+      - RABTUL_WALLET_URL=${RABTUL_WALLET_URL:-https://rez-wallet-service.onrender.com}
+      - RAZORPAY_KEY=${RAZORPAY_KEY}
+      - RAZORPAY_SECRET=${RAZORPAY_SECRET}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4030/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  # ==========================================================================
+  # CORPID SERVICES (Identity & Trust)
+  # ==========================================================================
+
+  corpid-api-gateway:
+    build:
+      context: ./corpid/services/corpid-api-gateway
+      dockerfile: Dockerfile
+    container_name: corpid-api-gateway
+    restart: unless-stopped
+    ports:
+      - "4700:4700"
+    environment:
+      - NODE_ENV=production
+      - PORT=4700
+      - MONGODB_URI=mongodb://mongodb:27017/corpid
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - CORPID_IDENTITY_URL=http://corpid-identity-service:4701
+      - CORPID_TRUST_GRAPH_URL=http://corpid-trust-graph-service:4702
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4700/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-identity-service:
+    build:
+      context: ./corpid/services/corpid-identity-service
+      dockerfile: Dockerfile
+    container_name: corpid-identity-service
+    restart: unless-stopped
+    ports:
+      - "4701:4701"
+    environment:
+      - NODE_ENV=production
+      - PORT=4701
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_identity
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4701/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-trust-graph-service:
+    build:
+      context: ./corpid/services/corpid-trust-graph-service
+      dockerfile: Dockerfile
+    container_name: corpid-trust-graph-service
+    restart: unless-stopped
+    ports:
+      - "4702:4702"
+    environment:
+      - NODE_ENV=production
+      - PORT=4702
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_trust
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4702/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-verification-service:
+    build:
+      context: ./corpid/services/corpid-verification-service
+      dockerfile: Dockerfile
+    container_name: corpid-verification-service
+    restart: unless-stopped
+    ports:
+      - "4703:4703"
+    environment:
+      - NODE_ENV=production
+      - PORT=4703
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_verification
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - OCR_API_KEY=${OCR_API_KEY}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4703/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-passport-service:
+    build:
+      context: ./corpid/services/corpid-passport-service
+      dockerfile: Dockerfile
+    container_name: corpid-passport-service
+    restart: unless-stopped
+    ports:
+      - "4704:4704"
+    environment:
+      - NODE_ENV=production
+      - PORT=4704
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_passport
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4704/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-ci-score-service:
+    build:
+      context: ./corpid/services/corpid-ci-score-service
+      dockerfile: Dockerfile
+    container_name: corpid-ci-score-service
+    restart: unless-stopped
+    ports:
+      - "4705:4705"
+    environment:
+      - NODE_ENV=production
+      - PORT=4705
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_ci
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4705/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-risk-service:
+    build:
+      context: ./corpid/services/corpid-risk-service
+      dockerfile: Dockerfile
+    container_name: corpid-risk-service
+    restart: unless-stopped
+    ports:
+      - "4706:4706"
+    environment:
+      - NODE_ENV=production
+      - PORT=4706
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_risk
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4706/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-document-service:
+    build:
+      context: ./corpid/services/corpid-document-service
+      dockerfile: Dockerfile
+    container_name: corpid-document-service
+    restart: unless-stopped
+    ports:
+      - "4707:4707"
+    environment:
+      - NODE_ENV=production
+      - PORT=4707
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_documents
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - STORAGE_BUCKET=${STORAGE_BUCKET:-corpperks-documents}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4707/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-notification-service:
+    build:
+      context: ./corpid/services/corpid-notification-service
+      dockerfile: Dockerfile
+    container_name: corpid-notification-service
+    restart: unless-stopped
+    ports:
+      - "4708:4708"
+    environment:
+      - NODE_ENV=production
+      - PORT=4708
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_notifications
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4708/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-admin-service:
+    build:
+      context: ./corpid/services/corpid-admin-service
+      dockerfile: Dockerfile
+    container_name: corpid-admin-service
+    restart: unless-stopped
+    ports:
+      - "4709:4709"
+    environment:
+      - NODE_ENV=production
+      - PORT=4709
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_admin
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4709/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-partner-service:
+    build:
+      context: ./corpid/services/corpid-partner-service
+      dockerfile: Dockerfile
+    container_name: corpid-partner-service
+    restart: unless-stopped
+    ports:
+      - "4710:4710"
+    environment:
+      - NODE_ENV=production
+      - PORT=4710
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_partners
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4710/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  corpid-monitor-service:
+    build:
+      context: ./corpid/services/corpid-monitor-service
+      dockerfile: Dockerfile
+    container_name: corpid-monitor-service
+    restart: unless-stopped
+    ports:
+      - "4711:4711"
+    environment:
+      - NODE_ENV=production
+      - PORT=4711
+      - MONGODB_URI=mongodb://mongodb:27017/corpid_monitor
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4711/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  # ==========================================================================
+  # NEW SERVICES (Real-time, GraphQL, Webhooks, Push)
+  # ==========================================================================
+
+  realtime-service:
+    build:
+      context: ./realtime-service
+      dockerfile: Dockerfile
+    container_name: corperks-realtime
+    restart: unless-stopped
+    ports:
+      - "4748:4748"
+    environment:
+      - NODE_ENV=production
+      - PORT=4748
+      - MONGODB_URI=mongodb://mongodb:27017/realtime
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4748/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - corperks-network
+
+  graphql-api:
+    build:
+      context: ./graphql-api
+      dockerfile: Dockerfile
+    container_name: corperks-graphql
+    restart: unless-stopped
+    ports:
+      - "4747:4747"
+    environment:
+      - NODE_ENV=production
+      - PORT=4747
+      - MONGODB_URI=mongodb://mongodb:27017/graphql
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4747/graphql"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - corperks-network
+
+  webhook-service:
+    build:
+      context: ./webhook-service
+      dockerfile: Dockerfile
+    container_name: corperks-webhook
+    restart: unless-stopped
+    ports:
+      - "4746:4746"
+    environment:
+      - NODE_ENV=production
+      - PORT=4746
+      - MONGODB_URI=mongodb://mongodb:27017/webhook
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4746/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - corperks-network
+
+  expo-push-service:
+    build:
+      context: ./expo-push-service
+      dockerfile: Dockerfile
+    container_name: corperks-expo-push
+    restart: unless-stopped
+    ports:
+      - "4749:4749"
+    environment:
+      - NODE_ENV=production
+      - PORT=4749
+      - MONGODB_URI=mongodb://mongodb:27017/expo_push
+      - EXPO_ACCESS_TOKEN=${EXPO_ACCESS_TOKEN}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4749/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - corperks-network
+
+  # ==========================================================================
+  # FRONTEND SERVICES
+  # ==========================================================================
+
+  peopleos-frontend:
+    build:
+      context: ./peopleos
+      dockerfile: Dockerfile
+    container_name: peopleos-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://corperks-api:4006
+      - NEXT_PUBLIC_CORPINTEL_URL=http://corpperks-intelligence:4135
+      - NEXT_PUBLIC_PROJECTOS_URL=http://projectos-service:4715
+      - NEXT_PUBLIC_CORPID_URL=http://corpid-api-gateway:4700
+    depends_on:
+      - corperks-api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - corperks-network
+
+  # ==========================================================================
+  # VOLUMES
+  # ==========================================================================
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ==========================================================================
+# NETWORKS
+# ==========================================================================
+
+networks:
+  corperks-network:
+    driver: bridge
+    name: corperks-network

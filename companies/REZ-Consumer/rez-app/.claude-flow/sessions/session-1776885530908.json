@@ -1,0 +1,23 @@
+{
+  "id": "session-1776885530908",
+  "startedAt": "2026-04-22T19:18:50.908Z",
+  "cwd": "/Users/rejaulkarim/Documents/ReZ Full App/rez-app-consumer",
+  "context": {
+    "lastMatchedPatterns": [
+      "mem-project_vesper-key-files",
+      "mem-project_data_model_gaps-gap-3--icreditprofile-not-in-s",
+      "mem-project_rezapp-rez-consumer-app--nuqta-master",
+      "mem-project_hotel_ota_rez_integration-what-was-built",
+      "mem-project_hotel_integration-hotel-ota-api-render-environme"
+    ]
+  },
+  "metrics": {
+    "edits": 65,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "updatedAt": "2026-04-22T19:29:03.251Z",
+  "endedAt": "2026-04-22T19:55:07.709Z",
+  "duration": 2176802
+}

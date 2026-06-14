@@ -1,0 +1,106 @@
+// @ts-nocheck
+/**
+ * Capital API Tests
+ * Tests for capitalApi.ts - Restaurant lending
+ */
+
+import * as capitalApi from '@/services/capitalApi';
+
+jest.mock('@/services/apiClient', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), post: jest.fn() },
+  ApiResponse: {},
+}));
+
+import apiClient from '@/services/apiClient';
+
+describe('Capital API', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  describe('getCreditScore', () => {
+    it('should fetch credit score', async () => {
+      const mockScore = {
+        userId: 'user-1',
+        score: 750,
+        grade: 'A' as const,
+        limit: 100000,
+        utilization: 0.3,
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockScore });
+
+      const result = await capitalApi.getCreditScore();
+      expect(result.success).toBe(true);
+      expect(result.data?.grade).toBe('A');
+      expect(result.data?.score).toBe(750);
+    });
+  });
+
+  describe('applyForLoan', () => {
+    it('should submit loan application', async () => {
+      const mockApplication = {
+        id: 'loan-1',
+        amount: 50000,
+        purpose: 'inventory',
+        tenure: 12,
+        status: 'pending' as const,
+        createdAt: '2026-05-15T10:00:00Z',
+      };
+
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({ success: true, data: mockApplication });
+
+      const result = await capitalApi.applyForLoan({
+        amount: 50000,
+        purpose: 'inventory',
+        tenure: 12,
+        businessId: 'biz-1',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data?.status).toBe('pending');
+    });
+  });
+
+  describe('getLoanApplications', () => {
+    it('should fetch loan applications', async () => {
+      const mockLoans = [
+        { id: 'loan-1', amount: 50000, status: 'approved' as const },
+        { id: 'loan-2', amount: 25000, status: 'pending' as const },
+      ];
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockLoans });
+
+      const result = await capitalApi.getLoanApplications();
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+    });
+  });
+
+  describe('getRepaymentSchedule', () => {
+    it('should fetch repayment schedule', async () => {
+      const mockSchedule = [
+        { dueDate: '2026-06-15', amount: 5000, status: 'pending' as const },
+        { dueDate: '2026-07-15', amount: 5000, status: 'paid' as const },
+      ];
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockSchedule });
+
+      const result = await capitalApi.getRepaymentSchedule('loan-1');
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+    });
+  });
+
+  describe('makeRepayment', () => {
+    it('should make repayment', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { success: true, transactionId: 'txn-123' },
+      });
+
+      const result = await capitalApi.makeRepayment('loan-1', 5000);
+      expect(result.success).toBe(true);
+      expect(result.data?.transactionId).toBe('txn-123');
+    });
+  });
+});

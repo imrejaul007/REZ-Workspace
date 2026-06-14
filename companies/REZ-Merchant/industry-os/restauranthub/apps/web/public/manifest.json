@@ -1,0 +1,85 @@
+{
+  "name": "RestoPapa — Run Your Restaurant, Your Way",
+  "short_name": "RestoPapa",
+  "description": "Hire smarter, source better, grow faster. The all-in-one platform for restaurant operators — marketplace, jobs, training, and community in one place.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff6b35",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity", "food"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Restaurant Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Access your restaurant dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/icon",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Marketplace",
+      "short_name": "Marketplace",
+      "description": "Browse B2B marketplace",
+      "url": "/marketplace",
+      "icons": [
+        {
+          "src": "/icon",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "short_name": "Jobs",
+      "description": "Restaurant job portal",
+      "url": "/jobs",
+      "icons": [
+        {
+          "src": "/icon",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "short_name": "Messages",
+      "description": "View your messages and notifications",
+      "url": "/messages",
+      "icons": [
+        {
+          "src": "/icon",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "prefer_related_applications": false,
+  "related_applications": []
+}

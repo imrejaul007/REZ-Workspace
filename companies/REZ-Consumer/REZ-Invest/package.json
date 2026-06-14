@@ -1,0 +1,37 @@
+{
+  "name": "rez-invest",
+  "version": "1.0.0",
+  "description": "REZ-Invest - Stock Trading & Investment Platform",
+  "private": true,
+  "workspaces": [
+    "rez-invest-gateway",
+    "rez-invest-brokerage",
+    "rez-invest-trading",
+    "rez-invest-portfolio",
+    "rez-invest-wallet"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "investing",
+    "stock-trading",
+    "mutual-funds",
+    "portfolio",
+    "rez"
+  ],
+  "author": "REZ-Consumer",
+  "license": "UNLICENSED"
+}

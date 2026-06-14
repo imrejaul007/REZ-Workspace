@@ -1,0 +1,23 @@
+{
+  "id": "session-1777062071168",
+  "startedAt": "2026-04-24T20:21:11.169Z",
+  "cwd": "/Users/rejaulkarim/Documents/ReZ Full App/rez-app-consumer",
+  "context": {
+    "lastMatchedPatterns": [
+      "mem-project_rezapp-rez-consumer-app--nuqta-master",
+      "mem-project_hotel_ota_rez_integration-what-was-built",
+      "mem-project_sprint1_migrations-post-sprint-session--2026-04-1",
+      "mem-project_sprint1_migrations-post-sprint-session-2--2026-04",
+      "mem-reference_services_urls-infrastructure"
+    ]
+  },
+  "metrics": {
+    "edits": 120,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "updatedAt": "2026-04-24T20:23:04.549Z",
+  "endedAt": "2026-04-24T20:31:21.841Z",
+  "duration": 610674
+}

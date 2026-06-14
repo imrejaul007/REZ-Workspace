@@ -1,0 +1,47 @@
+# QR Cloud Service - Render Deployment
+# https://render.com/docs/deploy
+
+services:
+  - type: web
+    name: rez-qr-cloud
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4300
+      - key: MONGODB_URI
+        sync: false
+      - key: AUTH_SERVICE_URL
+        fromService:
+          type: web
+          name: rez-auth-service
+          envVarKey: RENDER_EXTERNAL_URL
+        value: https://rez-auth-service.onrender.com
+      - key: PAYMENT_SERVICE_URL
+        fromService:
+          type: web
+          name: rez-payment-service
+          envVarKey: RENDER_EXTERNAL_URL
+        value: https://rez-payment-service.onrender.com
+      - key: WALLET_SERVICE_URL
+        fromService:
+          type: web
+          name: rez-wallet-service
+          envVarKey: RENDER_EXTERNAL_URL
+        value: https://rez-wallet-service-36vo.onrender.com
+      - key: NOTIFICATION_SERVICE_URL
+        fromService:
+          type: web
+          name: rez-notifications-service
+          envVarKey: RENDER_EXTERNAL_URL
+        value: https://rez-notifications-service.onrender.com
+      - key: QR_CLOUD_URL
+        value: https://qr.rez.money
+      - key: INTERNAL_SERVICE_TOKEN
+        sync: false

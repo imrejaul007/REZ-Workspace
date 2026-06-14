@@ -1,0 +1,117 @@
+name: TreasuryOS Dashboard CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'REZ-treasury-dashboard/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'REZ-treasury-dashboard/**'
+
+env:
+  SERVICE_NAME: rez-treasury-dashboard
+  SERVICE_PORT: 3056
+  NODE_VERSION: '20'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: REZ-treasury-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: REZ-treasury-dashboard
+
+      - name: Run lint
+        run: npm run lint
+        working-directory: REZ-treasury-dashboard
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: REZ-treasury-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: REZ-treasury-dashboard
+
+      - name: Build
+        run: npm run build
+        working-directory: REZ-treasury-dashboard
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: REZ-treasury-dashboard/dist
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: REZ-treasury-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: REZ-treasury-dashboard
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: REZ-treasury-dashboard/dist
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        working-directory: REZ-treasury-dashboard
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - name: Deploy to staging
+        run: |
+          echo "Deploying ${{ env.SERVICE_NAME }} to staging..."
+          # Add your deployment logic here
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    environment: production
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "Deploying ${{ env.SERVICE_NAME }} to production..."

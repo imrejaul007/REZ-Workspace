@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: atlas-crm-core
+  namespace: rez-merchant
+  labels:
+    app: atlas-crm-core
+    managed-by: rez-merchant
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5183
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: atlas-crm-core

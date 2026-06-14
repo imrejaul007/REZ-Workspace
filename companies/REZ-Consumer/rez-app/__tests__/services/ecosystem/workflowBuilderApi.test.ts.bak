@@ -1,0 +1,114 @@
+/**
+ * Workflow Builder API Tests
+ * Tests for workflowBuilderApi.ts
+ */
+
+import * as workflowBuilderApi from '@/services/workflowBuilderApi';
+
+jest.mock('@/services/apiClient', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), post: jest.fn(), patch: jest.fn(), delete: jest.fn() },
+  ApiResponse: {},
+}));
+
+import apiClient from '@/services/apiClient';
+
+describe('Workflow Builder API', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  describe('getWorkflows', () => {
+    it('should fetch all workflows', async () => {
+      const mockWorkflows = {
+        workflows: [
+          { id: 'wf-1', name: 'Welcome Flow', status: 'active' },
+          { id: 'wf-2', name: 'Abandoned Cart', status: 'draft' },
+        ],
+        pagination: { page: 1, limit: 10, total: 2, pages: 1 },
+      };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockWorkflows });
+
+      const result = await workflowBuilderApi.getWorkflows();
+      expect(result.success).toBe(true);
+      expect(result.data?.workflows).toHaveLength(2);
+    });
+
+    it('should filter by status', async () => {
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { workflows: [{ id: 'wf-1', name: 'Active Flow', status: 'active' }], pagination: {} },
+      });
+
+      const result = await workflowBuilderApi.getWorkflows({ status: 'active' });
+      expect(result.data?.workflows).toHaveLength(1);
+    });
+  });
+
+  describe('getWorkflowById', () => {
+    it('should fetch workflow by ID', async () => {
+      const mockWorkflow = { id: 'wf-1', name: 'Test Flow', status: 'active', trigger: { type: 'user_action' }, steps: [] };
+
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({ success: true, data: mockWorkflow });
+
+      const result = await workflowBuilderApi.getWorkflowById('wf-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.name).toBe('Test Flow');
+    });
+  });
+
+  describe('activateWorkflow', () => {
+    it('should activate workflow', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { id: 'wf-1', status: 'active' },
+      });
+
+      const result = await workflowBuilderApi.activateWorkflow('wf-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.status).toBe('active');
+    });
+  });
+
+  describe('pauseWorkflow', () => {
+    it('should pause workflow', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { id: 'wf-1', status: 'paused' },
+      });
+
+      const result = await workflowBuilderApi.pauseWorkflow('wf-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.status).toBe('paused');
+    });
+  });
+
+  describe('triggerWorkflow', () => {
+    it('should trigger workflow for user', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: { id: 'exec-1', workflowId: 'wf-1', userId: 'user-1', status: 'running' },
+      });
+
+      const result = await workflowBuilderApi.triggerWorkflow('wf-1', 'user-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.status).toBe('running');
+    });
+  });
+
+  describe('getJourneys', () => {
+    it('should fetch journeys', async () => {
+      (apiClient.get as jest.Mock).mockResolvedValueOnce({
+        success: true,
+        data: {
+          journeys: [{ id: 'journey-1', name: 'Onboarding', enrolledUsers: 100, convertedUsers: 50 }],
+          pagination: {},
+        },
+      });
+
+      const result = await workflowBuilderApi.getJourneys();
+      expect(result.success).toBe(true);
+      expect(result.data?.journeys).toHaveLength(1);
+    });
+  });
+});
+});

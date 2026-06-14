@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# TypeScript build artifacts in source (should not be committed)
+*.js
+*.d.ts
+!*.d.ts.map
+
+# Keep type declaration files that are manually written (not generated)
+# src/types/*.ts should stay, but src/**/*.d.ts generated files should be ignored
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test coverage
+coverage/
+
+# Prisma
+packages/db/generated/
+
+# Temporary files
+*.tmp
+*.temp

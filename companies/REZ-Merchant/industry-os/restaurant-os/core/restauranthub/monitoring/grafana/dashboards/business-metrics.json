@@ -1,0 +1,429 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "RestoPapa - Business Metrics & KPIs",
+    "tags": ["restopapa", "business", "kpi"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "1m",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Users",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "active_users_current{user_type=\"all\",time_period=\"total\"}",
+            "legendFormat": "Total Users"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 4,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Users (30d)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "active_users_current{user_type=\"all\",time_period=\"last_30_days\"}",
+            "legendFormat": "Active Users"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 4,
+          "x": 4,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "User Registrations Today",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(user_registrations_total[24h])",
+            "legendFormat": "New Users"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 10
+                },
+                {
+                  "color": "green",
+                  "value": 50
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 4,
+          "x": 8,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Revenue Today",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(revenue_total_cents[24h]) / 100",
+            "legendFormat": "Revenue ($)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 4,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 5,
+        "title": "Job Postings",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(job_postings_total[24h])",
+            "legendFormat": "New Jobs"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 4,
+          "x": 16,
+          "y": 0
+        }
+      },
+      {
+        "id": 6,
+        "title": "Orders Today",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(order_creations_total[24h])",
+            "legendFormat": "Orders"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 4,
+          "x": 20,
+          "y": 0
+        }
+      },
+      {
+        "id": 7,
+        "title": "User Registration Trends",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(user_registrations_total{user_type=\"customer\"}[1h])",
+            "legendFormat": "Customer Registrations"
+          },
+          {
+            "expr": "rate(restaurant_registrations_total[1h])",
+            "legendFormat": "Restaurant Registrations"
+          },
+          {
+            "expr": "rate(vendor_registrations_total[1h])",
+            "legendFormat": "Vendor Registrations"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Registrations/hour",
+            "unit": "short"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 4
+        }
+      },
+      {
+        "id": 8,
+        "title": "Revenue Trends",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(revenue_total_cents[1h]) / 100",
+            "legendFormat": "Revenue per Hour"
+          },
+          {
+            "expr": "rate(payment_transactions_total{status=\"success\"}[1h])",
+            "legendFormat": "Successful Transactions/hour"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Revenue ($) / Transactions",
+            "unit": "short"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 4
+        }
+      },
+      {
+        "id": 9,
+        "title": "Job Market Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(job_postings_total[1h])",
+            "legendFormat": "Job Postings/hour"
+          },
+          {
+            "expr": "rate(job_applications_total[1h])",
+            "legendFormat": "Job Applications/hour"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Count/hour",
+            "unit": "short"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 12
+        }
+      },
+      {
+        "id": 10,
+        "title": "Order Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(order_creations_total[1h])",
+            "legendFormat": "Orders/hour"
+          },
+          {
+            "expr": "rate(order_creations_total{customer_type=\"returning\"}[1h])",
+            "legendFormat": "Returning Customer Orders/hour"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Orders/hour",
+            "unit": "short"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 12
+        }
+      },
+      {
+        "id": 11,
+        "title": "Conversion Rates",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "conversion_rate_percent{funnel_stage=\"registration\"}",
+            "legendFormat": "User Registration Rate"
+          },
+          {
+            "expr": "conversion_rate_percent{funnel_stage=\"user_retention\"}",
+            "legendFormat": "User Retention Rate"
+          },
+          {
+            "expr": "conversion_rate_percent{funnel_stage=\"job_application\"}",
+            "legendFormat": "Job Application Success Rate"
+          },
+          {
+            "expr": "conversion_rate_percent{funnel_stage=\"order_completion\"}",
+            "legendFormat": "Order Completion Rate"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "unit": "percent",
+            "max": 100,
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 20
+        }
+      },
+      {
+        "id": 12,
+        "title": "Customer Satisfaction",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "customer_satisfaction_score{service_category=\"overall\"}",
+            "legendFormat": "Overall Satisfaction"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 10,
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 6
+                },
+                {
+                  "color": "green",
+                  "value": 8
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 12,
+          "y": 20
+        }
+      },
+      {
+        "id": 13,
+        "title": "Payment Methods Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "increase(payment_transactions_total{status=\"success\"}[24h])",
+            "legendFormat": "{{payment_method}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 18,
+          "y": 20
+        }
+      },
+      {
+        "id": 14,
+        "title": "Top Business Metrics Summary",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "active_users_current{time_period=\"total\"}",
+            "legendFormat": "Total Users",
+            "format": "table"
+          },
+          {
+            "expr": "increase(user_registrations_total[24h])",
+            "legendFormat": "New Users (24h)",
+            "format": "table"
+          },
+          {
+            "expr": "increase(order_creations_total[24h])",
+            "legendFormat": "Orders (24h)",
+            "format": "table"
+          },
+          {
+            "expr": "increase(revenue_total_cents[24h]) / 100",
+            "legendFormat": "Revenue (24h)",
+            "format": "table"
+          },
+          {
+            "expr": "increase(job_postings_total[24h])",
+            "legendFormat": "Job Postings (24h)",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "table"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 28
+        }
+      }
+    ]
+  }
+}

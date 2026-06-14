@@ -1,0 +1,110 @@
+# KHAIRMOVE BuzzLocal API
+
+openapi: 3.0.3
+info:
+  title: KHAIRMOVE BuzzLocal
+  description: Community rides and carpooling
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4606
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+
+  /api/pools:
+    get:
+      summary: List ride pools
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [carpool, shuttle, subscription]
+      responses:
+        '200':
+          description: List of pools
+
+    post:
+      summary: Create ride pool
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                origin:
+                  type: object
+                destination:
+                  type: object
+                departureTime:
+                  type: string
+                availableSeats:
+                  type: number
+      responses:
+        '201':
+          description: Pool created
+
+  /api/pools/{id}:
+    get:
+      summary: Get pool by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pool details
+
+  /api/pools/{id}/join:
+    post:
+      summary: Join a pool
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Joined pool
+
+  /api/movement/patterns:
+    get:
+      summary: Get movement patterns
+      parameters:
+        - name: area
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Movement patterns
+
+  /api/movement/predict:
+    post:
+      summary: Predict movement patterns
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                currentLocation:
+                  type: object
+      responses:
+        '200':
+          description: Predicted patterns

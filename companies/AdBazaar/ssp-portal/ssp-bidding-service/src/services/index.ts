@@ -1,0 +1,1 @@
+export { biddingService, BiddingService } from './bidding.service';

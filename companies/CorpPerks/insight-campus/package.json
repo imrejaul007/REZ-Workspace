@@ -1,0 +1,25 @@
+{
+  "name": "insight-campus",
+  "version": "1.0.0",
+  "description": "Student operating system - part of CorpPerks ecosystem",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:analyze": "ANALYZE=true npm run build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "axios": "^1.6.0",
+    "zustand": "^4.4.0"
+  },
+  "devDependencies": {
+    "@next/bundle-analyzer": "^15.5.15",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.0"
+  }
+}

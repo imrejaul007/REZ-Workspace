@@ -1,0 +1,19 @@
+# Development Dockerfile with hot-reload support
+FROM node:20-alpine
+
+# Install dependencies for ts-node and debugging
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm install
+
+# Expose port
+EXPOSE 3000
+
+# Start with ts-node for hot-reload development
+CMD ["npx", "ts-node", "src/index.ts"]

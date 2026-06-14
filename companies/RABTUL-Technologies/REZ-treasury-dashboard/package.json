@@ -1,0 +1,37 @@
+{
+  "name": "rez-treasury-dashboard",
+  "version": "1.0.0",
+  "description": "TreasuryOS Dashboard - Cash Management, Investment Tracking, and Forecasting UI",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext ts,tsx",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "recharts": "^2.10.0",
+    "@tanstack/react-query": "^5.12.0",
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.294.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "@playwright/test": "^1.40.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0"
+  }
+}

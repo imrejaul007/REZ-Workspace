@@ -1,0 +1,459 @@
+# Invisible Hotel - Docker Compose
+# Complete stack for The Invisible Hotel experience
+
+version: '3.8'
+
+services:
+  # ============================================
+  # INFRASTRUCTURE
+  # ============================================
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: hotel
+      RABBITMQ_DEFAULT_PASS: hotel123
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_logs:/mosquitto/log
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ============================================
+  # CORE HOTEL SERVICES
+  # ============================================
+
+  ai-front-desk:
+    build:
+      context: ./ai-front-desk
+      dockerfile: Dockerfile
+    ports:
+      - "3800:3800"
+    environment:
+      - NODE_ENV=production
+      - PORT=3800
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - STAYBOT_URL=http://host.docker.internal:4840
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  hotel-os-integration:
+    build:
+      context: ./hotel-os-integration
+      dockerfile: Dockerfile
+    ports:
+      - "3899:3899"
+    environment:
+      - NODE_ENV=production
+      - PORT=3899
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  # ============================================
+  # INVISIBLE HOTEL SERVICES (Ports 3810-3828)
+  # ============================================
+
+  minibar-service:
+    build:
+      context: ./minibar-service
+      dockerfile: Dockerfile
+    ports:
+      - "3810:3810"
+    environment:
+      - NODE_ENV=production
+      - PORT=3810
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - WALLET_URL=http://host.docker.internal:4004
+      - PAYMENT_URL=http://host.docker.internal:4001
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  hotel-restaurant-booking:
+    build:
+      context: ./hotel-restaurant-booking
+      dockerfile: Dockerfile
+    ports:
+      - "3811:3811"
+    environment:
+      - NODE_ENV=production
+      - PORT=3811
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - RESTAURANT_SERVICE_URL=http://host.docker.internal:4017
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  hotel-spa-booking:
+    build:
+      context: ./hotel-spa-booking
+      dockerfile: Dockerfile
+    ports:
+      - "3812:3812"
+    environment:
+      - NODE_ENV=production
+      - PORT=3812
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - SPA_INVENTORY_URL=http://host.docker.internal:4402
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  room-controls:
+    build:
+      context: ./room-controls
+      dockerfile: Dockerfile
+    ports:
+      - "3814:3814"
+    environment:
+      - NODE_ENV=production
+      - PORT=3814
+      - REDIS_URL=redis://redis:6379
+      - MQTT_URL=mqtt://mosquitto:1883
+      - MQTT_USER=hotel
+      - MQTT_PASS=hotel123
+    depends_on:
+      redis:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  parking-service:
+    build:
+      context: ./parking-service
+      dockerfile: Dockerfile
+    ports:
+      - "3815:3815"
+    environment:
+      - NODE_ENV=production
+      - PORT=3815
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  lost-found:
+    build:
+      context: ./lost-found
+      dockerfile: Dockerfile
+    ports:
+      - "3816:3816"
+    environment:
+      - NODE_ENV=production
+      - PORT=3816
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - NOTIFICATION_URL=http://host.docker.internal:4510
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  upsell-engine:
+    build:
+      context: ./upsell-engine
+      dockerfile: Dockerfile
+    ports:
+      - "3817:3817"
+    environment:
+      - NODE_ENV=production
+      - PORT=3817
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - BOOKING_URL=http://host.docker.internal:4042
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  loyalty-system:
+    build:
+      context: ./loyalty-system
+      dockerfile: Dockerfile
+    ports:
+      - "3818:3818"
+    environment:
+      - NODE_ENV=production
+      - PORT=3818
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - WALLET_URL=http://host.docker.internal:4004
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  review-manager:
+    build:
+      context: ./review-manager
+      dockerfile: Dockerfile
+    ports:
+      - "3819:3819"
+    environment:
+      - NODE_ENV=production
+      - PORT=3819
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  feedback-survey:
+    build:
+      context: ./feedback-survey
+      dockerfile: Dockerfile
+    ports:
+      - "3820:3820"
+    environment:
+      - NODE_ENV=production
+      - PORT=3820
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  concierge-desk:
+    build:
+      context: ./concierge-desk
+      dockerfile: Dockerfile
+    ports:
+      - "3821:3821"
+    environment:
+      - NODE_ENV=production
+      - PORT=3821
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  smart-lock-service:
+    build:
+      context: ./smart-lock-service
+      dockerfile: Dockerfile
+    ports:
+      - "3825:3825"
+    environment:
+      - NODE_ENV=production
+      - PORT=3825
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - PMS_URL=http://host.docker.internal:4031
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  predictive-housekeeping:
+    build:
+      context: ./predictive-housekeeping
+      dockerfile: Dockerfile
+    ports:
+      - "3826:3826"
+    environment:
+      - NODE_ENV=production
+      - PORT=3826
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - HOUSEKEEPING_URL=http://host.docker.internal:4021
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  zero-checkout-automation:
+    build:
+      context: ./zero-checkout-automation
+      dockerfile: Dockerfile
+    ports:
+      - "3827:3827"
+    environment:
+      - NODE_ENV=production
+      - PORT=3827
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - PAYMENT_URL=http://host.docker.internal:4001
+      - WALLET_URL=http://host.docker.internal:4004
+      - BOOKING_URL=http://host.docker.internal:4020
+      - SMART_LOCK_URL=http://smart-lock-service:3825
+      - MINIBAR_URL=http://minibar-service:3810
+      - RESTAURANT_URL=http://hotel-restaurant-booking:3811
+      - SPA_URL=http://hotel-spa-booking:3812
+      - LAUNDRY_URL=http://host.docker.internal:4048
+    depends_on:
+      redis:
+        condition: service_healthy
+      minibar-service:
+        condition: service_started
+    networks:
+      - invisible-hotel
+
+  pre-arrival-service:
+    build:
+      context: ./pre-arrival-service
+      dockerfile: Dockerfile
+    ports:
+      - "3828:3828"
+    environment:
+      - NODE_ENV=production
+      - NODE_ENV=production
+      - PORT=3828
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - GUEST_SERVICE_URL=http://host.docker.internal:3800
+      - EMAIL_URL=http://host.docker.internal:4510
+      - SMS_URL=http://host.docker.internal:4510
+      - ROOM_SERVICE_URL=http://host.docker.internal:3800
+      - HOUSEKEEPING_URL=http://predictive-housekeeping:3826
+      - MINIBAR_URL=http://minibar-service:3810
+      - FRONTEND_URL=https://rez.app
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  # ============================================
+  # HOJAI MEMORY LAYER
+  # ============================================
+
+  hojai-memory-hotel:
+    build:
+      context: ./hojai-memory-hotel
+      dockerfile: Dockerfile
+    ports:
+      - "4720:4720"
+    environment:
+      - NODE_ENV=production
+      - PORT=4720
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - HOJAI_MEMORY_URL=http://host.docker.internal:4520
+      - GENIE_MEMORY_URL=http://host.docker.internal:4703
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+  # ============================================
+  # VOICE AGENT
+  # ============================================
+
+  voice-hotel-agent:
+    build:
+      context: ./voice-hotel-agent
+      dockerfile: Dockerfile
+    ports:
+      - "4870:4870"
+    environment:
+      - NODE_ENV=production
+      - PORT=4870
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://hotel:hotel123@rabbitmq:5672
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - GUEST_SERVICE_URL=http://host.docker.internal:3800
+      - BOOKING_URL=http://host.docker.internal:4020
+      - ROOM_SERVICE_URL=http://host.docker.internal:4043
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - invisible-hotel
+
+# ============================================
+# NETWORKS & VOLUMES
+# ============================================
+
+networks:
+  invisible-hotel:
+    driver: bridge
+
+volumes:
+  redis_data:
+  mongo_data:
+  rabbitmq_data:
+  mosquitto_data:
+  mosquitto_logs:

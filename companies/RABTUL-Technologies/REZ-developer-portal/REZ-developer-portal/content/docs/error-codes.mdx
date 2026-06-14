@@ -1,0 +1,108 @@
+---
+title: Error Codes
+description: Reference for all API error codes and how to handle them
+lastUpdated: May 17, 2026
+order: 7
+---
+
+## Error Response Format
+
+All errors follow a consistent JSON format:
+
+```json
+{
+  "error": {
+    "code": "error_code",
+    "message": "Human readable message",
+    "details": {
+      "field": "Additional context"
+    }
+  },
+  "request_id": "req_abc123"
+}
+```
+
+## HTTP Status Codes
+
+REZ API uses standard HTTP status codes:
+
+| Code | Meaning |
+|------|---------|
+| 200 | OK - Request succeeded |
+| 201 | Created - Resource created successfully |
+| 400 | Bad Request - Invalid parameters |
+| 401 | Unauthorized - Invalid or missing API key |
+| 403 | Forbidden - Insufficient permissions |
+| 404 | Not Found - Resource does not exist |
+| 409 | Conflict - Resource conflict (e.g., duplicate) |
+| 422 | Unprocessable - Validation error |
+| 429 | Too Many Requests - Rate limit exceeded |
+| 500 | Internal Error - Server error |
+| 503 | Service Unavailable - Temporary outage |
+
+## Error Codes Reference
+
+### Authentication Errors
+
+| Code | Description |
+|------|-------------|
+| `invalid_api_key` | The API key is invalid |
+| `expired_token` | JWT token has expired |
+| `invalid_signature` | Webhook signature mismatch |
+| `mfa_required` | Multi-factor authentication required |
+
+### Validation Errors
+
+| Code | Description |
+|------|-------------|
+| `missing_field` | Required field is missing |
+| `invalid_format` | Field format is incorrect |
+| `invalid_value` | Field value is not allowed |
+| `duplicate_entry` | Resource already exists |
+
+### Payment Errors
+
+| Code | Description |
+|------|-------------|
+| `insufficient_balance` | Wallet balance too low |
+| `payment_failed` | Payment processing failed |
+| `invalid_upi` | UPI ID format is invalid |
+| `card_declined` | Card was declined by issuer |
+| `fraud_suspected` | Transaction flagged as fraud |
+
+### Rate Limit Errors
+
+| Code | Description |
+|------|-------------|
+| `rate_limit_exceeded` | Too many requests |
+| `quota_exceeded` | Daily/monthly quota exceeded |
+
+## Handling Errors
+
+Here is an example of proper error handling:
+
+```typescript
+try {
+  const payment = await client.payments.create({
+    amount: 49900,
+    currency: 'INR',
+    customer: { /* ... */ }
+  });
+} catch (error) {
+  if (error.code === 'rate_limit_exceeded') {
+    // Implement backoff and retry
+    await delay(error.retry_after * 1000);
+    return retry();
+  }
+
+  if (error.code === 'insufficient_balance') {
+    // Prompt user to add funds
+    showAddFundsModal();
+    return;
+  }
+
+  // Log and display generic error
+  console.error('Payment failed:', error.message);
+  showErrorToast('Payment could not be processed');
+}
+```

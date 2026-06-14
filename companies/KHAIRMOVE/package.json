@@ -1,0 +1,33 @@
+{
+  "name": "khaimove",
+  "version": "1.0.0",
+  "description": "KHAIRMOVE - Mobility & Logistics Infrastructure",
+  "private": true,
+  "workspaces": [
+    "khaimove-api-gateway",
+    "khaimove-ride-service",
+    "khaimove-fleet-service",
+    "khaimove-delivery-service",
+    "khaimove-logistics-aggregator",
+    "khaimove-rental-service",
+    "buzzlocal-rides-integration",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "dev:gateway": "npm run dev --workspace=khaimove-api-gateway",
+    "dev:ride": "npm run dev --workspace=khaimove-ride-service",
+    "dev:fleet": "npm run dev --workspace=khaimove-fleet-service",
+    "dev:delivery": "npm run dev --workspace=khaimove-delivery-service",
+    "dev:logistics": "npm run dev --workspace=khaimove-logistics-aggregator",
+    "dev:rental": "npm run dev --workspace=khaimove-rental-service",
+    "dev:buzzlocal": "npm run dev --workspace=buzzlocal-rides-integration"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

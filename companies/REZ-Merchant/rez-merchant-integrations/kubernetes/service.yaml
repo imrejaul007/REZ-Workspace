@@ -1,0 +1,20 @@
+# Kubernetes Service for rez-merchant-integrations
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-merchant-integrations
+  namespace: rez-merchant
+  labels:
+    app: rez-merchant-integrations
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-merchant-integrations service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4040
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-merchant-integrations

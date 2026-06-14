@@ -1,0 +1,1074 @@
+openapi: 3.0.3
+info:
+  title: Follower Growth Tracker Service
+  description: |
+    Track and analyze follower growth for Instagram accounts.
+    Monitor daily snapshots, competitor comparisons, milestone alerts, and predictions.
+  version: 1.0.0
+  contact:
+    name: AdBazaar Support
+    email: support@adBazaar.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:5093
+    description: Local development server
+  - url: https://api.adBazaar.com/growth
+    description: Production server
+
+tags:
+  - name: Growth
+    description: Follower growth tracking and analytics
+  - name: Snapshots
+    description: Daily and period snapshots
+  - name: Analytics
+    description: Deep analytics and predictions
+  - name: Competitors
+    description: Competitor comparison
+  - name: Alerts
+    description: Milestone alerts
+  - name: Admin
+    description: Admin operations
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the service is running and healthy
+      tags:
+        - Admin
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: follower-growth-tracker
+                  version:
+                    type: string
+                    example: 1.0.0
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/growth/{accountId}:
+    get:
+      summary: Get overall growth data
+      description: Retrieve overall growth data for an Instagram account
+      tags:
+        - Growth
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+        - name: days
+          in: query
+          description: Number of days to analyze
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 365
+            default: 30
+      responses:
+        '200':
+          description: Growth data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/GrowthData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/growth/{accountId}/daily:
+    get:
+      summary: Get daily snapshots
+      description: Retrieve daily follower snapshots for a specific period
+      tags:
+        - Snapshots
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+        - name: days
+          in: query
+          description: Number of days to retrieve
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 365
+            default: 30
+      responses:
+        '200':
+          description: Daily snapshots retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DailySnapshot'
+
+  /api/growth/{accountId}/weekly:
+    get:
+      summary: Get weekly summary
+      description: Retrieve weekly follower growth summary
+      tags:
+        - Snapshots
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+        - name: periods
+          in: query
+          description: Number of weeks to retrieve
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 52
+            default: 12
+      responses:
+        '200':
+          description: Weekly summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WeeklySummary'
+
+  /api/growth/{accountId}/monthly:
+    get:
+      summary: Get monthly summary
+      description: Retrieve monthly follower growth summary
+      tags:
+        - Snapshots
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+        - name: periods
+          in: query
+          description: Number of months to retrieve
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 52
+            default: 12
+      responses:
+        '200':
+          description: Monthly summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MonthlySummary'
+
+  /api/growth/{accountId}/analytics:
+    get:
+      summary: Get deep analytics
+      description: Get comprehensive growth analytics including engagement correlation
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/GrowthAnalytics'
+
+  /api/growth/{accountId}/predictions:
+    get:
+      summary: Get growth predictions
+      description: Get AI-powered follower growth predictions
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Predictions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/GrowthPredictions'
+
+  /api/growth/{accountId}/compare:
+    get:
+      summary: Compare with competitors
+      description: Compare follower growth with competitor accounts
+      tags:
+        - Competitors
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+        - name: competitorIds
+          in: query
+          required: true
+          description: Comma-separated list of competitor account IDs
+          schema:
+            type: array
+            items:
+              type: string
+            minItems: 1
+            maxItems: 10
+      responses:
+        '200':
+          description: Comparison data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CompetitorComparison'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/growth/{accountId}/alerts:
+    get:
+      summary: Get milestone alerts
+      description: Get all milestone alerts for an account
+      tags:
+        - Alerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alerts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MilestoneAlert'
+
+    post:
+      summary: Set milestone alert
+      description: Create a new milestone alert for follower count
+      tags:
+        - Alerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - milestone
+              properties:
+                milestone:
+                  type: integer
+                  description: Follower count milestone (must be multiple of 1000)
+                  example: 10000
+            example:
+              milestone: 50000
+      responses:
+        '201':
+          description: Alert created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/MilestoneAlert'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/growth/{accountId}/sources:
+    get:
+      summary: Get follower source breakdown
+      description: Get breakdown of where followers are coming from
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Source breakdown retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FollowerSources'
+
+  /api/growth/{accountId}/engagement:
+    get:
+      summary: Get engagement correlation
+      description: Get correlation between engagement and follower growth
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Engagement correlation retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/EngagementCorrelation'
+
+  /api/growth/{accountId}/churn:
+    get:
+      summary: Get churn analysis
+      description: Get unfollow/churn tracking and analysis
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Churn analysis retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/ChurnAnalysis'
+
+  /api/sync:
+    post:
+      summary: Sync follower data
+      description: Sync follower data from Instagram API
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accountId
+              properties:
+                accountId:
+                  type: string
+                fetchFromInstagram:
+                  type: boolean
+                  default: true
+            example:
+              accountId: "ig_123456"
+              fetchFromInstagram: true
+      responses:
+        '200':
+          description: Sync completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Sync completed"
+
+  /api/snapshot:
+    post:
+      summary: Create manual snapshot
+      description: Create a manual follower snapshot
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSnapshotInput'
+            example:
+              accountId: "ig_123456"
+              followers: 45230
+              following: 1250
+              posts: 342
+              change: 120
+              sources:
+                hashtag: 45
+                explore: 30
+                profile: 25
+      responses:
+        '201':
+          description: Snapshot created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Snapshot created"
+
+  /api/unfollow:
+    post:
+      summary: Record unfollow event
+      description: Record when a user unfollows an account
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accountId
+                - unfollowerId
+              properties:
+                accountId:
+                  type: string
+                unfollowerId:
+                  type: string
+                unfollowerUsername:
+                  type: string
+                daysAsFollower:
+                  type: integer
+            example:
+              accountId: "ig_123456"
+              unfollowerId: "user_789"
+              unfollowerUsername: "john_doe"
+              daysAsFollower: 45
+      responses:
+        '201':
+          description: Unfollow recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Unfollow recorded"
+
+  /api/competitor:
+    post:
+      summary: Add competitor
+      description: Add a competitor account for tracking
+      tags:
+        - Competitors
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accountId
+                - competitorId
+                - competitorUsername
+              properties:
+                accountId:
+                  type: string
+                competitorId:
+                  type: string
+                competitorUsername:
+                  type: string
+                competitorName:
+                  type: string
+            example:
+              accountId: "ig_123456"
+              competitorId: "comp_789"
+              competitorUsername: "competitor_account"
+              competitorName: "Competitor Brand"
+      responses:
+        '201':
+          description: Competitor added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Competitor'
+
+  /api/profile/{accountId}:
+    get:
+      summary: Get Instagram profile
+      description: Get Instagram profile data via internal service
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Instagram account ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/InstagramProfile'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from REZ Auth Service
+
+  schemas:
+    GrowthData:
+      type: object
+      properties:
+        accountId:
+          type: string
+        currentFollowers:
+          type: integer
+        previousFollowers:
+          type: integer
+        change:
+          type: integer
+        changePercent:
+          type: number
+        period:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+
+    DailySnapshot:
+      type: object
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+        date:
+          type: string
+          format: date
+        followers:
+          type: integer
+        following:
+          type: integer
+        posts:
+          type: integer
+        change:
+          type: integer
+        sources:
+          type: object
+          properties:
+            hashtag:
+              type: integer
+            explore:
+              type: integer
+            profile:
+              type: integer
+            suggested:
+              type: integer
+            other:
+              type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    WeeklySummary:
+      type: object
+      properties:
+        weekStart:
+          type: string
+          format: date
+        weekEnd:
+          type: string
+          format: date
+        startFollowers:
+          type: integer
+        endFollowers:
+          type: integer
+        change:
+          type: integer
+        changePercent:
+          type: number
+        avgDailyGrowth:
+          type: number
+
+    MonthlySummary:
+      type: object
+      properties:
+        month:
+          type: string
+        startFollowers:
+          type: integer
+        endFollowers:
+          type: integer
+        change:
+          type: integer
+        changePercent:
+          type: number
+        avgDailyGrowth:
+          type: number
+        bestDay:
+          type: string
+          format: date
+
+    GrowthAnalytics:
+      type: object
+      properties:
+        accountId:
+          type: string
+        growthRate:
+          type: number
+        avgEngagementRate:
+          type: number
+        bestPostingTime:
+          type: string
+        contentTypePerformance:
+          type: object
+          additionalProperties:
+            type: number
+        engagementCorrelation:
+          type: number
+        predictedMonthlyGrowth:
+          type: integer
+
+    GrowthPredictions:
+      type: object
+      properties:
+        accountId:
+          type: string
+        nextWeek:
+          type: object
+          properties:
+            followers:
+              type: integer
+            confidence:
+              type: number
+        nextMonth:
+          type: object
+          properties:
+            followers:
+              type: integer
+            confidence:
+              type: number
+        milestones:
+          type: array
+          items:
+            type: object
+            properties:
+              target:
+                type: integer
+              predictedDate:
+                type: string
+                format: date
+
+    CompetitorComparison:
+      type: object
+      properties:
+        accountId:
+          type: string
+        competitors:
+          type: array
+          items:
+            type: object
+            properties:
+              competitorId:
+                type: string
+              username:
+                type: string
+              currentFollowers:
+                type: integer
+              growthRate:
+                type: number
+              comparison:
+                type: object
+                properties:
+                  aheadBy:
+                    type: integer
+                  growthDifference:
+                    type: number
+
+    MilestoneAlert:
+      type: object
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+        milestone:
+          type: integer
+        status:
+          type: string
+          enum: [active, triggered, deleted]
+        triggeredAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    FollowerSources:
+      type: object
+      properties:
+        accountId:
+          type: string
+        period:
+          type: string
+        sources:
+          type: object
+          properties:
+            hashtag:
+              type: integer
+            explore:
+              type: integer
+            profile:
+              type: integer
+            suggested:
+              type: integer
+            other:
+              type: integer
+        percentages:
+          type: object
+          additionalProperties:
+            type: number
+
+    EngagementCorrelation:
+      type: object
+      properties:
+        accountId:
+          type: string
+        correlation:
+          type: number
+        analysis:
+          type: object
+          properties:
+            likesCorrelation:
+              type: number
+            commentsCorrelation:
+              type: number
+            sharesCorrelation:
+              type: number
+        insight:
+          type: string
+
+    ChurnAnalysis:
+      type: object
+      properties:
+        accountId:
+          type: string
+        totalUnfollowers:
+          type: integer
+        churnRate:
+          type: number
+        recentUnfollowers:
+          type: array
+          items:
+            type: object
+            properties:
+              userId:
+                type: string
+              username:
+                type: string
+              daysAsFollower:
+                type: integer
+              unfollowedAt:
+                type: string
+                format: date-time
+
+    CreateSnapshotInput:
+      type: object
+      required:
+        - accountId
+        - followers
+      properties:
+        accountId:
+          type: string
+        followers:
+          type: integer
+          minimum: 0
+        following:
+          type: integer
+          minimum: 0
+        posts:
+          type: integer
+          minimum: 0
+        change:
+          type: integer
+        sources:
+          type: object
+          properties:
+            hashtag:
+              type: integer
+            explore:
+              type: integer
+            profile:
+              type: integer
+            suggested:
+              type: integer
+            other:
+              type: integer
+
+    Competitor:
+      type: object
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+        competitorId:
+          type: string
+        competitorUsername:
+          type: string
+        competitorName:
+          type: string
+        addedAt:
+          type: string
+          format: date-time
+
+    InstagramProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        fullName:
+          type: string
+        biography:
+          type: string
+        followersCount:
+          type: integer
+        followingCount:
+          type: integer
+        mediaCount:
+          type: integer
+        isBusiness:
+          type: boolean
+        profilePictureUrl:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "Validation Error"
+            details:
+              - message: "Invalid milestone value"
+
+    Unauthorized:
+      description: Unauthorized - missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "Unauthorized"
+
+    NotFound:
+      description: Not found - resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "Account not found"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: "Failed to get growth data"

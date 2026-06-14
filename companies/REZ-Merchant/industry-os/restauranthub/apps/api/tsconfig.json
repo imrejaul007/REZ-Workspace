@@ -1,0 +1,74 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "sourceMap": false,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowJs": false,
+    "checkJs": false,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+    "useDefineForClassFields": true,
+    "importsNotUsedAsValues": "remove",
+    "preserveValueImports": false,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    "paths": {
+      "@/*": ["src/*"],
+      "@common/*": ["../../packages/common/src/*"],
+      "@db/*": ["../../packages/db/src/*"],
+      "@restopapa/rez-client": ["../../packages/rez-client/src"],
+      "@restopapa/rez-client/*": ["../../packages/rez-client/src/*"],
+      "@cache/*": ["src/cache/*"],
+      "@monitoring/*": ["src/monitoring/*"]
+    },
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*spec.ts",
+    "**/*.test.ts",
+    "**/vue-composables.ts",
+    "**/react-hooks.ts",
+    "**/socket-client.ts",
+    "disabled_modules/**/*",
+    "src/disabled_modules/**/*",
+    "src/client/**/*"
+  ],
+  "ts-node": {
+    "files": true,
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "CommonJS",
+      "target": "ES2022"
+    }
+  },
+  "compileOnSave": false
+}

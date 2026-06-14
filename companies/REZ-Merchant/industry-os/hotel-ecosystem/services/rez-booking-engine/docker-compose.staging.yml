@@ -1,0 +1,84 @@
+# ================================================
+# REZ-Merchant Docker Compose Staging
+# Includes monitoring and logging
+# ================================================
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rez-booking-engine-staging
+    restart: unless-stopped
+    ports:
+      - "4043:4042"
+    environment:
+      NODE_ENV: staging
+      PORT: 4042
+      MONGODB_URI: mongodb://mongodb:27017/rez_booking_engine_staging
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      SENTRY_DSN: ${SENTRY_DSN}
+      PROMETHEUS_ENABLED: "true"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4042/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rez-network
+
+  mongodb:
+    image: mongo:6-alpine
+    container_name: rez-booking-engine-mongodb-staging
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: rez_booking_engine_staging
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb-staging-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - rez-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: rez-booking-engine-redis-staging
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-staging-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rez-network
+
+networks:
+  rez-network:
+    driver: bridge
+
+volumes:
+  mongodb-staging-data:
+    driver: local
+  redis-staging-data:
+    driver: local

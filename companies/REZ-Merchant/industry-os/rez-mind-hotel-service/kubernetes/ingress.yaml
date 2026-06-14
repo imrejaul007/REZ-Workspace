@@ -1,0 +1,38 @@
+# ================================================
+# REZ-Merchant Kubernetes Ingress Template
+# ================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rez-mind-hotel-service
+  namespace: rez-merchant
+  labels:
+    app: rez-mind-hotel-service
+    managed-by: rez-merchant
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Request-ID $request_id";
+spec:
+  tls:
+    - hosts:
+        - api.rezmerchant.com
+      secretName: rez-mind-hotel-service-tls
+  rules:
+    - host: api.rezmerchant.com
+      http:
+        paths:
+          - path: /api/mind-hotel
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-mind-hotel-service
+                port:
+                  number: 4017

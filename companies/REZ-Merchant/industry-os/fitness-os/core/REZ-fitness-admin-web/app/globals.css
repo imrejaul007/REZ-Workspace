@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --fitness-primary: #ef4444;
+  --fitness-secondary: #dc2626;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+@layer utilities {
+  .text-fitness {
+    @apply text-red-600;
+  }
+  .bg-fitness {
+    @apply bg-red-600;
+  }
+}

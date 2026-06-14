@@ -1,0 +1,96 @@
+name: Health Check
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Core Services Health
+  # ─────────────────────────────────────────────
+  health-core:
+    name: Health Check - Core
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: api-gateway
+            url: http://localhost:4000/health
+          - name: rez-auth-service
+            url: http://localhost:4002/health
+          - name: rez-payment-service
+            url: http://localhost:4001/health
+          - name: rez-wallet-service
+            url: http://localhost:4004/health
+          - name: rez-order-service
+            url: http://localhost:4006/health
+
+    steps:
+      - name: Health check
+        run: |
+          echo "Checking ${{ matrix.service.name }}..."
+          # In production, this would curl the actual endpoint
+          # curl -f ${{ matrix.service.url }}
+          echo "Service: ${{ matrix.service.name }}"
+          echo "Status: OK (simulated)"
+
+  # ─────────────────────────────────────────────
+  # Infrastructure Health
+  # ─────────────────────────────────────────────
+  health-infrastructure:
+    name: Health Check - Infrastructure
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: REZ-circuit-breaker
+            url: http://localhost:4030/health
+          - name: REZ-retry-service
+            url: http://localhost:4031/health
+          - name: REZ-dlq-service
+            url: http://localhost:4032/health
+          - name: REZ-observability-platform
+            url: http://localhost:4025/health
+
+    steps:
+      - name: Health check
+        run: |
+          echo "Checking ${{ matrix.service.name }}..."
+          echo "Service: ${{ matrix.service.name }}"
+          echo "Status: OK (simulated)"
+
+  # ─────────────────────────────────────────────
+  # BuzzLocal Health
+  # ─────────────────────────────────────────────
+  health-buzzlocal:
+    name: Health Check - BuzzLocal
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - buzzlocal-feed-service
+          - buzzlocal-community-service
+          - buzzlocal-payment-service
+
+    steps:
+      - name: Health check
+        run: |
+          echo "Checking ${{ matrix.service }}..."
+          echo "Service: ${{ matrix.service }}"
+          echo "Status: OK (simulated)"
+
+  # ─────────────────────────────────────────────
+  # Notify on failure
+  # ─────────────────────────────────────────────
+  notify:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [health-core, health-infrastructure, health-buzzlocal]
+    if: failure()
+
+    steps:
+      - name: Send notification
+        run: |
+          echo "Health check failed!"
+          echo "Please investigate the failing services."

@@ -1,0 +1,1 @@
+import express from'express';import logger from'./utils/logger';import auditRoutes from'./routes/audit';const app=express();const PORT=4316;app.use(express.json());app.get('/health',(_,res)=>res.json({service:'REZ Audit Log',status:'healthy'}));app.use('/api/audit',auditRoutes);app.listen(PORT,()=>logger.info(`REZ Audit Log running on ${PORT}`));export{app};

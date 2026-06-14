@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ad-bazaar-crisis-alert
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-crisis-alert
+    tier: social-automation
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "5103"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5103
+    targetPort: 5103
+    protocol: TCP
+    name: http
+  selector:
+    app: ad-bazaar-crisis-alert

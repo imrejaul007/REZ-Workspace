@@ -1,0 +1,44 @@
+# ================================================
+# REZ-Merchant Kubernetes ConfigMap
+# rez-restaurant-pos-service
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-restaurant-pos-service-config
+  namespace: rez-merchant
+  labels:
+    app: rez-restaurant-pos-service
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "3005"
+  LOG_LEVEL: "info"
+
+  # Service Discovery
+  SERVICE_NAME: "rez-restaurant-pos-service"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "*"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_restaurant_pos"
+
+  # Redis
+  REDIS_DATABASE: "0"
+
+  # GST Configuration
+  GST_BUSINESS_NAME: "ReZ Restaurant"
+  GST_INVOICE_PREFIX: "INV"
+  GST_INVOICE_SUFFIX: "REST"

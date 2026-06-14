@@ -1,0 +1,11 @@
+{
+  "name": "@rez/cms-service",
+  "version": "1.0.0",
+  "description": "REZ CMS - Notion competitor for content management",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  }
+}

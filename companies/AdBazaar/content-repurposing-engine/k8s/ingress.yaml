@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-content-repurposing
+  labels:
+    app: ad-bazaar-content-repurposing
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - content-repurposing.adbazaar.internal
+    secretName: ad-bazaar-content-repurposing-tls
+  rules:
+  - host: content-repurposing.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-content-repurposing
+            port:
+              number: 80

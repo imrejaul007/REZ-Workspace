@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REZ QR - Scan & Order</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div id="app">
+    <!-- Loading -->
+    <div id="loading" class="flex items-center justify-center min-h-screen">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-gray-600">Loading menu...</p>
+      </div>
+    </div>
+
+    <!-- Menu Page -->
+    <div id="menu-page" class="hidden pb-24">
+      <!-- Header -->
+      <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-lg mx-auto px-4 py-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 id="merchant-name" class="text-xl font-bold text-gray-900">Loading...</h1>
+              <p class="text-sm text-gray-500" id="merchant-type">Restaurant</p>
+            </div>
+            <button onclick="showCart()" class="relative p-2 bg-gray-100 rounded-full">
+              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+              <span id="cart-count" class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Search -->
+      <div class="bg-white px-4 py-2 border-b">
+        <div class="relative">
+          <input type="text" id="search-input" placeholder="Search menu..." oninput="filterItems()"
+            class="w-full px-4 py-2 pl-10 bg-gray-100 rounded-lg text-sm">
+          <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="bg-white px-4 py-2 border-b flex gap-2 overflow-x-auto">
+        <button onclick="filterByVeg(null)" class="filter-btn px-3 py-1 rounded-full text-sm bg-blue-500 text-white">All</button>
+        <button onclick="filterByVeg(true)" class="filter-btn px-3 py-1 rounded-full text-sm bg-gray-100">🥬 Veg</button>
+        <button onclick="filterByVeg(false)" class="filter-btn px-3 py-1 rounded-full text-sm bg-gray-100">🍖 Non-Veg</button>
+      </div>
+
+      <!-- Categories -->
+      <div id="categories" class="bg-white border-b px-4 py-2 flex gap-2 overflow-x-auto"></div>
+
+      <!-- Menu Items -->
+      <div class="max-w-lg mx-auto px-4 py-4">
+        <div id="menu-items" class="space-y-4"></div>
+      </div>
+
+      <!-- Cart Footer -->
+      <div id="cart-footer" class="fixed bottom-0 left-0 right-0 bg-blue-500 text-white p-4 hidden shadow-lg">
+        <button onclick="showCart()" class="w-full text-center font-bold text-lg flex items-center justify-center gap-2">
+          <span>View Cart</span>
+          <span id="cart-total-count">(0)</span>
+          <span>-</span>
+          <span>₹<span id="cart-total-amount">0</span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="hidden fixed inset-0 z-50">
+      <div class="absolute inset-0 bg-black/50" onclick="hideCart()"></div>
+      <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] overflow-hidden flex flex-col">
+        <div class="p-4 border-b flex items-center justify-between">
+          <h2 class="text-lg font-bold">Your Cart</h2>
+          <button onclick="hideCart()" class="p-2 hover:bg-gray-100 rounded-full">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div id="cart-items" class="flex-1 overflow-y-auto p-4"></div>
+
+        <div class="p-4 border-t bg-gray-50">
+          <div class="flex justify-between mb-2 text-sm">
+            <span class="text-gray-600">Subtotal</span>
+            <span id="subtotal">₹0</span>
+          </div>
+          <div class="flex justify-between mb-2 text-sm">
+            <span class="text-gray-600">Tax (5%)</span>
+            <span id="tax">₹0</span>
+          </div>
+          <div class="flex justify-between mb-2 text-sm">
+            <span class="text-gray-600">Delivery</span>
+            <span id="delivery">₹50</span>
+          </div>
+          <div class="flex justify-between font-bold text-lg mb-4 pt-2 border-t">
+            <span>Total</span>
+            <span id="total">₹0</span>
+          </div>
+          <button onclick="placeOrder()" class="w-full bg-blue-500 text-white py-3 rounded-xl font-bold text-lg">
+            Place Order
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Page -->
+    <div id="success-page" class="hidden min-h-screen flex items-center justify-center p-4">
+      <div class="text-center max-w-sm">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">Order Placed!</h1>
+        <p class="text-gray-600 mb-4">Your order has been sent to the kitchen.</p>
+        <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+          <p class="text-sm text-gray-500 mb-1">Order ID</p>
+          <p id="order-id" class="font-mono font-bold text-lg">#ORD123</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+          <p class="text-sm text-gray-500 mb-1">Amount to Pay</p>
+          <p id="order-total" class="font-bold text-2xl text-green-600">₹0</p>
+        </div>
+        <p class="text-sm text-gray-500 mb-4">Please pay at the counter</p>
+        <button onclick="location.reload()" class="w-full bg-blue-500 text-white py-3 rounded-xl font-bold">
+          Order More
+        </button>
+      </div>
+    </div>
+
+    <!-- Error Page -->
+    <div id="error-page" class="hidden min-h-screen flex items-center justify-center p-4">
+      <div class="text-center">
+        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">Error</h1>
+        <p id="error-message" class="text-gray-600 mb-6">Something went wrong.</p>
+        <button onclick="location.reload()" class="bg-blue-500 text-white px-6 py-3 rounded-xl font-bold">
+          Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:4300/api';
+    let merchant = null, menu = { categories: [], items: [] }, cart = [], selectedCategory = null, vegFilter = null;
+
+    function getMerchantSlug() {
+      const m = window.location.pathname.match(/\/menu\/([^\/]+)/);
+      return m ? m[1] : 'demo';
+    }
+
+    async function init() {
+      try {
+        const slug = getMerchantSlug();
+        const mr = await fetch(API_URL + '/resolve/' + slug);
+        if (!mr.ok) throw new Error('Restaurant not found');
+        const rd = await mr.json();
+        if (!rd.success) throw new Error(rd.error);
+        merchant = rd.data.merchant;
+        document.getElementById('merchant-name').textContent = merchant.name;
+        document.getElementById('merchant-type').textContent = merchant.type;
+
+        const r = await fetch(API_URL + '/public/menu/' + merchant._id);
+        if (r.ok) {
+          const md = (await r.json()).data;
+          if (md) { menu = md; renderCategories(); renderMenuItems(); }
+        }
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('menu-page').classList.remove('hidden');
+      } catch (e) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('error-page').classList.remove('hidden');
+        document.getElementById('error-message').textContent = e.message;
+      }
+    }
+
+    function renderCategories() {
+      const c = document.getElementById('categories');
+      c.textContent = '';
+      const allBtn = document.createElement('button');
+      allBtn.className = 'px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap ' + (!selectedCategory ? 'bg-blue-500 text-white' : 'bg-gray-100');
+      allBtn.textContent = 'All';
+      allBtn.onclick = () => selectCategory(null);
+      c.appendChild(allBtn);
+      menu.categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap ' + (selectedCategory === cat._id ? 'bg-blue-500 text-white' : 'bg-gray-100');
+        btn.textContent = cat.name || '';
+        btn.onclick = () => selectCategory(cat._id);
+        c.appendChild(btn);
+      });
+    }
+
+    function selectCategory(id) { selectedCategory = id; renderCategories(); renderMenuItems(); }
+
+    function filterByVeg(isVeg) { vegFilter = isVeg; renderMenuItems(); }
+
+    function filterItems() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      const items = getFilteredItems();
+      const filtered = q ? items.filter(i => i.name.toLowerCase().includes(q)) : items;
+      const container = document.getElementById('menu-items');
+      container.textContent = '';
+      if (filtered.length) {
+        filtered.forEach(item => container.appendChild(createMenuItemElement(item)));
+      } else {
+        const p = document.createElement('p');
+        p.className = 'text-center text-gray-500 py-8';
+        p.textContent = 'No items found';
+        container.appendChild(p);
+      }
+    }
+
+    function getFilteredItems() {
+      let items = menu.items;
+      if (selectedCategory) items = items.filter(i => i.categoryId === selectedCategory);
+      if (vegFilter !== null) items = items.filter(i => i.isVeg === vegFilter);
+      return items;
+    }
+
+    function renderMenuItems() {
+      const container = document.getElementById('menu-items');
+      container.textContent = '';
+      const items = getFilteredItems();
+      if (items.length) {
+        items.forEach(item => container.appendChild(createMenuItemElement(item)));
+      } else {
+        const p = document.createElement('p');
+        p.className = 'text-center text-gray-500 py-8';
+        p.textContent = 'No items available';
+        container.appendChild(p);
+      }
+    }
+
+    function createMenuItemElement(item) {
+      const div = document.createElement('div');
+      div.className = 'bg-white rounded-xl p-4 shadow-sm flex gap-4';
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden';
+      if (item.image) {
+        const img = document.createElement('img');
+        img.src = item.image || '';
+        img.className = 'w-full h-full object-cover';
+        img.onerror = () => img.style.display = 'none';
+        imgDiv.appendChild(img);
+      } else {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'w-8 h-8 text-gray-300');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>';
+        imgDiv.appendChild(svg);
+      }
+      div.appendChild(imgDiv);
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'flex-1 min-w-0';
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'flex justify-between';
+      const nameDiv = document.createElement('div');
+      const h3 = document.createElement('h3');
+      h3.className = 'font-bold';
+      h3.textContent = item.name || '';
+      nameDiv.appendChild(h3);
+      if (item.isVeg !== undefined) {
+        const vegSpan = document.createElement('span');
+        vegSpan.className = 'text-xs px-1 border rounded ' + (item.isVeg ? 'text-green-600 border-green-600' : 'text-red-600 border-red-600');
+        vegSpan.textContent = item.isVeg ? 'Veg' : 'Non-Veg';
+        nameDiv.appendChild(vegSpan);
+      }
+      rowDiv.appendChild(nameDiv);
+      const priceSpan = document.createElement('span');
+      priceSpan.className = 'font-bold text-blue-600';
+      priceSpan.textContent = '₹' + (item.price || 0);
+      rowDiv.appendChild(priceSpan);
+      contentDiv.appendChild(rowDiv);
+      if (item.description) {
+        const descP = document.createElement('p');
+        descP.className = 'text-sm text-gray-500 mt-1 line-clamp-2';
+        descP.textContent = item.description;
+        contentDiv.appendChild(descP);
+      }
+      if (item.isBestseller) {
+        const badge = document.createElement('span');
+        badge.className = 'inline-block mt-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded';
+        badge.textContent = '★ Bestseller';
+        contentDiv.appendChild(badge);
+      }
+      const addBtn = document.createElement('button');
+      addBtn.className = 'mt-2 bg-blue-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium';
+      addBtn.textContent = 'Add';
+      addBtn.onclick = () => addToCart(item._id);
+      contentDiv.appendChild(addBtn);
+      div.appendChild(contentDiv);
+      return div;
+    }
+
+    function addToCart(id) {
+      const item = menu.items.find(i => i._id === id);
+      if (!item) return;
+      const ex = cart.find(c => c.itemId === id);
+      if (ex) ex.quantity++; else cart.push({ itemId: id, name: item.name, price: item.price, quantity: 1 });
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const count = cart.reduce((s, i) => s + i.quantity, 0), total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+      const el = document.getElementById('cart-count');
+      if (count > 0) { el.textContent = count; el.classList.remove('hidden'); document.getElementById('cart-footer').classList.remove('hidden'); }
+      else { el.classList.add('hidden'); document.getElementById('cart-footer').classList.add('hidden'); }
+      document.getElementById('cart-total-count').textContent = '(' + count + ')';
+      document.getElementById('cart-total-amount').textContent = total.toFixed(0);
+    }
+
+    function showCart() {
+      const items = document.getElementById('cart-items');
+      items.textContent = '';
+      if (cart.length) {
+        cart.forEach(i => {
+          const row = document.createElement('div');
+          row.className = 'flex justify-between items-center py-3 border-b';
+          const leftDiv = document.createElement('div');
+          const nameP = document.createElement('p');
+          nameP.className = 'font-medium';
+          nameP.textContent = i.name || '';
+          leftDiv.appendChild(nameP);
+          const priceP = document.createElement('p');
+          priceP.className = 'text-sm text-gray-500';
+          priceP.textContent = '₹' + i.price;
+          leftDiv.appendChild(priceP);
+          row.appendChild(leftDiv);
+          const qtyDiv = document.createElement('div');
+          qtyDiv.className = 'flex items-center gap-2';
+          const minusBtn = document.createElement('button');
+          minusBtn.className = 'w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200';
+          minusBtn.textContent = '-';
+          minusBtn.onclick = () => updateQty(i.itemId, -1);
+          qtyDiv.appendChild(minusBtn);
+          const qtySpan = document.createElement('span');
+          qtySpan.className = 'w-6 text-center';
+          qtySpan.textContent = String(i.quantity);
+          qtyDiv.appendChild(qtySpan);
+          const plusBtn = document.createElement('button');
+          plusBtn.className = 'w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200';
+          plusBtn.textContent = '+';
+          plusBtn.onclick = () => updateQty(i.itemId, 1);
+          qtyDiv.appendChild(plusBtn);
+          row.appendChild(qtyDiv);
+          items.appendChild(row);
+        });
+      } else {
+        const p = document.createElement('p');
+        p.className = 'text-center text-gray-500 py-8';
+        p.textContent = 'Your cart is empty';
+        items.appendChild(p);
+      }
+      const sub = cart.reduce((s, i) => s + (i.price * i.quantity), 0), tax = Math.round(sub * 0.05), del = 50, total = sub + tax + del;
+      document.getElementById('subtotal').textContent = '₹' + sub.toFixed(0);
+      document.getElementById('tax').textContent = '₹' + tax.toFixed(0);
+      document.getElementById('delivery').textContent = '₹' + del;
+      document.getElementById('total').textContent = '₹' + total.toFixed(0);
+      document.getElementById('cart-modal').classList.remove('hidden');
+    }
+
+    function hideCart() { document.getElementById('cart-modal').classList.add('hidden'); }
+    function updateQty(id, delta) {
+      const i = cart.find(c => c.itemId === id);
+      if (!i) return;
+      i.quantity += delta;
+      if (i.quantity <= 0) cart = cart.filter(c => c.itemId !== id);
+      updateCartUI(); showCart();
+    }
+
+    async function placeOrder() {
+      if (!cart.length || !merchant) return;
+      const phone = prompt('Enter your phone number:');
+      if (!phone) return;
+      const type = prompt('Order type? (dine_in/takeaway/delivery)', 'dine_in');
+      try {
+        const res = await fetch(API_URL + '/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            merchantId: merchant._id,
+            customerPhone: phone,
+            type: type || 'dine_in',
+            items: cart.map(i => ({ itemId: i.itemId, name: i.name, quantity: i.quantity, price: i.price }))
+          })
+        });
+        const r = await res.json();
+        if (r.success) {
+          hideCart(); cart = []; updateCartUI();
+          document.getElementById('menu-page').classList.add('hidden');
+          document.getElementById('success-page').classList.remove('hidden');
+          document.getElementById('order-id').textContent = '#' + r.data._id.slice(-6).toUpperCase();
+          document.getElementById('order-total').textContent = '₹' + r.data.total.toFixed(0);
+        } else alert(r.error || 'Failed');
+      } catch (e) { alert('Failed. Try again.'); }
+    }
+
+    init();
+  </script>
+</body>
+</html>

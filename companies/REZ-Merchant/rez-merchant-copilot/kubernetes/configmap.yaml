@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for rez-merchant-copilot
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-merchant-copilot-config
+  namespace: rez-merchant
+  labels:
+    app: rez-merchant-copilot
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "4022"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-merchant-copilot"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez-merchant-copilot"
+  REDIS_DATABASE: "0"

@@ -1,0 +1,81 @@
+name: QR Cloud CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'rez-qr-cloud-service/**'
+      - 'rez-qr-cloud-app/**'
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ============================================
+  # Build and Test QR Cloud Service
+  # ============================================
+  build-service:
+    name: Build QR Cloud Service
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: rez-qr-cloud-service/package-lock.json
+
+      - name: Install dependencies
+        working-directory: rez-qr-cloud-service
+        run: npm ci
+
+      - name: Run linter
+        working-directory: rez-qr-cloud-service
+        run: npm run lint || true
+
+      - name: Build TypeScript
+        working-directory: rez-qr-cloud-service
+        run: npm run build
+
+  # ============================================
+  # Build Customer App
+  # ============================================
+  build-app:
+    name: Build Customer App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: rez-qr-cloud-app
+
+  # ============================================
+  # Deploy to Render (Production)
+  # ============================================
+  deploy-service:
+    name: Deploy QR Cloud Service
+    runs-on: ubuntu-latest
+    needs: build-service
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Render
+        uses: render/deploy-action@v1
+        with:
+          render-token: ${{ secrets.RENDER_API_KEY }}
+          service-id: ${{ secrets.RENDER_QR_CLOUD_SERVICE_ID }}
+          wait-for-success: true

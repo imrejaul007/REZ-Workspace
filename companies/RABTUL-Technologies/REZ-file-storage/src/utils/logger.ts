@@ -1,0 +1,1 @@
+import winston from 'winston';const{combine,timestamp,printf,colorize}=winston.format;const log=printf(({level,message})=>`${timestamp()} [${level}]: ${message}`);export default winston.createLogger({level:'info',format:combine(timestamp(),colorize(),log),transports:[new winston.transports.Console]});

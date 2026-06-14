@@ -1,0 +1,58 @@
+# ================================================
+# REZ-Merchant Kubernetes Ingress
+# rez-mind-restaurant-service
+# ================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rez-mind-restaurant-service
+  namespace: rez-merchant
+  labels:
+    app: rez-mind-restaurant-service
+    managed-by: rez-merchant
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+    - hosts:
+        - api.rezmerchant.com
+      secretName: rez-mind-restaurant-service-tls
+  rules:
+    - host: api.rezmerchant.com
+      http:
+        paths:
+          - path: /api/v1/pricing
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-mind-restaurant-service
+                port:
+                  number: 4007
+          - path: /api/v1/insights
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-mind-restaurant-service
+                port:
+                  number: 4007
+          - path: /api/internal/pricing
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-mind-restaurant-service
+                port:
+                  number: 4007
+          - path: /api/internal/insights
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-mind-restaurant-service
+                port:
+                  number: 4007

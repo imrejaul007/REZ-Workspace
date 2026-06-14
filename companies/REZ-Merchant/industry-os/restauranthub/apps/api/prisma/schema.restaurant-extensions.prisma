@@ -1,0 +1,330 @@
+// ==========================================
+// RESTAURANT VERTICAL PRISMA SCHEMA EXTENSIONS
+// ==========================================
+// This file contains the Prisma schema additions needed for
+// the Restaurant Vertical integrations.
+//
+// To apply:
+// 1. Copy these models into the main schema.prisma file, OR
+// 2. Use prisma db push with this file
+//
+// Last Updated: June 1, 2026
+
+// ==========================================
+// CUSTOMER PROFILE MODEL (CRM)
+// ==========================================
+
+model CustomerProfile {
+  id          String   @id @default(cuid())
+  userId     String
+  restaurantId String
+
+  // Segment classification
+  segment     String   @default("new") // 'new' | 'regular' | 'vip' | 'at-risk' | 'churned'
+
+  // Preferences stored as JSON
+  preferences Json     @default("{}")
+  // {
+  //   favoriteItems: [{ itemId, orderCount }],
+  //   dietaryRestrictions: string[],
+  //   preferredPaymentMethod: string,
+  //   preferredOrderType: 'delivery' | 'pickup' | 'dine-in',
+  //   avgOrderValue: number,
+  //   orderFrequency: 'daily' | 'weekly' | 'monthly' | 'occasional'
+  // }
+
+  // Behavior metrics
+  behavior    Json     @default("{}")
+  // {
+  //   lastOrderDate: Date | null,
+  //   totalOrders: number,
+  //   lifetimeValue: number,
+  //   churnRisk: 'low' | 'medium' | 'high',
+  //   engagementScore: number (0-100)
+  // }
+
+  // Tags for segmentation
+  tags        String[] @default([])
+
+  // Interaction tracking
+  lastInteraction DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, restaurantId])
+  @@index([segment])
+  @@index([restaurantId])
+  @@index([lastInteraction])
+}
+
+// ==========================================
+// RECIPE MODELS (Recipe → Inventory)
+// ==========================================
+
+model Recipe {
+  id          String   @id @default(cuid())
+  menuItemId  String   @unique
+
+  // Timing
+  prepTime    Int      @default(0)  // minutes
+  cookTime    Int      @default(0) // minutes
+
+  // Kitchen station
+  station     String   @default("main") // 'grill' | 'fry' | 'saute' | 'salad' | 'dessert' | 'beverage' | 'main'
+
+  // Versioning
+  isActive    Boolean  @default(true)
+  version     Int      @default(1)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  ingredients RecipeIngredient[]
+
+  @@index([menuItemId])
+  @@index([isActive])
+}
+
+model RecipeIngredient {
+  id          String   @id @default(cuid())
+  recipeId    String
+  ingredientId String
+
+  // Quantity for one serving
+  quantity    Float
+  unit        String   // 'g' | 'kg' | 'ml' | 'l' | 'pieces' | 'cups' | 'tbsp' | 'tsp'
+
+  // Wastage percentage during prep/cooking
+  wastagePercentage Float @default(0)
+
+  createdAt   DateTime @default(now())
+
+  // Relations
+  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient  Product  @relation(fields: [ingredientId], references: [id])
+
+  @@unique([recipeId, ingredientId])
+  @@index([recipeId])
+  @@index([ingredientId])
+}
+
+// ==========================================
+// REPUTATION MODELS (Reviews & Ratings)
+// ==========================================
+
+// Note: Review model may already exist - verify before adding
+// This extends the existing Review model with restaurant-specific fields
+
+model Review {
+  // Existing fields from main schema (verify these exist):
+  // id, orderId, customerId, rating, comment, photos, createdAt, updatedAt
+
+  // Additional restaurant-specific fields
+  restaurantId   String?
+  foodRating     Int?    // 1-5
+  serviceRating  Int?    // 1-5
+  ambienceRating Int?    // 1-5
+  deliveryRating Int?    // 1-5
+
+  // Sentiment analysis
+  sentiment      String? // 'positive' | 'neutral' | 'negative'
+
+  // Owner response
+  response       String?
+  respondedAt    DateTime?
+
+  // Metadata
+  source         String? // 'app' | 'zomato' | 'swiggy' | 'google'
+  externalId    String? // ID from external review platform
+
+  // Indexes (if not already present)
+  @@index([restaurantId])
+  @@index([sentiment])
+  @@index([createdAt])
+}
+
+// ==========================================
+// INVENTORY ITEM MODEL (Enhanced)
+// ==========================================
+
+model InventoryItem {
+  id           String   @id @default(cuid())
+  restaurantId String
+  productId    String   @unique
+
+  // Stock levels
+  currentStock Float    @default(0)
+  minStock    Float?   // Reorder point
+  maxStock    Float?   // Maximum capacity
+
+  // Unit
+  unit        String   @default("pieces")
+
+  // Cost tracking
+  lastPurchasePrice Float?
+  avgCost          Float?
+
+  // Status
+  status       String   @default("active") // 'active' | 'low_stock' | 'out_of_stock'
+
+  // Alerts
+  alertEnabled Boolean  @default(true)
+  alertThreshold Float? // Percentage at which to alert
+
+  // Location
+  location     String?  // Storage location in kitchen
+
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastRestockedAt DateTime?
+
+  @@index([restaurantId])
+  @@index([status])
+  @@index([currentStock])
+}
+
+model StockMovement {
+  id           String   @id @default(cuid())
+  inventoryItemId String
+
+  // Movement details
+  movementType String   // 'purchase' | 'usage' | 'adjustment' | 'wastage' | 'return'
+  quantity     Float
+  previousStock Float
+  newStock     Float
+
+  // Reference
+  reason       String?  // Description of why stock changed
+  orderId      String?  // Associated order if applicable
+
+  // Cost
+  unitCost     Float?
+  totalCost    Float?
+
+  createdAt    DateTime @default(now())
+
+  // Relations
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+
+  @@index([inventoryItemId])
+  @@index([createdAt])
+  @@index([movementType])
+}
+
+// ==========================================
+// FINANCIAL PROFILE (Merchant Loans)
+// ==========================================
+// This is a denormalized snapshot for loan applications
+// The actual calculation is done in MerchantLoansService
+
+model FinancialSnapshot {
+  id           String   @id @default(cuid())
+  restaurantId String
+
+  // Period of this snapshot
+  periodStart  DateTime
+  periodEnd    DateTime
+
+  // Calculated metrics
+  totalRevenue Float
+  avgDailyRevenue Float
+  transactionCount Int
+  avgOrderValue   Float
+
+  // Risk indicators
+  revenueVolatility Float   // Coefficient of variation (0-100)
+  weekendVsWeekday Float   // Ratio
+  growthRate        Float   // Month-over-month growth %
+
+  // Calculated credit score
+  creditScore    Int      // 300-850
+  creditTier     String   // 'poor' | 'fair' | 'good' | 'very-good' | 'excellent'
+
+  // Snapshot metadata
+  createdAt     DateTime @default(now())
+
+  @@unique([restaurantId, periodStart, periodEnd])
+  @@index([restaurantId])
+  @@index([createdAt])
+}
+
+// ==========================================
+// RETRY QUEUE (Database-backed retry)
+// ==========================================
+
+enum RetryJobType {
+  KDS_NOTIFY
+  CASHBACK_CREDIT
+  LOW_STOCK_ALERT
+  WEBHOOK_DELIVERY
+  NOTIFICATION
+}
+
+enum RetryJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+model RetryJob {
+  id          String   @id @default(cuid())
+
+  // Job type
+  type       RetryJobType
+
+  // Status
+  status     RetryJobStatus @default(PENDING)
+
+  // Payload (JSON)
+  payload    Json
+
+  // Retry configuration
+  attempts   Int      @default(0)
+  maxAttempts Int    @default(5)
+
+  // Timing
+  lastAttemptAt DateTime?
+  nextRetryAt   DateTime @default(now())
+  expiresAt     DateTime
+
+  // Error tracking
+  lastError   String?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, nextRetryAt])
+  @@index([type])
+  @@index([expiresAt])
+}
+
+// ==========================================
+// NOTIFICATION TEMPLATES (WhatsApp)
+// ==========================================
+
+model NotificationTemplate {
+  id           String   @id @default(cuid())
+  restaurantId String?
+  templateType String  // 'order_confirmation' | 'status_update' | 'reservation' | etc.
+
+  // Template content
+  template     String   // WhatsApp template or message format
+  variables    String[] // List of required variables
+
+  // Status
+  isActive    Boolean  @default(true)
+  isApproved  Boolean  @default(false) // WhatsApp Business approval
+
+  // Meta
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([templateType])
+  @@index([restaurantId])
+}

@@ -1,0 +1,219 @@
+version: '3.8'
+
+# ===========================================
+# REZ Merchant Industry OS - Full Stack
+# ===========================================
+# Run the entire merchant ecosystem locally
+
+services:
+  # ===========================================
+  # CORE SERVICES (RABTUL Platform)
+  # ===========================================
+  rez-auth:
+    image: rezhq/rez-auth:latest
+    ports:
+      - "4002:4002"
+    environment:
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_auth
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-in-production}
+      - NODE_ENV=production
+    depends_on:
+      - rez-mongo
+    restart: unless-stopped
+
+  rez-payment:
+    image: rezhq/rez-payment:latest
+    ports:
+      - "4001:4001"
+    environment:
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_payment
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      - rez-mongo
+      - rez-auth
+    restart: unless-stopped
+
+  rez-order:
+    image: rezhq/rez-order:latest
+    ports:
+      - "4006:4006"
+    environment:
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_order
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      - rez-mongo
+      - rez-auth
+    restart: unless-stopped
+
+  rez-catalog:
+    image: rezhq/rez-catalog:latest
+    ports:
+      - "4007:4007"
+    environment:
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_catalog
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      - rez-mongo
+      - rez-auth
+    restart: unless-stopped
+
+  rez-notifications:
+    image: rezhq/rez-notifications:latest
+    ports:
+      - "4011:4011"
+    environment:
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_notifications
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      - rez-mongo
+    restart: unless-stopped
+
+  # ===========================================
+  # KDS SERVICE
+  # ===========================================
+  rez-kds:
+    build:
+      context: ../../../RABTUL-Technologies/REZ-kds-service
+      dockerfile: Dockerfile
+    ports:
+      - "4014:4014"
+    environment:
+      - NODE_ENV=production
+      - PORT=4014
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_kds
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      - rez-mongo
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4014/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # RESTAURANT POS SERVICE
+  # ===========================================
+  rez-restaurant-pos:
+    build:
+      context: ./rez-restaurant-pos-service
+      dockerfile: Dockerfile
+    ports:
+      - "4010:4010"
+    environment:
+      - NODE_ENV=production
+      - PORT=4010
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_restaurant_pos
+      - REDIS_URL=redis://rez-redis:6379
+      - KDS_SERVICE_URL=http://rez-kds:4014
+      - AUTH_SERVICE_URL=http://rez-auth:4002
+      - PAYMENT_SERVICE_URL=http://rez-payment:4001
+      - ORDER_SERVICE_URL=http://rez-order:4006
+      - CATALOG_SERVICE_URL=http://rez-catalog:4007
+      - NOTIFICATION_SERVICE_URL=http://rez-notifications:4011
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      - rez-mongo
+      - rez-redis
+      - rez-kds
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # MERCHANT INTEGRATIONS
+  # ===========================================
+  rez-merchant-integrations:
+    build:
+      context: ../../rez-merchant-integrations
+      dockerfile: Dockerfile
+    ports:
+      - "4020:4020"
+    environment:
+      - NODE_ENV=production
+      - PORT=4020
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_merchant_integrations
+      - REDIS_URL=redis://rez-redis:6379
+      - AUTH_SERVICE_URL=http://rez-auth:4002
+      - ORDER_SERVICE_URL=http://rez-order:4006
+      - PAYMENT_SERVICE_URL=http://rez-payment:4001
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - SWIGGY_API_KEY=${SWIGGY_API_KEY}
+      - SWIGGY_STORE_ID=${SWIGGY_STORE_ID}
+      - ZOMATO_API_KEY=${ZOMATO_API_KEY}
+      - ZOMATO_RESTAURANT_ID=${ZOMATO_RESTAURANT_ID}
+    depends_on:
+      - rez-mongo
+      - rez-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4020/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # RESTAURANT SERVICE
+  # ===========================================
+  rez-restaurant:
+    build:
+      context: ./rez-restaurant-service
+      dockerfile: Dockerfile
+    ports:
+      - "4012:4012"
+    environment:
+      - NODE_ENV=production
+      - PORT=4012
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_restaurant
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      - rez-mongo
+    restart: unless-stopped
+
+  # ===========================================
+  # SALON SERVICE
+  # ===========================================
+  rez-salon:
+    build:
+      context: ./rez-salon-service
+      dockerfile: Dockerfile
+    ports:
+      - "4013:4013"
+    environment:
+      - NODE_ENV=production
+      - PORT=4013
+      - MONGODB_URI=mongodb://rez-mongo:27017/rez_salon
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+    depends_on:
+      - rez-mongo
+    restart: unless-stopped
+
+  # ===========================================
+  # INFRASTRUCTURE
+  # ===========================================
+  rez-mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  rez-redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  redis_data:

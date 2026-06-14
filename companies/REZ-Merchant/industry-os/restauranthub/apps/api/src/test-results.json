@@ -1,0 +1,137 @@
+{
+  "timestamp": "2025-09-21T04:55:43.942Z",
+  "tests": [
+    {
+      "name": "admin authentication",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:44.951Z",
+      "data": null,
+      "error": "Authentication failed for admin: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "restaurant authentication",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:45.959Z",
+      "data": null,
+      "error": "Authentication failed for restaurant: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "employee authentication",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:46.960Z",
+      "data": null,
+      "error": "Authentication failed for employee: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "vendor authentication",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:47.963Z",
+      "data": null,
+      "error": "Authentication failed for vendor: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "User profile operations",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:48.965Z",
+      "data": null,
+      "error": "Authentication failed for admin: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "Restaurant operations",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:49.970Z",
+      "data": null,
+      "error": "Authentication failed for restaurant: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "Job operations",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:50.974Z",
+      "data": null,
+      "error": "Authentication failed for restaurant: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "Vendor operations",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:51.975Z",
+      "data": null,
+      "error": "Authentication failed for vendor: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "Admin operations",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:52.981Z",
+      "data": null,
+      "error": "Authentication failed for admin: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "Data consistency check",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:53.987Z",
+      "data": null,
+      "error": "Authentication failed for admin: connect ECONNREFUSED ::1:3016"
+    },
+    {
+      "name": "Concurrent authentication",
+      "status": "FAIL",
+      "timestamp": "2025-09-21T04:55:54.293Z",
+      "data": {
+        "totalRequests": 3,
+        "successful": 0,
+        "failed": 3
+      },
+      "error": null
+    }
+  ],
+  "summary": {
+    "total": 11,
+    "passed": 0,
+    "failed": 11,
+    "errors": [
+      {
+        "test": "admin authentication",
+        "error": "Authentication failed for admin: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "restaurant authentication",
+        "error": "Authentication failed for restaurant: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "employee authentication",
+        "error": "Authentication failed for employee: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "vendor authentication",
+        "error": "Authentication failed for vendor: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "User profile operations",
+        "error": "Authentication failed for admin: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "Restaurant operations",
+        "error": "Authentication failed for restaurant: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "Job operations",
+        "error": "Authentication failed for restaurant: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "Vendor operations",
+        "error": "Authentication failed for vendor: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "Admin operations",
+        "error": "Authentication failed for admin: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "Data consistency check",
+        "error": "Authentication failed for admin: connect ECONNREFUSED ::1:3016"
+      },
+      {
+        "test": "Concurrent authentication",
+        "error": "Unknown error"
+      }
+    ]
+  }
+}

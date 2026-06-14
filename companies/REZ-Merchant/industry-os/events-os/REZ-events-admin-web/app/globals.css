@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --events-primary: #d946ef;
+  --events-secondary: #c026d3;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+@layer utilities {
+  .text-events {
+    @apply text-fuchsia-600;
+  }
+  .bg-events {
+    @apply bg-fuchsia-600;
+  }
+}

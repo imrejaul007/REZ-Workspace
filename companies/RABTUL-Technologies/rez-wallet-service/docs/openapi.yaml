@@ -1,0 +1,1039 @@
+openapi: 3.0.0
+info:
+  title: ReZ Wallet Service API
+  version: 1.0.0
+  description: |
+    ReZ Wallet Service manages consumer and merchant wallets, coin transactions,
+    credit scores, payouts, referrals, and corporate benefits.
+  contact:
+    name: ReZ API Support
+    email: api-support@rez.money
+  license:
+    name: Proprietary
+    url: https://rez.money/terms
+
+servers:
+  - url: https://api.rez.money/wallet
+    description: Production
+  - url: https://staging-api.rez.money/wallet
+    description: Staging
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Wallet
+    description: Consumer wallet operations
+  - name: Merchant
+    description: Merchant wallet operations
+  - name: Credit
+    description: Consumer credit and BNPL
+  - name: Payouts
+    description: Merchant payout management
+  - name: Referral
+    description: Referral program management
+  - name: CorpPerks
+    description: Corporate benefits
+  - name: Internal
+    description: Internal service endpoints
+
+paths:
+  # Consumer Wallet Routes
+  /api/wallet/balance:
+    get:
+      summary: Get Wallet Balance
+      description: Returns the user's wallet balance across all coin types.
+      tags: [Wallet]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Balance retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      balance:
+                        type: number
+                      coinTypes:
+                        type: object
+        '401':
+          description: Unauthorized
+
+  /api/wallet/transactions:
+    get:
+      summary: Get Wallet Transactions
+      description: Returns paginated wallet transaction history.
+      tags: [Wallet]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: coinType
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transactions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  transactions:
+                    type: array
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      hasMore:
+                        type: boolean
+
+  /api/wallet/summary:
+    get:
+      summary: Get Transaction Summary
+      description: Returns summary of all wallet transactions.
+      tags: [Wallet]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Summary retrieved
+
+  /api/wallet/credit:
+    post:
+      summary: Credit Wallet (Admin Only)
+      description: |
+        Credits coins to a user's wallet. Admin/operator role required.
+        Rate limited: 20 credits per minute per admin.
+      tags: [Wallet]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - coinType
+                - source
+                - description
+              properties:
+                amount:
+                  type: number
+                  maximum: 1000000
+                coinType:
+                  type: string
+                  enum: [rez, prive, branded, promo, cashback, referral]
+                source:
+                  type: string
+                description:
+                  type: string
+                sourceId:
+                  type: string
+                merchantId:
+                  type: string
+                idempotencyKey:
+                  type: string
+                targetUserId:
+                  type: string
+                  description: User to credit (defaults to caller's wallet)
+      responses:
+        '200':
+          description: Credit successful
+        '403':
+          description: Admin role required
+
+  /debit:
+    post:
+      summary: Debit Wallet
+      description: Debits coins from the authenticated user's wallet.
+      tags: [Wallet]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - coinType
+                - source
+                - description
+              properties:
+                amount:
+                  type: number
+                coinType:
+                  type: string
+                source:
+                  type: string
+                description:
+                  type: string
+                sourceId:
+                  type: string
+                idempotencyKey:
+                  type: string
+      responses:
+        '200':
+          description: Debit successful
+        '400':
+          description: Insufficient balance
+
+  /api/wallet/coin-debit:
+    post:
+      summary: Debit Coins (Validated)
+      description: Debits coins with Zod validation for idempotency and source.
+      tags: [Wallet]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - source
+              properties:
+                amount:
+                  type: number
+                  maximum: 1000000
+                source:
+                  type: string
+                description:
+                  type: string
+                idempotencyKey:
+                  type: string
+                  maxLength: 200
+      responses:
+        '200':
+          description: Debit successful
+
+  /api/wallet/welcome-coins:
+    post:
+      summary: Claim Welcome Coins
+      description: Claims 50 welcome coins on first login. Limited to 3 claims per day.
+      tags: [Wallet]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Coins credited
+        '429':
+          description: Daily limit exceeded
+
+  /api/wallet/conversion-rate:
+    get:
+      summary: Get Conversion Rate
+      description: Returns the current coin-to-rupee conversion rate.
+      tags: [Wallet]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Conversion rate returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      coinToRupeeRate:
+                        type: number
+                      exampleConversion:
+                        type: object
+
+  # Consumer Credit Routes
+  /api/credit/score:
+    get:
+      summary: Get Credit Score
+      description: Returns consumer's credit score summary.
+      tags: [Credit]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Credit score retrieved
+
+  /api/credit/bnpl:
+    get:
+      summary: Get Active BNPLs
+      description: Returns active Buy Now Pay Later transactions.
+      tags: [Credit]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: BNPLs retrieved
+
+  /api/credit/apply:
+    post:
+      summary: Apply for BNPL
+      description: Creates a new BNPL transaction.
+      tags: [Credit]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - merchantId
+                - vertical
+                - amount
+              properties:
+                merchantId:
+                  type: string
+                merchantName:
+                  type: string
+                vertical:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        '201':
+          description: BNPL created
+
+  /api/credit/repay:
+    post:
+      summary: Repay BNPL
+      description: Repays an active BNPL transaction.
+      tags: [Credit]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transactionId
+                - amount
+              properties:
+                transactionId:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        '200':
+          description: Repayment successful
+
+  /api/credit/check-eligibility:
+    post:
+      summary: Check BNPL Eligibility
+      description: Checks if user is eligible for BNPL on a given amount.
+      tags: [Credit]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+              properties:
+                amount:
+                  type: number
+      responses:
+        '200':
+          description: Eligibility checked
+
+  # Merchant Wallet Routes
+  /:
+    get:
+      summary: Get Merchant Wallet
+      description: Returns merchant's wallet summary with bank details.
+      tags: [Merchant]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Wallet retrieved
+
+  /transactions:
+    get:
+      summary: Get Merchant Transactions
+      description: Returns merchant's transaction history.
+      tags: [Merchant]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Transactions retrieved
+
+  /withdraw:
+    post:
+      summary: Request Withdrawal
+      description: Requests payout from merchant wallet.
+      tags: [Merchant]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+              properties:
+                amount:
+                  type: number
+      responses:
+        '201':
+          description: Withdrawal requested
+
+  /withdrawals:
+    get:
+      summary: Get Withdrawal Requests
+      description: Returns withdrawal requests with status.
+      tags: [Merchant]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Withdrawals retrieved
+
+  /bank-details:
+    put:
+      summary: Update Bank Details
+      description: Updates merchant's bank account information.
+      tags: [Merchant]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ifscCode
+                - accountHolderName
+                - bankName
+              properties:
+                accountNumber:
+                  type: string
+                ifscCode:
+                  type: string
+                accountHolderName:
+                  type: string
+                bankName:
+                  type: string
+                upiId:
+                  type: string
+      responses:
+        '200':
+          description: Bank details updated
+
+  /stats:
+    get:
+      summary: Get Wallet Stats
+      description: Returns merchant wallet statistics.
+      tags: [Merchant]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Stats retrieved
+
+  # Internal Routes
+  /internal/wallet/read/balance/{userId}:
+    get:
+      summary: Get User Balance (Internal)
+      description: Returns user wallet balance. Internal service use only.
+      tags: [Internal]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Balance retrieved
+        '404':
+          description: Wallet not found
+
+  /internal/wallet/read/statistics/{userId}:
+    get:
+      summary: Get User Statistics (Internal)
+      description: Returns user wallet statistics.
+      tags: [Internal]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistics retrieved
+
+  /internal/wallet/read/leaderboard:
+    get:
+      summary: Get Top Wallets (Internal)
+      description: Returns top wallets by balance.
+      tags: [Internal]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Leaderboard retrieved
+
+  /internal/payouts:
+    get:
+      summary: Get Payouts (Internal)
+      description: Returns payout history for a merchant.
+      tags: [Internal]
+      parameters:
+        - name: merchantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Payouts retrieved
+
+  /internal/payouts/request:
+    post:
+      summary: Request Payout (Internal)
+      description: Requests a payout from merchant wallet. Rate limited to 1 per hour.
+      tags: [Internal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - merchantId
+                - storeId
+                - amountPaise
+              properties:
+                merchantId:
+                  type: string
+                storeId:
+                  type: string
+                amountPaise:
+                  type: number
+      responses:
+        '201':
+          description: Payout requested
+        '429':
+          description: Rate limit exceeded
+
+  /internal/payouts/pending:
+    get:
+      summary: Get Pending Payouts (Internal)
+      description: Lists all pending withdrawal requests.
+      tags: [Internal]
+      responses:
+        '200':
+          description: Pending payouts retrieved
+
+  /internal/payouts/{id}/process:
+    patch:
+      summary: Process Payout (Internal)
+      description: Marks payout as processed. Moves pending to withdrawn.
+      tags: [Internal]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionRef:
+                  type: string
+      responses:
+        '200':
+          description: Payout processed
+
+  /internal/payouts/{id}/fail:
+    patch:
+      summary: Fail Payout (Internal)
+      description: Marks payout as failed. Returns funds to available balance.
+      tags: [Internal]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Payout failed
+
+  # Referral Routes
+  /internal/referral/register:
+    post:
+      summary: Register Referral (Internal)
+      description: Registers a new referral relationship.
+      tags: [Internal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - referrerId
+                - refereeId
+              properties:
+                referrerId:
+                  type: string
+                refereeId:
+                  type: string
+                rewardAmount:
+                  type: number
+                rewardCoinType:
+                  type: string
+      responses:
+        '201':
+          description: Referral registered
+
+  /internal/referral/qualify:
+    post:
+      summary: Qualify Referral (Internal)
+      description: Marks referral as qualified (first order, payment, etc).
+      tags: [Internal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refereeId
+              properties:
+                refereeId:
+                  type: string
+                action:
+                  type: string
+                  enum: [first_order, first_payment, account_verified]
+                actionId:
+                  type: string
+                idempotencyKey:
+                  type: string
+      responses:
+        '200':
+          description: Referral qualified
+
+  /internal/referral/status/{refereeId}:
+    get:
+      summary: Get Referral Status (Internal)
+      description: Returns referral status for a referee.
+      tags: [Internal]
+      parameters:
+        - name: refereeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status retrieved
+
+  /internal/referral/validate:
+    post:
+      summary: Validate Referral Credit (Internal)
+      description: Validates referral credit before awarding.
+      tags: [Internal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - referrerId
+                - refereeId
+                - userId
+              properties:
+                referrerId:
+                  type: string
+                refereeId:
+                  type: string
+                userId:
+                  type: string
+      responses:
+        '200':
+          description: Validation result
+
+  # Credit Score Routes
+  /credit-score/{merchantId}:
+    get:
+      summary: Get Merchant Credit Score (Internal)
+      description: Returns credit score for a merchant. Cached for 24 hours.
+      tags: [Internal]
+      parameters:
+        - name: merchantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Credit score retrieved
+        '400':
+          description: Invalid merchantId
+
+  # CorpPerks Routes
+  /api/corp/benefits:
+    get:
+      summary: Get Corporate Benefits
+      description: Returns benefit packages for the company.
+      tags: [CorpPerks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Benefits retrieved
+    post:
+      summary: Create Benefit Package
+      description: Creates a new corporate benefit package. Admin only.
+      tags: [CorpPerks]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - benefitType
+                - amount
+                - periodType
+                - startDate
+              properties:
+                name:
+                  type: string
+                benefitType:
+                  type: string
+                  enum: [meal, travel, gift, wellness, flex, learning]
+                amount:
+                  type: number
+                periodType:
+                  type: string
+                  enum: [monthly, quarterly, yearly]
+                startDate:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Benefit created
+
+  /api/corp/employees:
+    get:
+      summary: Get Corporate Employees
+      description: Returns enrolled employees for the company.
+      tags: [CorpPerks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: enrollmentStatus
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employees retrieved
+    post:
+      summary: Enroll Employee
+      description: Enrolls a new corporate employee.
+      tags: [CorpPerks]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - employeeId
+                - department
+                - level
+              properties:
+                userId:
+                  type: string
+                employeeId:
+                  type: string
+                department:
+                  type: string
+                level:
+                  type: string
+                designation:
+                  type: string
+                employmentType:
+                  type: string
+                  enum: [full_time, part_time, contractor]
+      responses:
+        '201':
+          description: Employee enrolled
+
+  /api/corp/me:
+    get:
+      summary: Get My Corporate Profile
+      description: Returns current user's corporate benefits.
+      tags: [CorpPerks]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved
+
+  /api/corp/me/benefits/summary:
+    get:
+      summary: Get My Benefit Balance
+      description: Returns benefit balance summary by type.
+      tags: [CorpPerks]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Summary retrieved
+
+  # DLQ Admin Routes
+  /admin/dlq:
+    get:
+      summary: Get DLQ Summary
+      description: Returns failed/waiting job counts for wallet-events queue.
+      tags: [Internal]
+      responses:
+        '200':
+          description: Queue summary
+
+  /admin/dlq/jobs:
+    get:
+      summary: Get Failed Jobs
+      description: Returns paginated list of failed jobs.
+      tags: [Internal]
+      parameters:
+        - name: start
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: end
+          in: query
+          schema:
+            type: integer
+            default: 49
+      responses:
+        '200':
+          description: Failed jobs retrieved
+
+  /admin/dlq/jobs/{jobId}/retry:
+    post:
+      summary: Retry Failed Job
+      description: Retries a single failed job.
+      tags: [Internal]
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job requeued
+
+  /admin/dlq/retry-all:
+    post:
+      summary: Retry All Failed Jobs
+      description: Retries all currently failed jobs.
+      tags: [Internal]
+      responses:
+        '200':
+          description: Bulk retry completed
+
+  /admin/dlq/jobs/{jobId}:
+    delete:
+      summary: Discard Failed Job
+      description: Permanently removes a failed job.
+      tags: [Internal]
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job removed
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        code:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        hasMore:
+          type: boolean
+
+    WalletBalance:
+      type: object
+      properties:
+        available:
+          type: number
+        pending:
+          type: number
+        withdrawn:
+          type: number
+
+    CoinTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [credit, debit]
+        amount:
+          type: number
+        coinType:
+          type: string
+        source:
+          type: string
+        description:
+          type: string
+        balance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time

@@ -1,0 +1,23 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-hotel-analytics-service
+  namespace: rez-merchant
+  labels:
+    app: rez-hotel-analytics-service
+    managed-by: rez-merchant
+  annotations:
+    description: "Hotel Analytics Service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4025
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-hotel-analytics-service

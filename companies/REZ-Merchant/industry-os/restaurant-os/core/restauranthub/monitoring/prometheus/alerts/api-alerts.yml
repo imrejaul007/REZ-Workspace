@@ -1,0 +1,207 @@
+# API Service Alerts for RestaurantHub
+groups:
+  - name: restauranthub-api.rules
+    rules:
+      # High-level service availability
+      - alert: APIServiceDown
+        expr: up{job="restauranthub-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+        annotations:
+          summary: "RestaurantHub API service is down"
+          description: "The RestaurantHub API service has been down for more than 1 minute on instance {{ $labels.instance }}"
+          runbook_url: "https://docs.restauranthub.com/runbooks/api-service-down"
+          dashboard_url: "https://grafana.restauranthub.com/d/api-overview"
+
+      # Response time alerts
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="restauranthub-api"}[5m])) by (le, method, route)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+        annotations:
+          summary: "High API response time"
+          description: "95th percentile latency for {{ $labels.method }} {{ $labels.route }} is {{ $value }}s, which is above 2s threshold"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-latency"
+
+      - alert: VeryHighAPILatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="restauranthub-api"}[5m])) by (le, method, route)) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+        annotations:
+          summary: "Very high API response time"
+          description: "95th percentile latency for {{ $labels.method }} {{ $labels.route }} is {{ $value }}s, which is critically high"
+          runbook_url: "https://docs.restauranthub.com/runbooks/very-high-latency"
+
+      # Error rate alerts
+      - alert: HighErrorRate
+        expr: (sum(rate(http_requests_total{job="restauranthub-api",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="restauranthub-api"}[5m]))) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+        annotations:
+          summary: "High API error rate"
+          description: "API error rate is {{ $value }}%, which is above 5% threshold"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-error-rate"
+
+      - alert: VeryHighErrorRate
+        expr: (sum(rate(http_requests_total{job="restauranthub-api",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="restauranthub-api"}[5m]))) * 100 > 20
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+        annotations:
+          summary: "Very high API error rate"
+          description: "API error rate is {{ $value }}%, which is critically high"
+          runbook_url: "https://docs.restauranthub.com/runbooks/very-high-error-rate"
+
+      # Authentication service alerts
+      - alert: AuthenticationFailureSpike
+        expr: increase(http_requests_total{job="restauranthub-api",route="/api/v1/auth/signin",status="401"}[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+          service: api
+          team: security
+        annotations:
+          summary: "Authentication failure spike detected"
+          description: "There have been {{ $value }} authentication failures in the last 5 minutes, indicating possible brute force attack"
+          runbook_url: "https://docs.restauranthub.com/runbooks/auth-failure-spike"
+
+      # Rate limiting alerts
+      - alert: RateLimitingTriggered
+        expr: increase(http_requests_total{job="restauranthub-api",status="429"}[5m]) > 100
+        for: 1m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+        annotations:
+          summary: "Rate limiting frequently triggered"
+          description: "Rate limiting has been triggered {{ $value }} times in the last 5 minutes"
+          runbook_url: "https://docs.restauranthub.com/runbooks/rate-limiting"
+
+      # Database connection alerts
+      - alert: DatabaseConnectionPoolExhausted
+        expr: database_connections_active{job="restauranthub-api"} / database_connections_max{job="restauranthub-api"} > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "Database connection pool is {{ $value | humanizePercentage }} full"
+          runbook_url: "https://docs.restauranthub.com/runbooks/db-connection-pool"
+
+      - alert: SlowDatabaseQueries
+        expr: histogram_quantile(0.95, sum(rate(database_query_duration_seconds_bucket{job="restauranthub-api"}[5m])) by (le, query_type)) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+        annotations:
+          summary: "Slow database queries detected"
+          description: "95th percentile database query time for {{ $labels.query_type }} is {{ $value }}s"
+          runbook_url: "https://docs.restauranthub.com/runbooks/slow-queries"
+
+      # Memory and CPU alerts
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes{job="restauranthub-api"} / (1024*1024*1024)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+        annotations:
+          summary: "High memory usage"
+          description: "API service is using {{ $value }}GB of memory"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-memory"
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total{job="restauranthub-api"}[5m]) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: api
+          team: backend
+        annotations:
+          summary: "High CPU usage"
+          description: "API service CPU usage is {{ $value }}%"
+          runbook_url: "https://docs.restauranthub.com/runbooks/high-cpu"
+
+      # Redis connectivity alerts
+      - alert: RedisConnectionFailed
+        expr: redis_connected_clients{job="restauranthub-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+        annotations:
+          summary: "Redis connection failed"
+          description: "API service cannot connect to Redis"
+          runbook_url: "https://docs.restauranthub.com/runbooks/redis-connection"
+
+      # Business logic alerts
+      - alert: JobApplicationProcessingBacklog
+        expr: job_applications_pending{job="restauranthub-api"} > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: api
+          team: product
+        annotations:
+          summary: "Job application processing backlog"
+          description: "There are {{ $value }} pending job applications"
+          runbook_url: "https://docs.restauranthub.com/runbooks/job-backlog"
+
+      - alert: PaymentProcessingFailures
+        expr: increase(payment_transactions_failed_total{job="restauranthub-api"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+          team: payments
+        annotations:
+          summary: "Payment processing failures"
+          description: "{{ $value }} payment transactions failed in the last 5 minutes"
+          runbook_url: "https://docs.restauranthub.com/runbooks/payment-failures"
+
+      # API endpoint specific alerts
+      - alert: HealthCheckEndpointDown
+        expr: probe_success{job="blackbox-http",instance="http://api:3000/api/v1/auth/health"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+          team: backend
+        annotations:
+          summary: "API health check endpoint is down"
+          description: "The API health check endpoint is not responding"
+          runbook_url: "https://docs.restauranthub.com/runbooks/health-check-down"
+
+      # JWT token alerts
+      - alert: JWTTokenValidationFailures
+        expr: increase(jwt_validation_failures_total{job="restauranthub-api"}[5m]) > 20
+        for: 2m
+        labels:
+          severity: warning
+          service: api
+          team: security
+        annotations:
+          summary: "High number of JWT token validation failures"
+          description: "{{ $value }} JWT token validation failures in the last 5 minutes"
+          runbook_url: "https://docs.restauranthub.com/runbooks/jwt-failures"

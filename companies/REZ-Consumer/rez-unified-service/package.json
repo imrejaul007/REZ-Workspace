@@ -1,0 +1,10 @@
+{
+  "name": "rez-unified-service",
+  "version": "1.0.0",
+  "description": "Unified service connecting REZ-Consumer to all services",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js"
+  }
+}

@@ -1,0 +1,63 @@
+# ================================================
+# REZ-Inventory-Engine Render Blueprint
+# ================================================
+
+services:
+  - type: web
+    name: rez-inventory-engine
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4010
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+      - key: CORS_ORIGINS
+        value: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+      - key: RATE_LIMIT_MAX
+        value: 100
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 60000
+
+---
+
+# Auto-scaling configuration
+services:
+  - type: web
+    name: rez-inventory-engine
+    env: node
+    region: oregon
+    plan: performance
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoScalar:
+      min: 2
+      max: 10
+      targetMemoryPercent: 70
+      targetCPUPercent: 60
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4010
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info

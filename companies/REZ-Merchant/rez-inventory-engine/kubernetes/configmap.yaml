@@ -1,0 +1,36 @@
+# ================================================
+# REZ-Inventory-Engine Kubernetes ConfigMap
+# ================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-inventory-engine-config
+  namespace: rez-merchant
+  labels:
+    app: rez-inventory-engine
+    managed-by: rez-merchant
+data:
+  # Application Settings
+  NODE_ENV: "production"
+  PORT: "4010"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-inventory-engine"
+  SERVICE_VERSION: "latest"
+
+  # Feature Flags
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+
+  # CORS Configuration
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+
+  # Rate Limiting
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+
+  # Database
+  MONGODB_DATABASE: "rez_inventory"
+
+  # Redis
+  REDIS_DATABASE: "0"

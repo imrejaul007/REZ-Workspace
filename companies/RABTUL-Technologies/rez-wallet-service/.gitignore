@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.*
+.env.bak*
+!.env.example
+*.log
+.DS_Store
+coverage/
+.claude-flow/
+.npmrc

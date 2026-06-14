@@ -1,0 +1,46 @@
+# =============================================================================
+# Kustomize Overlay - Production
+# =============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: risacare
+
+bases:
+  - ../../base
+
+images:
+  - name: risacare/risa-care-api-gateway
+    newTag: v1.0.0-prod
+  - name: risacare/risa-care-ai-service
+    newTag: v1.0.0-prod
+
+configMapGenerator:
+  - name: risacare-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=warn
+      - ENABLE_AI_INTERPRETATION=true
+
+secretGenerator:
+  - name: risacare-secrets
+    behavior: merge
+    envs:
+      - secrets/prod.env
+
+replicas:
+  - name: risacare-api-gateway
+    count: 3
+  - name: risacare-ai-service
+    count: 5
+
+commonLabels:
+  environment: production
+  managed-by: kustomize
+
+patches:
+  - path: patches/resources.yaml
+    target:
+      kind: Deployment

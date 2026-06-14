@@ -1,0 +1,31 @@
+{
+  "name": "rez-cross-analytics",
+  "version": "1.0.0",
+  "description": "Cross-platform analytics service for unified social media metrics",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "winston": "^3.11.0",
+    "date-fns": "^3.6.0",
+    "uuid": "^9.0.1",
+    "pdfkit": "^0.15.0",
+    "json2csv": "^6.0.0-alpha.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^20.11.30",
+    "@types/uuid": "^9.0.8",
+    "@types/pdfkit": "^0.13.4",
+    "typescript": "^5.4.3",
+    "ts-node": "^10.9.2"
+  }
+}

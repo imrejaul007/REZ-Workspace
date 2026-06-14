@@ -1,0 +1,23 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-hotel-messaging-service
+  namespace: rez-merchant
+  labels:
+    app: rez-hotel-messaging-service
+    managed-by: rez-merchant
+  annotations:
+    description: "Hotel Messaging Service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4024
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-hotel-messaging-service

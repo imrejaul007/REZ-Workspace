@@ -1,0 +1,35 @@
+# Render Blueprint for rez-merchant-integrations
+# Deploy at: https://dashboard.render.com/blueprints
+
+services:
+  - type: web
+    name: rez-merchant-integrations
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4040
+      - key: MERCHANT_SERVICE_URL
+        value: https://rez-merchant-service.onrender.com
+      - key: ORDER_SERVICE_URL
+        value: https://rez-order-service.onrender.com
+      - key: SWIGGY_API_KEY
+        sync: false
+      - key: SWIGGY_STORE_ID
+        sync: false
+      - key: ZOMATO_API_KEY
+        sync: false
+      - key: ZOMATO_STORE_ID
+        sync: false
+      - key: DUNZO_API_KEY
+        sync: false
+      - key: SHADOWFAX_API_KEY
+        sync: false
+      - key: LOG_LEVEL
+        value: info

@@ -1,0 +1,238 @@
+{
+  "default_strategy": {
+    "type": "probabilistic",
+    "param": 0.001,
+    "max_traces_per_second": 10000
+  },
+  "per_service_strategies": [
+    {
+      "service": "restopapa-api",
+      "type": "adaptive",
+      "max_traces_per_second": 1000,
+      "param": 0.01,
+      "operations": [
+        {
+          "operation": "POST /api/v1/auth/login",
+          "type": "probabilistic",
+          "param": 0.1
+        },
+        {
+          "operation": "POST /api/v1/auth/register",
+          "type": "probabilistic",
+          "param": 0.1
+        },
+        {
+          "operation": "GET /api/v1/jobs",
+          "type": "probabilistic",
+          "param": 0.05
+        },
+        {
+          "operation": "POST /api/v1/jobs",
+          "type": "probabilistic",
+          "param": 0.1
+        },
+        {
+          "operation": "GET /api/v1/restaurants",
+          "type": "probabilistic",
+          "param": 0.02
+        },
+        {
+          "operation": "POST /api/v1/orders",
+          "type": "probabilistic",
+          "param": 0.2
+        },
+        {
+          "operation": "PUT /api/v1/orders/*",
+          "type": "probabilistic",
+          "param": 0.2
+        }
+      ]
+    },
+    {
+      "service": "restopapa-web",
+      "type": "adaptive",
+      "max_traces_per_second": 500,
+      "param": 0.005,
+      "operations": [
+        {
+          "operation": "/login",
+          "type": "probabilistic",
+          "param": 0.05
+        },
+        {
+          "operation": "/dashboard",
+          "type": "probabilistic",
+          "param": 0.02
+        },
+        {
+          "operation": "/jobs/create",
+          "type": "probabilistic",
+          "param": 0.1
+        }
+      ]
+    },
+    {
+      "service": "auth-service",
+      "type": "adaptive",
+      "max_traces_per_second": 800,
+      "param": 0.02,
+      "operations": [
+        {
+          "operation": "authenticate",
+          "type": "probabilistic",
+          "param": 0.05
+        },
+        {
+          "operation": "validate_token",
+          "type": "probabilistic",
+          "param": 0.01
+        },
+        {
+          "operation": "refresh_token",
+          "type": "probabilistic",
+          "param": 0.1
+        }
+      ]
+    },
+    {
+      "service": "notification-service",
+      "type": "adaptive",
+      "max_traces_per_second": 200,
+      "param": 0.05,
+      "operations": [
+        {
+          "operation": "send_email",
+          "type": "probabilistic",
+          "param": 0.2
+        },
+        {
+          "operation": "send_sms",
+          "type": "probabilistic",
+          "param": 0.3
+        },
+        {
+          "operation": "send_push",
+          "type": "probabilistic",
+          "param": 0.1
+        }
+      ]
+    },
+    {
+      "service": "order-service",
+      "type": "adaptive",
+      "max_traces_per_second": 300,
+      "param": 0.1,
+      "operations": [
+        {
+          "operation": "create_order",
+          "type": "probabilistic",
+          "param": 0.5
+        },
+        {
+          "operation": "update_order_status",
+          "type": "probabilistic",
+          "param": 0.3
+        },
+        {
+          "operation": "cancel_order",
+          "type": "probabilistic",
+          "param": 0.8
+        }
+      ]
+    },
+    {
+      "service": "restaurant-service",
+      "type": "adaptive",
+      "max_traces_per_second": 400,
+      "param": 0.02,
+      "operations": [
+        {
+          "operation": "get_restaurants",
+          "type": "probabilistic",
+          "param": 0.01
+        },
+        {
+          "operation": "create_restaurant",
+          "type": "probabilistic",
+          "param": 0.5
+        },
+        {
+          "operation": "update_restaurant",
+          "type": "probabilistic",
+          "param": 0.3
+        }
+      ]
+    },
+    {
+      "service": "database",
+      "type": "adaptive",
+      "max_traces_per_second": 2000,
+      "param": 0.001,
+      "operations": [
+        {
+          "operation": "SELECT",
+          "type": "probabilistic",
+          "param": 0.001
+        },
+        {
+          "operation": "INSERT",
+          "type": "probabilistic",
+          "param": 0.05
+        },
+        {
+          "operation": "UPDATE",
+          "type": "probabilistic",
+          "param": 0.05
+        },
+        {
+          "operation": "DELETE",
+          "type": "probabilistic",
+          "param": 0.1
+        }
+      ]
+    },
+    {
+      "service": "redis",
+      "type": "adaptive",
+      "max_traces_per_second": 5000,
+      "param": 0.0001,
+      "operations": [
+        {
+          "operation": "GET",
+          "type": "probabilistic",
+          "param": 0.0001
+        },
+        {
+          "operation": "SET",
+          "type": "probabilistic",
+          "param": 0.001
+        },
+        {
+          "operation": "DEL",
+          "type": "probabilistic",
+          "param": 0.01
+        }
+      ]
+    }
+  ],
+  "per_operation_strategies": [
+    {
+      "service": "*",
+      "operation": "health_check",
+      "type": "probabilistic",
+      "param": 0.0001
+    },
+    {
+      "service": "*",
+      "operation": "metrics",
+      "type": "probabilistic",
+      "param": 0.0001
+    },
+    {
+      "service": "*",
+      "operation": "*/health",
+      "type": "probabilistic",
+      "param": 0.0001
+    }
+  ]
+}

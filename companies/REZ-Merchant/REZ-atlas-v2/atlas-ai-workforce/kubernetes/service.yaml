@@ -1,0 +1,17 @@
+# Atlas AI Workforce - Kubernetes Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: atlas-ai-workforce
+  namespace: rez-merchant
+  labels:
+    app: atlas-ai-workforce
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5190
+      targetPort: 5190
+      protocol: TCP
+  selector:
+    app: atlas-ai-workforce

@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atlas-email-service
+  namespace: rez-merchant
+  labels:
+    app: atlas-email-service
+    version: latest
+    managed-by: rez-merchant
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: atlas-email-service
+  template:
+    metadata:
+      labels:
+        app: atlas-email-service
+        version: latest
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5161"
+    spec:
+      containers:
+        - name: atlas-email-service
+          image: ghcr.io/imrejaul007/atlas-email-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5161
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: atlas-email-service-config
+            - secretRef:
+                name: atlas-email-service-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}

@@ -1,0 +1,35 @@
+# Kubernetes Ingress for REZ-dashboard
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rez-dashboard
+  namespace: rez-merchant
+  labels:
+    app: rez-dashboard
+    managed-by: rez-merchant
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Request-ID $request_id";
+spec:
+  tls:
+    - hosts:
+        - dashboard.rezmerchant.com
+      secretName: rez-dashboard-tls
+  rules:
+    - host: dashboard.rezmerchant.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rez-dashboard
+                port:
+                  number: 3000

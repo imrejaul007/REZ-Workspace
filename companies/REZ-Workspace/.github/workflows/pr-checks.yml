@@ -1,0 +1,55 @@
+name: PR Quality Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  pr-checks:
+    name: PR Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm test
+
+      - name: Check PR title format
+        run: |
+          if [[ ! "${{ github.event.pull_request.title }}" =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?:[[:space:]].+ ]]; then
+            echo "PR title must follow conventional commits format"
+            echo "Format: type(scope): description"
+            echo "Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
+            exit 1
+          fi
+
+      - name: Check for sensitive data
+        run: |
+          # Check for potential secrets in the diff
+          git diff --staged --name-only | xargs -I {} sh -c '
+            if grep -q -E "(password|secret|token|api.?key).*=.*{}" {} 2>/dev/null; then
+              echo "Potential secret found in {}"
+              exit 1
+            fi
+          ' || true

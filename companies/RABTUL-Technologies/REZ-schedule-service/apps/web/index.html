@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Meeting - ReZ Schedule</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .slot-btn:hover:not(:disabled) { transform: scale(1.02); }
+    .slot-btn.selected { background: #6366f1; color: white; }
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #6366f1;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div id="booking-widget" class="max-w-lg mx-auto p-6">
+    <!-- Loading State -->
+    <div id="loading" class="flex items-center justify-center py-12">
+      <div class="loading-spinner"></div>
+      <span class="ml-3 text-gray-600">Loading...</span>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="hidden">
+      <!-- Event Type Header -->
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+            <span class="text-indigo-600 font-semibold text-lg" id="avatar-initial">H</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-semibold text-gray-900" id="event-title">Loading...</h1>
+            <p class="text-gray-500" id="host-name">with Host</p>
+            <p class="text-sm text-indigo-600 font-medium" id="duration">30 min</p>
+          </div>
+        </div>
+        <p class="text-gray-600 mt-4" id="event-description"></p>
+      </div>
+
+      <!-- Date Selection -->
+      <div id="step-date" class="step bg-white rounded-xl shadow-sm p-6 mb-4">
+        <h2 class="text-lg font-semibold mb-4">Select a Date</h2>
+        <div class="flex items-center justify-between mb-4">
+          <button id="prev-week" class="p-2 hover:bg-gray-100 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+          <span id="week-label" class="font-medium">May 2026</span>
+          <button id="next-week" class="p-2 hover:bg-gray-100 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="date-grid" class="grid grid-cols-7 gap-2 mb-4"></div>
+      </div>
+
+      <!-- Time Selection -->
+      <div id="step-time" class="step hidden bg-white rounded-xl shadow-sm p-6 mb-4">
+        <h2 class="text-lg font-semibold mb-4">Select a Time</h2>
+        <div id="timezone" class="text-sm text-gray-500 mb-4"></div>
+        <div id="time-slots" class="grid grid-cols-3 gap-2"></div>
+      </div>
+
+      <!-- Guest Info -->
+      <div id="step-guest" class="step hidden bg-white rounded-xl shadow-sm p-6 mb-4">
+        <h2 class="text-lg font-semibold mb-4">Enter Your Details</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+            <input type="text" id="guest-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input type="email" id="guest-email" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <input type="tel" id="guest-phone" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation -->
+      <div id="step-confirm" class="step hidden bg-white rounded-xl shadow-sm p-6 mb-4">
+        <h2 class="text-lg font-semibold mb-4">Confirm Booking</h2>
+        <div id="booking-summary" class="bg-gray-50 rounded-lg p-4 mb-4"></div>
+        <button id="confirm-btn" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition">
+          Confirm Booking
+        </button>
+      </div>
+
+      <!-- Success -->
+      <div id="step-success" class="step hidden bg-white rounded-xl shadow-sm p-6 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold mb-2">Booking Confirmed!</h2>
+        <p class="text-gray-600 mb-4" id="success-message">You will receive a confirmation email shortly.</p>
+        <div id="booking-details" class="bg-gray-50 rounded-lg p-4 text-left"></div>
+      </div>
+
+      <!-- Error -->
+      <div id="step-error" class="step hidden bg-red-50 rounded-xl shadow-sm p-6 text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold mb-2 text-red-800">Booking Failed</h2>
+        <p class="text-red-600 mb-4" id="error-message">Something went wrong.</p>
+        <button onclick="resetWidget()" class="px-6 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-100">
+          Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration
+    const API_BASE = 'http://localhost:4080/api';
+
+    // State
+    let state = {
+      username: '',
+      slug: '',
+      eventType: null,
+      selectedDate: null,
+      selectedSlot: null,
+      guest: { name: '', email: '', phone: '' },
+      step: 'loading'
+    };
+
+    // Get URL params
+    const params = new URLSearchParams(window.location.search);
+    state.username = params.get('username') || 'glamstudio';
+    state.slug = params.get('slug') || 'haircut-styling';
+
+    // Initialize
+    async function init() {
+      try {
+        const res = await fetch(`${API_BASE}/event-types/public/${state.username}/${state.slug}`);
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.error);
+
+        state.eventType = data.data;
+
+        // Update UI
+        document.getElementById('avatar-initial').textContent = state.eventType.user.name.charAt(0).toUpperCase();
+        document.getElementById('event-title').textContent = state.eventType.title;
+        document.getElementById('host-name').textContent = `with ${state.eventType.user.name}`;
+        document.getElementById('duration').textContent = `${state.eventType.duration} min`;
+        document.getElementById('event-description').textContent = state.eventType.description || '';
+
+        // Show content
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('content').classList.remove('hidden');
+
+        // Render dates
+        renderDates();
+        showStep('date');
+      } catch (err) {
+        document.getElementById('loading').innerHTML = `
+          <div class="text-center">
+            <p class="text-red-600 mb-2">Failed to load event</p>
+            <button onclick="init()" class="text-indigo-600 hover:underline">Try Again</button>
+          </div>
+        `;
+      }
+    }
+
+    // Render date picker
+    function renderDates() {
+      const grid = document.getElementById('date-grid');
+      grid.innerHTML = '';
+
+      const today = new Date();
+      state.weekStart = new Date(today);
+      state.weekStart.setDate(today.getDate() - today.getDay());
+
+      const weekLabel = document.getElementById('week-label');
+      weekLabel.textContent = state.weekStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(state.weekStart);
+        date.setDate(state.weekStart.getDate() + i);
+
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const isToday = date.toDateString() === today.toDateString();
+        const isPast = date < today;
+
+        const btn = document.createElement('button');
+        btn.className = `text-center p-2 rounded-lg ${isPast ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-50 cursor-pointer'} ${state.selectedDate?.toDateString() === date.toDateString() ? 'bg-indigo-600 text-white' : ''}`;
+        btn.innerHTML = `
+          <div class="text-xs text-gray-500">${dayNames[i]}</div>
+          <div class="font-medium">${date.getDate()}</div>
+        `;
+
+        if (!isPast) {
+          btn.onclick = () => selectDate(date);
+        }
+
+        grid.appendChild(btn);
+      }
+    }
+
+    // Select date
+    async function selectDate(date) {
+      state.selectedDate = date;
+      state.selectedSlot = null;
+
+      // Update UI
+      document.querySelectorAll('#date-grid button').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+      });
+      event.target.closest('button').classList.add('bg-indigo-600', 'text-white');
+
+      // Load slots
+      showStep('loading');
+      const endDate = new Date(date);
+      endDate.setDate(date.getDate() + 1);
+
+      try {
+        const res = await fetch(`${API_BASE}/availability/${state.username}/${state.slug}?startDate=${date.toISOString()}&endDate=${endDate.toISOString()}`);
+        const data = await res.json();
+
+        if (data.success && data.data.slots) {
+          state.slots = data.data.slots;
+          renderSlots();
+        }
+        showStep('time');
+      } catch (err) {
+        showStep('error');
+        document.getElementById('error-message').textContent = 'Failed to load time slots';
+      }
+    }
+
+    // Render time slots
+    function renderSlots() {
+      const container = document.getElementById('time-slots');
+      container.innerHTML = '';
+
+      const timezone = document.getElementById('timezone');
+      timezone.textContent = `Times shown in ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+
+      if (!state.slots || state.slots.length === 0) {
+        container.innerHTML = '<p class="col-span-3 text-center text-gray-500 py-8">No available slots for this date</p>';
+        return;
+      }
+
+      state.slots.forEach(slot => {
+        if (!slot.available) return;
+
+        const time = new Date(slot.startTime).toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+
+        const btn = document.createElement('button');
+        btn.className = 'slot-btn py-2 px-3 border rounded-lg text-sm hover:border-indigo-500 transition';
+        btn.textContent = time;
+        btn.onclick = () => selectSlot(slot);
+        container.appendChild(btn);
+      });
+
+      if (container.children.length === 0) {
+        container.innerHTML = '<p class="col-span-3 text-center text-gray-500 py-8">No available slots</p>';
+      }
+    }
+
+    // Select time slot
+    function selectSlot(slot) {
+      state.selectedSlot = slot;
+
+      document.querySelectorAll('.slot-btn').forEach(btn => btn.classList.remove('selected'));
+      event.target.classList.add('selected');
+
+      showStep('guest');
+    }
+
+    // Show step
+    function showStep(step) {
+      document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`step-${step}`)?.classList.remove('hidden');
+      state.step = step;
+    }
+
+    // Confirm booking
+    async function confirmBooking() {
+      state.guest.name = document.getElementById('guest-name').value;
+      state.guest.email = document.getElementById('guest-email').value;
+      state.guest.phone = document.getElementById('guest-phone').value;
+
+      if (!state.guest.name || !state.guest.email) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      showStep('loading');
+
+      try {
+        const res = await fetch(`${API_BASE}/bookings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eventTypeId: state.eventType.id,
+            startTime: state.selectedSlot.startTime,
+            endTime: state.selectedSlot.endTime,
+            attendeeName: state.guest.name,
+            attendeeEmail: state.guest.email,
+            attendeePhone: state.guest.phone || undefined,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showStep('success');
+          document.getElementById('success-message').textContent = 'You will receive a confirmation email shortly.';
+          document.getElementById('booking-details').innerHTML = `
+            <p><strong>Event:</strong> ${state.eventType.title}</p>
+            <p><strong>Date:</strong> ${new Date(state.selectedSlot.startTime).toLocaleDateString()}</p>
+            <p><strong>Time:</strong> ${new Date(state.selectedSlot.startTime).toLocaleTimeString()}</p>
+            <p><strong>Booking ID:</strong> ${data.data.uid}</p>
+          `;
+        } else {
+          throw new Error(data.error || 'Booking failed');
+        }
+      } catch (err) {
+        showStep('error');
+        document.getElementById('error-message').textContent = err.message;
+      }
+    }
+
+    // Reset widget
+    function resetWidget() {
+      state.selectedDate = null;
+      state.selectedSlot = null;
+      document.getElementById('guest-name').value = '';
+      document.getElementById('guest-email').value = '';
+      document.getElementById('guest-phone').value = '';
+      showStep('date');
+      renderDates();
+    }
+
+    // Event listeners
+    document.getElementById('prev-week').onclick = () => {
+      state.weekStart.setDate(state.weekStart.getDate() - 7);
+      renderDates();
+    };
+
+    document.getElementById('next-week').onclick = () => {
+      state.weekStart.setDate(state.weekStart.getDate() + 7);
+      renderDates();
+    };
+
+    document.getElementById('confirm-btn').onclick = confirmBooking;
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>

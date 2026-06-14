@@ -1,0 +1,20 @@
+# Kubernetes Service for rez-inventory-alerts
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-inventory-alerts
+  namespace: rez-merchant
+  labels:
+    app: rez-inventory-alerts
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-inventory-alerts service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4625
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-inventory-alerts

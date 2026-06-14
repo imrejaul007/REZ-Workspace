@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: rez-merchant-copilot
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4022
+      - key: REZ_ORDER_SERVICE_URL
+        value: https://rez-order-service.onrender.com
+      - key: REZ_CATALOG_SERVICE_URL
+        value: https://rez-catalog-service.onrender.com
+      - key: REZ_MERCHANT_SERVICE_URL
+        value: https://rez-merchant-service.onrender.com
+      - key: REZ_EVENT_PLATFORM_URL
+        value: https://REZ-event-platform.onrender.com
+      - key: INTERNAL_TOKEN
+        sync: false

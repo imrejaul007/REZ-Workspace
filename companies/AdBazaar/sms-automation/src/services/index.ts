@@ -1,0 +1,1 @@
+export { SMSService, smsService } from './SMSService';

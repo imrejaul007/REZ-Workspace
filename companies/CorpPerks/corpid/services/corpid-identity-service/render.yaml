@@ -1,0 +1,42 @@
+# =============================================================================
+# Render Blueprint - CorpID Identity Service
+# =============================================================================
+
+services:
+  - type: web
+    name: corpid-identity-service
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    healthCheckInterval: 30s
+    healthCheckThreshold: 3
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4701"
+
+      # MongoDB
+      - key: MONGODB_URI
+        sync: false
+
+      # Authentication
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+
+      # CORS
+      - key: CORS_ORIGIN
+        value: https://corpid.corpperks.com
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info

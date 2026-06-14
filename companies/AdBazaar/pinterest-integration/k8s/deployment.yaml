@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-pinterest-integration
+  labels:
+    app: ad-bazaar-pinterest-integration
+    tier: social-automation
+    component: pinterest
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-pinterest-integration
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-pinterest-integration
+        tier: social-automation
+        component: pinterest
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5095"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: app
+        image: adbazaar/pinterest-integration:latest
+        ports:
+        - containerPort: 5095
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: ad-bazaar-pinterest-integration-config
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5095
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5095
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3

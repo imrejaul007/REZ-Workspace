@@ -1,0 +1,20 @@
+# Kubernetes Service for rez-multi-location
+apiVersion: v1
+kind: Service
+metadata:
+  name: rez-multi-location
+  namespace: rez-merchant
+  labels:
+    app: rez-multi-location
+    managed-by: rez-merchant
+  annotations:
+    description: "rez-multi-location service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4632
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: rez-multi-location

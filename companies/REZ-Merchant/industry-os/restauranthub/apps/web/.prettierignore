@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+*.d.ts
+.turbo/
+.git/
+*.log
+*.env*
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+public/

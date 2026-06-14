@@ -1,0 +1,245 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Test Job
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [web, auth-service, restaurant-service, order-service, notification-service, api-gateway]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linting
+      run: npm run lint --workspace=@restauranthub/${{ matrix.service }}
+
+    - name: Run type checking
+      run: npm run type-check --workspace=@restauranthub/${{ matrix.service }}
+      if: matrix.service != 'web'
+
+    - name: Run unit tests
+      run: npm run test --workspace=@restauranthub/${{ matrix.service }}
+
+    - name: Run e2e tests
+      run: npm run test:e2e --workspace=@restauranthub/${{ matrix.service }}
+      if: matrix.service == 'web'
+
+  # Security Scan
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Dependency vulnerability check
+      run: npm audit --audit-level high
+
+  # Build and Push Images
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main'
+    
+    strategy:
+      matrix:
+        service: [web, auth-service, restaurant-service, order-service, notification-service, api-gateway]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.${{ matrix.service }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+  # Deploy to Staging
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig --region us-east-1 --name restauranthub-staging
+
+    - name: Deploy to staging
+      run: |
+        envsubst < k8s/namespace.yaml | kubectl apply -f -
+        envsubst < k8s/postgres-deployment.yaml | kubectl apply -f -
+        envsubst < k8s/redis-deployment.yaml | kubectl apply -f -
+        envsubst < k8s/api-gateway-deployment.yaml | kubectl apply -f -
+        envsubst < k8s/web-deployment.yaml | kubectl apply -f -
+        
+        # Wait for deployments to be ready
+        kubectl wait --for=condition=available --timeout=300s deployment/api-gateway -n restauranthub
+        kubectl wait --for=condition=available --timeout=300s deployment/web -n restauranthub
+
+    - name: Run smoke tests
+      run: |
+        API_URL=$(kubectl get service api-gateway -n restauranthub -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        curl -f http://$API_URL/health || exit 1
+        
+        WEB_URL=$(kubectl get service web -n restauranthub -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        curl -f http://$WEB_URL/health || exit 1
+
+  # Deploy to Production
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig --region us-east-1 --name restauranthub-production
+
+    - name: Blue-Green Deployment
+      run: |
+        # Deploy to green environment
+        sed 's/restauranthub/restauranthub-green/g' k8s/*.yaml | kubectl apply -f -
+        
+        # Wait for green deployment
+        kubectl wait --for=condition=available --timeout=600s deployment/api-gateway -n restauranthub-green
+        kubectl wait --for=condition=available --timeout=600s deployment/web -n restauranthub-green
+        
+        # Run health checks on green
+        GREEN_API_URL=$(kubectl get service api-gateway -n restauranthub-green -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        curl -f http://$GREEN_API_URL/health || exit 1
+        
+        # Switch traffic to green
+        kubectl patch service api-gateway -n restauranthub -p '{"spec":{"selector":{"version":"green"}}}'
+        kubectl patch service web -n restauranthub -p '{"spec":{"selector":{"version":"green"}}}'
+        
+        # Clean up old blue deployment
+        kubectl delete namespace restauranthub-blue --ignore-not-found=true
+        kubectl create namespace restauranthub-blue
+        kubectl label namespace restauranthub restauranthub-blue
+
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: always()
+
+  # Performance Testing
+  performance-test:
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run load tests
+      run: |
+        docker run --rm -v $(pwd)/load-tests:/tests grafana/k6 run /tests/load-test.js
+      env:
+        K6_OUT: json=/tmp/k6-results.json
+        API_URL: https://api.restauranthub.com
+        WEB_URL: https://restauranthub.com
+
+    - name: Archive performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results
+        path: /tmp/k6-results.json

@@ -1,0 +1,183 @@
+# RTNM Companies - Production Readiness Audit (All Companies)
+
+**Date:** June 12, 2026  
+**Status:** 🔧 IN PROGRESS
+
+---
+
+## Summary
+
+| Company | Console.log | Hardcoded URLs | Production Ready | Priority |
+|---------|-------------|----------------|-------------------|----------|
+| AdBazaar | ✅ Fixed | ✅ Fixed | ✅ **YES** | - |
+| Nexha | 141 | 52 | ⚠️ Needs fixes | MEDIUM |
+| CorpPerks | 699 | 996 | ⚠️ Needs fixes | HIGH |
+| RisaCare | 175 | 296 | ⚠️ Needs fixes | MEDIUM |
+| StayOwn-Hospitality | 6,238 | 433 | ⚠️ Needs fixes | HIGH |
+| RisnaEstate | 209 | 120 | ⚠️ Needs fixes | MEDIUM |
+| KHAIRMOVE | 190 | 248 | ⚠️ Needs fixes | MEDIUM |
+| LawGens | 33 | 16 | ⚠️ Needs fixes | LOW |
+| REZ-Workspace | 56 | 25 | ⚠️ Needs fixes | MEDIUM |
+| AssetMind | 0 | 55 | ⚠️ Needs fixes | LOW |
+
+**Total Issues:** 8,741 console.log + 2,245 hardcoded URLs across 9 companies
+
+---
+
+## Fixes Applied
+
+### ✅ Completed
+1. **AdBazaar** - 100% Production Ready
+   - Fixed all console.log in frontend
+   - Added structured logging
+   - Created deployment configs
+
+2. **Shared Logger** - Created for all companies
+   - Location: `shared/logger.ts`
+   - PII redaction
+   - JSON structured logging
+   - Production-safe
+
+### ⚠️ In Progress
+
+| Company | Services | Status |
+|---------|----------|--------|
+| StayOwn-Hospitality | Hotel OTA, Staff App | Most console.log in seed/test files |
+| CorpPerks | Backend, API Gateway | Many in production code |
+| RisaCare | Emergency, ABHA | Some in production code |
+
+---
+
+## Per-Company Analysis
+
+### Nexha (Consumer App Platform)
+**Issues:** 141 console.log, 52 hardcoded URLs
+**Affected:** Mobile app, API services
+**Action:** Replace console.log with shared logger
+
+### CorpPerks (Employee Benefits)
+**Issues:** 699 console.log, 996 hardcoded URLs
+**Affected:** Backend, API Gateway, AI Agents
+**Action:** High priority - replace all production code console.log
+
+### RisaCare (Healthcare)
+**Issues:** 175 console.log, 296 hardcoded URLs
+**Affected:** ABHA service, Emergency service, Integrations
+**Action:** Medium priority - critical for HIPAA compliance
+
+### StayOwn-Hospitality (Hospitality)
+**Issues:** 6,238 console.log (mostly seed/test), 433 hardcoded URLs
+**Affected:** Hotel PMS, OTA, Staff App
+**Action:** High priority - seed files not critical but production code needs fixing
+
+### RisnaEstate (Real Estate)
+**Issues:** 209 console.log, 120 hardcoded URLs
+**Affected:** Property listings, Virtual tours
+**Action:** Medium priority
+
+### KHAIRMOVE (Logistics)
+**Issues:** 190 console.log, 248 hardcoded URLs
+**Affected:** Driver app, User app, Backend
+**Action:** Medium priority
+
+### LawGens (Legal AI)
+**Issues:** 33 console.log, 16 hardcoded URLs
+**Affected:** Document generation, Research
+**Action:** Low priority
+
+### REZ-Workspace
+**Issues:** 56 console.log, 25 hardcoded URLs
+**Affected:** Workspace management
+**Action:** Medium priority
+
+### AssetMind (Asset Management AI)
+**Issues:** 0 console.log, 55 hardcoded URLs
+**Affected:** Portfolio analysis
+**Action:** Low priority - just fix URLs
+
+---
+
+## Hardcoded URL Patterns Found
+
+### Common Patterns
+```
+localhost:3000 - Frontend dev server
+localhost:4000 - Marketing service
+localhost:4002 - RABTUL Auth
+localhost:4004 - RABTUL Wallet
+localhost:4007 - REZ Ads
+localhost:4500 - HOJAI AI
+localhost:5000 - Default Express port
+localhost:27017 - MongoDB
+localhost:6379 - Redis
+```
+
+### Solution
+Replace with environment variables:
+```typescript
+// Before
+const url = 'http://localhost:4000';
+
+// After
+const url = process.env.SERVICE_URL || 'http://localhost:4000';
+```
+
+---
+
+## Recommended Actions
+
+### Immediate (This Week)
+1. ✅ Shared logger created for all companies
+2. ⬜ Fix CorpPerks production code (699 console.log)
+3. ⬜ Fix StayOwn-Hospitality production code (exclude seed/test)
+4. ⬜ Fix RisaCare production code (175 console.log)
+
+### Short-term (This Month)
+1. ⬜ Replace all console.log with shared logger
+2. ⬜ Add .env.example to missing companies (StayOwn, LawGens, REZ-Workspace, AssetMind)
+3. ⬜ Replace hardcoded URLs with env vars
+
+### Long-term (This Quarter)
+1. ⬜ Set up centralized logging (ELK/Datadog)
+2. ⬜ Add service mesh
+3. ⬜ Implement circuit breakers
+
+---
+
+## Shared Resources Created
+
+```
+RTNM/companies/
+├── shared/
+│   └── logger.ts              # ✅ Created - Shared production logger
+├── AdBazaar/
+│   └── shared/production-utils/  # ✅ Created
+└── [company]/shared/
+    └── logger.ts              # ✅ Copied to all companies
+```
+
+### Shared Logger Usage
+```typescript
+import { logger } from '../../shared/logger';
+
+// Replace
+console.log('User logged in', userId);
+
+// With
+logger.info('User logged in', { userId });
+```
+
+---
+
+## Companies Missing .env.example
+
+- StayOwn-Hospitality
+- LawGens
+- REZ-Workspace
+- AssetMind
+
+**Action:** Create .env.example for each
+
+---
+
+*Generated by Claude Code Production Audit*

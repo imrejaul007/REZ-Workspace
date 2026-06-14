@@ -1,0 +1,1091 @@
+openapi: 3.0.3
+info:
+  title: RestaurantHub API
+  description: |
+    The RestaurantHub API - Complete B2B/B2C SaaS platform for the restaurant industry.
+
+    ## Features:
+    - Multi-role authentication (Admin, Restaurant, Vendor, Employee, Customer)
+    - Restaurant management and operations
+    - B2B marketplace with vendor integration
+    - Job portal and HR management
+    - Real-time messaging and notifications
+    - Payment processing and billing
+    - Analytics and reporting
+    - Community features and social networking
+
+    ## Authentication
+    This API uses JWT Bearer tokens for authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+
+    ## Rate Limiting
+    - General endpoints: 1000 requests per 15 minutes (development), 100 requests per 15 minutes (production)
+    - Authentication endpoints: 20 requests per 15 minutes (development), 5 requests per 15 minutes (production)
+    - Sensitive operations (password reset): 3 requests per hour
+
+    ## Error Responses
+    All error responses follow this format:
+    ```json
+    {
+      "statusCode": 400,
+      "message": "Error description",
+      "error": "BadRequest",
+      "timestamp": "2024-01-01T00:00:00.000Z"
+    }
+    ```
+
+    For support, contact: support@restauranthub.com
+  version: 1.0.0
+  contact:
+    name: RestaurantHub Support
+    email: support@restauranthub.com
+    url: https://restauranthub.com/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+  - url: https://api.restauranthub.com/api/v1
+    description: Production server
+
+security:
+  - BearerAuth: []
+  - ApiKey: []
+
+paths:
+  # Authentication Endpoints
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Register a new user with role-specific information
+      operationId: signup
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpDto'
+            examples:
+              restaurant:
+                summary: Restaurant Owner Registration
+                value:
+                  email: "restaurant@example.com"
+                  password: "SecurePassword123!"
+                  role: "RESTAURANT"
+                  firstName: "John"
+                  lastName: "Doe"
+                  phone: "+919876543210"
+                  restaurantName: "The Food Court"
+                  cuisineType: ["Indian", "Chinese"]
+              employee:
+                summary: Employee Registration
+                value:
+                  email: "employee@example.com"
+                  password: "SecurePassword123!"
+                  role: "EMPLOYEE"
+                  firstName: "Jane"
+                  lastName: "Smith"
+                  phone: "+919876543211"
+                  restaurantId: "cm2abcd1234567890"
+                  designation: "Chef"
+              vendor:
+                summary: Vendor Registration
+                value:
+                  email: "vendor@example.com"
+                  password: "SecurePassword123!"
+                  role: "VENDOR"
+                  firstName: "Mike"
+                  lastName: "Johnson"
+                  phone: "+919876543212"
+                  companyName: "Fresh Supplies Co"
+                  businessType: "Food Wholesale"
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User created successfully"
+                  user:
+                    $ref: '#/components/schemas/User'
+                  tokens:
+                    $ref: '#/components/schemas/AuthTokens'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/signin:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and receive access tokens
+      operationId: signin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInDto'
+            example:
+              email: "restaurant@example.com"
+              password: "SecurePassword123!"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  user:
+                    $ref: '#/components/schemas/User'
+                  tokens:
+                    $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Get a new access token using refresh token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenDto'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid refresh token
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Logout user and invalidate tokens
+      operationId: logout
+      parameters:
+        - name: all
+          in: query
+          description: Logout from all devices
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout successful"
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Request password reset
+      description: Send password reset link to user's email
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordDto'
+      responses:
+        '200':
+          description: Reset link sent if email exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset link sent if email exists"
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password with token
+      description: Reset user password using reset token
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordDto'
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          description: Invalid or expired token
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user profile
+      description: Get the authenticated user's profile information
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # Jobs Endpoints
+  /jobs:
+    get:
+      tags:
+        - Jobs
+      summary: Get all job postings
+      description: Retrieve paginated list of job postings with filtering options
+      operationId: getAllJobs
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: location
+          in: query
+          description: Filter by job location
+          schema:
+            type: string
+        - name: jobType
+          in: query
+          description: Filter by job type
+          schema:
+            type: string
+            enum: [Full-time, Part-time, Contract, Freelance]
+        - name: skills
+          in: query
+          description: Filter by required skills (comma-separated)
+          schema:
+            type: string
+        - name: experienceMin
+          in: query
+          description: Minimum experience required (years)
+          schema:
+            type: integer
+            minimum: 0
+        - name: salaryMin
+          in: query
+          description: Minimum salary filter
+          schema:
+            type: number
+        - name: salaryMax
+          in: query
+          description: Maximum salary filter
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Jobs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+
+    post:
+      tags:
+        - Jobs
+      summary: Create a new job posting
+      description: Create a new job posting (Restaurant owners and Admins only)
+      operationId: createJob
+      parameters:
+        - name: restaurantId
+          in: query
+          description: Restaurant ID (required for admins, ignored for restaurant owners)
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobDto'
+      responses:
+        '201':
+          description: Job posting created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '403':
+          description: Insufficient permissions
+
+  /jobs/search:
+    get:
+      tags:
+        - Jobs
+      summary: Search job postings
+      description: Search jobs using text query and filters
+      operationId: searchJobs
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+        - name: location
+          in: query
+          description: Filter by location
+          schema:
+            type: string
+        - name: jobType
+          in: query
+          description: Filter by job type
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+                  total:
+                    type: integer
+                  query:
+                    type: string
+
+  /jobs/my-jobs:
+    get:
+      tags:
+        - Jobs
+      summary: Get jobs posted by current restaurant
+      description: Get jobs posted by the authenticated restaurant owner
+      operationId: getMyJobs
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          description: Filter by job status
+          schema:
+            $ref: '#/components/schemas/JobStatus'
+      responses:
+        '200':
+          description: Restaurant jobs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+
+  /jobs/{id}:
+    get:
+      tags:
+        - Jobs
+      summary: Get a specific job posting
+      description: Retrieve detailed information about a job posting
+      operationId: getJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Job ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job posting retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobDetails'
+        '404':
+          description: Job posting not found
+
+    patch:
+      tags:
+        - Jobs
+      summary: Update a job posting
+      description: Update job posting details (owners and admins only)
+      operationId: updateJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Job ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobDto'
+      responses:
+        '200':
+          description: Job posting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '403':
+          description: Access denied
+        '404':
+          description: Job posting not found
+
+    delete:
+      tags:
+        - Jobs
+      summary: Delete a job posting
+      description: Delete/close a job posting (owners and admins only)
+      operationId: deleteJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Job ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Job posting deleted successfully
+        '403':
+          description: Access denied
+        '404':
+          description: Job posting not found
+
+  /jobs/{id}/apply:
+    post:
+      tags:
+        - Jobs
+      summary: Apply for a job
+      description: Submit job application (requires verification)
+      operationId: applyForJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Job ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobApplicationDto'
+      responses:
+        '201':
+          description: Application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobApplication'
+        '403':
+          description: Verification required or access denied
+        '404':
+          description: Job posting not found
+
+  # Community Endpoints
+  /community/posts:
+    get:
+      tags:
+        - Community
+      summary: Get community posts
+      description: Retrieve community posts and discussions
+      operationId: getCommunityPosts
+      responses:
+        '200':
+          description: Community posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityPost'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer token authentication
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API Key for external integrations
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Page number (1-based)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  schemas:
+    # Authentication Schemas
+    SignUpDto:
+      type: object
+      required:
+        - email
+        - password
+        - role
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          minLength: 12
+          description: "Strong password with uppercase, lowercase, number, and special character"
+          example: "SecurePassword123!"
+        role:
+          $ref: '#/components/schemas/UserRole'
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        phone:
+          type: string
+          format: phone
+          example: "+919876543210"
+        restaurantName:
+          type: string
+          description: "Required for RESTAURANT role"
+          example: "The Food Court"
+        cuisineType:
+          type: array
+          items:
+            type: string
+          description: "Required for RESTAURANT role"
+          example: ["Indian", "Chinese"]
+        companyName:
+          type: string
+          description: "Required for VENDOR role"
+          example: "Fresh Supplies Co"
+        businessType:
+          type: string
+          description: "Required for VENDOR role"
+          example: "Food Wholesale"
+        restaurantId:
+          type: string
+          description: "Required for EMPLOYEE role"
+          example: "cm2abcd1234567890"
+        designation:
+          type: string
+          description: "Required for EMPLOYEE role"
+          example: "Chef"
+
+    SignInDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          example: "SecurePassword123!"
+
+    RefreshTokenDto:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: "Refresh token received during login"
+
+    ForgotPasswordDto:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+
+    ResetPasswordDto:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+          description: "Reset token received in email"
+        newPassword:
+          type: string
+          format: password
+          minLength: 12
+          example: "NewSecurePassword123!"
+
+    AuthTokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: "JWT access token"
+        refreshToken:
+          type: string
+          description: "JWT refresh token"
+        expiresIn:
+          type: integer
+          description: "Access token expiry time in seconds"
+          example: 3600
+
+    # User and Role Schemas
+    UserRole:
+      type: string
+      enum:
+        - ADMIN
+        - RESTAURANT
+        - EMPLOYEE
+        - VENDOR
+      description: "User role in the system"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "cm2abcd1234567890"
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        isActive:
+          type: boolean
+        isVerified:
+          type: boolean
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        avatar:
+          type: string
+          format: uri
+        bio:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        pincode:
+          type: string
+
+    # Job Schemas
+    JobStatus:
+      type: string
+      enum:
+        - DRAFT
+        - OPEN
+        - CLOSED
+        - FILLED
+      description: "Current status of the job posting"
+
+    CreateJobDto:
+      type: object
+      required:
+        - title
+        - description
+        - location
+        - jobType
+        - validTill
+      properties:
+        title:
+          type: string
+          example: "Senior Chef"
+        description:
+          type: string
+          example: "We are looking for an experienced chef to lead our kitchen team..."
+        requirements:
+          type: array
+          items:
+            type: string
+          example: ["5+ years cooking experience", "Knowledge of Indian cuisine"]
+        skills:
+          type: array
+          items:
+            type: string
+          example: ["Cooking", "Team Leadership", "Menu Planning"]
+        experienceMin:
+          type: integer
+          minimum: 0
+          example: 3
+        experienceMax:
+          type: integer
+          minimum: 0
+          example: 8
+        salaryMin:
+          type: number
+          minimum: 0
+          example: 25000
+        salaryMax:
+          type: number
+          minimum: 0
+          example: 40000
+        location:
+          type: string
+          example: "Mumbai, Maharashtra"
+        jobType:
+          type: string
+          enum: [Full-time, Part-time, Contract, Freelance]
+          example: "Full-time"
+        validTill:
+          type: string
+          format: date
+          example: "2024-12-31"
+
+    UpdateJobDto:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceMin:
+          type: integer
+          minimum: 0
+        experienceMax:
+          type: integer
+          minimum: 0
+        salaryMin:
+          type: number
+          minimum: 0
+        salaryMax:
+          type: number
+          minimum: 0
+        location:
+          type: string
+        jobType:
+          type: string
+        validTill:
+          type: string
+          format: date
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "cm2job1234567890"
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experienceMin:
+          type: integer
+        experienceMax:
+          type: integer
+        salaryMin:
+          type: number
+        salaryMax:
+          type: number
+        location:
+          type: string
+        jobType:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        validTill:
+          type: string
+          format: date-time
+        viewCount:
+          type: integer
+        applicationCount:
+          type: integer
+        restaurant:
+          $ref: '#/components/schemas/RestaurantInfo'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    JobDetails:
+      allOf:
+        - $ref: '#/components/schemas/Job'
+        - type: object
+          properties:
+            applications:
+              type: array
+              items:
+                $ref: '#/components/schemas/JobApplication'
+
+    JobApplicationDto:
+      type: object
+      properties:
+        coverLetter:
+          type: string
+          example: "I am excited to apply for this position..."
+        resume:
+          type: string
+          format: uri
+          example: "https://example.com/resume.pdf"
+
+    JobApplication:
+      type: object
+      properties:
+        id:
+          type: string
+        jobId:
+          type: string
+        employee:
+          $ref: '#/components/schemas/EmployeeInfo'
+        coverLetter:
+          type: string
+        resume:
+          type: string
+          format: uri
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        reviewNotes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ApplicationStatus:
+      type: string
+      enum:
+        - PENDING
+        - REVIEWED
+        - SHORTLISTED
+        - ACCEPTED
+        - REJECTED
+
+    # Restaurant Schemas
+    RestaurantInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        logo:
+          type: string
+          format: uri
+        cuisineType:
+          type: array
+          items:
+            type: string
+        rating:
+          type: number
+          format: float
+        totalReviews:
+          type: integer
+
+    EmployeeInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        designation:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    # Community Schemas
+    CommunityPost:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        author:
+          $ref: '#/components/schemas/UserProfile'
+        likeCount:
+          type: integer
+        commentCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    # Common Schemas
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 150
+        totalPages:
+          type: integer
+          example: 8
+        hasNext:
+          type: boolean
+          example: true
+        hasPrev:
+          type: boolean
+          example: false
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Validation failed"
+        error:
+          type: string
+          example: "BadRequest"
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+          example: "/api/v1/auth/signin"
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization endpoints
+  - name: Jobs
+    description: Job portal and application management
+  - name: Community
+    description: Community features and social networking
+  - name: Users
+    description: User profile management
+  - name: Restaurants
+    description: Restaurant operations and management
+  - name: Vendors
+    description: Vendor and supplier management
+  - name: Orders
+    description: Order management and fulfillment
+  - name: Payments
+    description: Payment processing and billing
+  - name: Analytics
+    description: Analytics and reporting

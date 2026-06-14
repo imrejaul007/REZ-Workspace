@@ -1,0 +1,79 @@
+# Atlas AI Workforce - Render Blueprint
+# AI Employee Orchestration Hub
+
+services:
+  - type: web
+    name: atlas-ai-workforce
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5190"
+      - key: SERVICE_NAME
+        value: atlas-ai-workforce
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+  # Nested Worker Services
+  - type: worker
+    name: atlas-sdr-agent
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5174"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+
+  - type: worker
+    name: atlas-qualification-agent
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5175"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+
+  - type: worker
+    name: atlas-meeting-agent
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5176"
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false

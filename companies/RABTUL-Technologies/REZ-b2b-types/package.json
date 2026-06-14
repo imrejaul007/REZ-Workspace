@@ -1,0 +1,27 @@
+{
+  "name": "@rez/b2b-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for REZ B2B Revenue OS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.npmjs.com/"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "rez",
+    "b2b",
+    "sales",
+    "crm",
+    "typescript"
+  ],
+  "license": "MIT"
+}

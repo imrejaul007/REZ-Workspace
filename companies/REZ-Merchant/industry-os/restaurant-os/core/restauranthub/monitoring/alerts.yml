@@ -1,0 +1,103 @@
+groups:
+- name: restauranthub.rules
+  rules:
+  
+  # High CPU Usage
+  - alert: HighCPUUsage
+    expr: (100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage on {{ $labels.instance }}"
+      description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
+
+  # High Memory Usage
+  - alert: HighMemoryUsage
+    expr: (1 - ((node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))) * 100 > 90
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage on {{ $labels.instance }}"
+      description: "Memory usage is above 90% for more than 5 minutes on {{ $labels.instance }}"
+
+  # Service Down
+  - alert: ServiceDown
+    expr: up == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Service {{ $labels.job }} is down"
+      description: "Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 2 minutes"
+
+  # High Response Time
+  - alert: HighResponseTime
+    expr: http_request_duration_seconds{quantile="0.95"} > 2
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High response time on {{ $labels.job }}"
+      description: "95th percentile response time is above 2 seconds for {{ $labels.job }}"
+
+  # High Error Rate
+  - alert: HighErrorRate
+    expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) * 100 > 5
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High error rate on {{ $labels.job }}"
+      description: "Error rate is above 5% for {{ $labels.job }}"
+
+  # Database Connection Issues
+  - alert: DatabaseConnectionIssues
+    expr: pg_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Database connection issues"
+      description: "PostgreSQL database is not reachable"
+
+  # Redis Connection Issues
+  - alert: RedisConnectionIssues
+    expr: redis_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Redis connection issues"
+      description: "Redis server is not reachable"
+
+  # Disk Space Low
+  - alert: DiskSpaceLow
+    expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 20
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Low disk space on {{ $labels.instance }}"
+      description: "Disk space is below 20% on {{ $labels.instance }}"
+
+  # Pod CrashLooping
+  - alert: PodCrashLooping
+    expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Pod {{ $labels.pod }} is crash looping"
+      description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently"
+
+  # High Request Rate
+  - alert: HighRequestRate
+    expr: rate(http_requests_total[5m]) > 100
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High request rate on {{ $labels.job }}"
+      description: "Request rate is above 100 requests per second for {{ $labels.job }}"

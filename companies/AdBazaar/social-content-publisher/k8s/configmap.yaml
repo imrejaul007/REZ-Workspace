@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ad-bazaar-social-publisher-config
+  labels:
+    app: ad-bazaar-social-publisher
+data:
+  NODE_ENV: "production"
+  PORT: "5083"
+  LOG_LEVEL: "info"
+  MONGODB_URI: "mongodb://mongo-cluster.mongodb.svc.cluster.local:27017/social_publisher"
+  REDIS_URL: "redis://redis-cluster.redis.svc.cluster.local:6379"
+  QUEUE_CONCURRENCY: "5"
+  PUBLISH_BATCH_SIZE: "10"

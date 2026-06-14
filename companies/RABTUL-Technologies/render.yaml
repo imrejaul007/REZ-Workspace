@@ -1,0 +1,347 @@
+# RABTUL Technologies - Render Blueprint
+# Deploy all services to Render
+
+services:
+  # ─────────────────────────────────────────────
+  # Core Services
+  # ─────────────────────────────────────────────
+
+  - name: api-gateway
+    env: web
+    region: singapore
+    plan: starter
+    port: 4000
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  - name: rez-auth-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4002
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+  - name: rez-payment-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4001
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+
+  - name: rez-wallet-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4004
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  - name: rez-order-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4006
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  - name: rez-catalog-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4007
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  - name: rez-search-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4008
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  - name: rez-delivery-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4009
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  - name: rez-notifications-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4011
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  - name: rez-profile-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4013
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  - name: rez-analytics-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4016
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  - name: rez-booking-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4020
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+
+  # ─────────────────────────────────────────────
+  # Infrastructure Services
+  # ─────────────────────────────────────────────
+
+  - name: rez-circuit-breaker
+    env: web
+    region: singapore
+    plan: starter
+    port: 4030
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: rez-retry-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4031
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: rez-dlq-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4032
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: rez-idempotency-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4033
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: rez-policy-engine
+    env: web
+    region: singapore
+    plan: starter
+    port: 4034
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: rez-secrets-manager
+    env: web
+    region: singapore
+    plan: starter
+    port: 4035
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: MASTER_PASSWORD
+        sync: false
+
+  - name: rez-scheduler-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4038
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: rez-observability-platform
+    env: web
+    region: singapore
+    plan: starter
+    port: 4025
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  # ─────────────────────────────────────────────
+  # BuzzLocal Services
+  # ─────────────────────────────────────────────
+
+  - name: buzzlocal-feed-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4201
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: buzzlocal-community-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4202
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: buzzlocal-intelligence-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4203
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: buzzlocal-notification-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4204
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: buzzlocal-payment-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4205
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: buzzlocal-realtime-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4206
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: buzzlocal-vibe-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4207
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+  - name: buzzlocal-weather-service
+    env: web
+    region: singapore
+    plan: starter
+    port: 4208
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
+
+# ─────────────────────────────────────────────
+# Managed Services
+# ─────────────────────────────────────────────
+
+backends:
+  - name: mongodb
+    plan: starter
+    databaseName: rabtul
+    ipAllowList: []
+
+  - name: redis
+    plan: starter

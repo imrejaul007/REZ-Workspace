@@ -1,0 +1,1262 @@
+openapi: 3.0.0
+info:
+  title: Instagram Shop Integration API
+  version: 1.0.0
+  description: |
+    API for Instagram Shop integration - connects your product catalog to Instagram Shopping.
+    Enables product syncing, in-app checkout, and order management through Instagram.
+  contact:
+    name: AdBazaar Support
+    email: support@adbazaar.com
+  license:
+    name: Proprietary
+    url: https://adbazaar.com/license
+
+servers:
+  - url: http://localhost:5080
+    description: Local development server
+  - url: https://api.adbazaar.com/shop/v1
+    description: Production server
+
+tags:
+  - name: System
+    description: System health and monitoring endpoints
+  - name: Products
+    description: Product catalog management
+  - name: Orders
+    description: Order management and tracking
+  - name: Analytics
+    description: Shop performance analytics
+  - name: Webhooks
+    description: Instagram webhook handlers
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the current health status of the service
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                service: instagram-shop-integration
+                version: "1.0.0"
+                timestamp: "2026-06-08T10:30:00.000Z"
+                mongodb: connected
+
+  /ready:
+    get:
+      summary: Readiness check
+      description: Checks if the service is ready to accept requests (MongoDB connected)
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+        '503':
+          description: Service not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics for monitoring
+      tags:
+        - System
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          description: Error generating metrics
+
+  # ============ PRODUCTS ============
+  /api/products:
+    get:
+      summary: List products
+      description: Retrieve a paginated list of products with optional filtering
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category
+        - name: availability
+          in: query
+          schema:
+            type: string
+            enum: [in_stock, out_of_stock, preorder]
+          description: Filter by availability status
+        - name: syncStatus
+          in: query
+          schema:
+            type: string
+          description: Filter by Instagram sync status
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+          description: Items per page
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by product name
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '500':
+          description: Failed to list products
+
+    post:
+      summary: Create product
+      description: Create a new product in the catalog
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+            example:
+              name: "Premium Cotton T-Shirt"
+              description: "High-quality organic cotton t-shirt in multiple colors"
+              price: 1299.99
+              currency: INR
+              images:
+                - "https://example.com/tshirt-black.jpg"
+                - "https://example.com/tshirt-white.jpg"
+              availability: in_stock
+              category: apparel
+              syncToInstagram: true
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Failed to create product
+
+  /api/products/{id}:
+    get:
+      summary: Get product
+      description: Retrieve a single product by ID
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Product ID
+      responses:
+        '200':
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          description: Product not found
+        '500':
+          description: Failed to get product
+
+    patch:
+      summary: Update product
+      description: Update an existing product
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Product ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          description: Product not found
+        '500':
+          description: Failed to update product
+
+    delete:
+      summary: Delete product
+      description: Delete a product from the catalog
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Product ID
+      responses:
+        '200':
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '404':
+          description: Product not found
+        '500':
+          description: Failed to delete product
+
+  /api/products/sync:
+    post:
+      summary: Sync product to Instagram
+      description: Sync a product to Instagram Shopping catalog
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+              properties:
+                productId:
+                  type: string
+            example:
+              productId: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Product synced successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          description: Missing product ID
+        '404':
+          description: Product not found
+        '500':
+          description: Failed to sync product
+
+  /api/products/{id}/sync:
+    post:
+      summary: Sync specific product
+      description: Sync a specific product to Instagram by ID
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Product ID
+      responses:
+        '200':
+          description: Product synced successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          description: Product not found
+        '500':
+          description: Failed to sync product
+
+  /api/products/{id}/instagram:
+    delete:
+      summary: Remove from Instagram
+      description: Remove a product from the Instagram catalog
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Product ID
+      responses:
+        '200':
+          description: Product removed from Instagram
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '400':
+          description: Product not synced to Instagram
+        '404':
+          description: Product not found
+        '500':
+          description: Failed to remove product
+
+  /api/products/{id}/tags:
+    get:
+      summary: Get tagging suggestions
+      description: Get product tagging suggestions for Instagram posts
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Product ID
+      responses:
+        '200':
+          description: Tagging suggestions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                      suggestions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TaggingSuggestion'
+
+  /api/products/{id}/availability:
+    patch:
+      summary: Update availability
+      description: Update product availability status
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Product ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - availability
+              properties:
+                availability:
+                  type: string
+                  enum: [in_stock, out_of_stock, preorder]
+            example:
+              availability: out_of_stock
+      responses:
+        '200':
+          description: Availability updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          description: Invalid availability value
+        '404':
+          description: Product not found
+        '500':
+          description: Failed to update availability
+
+  # ============ ORDERS ============
+  /api/orders:
+    get:
+      summary: List orders
+      description: Retrieve a paginated list of orders with filtering
+      tags:
+        - Orders
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+          description: Filter by user ID
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, confirmed, shipped, delivered, cancelled]
+          description: Filter by order status
+        - name: productId
+          in: query
+          schema:
+            type: string
+          description: Filter by product ID
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter orders from this date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter orders until this date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+        '500':
+          description: Failed to list orders
+
+    post:
+      summary: Create order
+      description: Create a new order from Instagram Shopping
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+            example:
+              productId: "507f1f77bcf86cd799439011"
+              userId: "user_123"
+              quantity: 2
+              totalAmount: 2599.98
+              shippingAddress:
+                name: "John Doe"
+                street: "123 Main Street"
+                city: "Mumbai"
+                state: "Maharashtra"
+                zip: "400001"
+                country: India
+              notes: "Please gift wrap"
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Validation error
+        '500':
+          description: Failed to create order
+
+  /api/orders/stats:
+    get:
+      summary: Get order statistics
+      description: Get aggregated order statistics
+      tags:
+        - Orders
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+          description: Filter by user ID
+      responses:
+        '200':
+          description: Statistics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderStatsResponse'
+
+  /api/orders/user/{userId}:
+    get:
+      summary: Get user orders
+      description: Get all orders for a specific user
+      tags:
+        - Orders
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: User ID
+      responses:
+        '200':
+          description: User orders retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+        '500':
+          description: Failed to get user orders
+
+  /api/orders/{id}:
+    get:
+      summary: Get order
+      description: Get a single order by ID
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Order ID
+      responses:
+        '200':
+          description: Order retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Order not found
+        '500':
+          description: Failed to get order
+
+  /api/orders/{id}/status:
+    patch:
+      summary: Update order status
+      description: Update the status of an order
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Order ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderStatusRequest'
+            example:
+              status: shipped
+              trackingNumber: "TRACK123456789"
+              notes: "Shipped via Express delivery"
+      responses:
+        '200':
+          description: Order status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Order not found
+        '500':
+          description: Failed to update order status
+
+  /api/orders/{id}/cancel:
+    post:
+      summary: Cancel order
+      description: Cancel an order
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Order ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+            example:
+              reason: "Customer requested cancellation"
+      responses:
+        '200':
+          description: Order cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Order not found
+        '500':
+          description: Failed to cancel order
+
+  # ============ ANALYTICS ============
+  /api/analytics:
+    get:
+      summary: Get shop analytics
+      description: Get shop performance analytics for a period
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date (YYYY-MM-DD)
+        - name: productId
+          in: query
+          schema:
+            type: string
+          description: Filter by product ID
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, days_28]
+            default: days_28
+          description: Analytics period
+      responses:
+        '200':
+          description: Analytics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsResponse'
+        '500':
+          description: Failed to get analytics
+
+  /api/analytics/daily:
+    get:
+      summary: Get daily analytics
+      description: Get analytics for a specific date range
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End date (YYYY-MM-DD)
+      responses:
+        '200':
+          description: Daily analytics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsResponse'
+        '400':
+          description: Missing required parameters
+        '500':
+          description: Failed to get daily analytics
+
+  /api/analytics/products/{productId}:
+    get:
+      summary: Get product analytics
+      description: Get analytics for a specific product
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Product ID
+      responses:
+        '200':
+          description: Product analytics retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                      views:
+                        type: integer
+                      engagement:
+                        type: number
+                      conversions:
+                        type: integer
+        '500':
+          description: Failed to get product analytics
+
+  /api/analytics/record:
+    post:
+      summary: Record daily analytics
+      description: Record daily analytics (internal use)
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+            example:
+              date: "2026-06-08"
+      responses:
+        '200':
+          description: Analytics recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  # ============ WEBHOOKS ============
+  /api/webhooks/instagram:
+    get:
+      summary: Webhook verification
+      description: Verify webhook endpoint for Facebook
+      tags:
+        - Webhooks
+      parameters:
+        - name: hub.mode
+          in: query
+          schema:
+            type: string
+          description: Webhook mode (subscribe)
+        - name: hub.verify_token
+          in: query
+          schema:
+            type: string
+          description: Verification token
+        - name: hub.challenge
+          in: query
+          schema:
+            type: string
+          description: Challenge string
+      responses:
+        '200':
+          description: Webhook verified
+          content:
+            text/plain:
+              schema:
+                type: string
+        '403':
+          description: Verification failed
+
+    post:
+      summary: Webhook callback
+      description: Handle Instagram/Facebook webhook events
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPayload'
+      responses:
+        '200':
+          description: Webhook processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '500':
+          description: Webhook processing failed
+
+  /api/protected:
+    get:
+      summary: Protected endpoint
+      description: Example protected route requiring authentication
+      tags:
+        - System
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Access granted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+# ============ COMPONENTS ============
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        service:
+          type: string
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        mongodb:
+          type: string
+          enum: [connected, disconnected]
+
+    ReadyResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ready, not ready]
+        mongodb:
+          type: string
+
+    Product:
+      type: object
+      required:
+        - _id
+        - name
+        - description
+        - price
+        - images
+        - category
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+          default: INR
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+        availability:
+          type: string
+          enum: [in_stock, out_of_stock, preorder]
+        category:
+          type: string
+        instagramProductId:
+          type: string
+        syncStatus:
+          type: string
+          enum: [pending, synced, failed]
+        syncedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateProductRequest:
+      type: object
+      required:
+        - name
+        - description
+        - price
+        - images
+        - category
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 500
+        description:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        price:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          default: INR
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          minItems: 1
+          maxItems: 20
+        availability:
+          type: string
+          enum: [in_stock, out_of_stock, preorder]
+          default: in_stock
+        category:
+          type: string
+          minLength: 1
+        syncToInstagram:
+          type: boolean
+          default: false
+
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 500
+        description:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        price:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          minItems: 1
+          maxItems: 20
+        availability:
+          type: string
+          enum: [in_stock, out_of_stock, preorder]
+        category:
+          type: string
+
+    ProductResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Product'
+        message:
+          type: string
+
+    ProductListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+        productId:
+          type: string
+        userId:
+          type: string
+        quantity:
+          type: integer
+        totalAmount:
+          type: number
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled]
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        trackingNumber:
+          type: string
+        notes:
+          type: string
+        instagramOrderId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ShippingAddress:
+      type: object
+      properties:
+        name:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        country:
+          type: string
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - productId
+        - userId
+        - quantity
+        - totalAmount
+        - shippingAddress
+      properties:
+        productId:
+          type: string
+        userId:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 100
+        totalAmount:
+          type: number
+          minimum: 0
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        notes:
+          type: string
+          maxLength: 1000
+
+    UpdateOrderStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled]
+        trackingNumber:
+          type: string
+        notes:
+          type: string
+          maxLength: 1000
+
+    OrderResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Order'
+        message:
+          type: string
+
+    OrderListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    OrderStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            totalOrders:
+              type: integer
+            totalRevenue:
+              type: number
+            averageOrderValue:
+              type: number
+            ordersByStatus:
+              type: object
+
+    AnalyticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            views:
+              type: integer
+            engagement:
+              type: number
+            conversions:
+              type: integer
+            revenue:
+              type: number
+        period:
+          type: string
+
+    WebhookPayload:
+      type: object
+      properties:
+        object:
+          type: string
+          enum: [instagram_shopping, commerce_orders]
+        entry:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              time:
+                type: integer
+              changes:
+                type: array
+              messaging:
+                type: array
+
+    TaggingSuggestion:
+      type: object
+      properties:
+        x:
+          type: number
+          description: X position (0-100)
+        y:
+          type: number
+          description: Y position (0-100)
+        productId:
+          type: string
+        productName:
+          type: string
+        confidence:
+          type: number
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+
+    DeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string

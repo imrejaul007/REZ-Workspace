@@ -1,0 +1,3 @@
+[submodule "rez-merchant-intelligence-aggregator"]
+	path = rez-merchant-intelligence-aggregator
+	url = https://github.com/imrejaul007/rez-merchant-intelligence-aggregator

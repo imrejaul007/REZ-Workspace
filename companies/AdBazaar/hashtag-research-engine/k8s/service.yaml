@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ad-bazaar-hashtag-research
+  labels:
+    app: ad-bazaar-hashtag-research
+    tier: social-automation
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 5090
+    protocol: TCP
+    name: http
+  selector:
+    app: ad-bazaar-hashtag-research

@@ -1,0 +1,285 @@
+groups:
+  - name: critical-system-alerts
+    rules:
+      # Application Down
+      - alert: ApplicationDown
+        expr: up{job=~"restauranthub-.*"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "RestaurantHub service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 30 seconds"
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.job }} on {{ $labels.instance }}"
+
+      # High Response Time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}"
+
+      # Database Connection Issues
+      - alert: DatabaseConnectionDown
+        expr: up{job="postgresql-primary"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: "database"
+        annotations:
+          summary: "Primary database is down"
+          description: "Primary PostgreSQL database is unreachable"
+
+      - alert: DatabaseConnectionPool
+        expr: postgres_stat_database_numbackends / postgres_settings_max_connections > 0.8
+        for: 2m
+        labels:
+          severity: warning
+          service: "database"
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "Database connection pool is {{ $value | humanizePercentage }} full"
+
+      # Redis Issues
+      - alert: RedisDown
+        expr: up{job="redis-cluster"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: "redis"
+        annotations:
+          summary: "Redis cluster node down"
+          description: "Redis node {{ $labels.redis_node }} is down"
+
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: "redis"
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis node {{ $labels.instance }} memory usage is {{ $value | humanizePercentage }}"
+
+      # System Resource Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: "system"
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          service: "system"
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes > 0.9
+        for: 10m
+        labels:
+          severity: critical
+          service: "system"
+        annotations:
+          summary: "Disk space low"
+          description: "Disk usage is {{ $value | humanizePercentage }} on {{ $labels.instance }} mount {{ $labels.mountpoint }}"
+
+      # SSL Certificate Expiry
+      - alert: SSLCertExpiringSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 7 * 24 * 3600
+        for: 1h
+        labels:
+          severity: warning
+          service: "ssl"
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate for {{ $labels.instance }} expires in {{ $value | humanizeDuration }}"
+
+      - alert: SSLCertExpired
+        expr: probe_ssl_earliest_cert_expiry - time() <= 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "ssl"
+        annotations:
+          summary: "SSL certificate expired"
+          description: "SSL certificate for {{ $labels.instance }} has expired"
+
+  - name: business-critical-alerts
+    rules:
+      # User Authentication Issues
+      - alert: AuthenticationFailureRate
+        expr: rate(auth_attempts_failed_total[5m]) / rate(auth_attempts_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: "authentication"
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+
+      # Payment Processing Issues
+      - alert: PaymentProcessingFailures
+        expr: rate(payment_transactions_failed_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: "payments"
+        annotations:
+          summary: "High payment processing failures"
+          description: "Payment processing failures: {{ $value }} per second"
+
+      # Order Processing Issues
+      - alert: OrderProcessingDelay
+        expr: histogram_quantile(0.95, rate(order_processing_duration_seconds_bucket[5m])) > 300
+        for: 5m
+        labels:
+          severity: warning
+          service: "orders"
+        annotations:
+          summary: "Order processing delays"
+          description: "95th percentile order processing time is {{ $value }}s"
+
+      # User Registration Issues
+      - alert: UserRegistrationFailures
+        expr: rate(user_registration_failures_total[10m]) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: "registration"
+        annotations:
+          summary: "High user registration failure rate"
+          description: "User registration failures: {{ $value }} per second"
+
+      # Email Service Issues
+      - alert: EmailDeliveryFailures
+        expr: rate(email_delivery_failures_total[5m]) / rate(email_delivery_attempts_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: "email"
+        annotations:
+          summary: "High email delivery failure rate"
+          description: "Email delivery failure rate is {{ $value | humanizePercentage }}"
+
+      # File Upload Issues
+      - alert: FileUploadFailures
+        expr: rate(file_upload_failures_total[5m]) / rate(file_upload_attempts_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+          service: "file-upload"
+        annotations:
+          summary: "High file upload failure rate"
+          description: "File upload failure rate is {{ $value | humanizePercentage }}"
+
+  - name: security-alerts
+    rules:
+      # Suspicious Activity
+      - alert: UnusualTrafficPattern
+        expr: rate(http_requests_total[5m]) > 1000
+        for: 2m
+        labels:
+          severity: warning
+          service: "security"
+        annotations:
+          summary: "Unusual traffic pattern detected"
+          description: "Request rate is {{ $value }} requests/second, which is unusually high"
+
+      - alert: RateLimitHit
+        expr: rate(rate_limit_exceeded_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+          service: "security"
+        annotations:
+          summary: "Rate limits being hit frequently"
+          description: "Rate limit exceeded {{ $value }} times per second"
+
+      - alert: FailedLoginAttempts
+        expr: rate(auth_login_failures_total[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+          service: "security"
+        annotations:
+          summary: "High number of failed login attempts"
+          description: "Failed login attempts: {{ $value }} per second"
+
+      - alert: CSRFTokenFailures
+        expr: rate(csrf_token_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: "security"
+        annotations:
+          summary: "High CSRF token failure rate"
+          description: "CSRF token failures: {{ $value }} per second"
+
+  - name: performance-alerts
+    rules:
+      # Database Performance
+      - alert: SlowDatabaseQueries
+        expr: histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m])) > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: "database"
+        annotations:
+          summary: "Slow database queries detected"
+          description: "95th percentile database query time is {{ $value }}s"
+
+      - alert: DatabaseLockWaits
+        expr: postgres_stat_database_blks_hit / (postgres_stat_database_blks_hit + postgres_stat_database_blks_read) < 0.95
+        for: 5m
+        labels:
+          severity: warning
+          service: "database"
+        annotations:
+          summary: "Database cache hit ratio low"
+          description: "Database cache hit ratio is {{ $value | humanizePercentage }}"
+
+      # API Performance
+      - alert: APIThroughputDrop
+        expr: rate(http_requests_total[5m]) < 10
+        for: 10m
+        labels:
+          severity: warning
+          service: "api"
+        annotations:
+          summary: "API throughput unusually low"
+          description: "API request rate is only {{ $value }} requests/second"
+
+      # Memory Leaks
+      - alert: MemoryLeakSuspected
+        expr: increase(process_resident_memory_bytes[1h]) > 100 * 1024 * 1024
+        for: 1h
+        labels:
+          severity: warning
+          service: "application"
+        annotations:
+          summary: "Potential memory leak detected"
+          description: "Memory usage increased by {{ $value | humanizeBytes }} in the last hour"

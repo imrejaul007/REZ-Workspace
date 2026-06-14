@@ -1,0 +1,1 @@
+import express from'express';import logger from'./utils/logger';import fileRoutes from'./routes/files';const app=express();const PORT=4322;app.use(express.json());app.get('/health',(_,res)=>res.json({service:'REZ File Storage',status:'healthy'}));app.use('/api/files',fileRoutes);app.listen(PORT,()=>logger.info(`REZ File Storage running on ${PORT}`));export{app};

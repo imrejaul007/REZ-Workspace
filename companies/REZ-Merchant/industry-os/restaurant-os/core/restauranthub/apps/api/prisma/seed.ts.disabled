@@ -1,0 +1,227 @@
+import { PrismaClient, JobStatus } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log('🌱 Starting database seed...');
+
+  // Create Super Admin
+  const adminPassword = await bcrypt.hash('Admin@123', 10);
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@resturistan.com' },
+    update: {},
+    create: {
+      email: 'admin@resturistan.com',
+      passwordHash: adminPassword,
+      role: 'ADMIN',
+      isActive: true,
+      isVerified: true,
+      phone: '+919999999999',
+    },
+  });
+
+  // Create Restaurant Owner
+  const restaurantPassword = await bcrypt.hash('Restaurant@123', 10);
+  const restaurant = await prisma.user.upsert({
+    where: { email: 'restaurant@resturistan.com' },
+    update: {},
+    create: {
+      email: 'restaurant@resturistan.com',
+      passwordHash: restaurantPassword,
+      role: 'RESTAURANT',
+      isActive: true,
+      isVerified: true,
+      phone: '+919888888888',
+    },
+  });
+
+  // Create Vendor
+  const vendorPassword = await bcrypt.hash('Vendor@123', 10);
+  const vendor = await prisma.user.upsert({
+    where: { email: 'vendor@resturistan.com' },
+    update: {},
+    create: {
+      email: 'vendor@resturistan.com',
+      passwordHash: vendorPassword,
+      role: 'VENDOR',
+      isActive: true,
+      emailVerifiedAt: new Date(),
+      // firstName: 'Sarah',
+      // lastName: 'Vendor',
+      phone: '+919777777777',
+      vendorProfile: {
+        create: {
+          businessName: 'Fresh Foods Supply Co.',
+          description: 'Premium quality food supplies for restaurants',
+          businessType: 'Food Supplier',
+          businessAddress: '456 Supply Street',
+          city: 'Mumbai',
+          state: 'Maharashtra',
+          zipCode: '400002',
+          gstNumber: 'GST987654321',
+          panNumber: 'PAN1234567',
+          isVerified: true,
+        }
+      }
+    },
+  });
+
+  // Create Employee
+  const employeePassword = await bcrypt.hash('Employee@123', 10);
+  const employee = await prisma.user.upsert({
+    where: { email: 'employee@resturistan.com' },
+    update: {},
+    create: {
+      email: 'employee@resturistan.com',
+      passwordHash: employeePassword,
+      role: 'EMPLOYEE',
+      isActive: true,
+      emailVerifiedAt: new Date(),
+      // firstName: 'Mike',
+      // lastName: 'Employee',
+      phone: '+919666666666',
+    },
+  });
+
+  // Create Customer
+  const customerPassword = await bcrypt.hash('Customer@123', 10);
+  const customer = await prisma.user.upsert({
+    where: { email: 'customer@resturistan.com' },
+    update: {},
+    create: {
+      email: 'customer@resturistan.com',
+      passwordHash: customerPassword,
+      role: 'VENDOR',
+      isActive: true,
+      emailVerifiedAt: new Date(),
+      // firstName: 'David',
+      // lastName: 'Customer',
+      phone: '+919555555555',
+      customerProfile: {
+        create: {
+          favoriteCuisines: ['Indian', 'Chinese'],
+          dietaryRestrictions: ['Vegetarian'],
+        }
+      }
+    },
+  });
+
+  // Get restaurant profile record
+  const restaurantProfile = await prisma.restaurantProfile.findUnique({ 
+    where: { userId: restaurant.id } 
+  });
+  if (!restaurantProfile) throw new Error('Restaurant profile not found');
+  
+  // Create Employee Profile for employee user
+  await prisma.employeeProfile.create({
+    data: {
+      userId: employee.id,
+      restaurantId: restaurantProfile.id,
+      employeeId: 'EMP001',
+      position: 'Head Chef',
+      department: 'Kitchen',
+      salary: 50000,
+      hireDate: new Date('2023-01-15'),
+      skills: ['Cooking', 'Leadership', 'Menu Planning'],
+    },
+  });
+
+  // Get vendor profile record  
+  const vendorProfile = await prisma.vendorProfile.findUnique({ 
+    where: { userId: vendor.id } 
+  });
+  if (!vendorProfile) throw new Error('Vendor profile not found');
+
+  // Create sample products for vendor
+  const products = [
+    {
+      name: 'Fresh Tomatoes',
+      description: 'Farm fresh tomatoes, Grade A quality',
+      category: 'Vegetables',
+      price: 40,
+      unit: 'kg',
+      minOrderQty: 5,
+      stockQuantity: 100,
+      vendorId: vendorProfile.id,
+      images: ['/images/tomatoes.jpg'],
+      tags: ['Fresh', 'Organic', 'Local'],
+    },
+    {
+      name: 'Fresh Milk',
+      description: 'Farm fresh pasteurized milk',
+      category: 'Dairy',
+      price: 60,
+      unit: 'liter',
+      minOrderQty: 5,
+      stockQuantity: 50,
+      vendorId: vendorProfile.id,
+      images: ['/images/milk.jpg'],
+      tags: ['Fresh', 'Pasteurized', 'Grade A'],
+    },
+  ];
+
+  for (const product of products) {
+    await prisma.product.create({
+      data: product,
+    });
+  }
+  
+  // Create sample job postings
+  const jobs = [
+    {
+      title: 'Head Chef',
+      description: 'Looking for an experienced head chef for fine dining restaurant',
+      requirements: ['5+ years experience', 'Culinary degree', 'Team management skills'],
+      responsibilities: ['Menu planning', 'Kitchen management', 'Staff training'],
+      type: JobType.FULL_TIME,
+      category: 'Chef',
+      experience: '5+ years',
+      location: 'Mumbai',
+      salaryRange: '₹60,000 - ₹80,000',
+      skills: ['Cooking', 'Leadership', 'Menu Planning'],
+      qualifications: ['Culinary degree', 'Food safety certification'],
+      status: JobStatus.PUBLISHED,
+      restaurantId: restaurantProfile.id,
+    },
+    {
+      title: 'Waiter/Waitress',
+      description: 'Looking for experienced service staff',
+      requirements: ['2+ years experience', 'Good communication skills', 'Customer service oriented'],
+      responsibilities: ['Customer service', 'Order taking', 'Table management'],
+      type: JobType.FULL_TIME,
+      category: 'Service Staff',
+      experience: '2+ years',
+      location: 'Mumbai',
+      salaryRange: '₹20,000 - ₹25,000',
+      skills: ['Customer Service', 'Communication'],
+      qualifications: ['High school diploma', 'Service experience'],
+      status: JobStatus.PUBLISHED,
+      restaurantId: restaurantProfile.id,
+    },
+  ];
+
+  for (const job of jobs) {
+    await prisma.jobPosting.create({
+      data: job,
+    });
+  }
+
+  console.log('✅ Database seed completed!');
+  console.log('');
+  console.log('Created users:');
+  console.log('  - Admin: admin@resturistan.com / Admin@123');
+  console.log('  - Restaurant: restaurant@resturistan.com / Restaurant@123');
+  console.log('  - Vendor: vendor@resturistan.com / Vendor@123');
+  console.log('  - Employee: employee@resturistan.com / Employee@123');
+  console.log('  - Customer: customer@resturistan.com / Customer@123');
+}
+
+main()
+  .catch((e) => {
+    console.error('❌ Seed failed:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

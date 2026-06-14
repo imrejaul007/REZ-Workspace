@@ -1,0 +1,976 @@
+openapi: 3.0.0
+info:
+  title: Instagram Insights Service API
+  version: 1.0.0
+  description: |
+    Deep analytics from Instagram Insights API.
+    Provides account-level insights, content performance, audience demographics,
+    and optimal posting time recommendations.
+  contact:
+    name: AdBazaar Support
+    email: support@adbazaar.com
+  license:
+    name: Proprietary
+    url: https://adbazaar.com/license
+
+servers:
+  - url: http://localhost:5082
+    description: Local development server
+  - url: https://api.adbazaar.com/insights/v1
+    description: Production server
+
+tags:
+  - name: System
+    description: System health and monitoring
+  - name: Account
+    description: Account-level insights
+  - name: Content
+    description: Content performance analytics
+  - name: Audience
+    description: Audience demographics and behavior
+  - name: Stories
+    description: Instagram Stories analytics
+  - name: Reels
+    description: Reels performance analytics
+  - name: Hashtags
+    description: Hashtag performance tracking
+  - name: Export
+    description: Report export functionality
+  - name: Dashboard
+    description: Dashboard summary data
+
+paths:
+  /:
+    get:
+      summary: API info
+      description: Returns service information and available endpoints
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service information
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                service: instagram-insights-service
+                version: "1.0.0"
+                description: Deep analytics from Instagram Insights API
+                endpoints:
+                  health: /health
+                  metrics: /metrics
+                  insights: /api/insights
+
+  /health:
+    get:
+      summary: Health check
+      description: Returns the current health status of the service
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                timestamp: "2026-06-08T10:30:00.000Z"
+                version: "1.0.0"
+                uptime: 86400
+                services:
+                  mongodb: connected
+                  instagram_api: healthy
+                memory:
+                  used: 128
+                  total: 512
+                  unit: MB
+
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics
+      tags:
+        - System
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  # ============ ACCOUNT INSIGHTS ============
+  /api/insights/account:
+    get:
+      summary: Get account insights
+      description: Get account-level insights (followers, reach, impressions)
+      tags:
+        - Account
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 90
+            default: 28
+          description: Number of days to retrieve (1-90)
+      responses:
+        '200':
+          description: Account insights retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountInsightsResponse'
+        '500':
+          description: Failed to retrieve insights
+
+    post:
+      summary: Refresh account insights
+      description: Force refresh account insights from Instagram API
+      tags:
+        - Account
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, days_28]
+            default: days_28
+          description: Insights period
+      responses:
+        '200':
+          description: Insights refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountInsightsResponse'
+
+  # ============ CONTENT INSIGHTS ============
+  /api/insights/content:
+    get:
+      summary: Get all content insights
+      description: Get insights for all published content
+      tags:
+        - Content
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Maximum number of content items
+        - name: mediaType
+          in: query
+          schema:
+            type: string
+            enum: [IMAGE, VIDEO, CAROUSEL_ALBUM, REELS, STORY, IGTV]
+          description: Filter by media type
+      responses:
+        '200':
+          description: Content insights retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentInsightsListResponse'
+        '500':
+          description: Failed to retrieve content insights
+
+    post:
+      summary: Sync content insights
+      description: Sync all content insights from Instagram
+      tags:
+        - Content
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+          description: Number of recent posts to sync
+      responses:
+        '200':
+          description: Content synced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+
+  /api/insights/content/{id}:
+    get:
+      summary: Get content insights by ID
+      description: Get detailed insights for a specific content item
+      tags:
+        - Content
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Content ID
+      responses:
+        '200':
+          description: Content insights retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentInsightItemResponse'
+        '400':
+          description: Content ID required
+        '500':
+          description: Failed to retrieve content insights
+
+  # ============ AUDIENCE INSIGHTS ============
+  /api/insights/audience:
+    get:
+      summary: Get audience demographics
+      description: Get audience demographics (age, gender, location)
+      tags:
+        - Audience
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Audience insights retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudienceInsightsResponse'
+        '500':
+          description: Failed to retrieve audience insights
+
+  /api/insights/audience/active:
+    get:
+      summary: Get active times
+      description: Get times when your audience is most active
+      tags:
+        - Audience
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Active times retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveTimesResponse'
+        '500':
+          description: Failed to retrieve active times
+
+  # ============ STORIES INSIGHTS ============
+  /api/insights/stories:
+    get:
+      summary: Get story insights
+      description: Get performance analytics for Instagram Stories
+      tags:
+        - Stories
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Story insights retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoriesInsightsResponse'
+        '500':
+          description: Failed to retrieve story insights
+
+  # ============ REELS INSIGHTS ============
+  /api/insights/reels:
+    get:
+      summary: Get reels insights
+      description: Get performance analytics for Instagram Reels
+      tags:
+        - Reels
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Reels insights retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReelsInsightsResponse'
+        '500':
+          description: Failed to retrieve reels insights
+
+  # ============ HASHTAG INSIGHTS ============
+  /api/insights/hashtags:
+    get:
+      summary: Get hashtag insights
+      description: Get performance for hashtags used in posts
+      tags:
+        - Hashtags
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: hashtag
+          in: query
+          schema:
+            type: string
+          description: Specific hashtag to get insights for (with or without #)
+      responses:
+        '200':
+          description: Hashtag insights retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagInsightsResponse'
+
+  # ============ BEST TIMES ============
+  /api/insights/best-times:
+    get:
+      summary: Get best posting times
+      description: Get optimal posting times based on audience activity
+      tags:
+        - Audience
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Best posting times retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BestTimesResponse'
+        '500':
+          description: Failed to retrieve best times
+
+  # ============ EXPORT ============
+  /api/insights/export:
+    post:
+      summary: Export insights report
+      description: Export insights data in various formats
+      tags:
+        - Export
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+            example:
+              type: account
+              format: json
+              days: 30
+      responses:
+        '200':
+          description: Report exported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportResponse'
+        '400':
+          description: Invalid export request
+
+  # ============ DASHBOARD ============
+  /api/insights/dashboard:
+    get:
+      summary: Get dashboard summary
+      description: Get summary data for dashboard display
+      tags:
+        - Dashboard
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 90
+            default: 7
+          description: Number of days for summary
+      responses:
+        '200':
+          description: Dashboard data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+        '500':
+          description: Failed to retrieve dashboard data
+
+# ============ COMPONENTS ============
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        uptime:
+          type: number
+        services:
+          type: object
+          properties:
+            mongodb:
+              type: string
+            instagram_api:
+              type: string
+        memory:
+          type: object
+          properties:
+            used:
+              type: integer
+            total:
+              type: integer
+            unit:
+              type: string
+
+    AccountInsightsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountInsight'
+        meta:
+          type: object
+          properties:
+            count:
+              type: integer
+            accountId:
+              type: string
+
+    AccountInsight:
+      type: object
+      properties:
+        accountId:
+          type: string
+        period:
+          type: string
+        date:
+          type: string
+          format: date
+        followers:
+          type: object
+          properties:
+            total:
+              type: integer
+            change:
+              type: integer
+        reach:
+          type: object
+          properties:
+            total:
+              type: integer
+            change:
+              type: integer
+        impressions:
+          type: object
+          properties:
+            total:
+              type: integer
+            change:
+              type: integer
+        profileViews:
+          type: integer
+        websiteClicks:
+          type: integer
+        emailContacts:
+          type: integer
+
+    ContentInsightsListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentInsight'
+        meta:
+          type: object
+          properties:
+            count:
+              type: integer
+            limit:
+              type: integer
+            mediaType:
+              type: string
+
+    ContentInsight:
+      type: object
+      properties:
+        id:
+          type: string
+        instagramMediaId:
+          type: string
+        mediaType:
+          type: string
+          enum: [IMAGE, VIDEO, CAROUSEL_ALBUM, REELS, STORY, IGTV]
+        caption:
+          type: string
+        permalink:
+          type: string
+        thumbnailUrl:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        metrics:
+          $ref: '#/components/schemas/ContentMetrics'
+        engagement:
+          type: number
+        reach:
+          type: integer
+        impressions:
+          type: integer
+
+    ContentMetrics:
+      type: object
+      properties:
+        likes:
+          type: integer
+        comments:
+          type: integer
+        saves:
+          type: integer
+        shares:
+          type: integer
+        views:
+          type: integer
+        reach:
+          type: integer
+        impressions:
+          type: integer
+
+    ContentInsightItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/ContentInsight'
+
+    SyncResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentInsight'
+        meta:
+          type: object
+          properties:
+            syncedCount:
+              type: integer
+            syncedAt:
+              type: string
+              format: date-time
+
+    AudienceInsightsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            demographics:
+              $ref: '#/components/schemas/AudienceDemographics'
+            onlineFollowers:
+              $ref: '#/components/schemas/OnlineFollowers'
+            reach:
+              $ref: '#/components/schemas/AudienceReach'
+
+    AudienceDemographics:
+      type: object
+      properties:
+        age:
+          type: object
+          additionalProperties:
+            type: object
+          example:
+            "18-24":
+              percentage: 35
+              count: 15000
+            "25-34":
+              percentage: 42
+              count: 18000
+        gender:
+          type: object
+          properties:
+            male:
+              type: object
+              properties:
+                percentage:
+                  type: number
+                count:
+                  type: integer
+            female:
+              type: object
+              properties:
+                percentage:
+                  type: number
+                count:
+                  type: integer
+        topLocations:
+          type: array
+          items:
+            type: object
+            properties:
+              city:
+                type: string
+              country:
+                type: string
+              percentage:
+                type: number
+
+    OnlineFollowers:
+      type: object
+      properties:
+        byDayOfWeek:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              properties:
+                hour:
+                  type: integer
+                percentage:
+                  type: number
+        byHour:
+          type: object
+          additionalProperties:
+            type: number
+
+    AudienceReach:
+      type: object
+      properties:
+        followed:
+          type: integer
+        nonFollowed:
+          type: integer
+        hashtags:
+          type: integer
+        explore:
+          type: integer
+        locations:
+          type: integer
+
+    ActiveTimesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            byDayOfWeek:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    hour:
+                      type: integer
+                    percentage:
+                      type: number
+            peakTimes:
+              type: array
+              items:
+                type: object
+                properties:
+                  dayOfWeek:
+                    type: string
+                  hour:
+                    type: integer
+                  activityLevel:
+                    type: string
+                    enum: [high, medium, low]
+
+    StoriesInsightsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoryInsight'
+        meta:
+          type: object
+          properties:
+            count:
+              type: integer
+
+    StoryInsight:
+      type: object
+      properties:
+        id:
+          type: string
+        instagramMediaId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        metrics:
+          type: object
+          properties:
+            reach:
+              type: integer
+            impressions:
+              type: integer
+            replies:
+              type: integer
+            exits:
+              type: integer
+            tapsForward:
+              type: integer
+            tapsBack:
+              type: integer
+        engagement:
+          type: number
+
+    ReelsInsightsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReelInsight'
+        meta:
+          type: object
+          properties:
+            count:
+              type: integer
+
+    ReelInsight:
+      type: object
+      properties:
+        id:
+          type: string
+        instagramMediaId:
+          type: string
+        caption:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        metrics:
+          type: object
+          properties:
+            views:
+              type: integer
+            likes:
+              type: integer
+            comments:
+              type: integer
+            shares:
+              type: integer
+            saves:
+              type: integer
+            reach:
+              type: integer
+        avgWatchTime:
+          type: number
+        retention:
+          type: number
+
+    HashtagInsightsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/HashtagInsight'
+        meta:
+          type: object
+          properties:
+            count:
+              type: integer
+
+    HashtagInsight:
+      type: object
+      properties:
+        hashtag:
+          type: string
+        usageCount:
+          type: integer
+        totalReach:
+          type: integer
+        avgEngagement:
+          type: number
+        topPerformingPost:
+          type: string
+
+    BestTimesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            optimalTimes:
+              type: array
+              items:
+                type: object
+                properties:
+                  dayOfWeek:
+                    type: string
+                  hour:
+                    type: integer
+                  score:
+                    type: number
+            timezone:
+              type: string
+
+    ExportRequest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [account, content, audience, stories, reels, hashtags]
+          description: Type of data to export
+        format:
+          type: string
+          enum: [json, csv, xlsx]
+          default: json
+        startDate:
+          type: string
+          format: date
+          description: Start date for export range
+        endDate:
+          type: string
+          format: date
+          description: End date for export range
+        days:
+          type: integer
+          minimum: 1
+          maximum: 90
+          description: Number of days to export (alternative to date range)
+        contentIds:
+          type: array
+          items:
+            type: string
+          description: Specific content IDs to export
+        hashtags:
+          type: array
+          items:
+            type: string
+          description: Specific hashtags to export
+
+    ExportResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+        meta:
+          type: object
+          properties:
+            exportedAt:
+              type: string
+              format: date-time
+            format:
+              type: string
+
+    DashboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            summary:
+              $ref: '#/components/schemas/DashboardSummary'
+            topContent:
+              type: array
+              items:
+                $ref: '#/components/schemas/ContentInsight'
+            audienceGrowth:
+              type: array
+              items:
+                type: object
+            engagementTrend:
+              type: array
+              items:
+                type: object
+
+    DashboardSummary:
+      type: object
+      properties:
+        period:
+          type: string
+        followersTotal:
+          type: integer
+        followersChange:
+          type: integer
+        followersChangePercent:
+          type: number
+        totalReach:
+          type: integer
+        reachChange:
+          type: integer
+        totalEngagement:
+          type: integer
+        engagementChange:
+          type: integer
+        topPost:
+          type: object
+          properties:
+            id:
+              type: string
+            caption:
+              type: string
+            engagement:
+              type: number

@@ -1,0 +1,5 @@
+// Shared types
+// All services
+export type UserRole =
+  | 'user'
+  | 'admin';

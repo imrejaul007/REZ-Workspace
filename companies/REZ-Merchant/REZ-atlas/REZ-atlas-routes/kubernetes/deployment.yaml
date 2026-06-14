@@ -1,0 +1,109 @@
+# Kubernetes Deployment for REZ-atlas-routes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: REZ-atlas-routes
+  namespace: rez-merchant
+  labels:
+    app: REZ-atlas-routes
+    version: latest
+    managed-by: rez-merchant
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: REZ-atlas-routes
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: REZ-atlas-routes
+        version: latest
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5171"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: REZ-atlas-routes-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: REZ-atlas-routes
+          image: ghcr.io/imrejaul007/rez-atlas-routes:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5171
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: REZ-atlas-routes-config
+            - secretRef:
+                name: REZ-atlas-routes-secrets
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: REZ-atlas-routes
+                topologyKey: kubernetes.io/hostname

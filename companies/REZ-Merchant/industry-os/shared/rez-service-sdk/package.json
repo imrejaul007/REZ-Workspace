@@ -1,0 +1,25 @@
+{
+  "name": "@rez/service-sdk",
+  "version": "1.0.0",
+  "description": "Unified Service SDK for REZ/HOJAI ecosystem - Connect all services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "axios": "^1.6.2"
+  },
+  "peerDependencies": {
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "axios": "^1.6.2"
+  },
+  "keywords": ["sdk", "microservices", "integration"],
+  "author": "REZ Technologies",
+  "license": "MIT"
+}

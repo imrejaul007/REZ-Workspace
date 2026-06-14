@@ -1,0 +1,11 @@
+{
+  "name": "@rez/links-service",
+  "version": "1.0.0",
+  "description": "REZ Links - Linktree competitor for link-in-bio",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  }
+}

@@ -1,0 +1,15 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="#6366F1"/>
+  <g transform="translate(128, 128)">
+    <!-- Airplane -->
+    <path d="M640 256L768 384H448L640 256Z" fill="white"/>
+    <path d="M640 256V384" stroke="white" stroke-width="32" stroke-linecap="round"/>
+    <!-- Coin circle -->
+    <circle cx="384" cy="512" r="160" fill="#F59E0B"/>
+    <circle cx="384" cy="512" r="120" fill="#FBBF24"/>
+    <text x="384" y="540" font-size="180" font-weight="bold" fill="#92400E" text-anchor="middle" font-family="system-ui">A</text>
+    <!-- Wings -->
+    <path d="M256 480L384 512L256 544V480Z" fill="#FBBF24"/>
+    <path d="M512 480L384 512L512 544V480Z" fill="#FBBF24"/>
+  </g>
+</svg>

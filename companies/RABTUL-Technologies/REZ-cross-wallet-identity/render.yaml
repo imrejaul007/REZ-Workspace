@@ -1,0 +1,59 @@
+services:
+  - type: web
+    name: rez-cross-wallet-identity
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: REZ_API_KEY
+        sync: false
+      - key: REZ_API_SECRET
+        sync: false
+      - key: REDIS_URL
+        fromDatabase:
+          name: rez-redis
+          property: REDIS_URL
+      - key: MONGODB_URI
+        fromDatabase:
+          name: rez-mongodb
+          property: MONGODB_URI
+
+databases:
+  - name: rez-redis
+    plan: starter
+    databaseName: rez_wallets_cache
+  - name: rez-mongodb
+    plan: starter
+    databaseName: rez_wallets
+
+workers:
+  - name: wallet-sync-worker
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm run worker:sync
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REDIS_URL
+        fromDatabase:
+          name: rez-redis
+          property: REDIS_URL
+      - key: MONGODB_URI
+        fromDatabase:
+          name: rez-mongodb
+          property: MONGODB_URI
+
+cron:
+  - name: wallet-balance-sync
+    schedule: "*/5 * * * *"
+    command: npm run cron:sync-balances
+    region: oregon

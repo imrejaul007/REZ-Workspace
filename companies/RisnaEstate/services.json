@@ -1,0 +1,88 @@
+{
+  "name": "RisnaEstate",
+  "tagline": "Real Estate OS - Property Marketplace, Property CRM, PropFlow AI",
+  "version": "1.0.0",
+  "category": "real-estate",
+  "parent": "RTNM Digital",
+  "services": [
+    {
+      "name": "risnaestate-api-gateway",
+      "port": 4901,
+      "description": "Unified API entry point for RisnaEstate",
+      "docker": "risnaestate-api-gateway",
+      "depends_on": ["property", "crm", "propflow", "analytics"]
+    },
+    {
+      "name": "risnaestate-property-service",
+      "port": 4902,
+      "description": "Property listings and marketplace",
+      "docker": "risnaestate-property-service",
+      "db": "risnaestate-properties",
+      "integrations": ["unified-hub", "hojai-intelligence", "hojai-memory"]
+    },
+    {
+      "name": "risnaestate-crm",
+      "port": 4903,
+      "description": "Property CRM and lead management",
+      "docker": "risnaestate-crm",
+      "db": "risnaestate-crm",
+      "integrations": ["unified-hub", "hojai-agents", "rabtul-wallet"]
+    },
+    {
+      "name": "risnaestate-propflow",
+      "port": 4904,
+      "description": "AI-powered property flow and recommendations",
+      "docker": "risnaestate-propflow",
+      "integrations": ["hojai-intelligence", "hojai-twin-os"]
+    },
+    {
+      "name": "risnaestate-analytics",
+      "port": 4905,
+      "description": "Market analytics and pricing insights",
+      "docker": "risnaestate-analytics",
+      "integrations": ["hojai-intelligence", "sutar-simulation"]
+    }
+  ],
+  "integrations": {
+    "unified-hub": {
+      "port": 4600,
+      "purpose": "Connect to all ecosystem services"
+    },
+    "hojai-intelligence": {
+      "port": 4750,
+      "purpose": "Property recommendations and price prediction"
+    },
+    "hojai-memory": {
+      "port": 4520,
+      "purpose": "Store buyer preferences and history"
+    },
+    "hojai-agents": {
+      "port": 4550,
+      "purpose": "Property search assistant AI"
+    },
+    "hojai-twin-os": {
+      "port": 4142,
+      "purpose": "Property digital twins"
+    },
+    "sutar-simulation": {
+      "port": 4241,
+      "purpose": "Market scenario simulation"
+    },
+    "rabtul-auth": {
+      "port": 4002,
+      "purpose": "User authentication"
+    },
+    "rabtul-payment": {
+      "port": 4001,
+      "purpose": "Rent payments and transactions"
+    },
+    "rabtul-wallet": {
+      "port": 4004,
+      "purpose": "Wallet for deposits and payments"
+    },
+    "event-bus": {
+      "port": 4025,
+      "purpose": "Event streaming for property updates"
+    }
+  }
+}

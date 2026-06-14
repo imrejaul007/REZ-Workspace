@@ -1,0 +1,22 @@
+# Kubernetes ConfigMap for REZ-dashboard
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rez-dashboard-config
+  namespace: rez-merchant
+  labels:
+    app: rez-dashboard
+    managed-by: rez-merchant
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  LOG_LEVEL: "info"
+  SERVICE_NAME: "rez-dashboard"
+  SERVICE_VERSION: "latest"
+  FEATURE_METRICS_ENABLED: "true"
+  FEATURE_TRACING_ENABLED: "true"
+  CORS_ORIGINS: "https://app.rezmerchant.com,https://admin.rezmerchant.com"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  MONGODB_DATABASE: "rez_dashboard"
+  REDIS_DATABASE: "0"

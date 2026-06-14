@@ -1,0 +1,233 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--gray-500);
+}
+
+.exportBtn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: white;
+  padding: 8px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background: var(--gray-100);
+}
+
+.tab.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* Preview */
+.preview {
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.resume {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.resumeHeader {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.resumeHeader h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.contact {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.resumeSection {
+  margin-bottom: 24px;
+}
+
+.resumeSection h3 {
+  font-size: 16px;
+  color: var(--primary);
+  border-bottom: 1px solid var(--gray-200);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.expItem, .eduItem {
+  margin-bottom: 16px;
+}
+
+.expHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.duration {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skillBadge {
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--primary);
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 13px;
+}
+
+/* Edit */
+.edit {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* AI Suggestions */
+.aiSuggestions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.aiCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.aiHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.aiHeader span {
+  font-size: 24px;
+}
+
+.suggestions {
+  list-style: none;
+  margin-bottom: 16px;
+}
+
+.suggestions li {
+  padding: 12px;
+  background: var(--gray-100);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.applyAll {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.matchList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.matchItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--gray-100);
+  border-radius: 8px;
+}
+
+.matchScore {
+  font-weight: 600;
+  color: var(--success);
+}

@@ -1,0 +1,36 @@
+# Render Blueprint - REZ Notifications Hub
+# Deploy with: render-blueprints create
+
+services:
+  # Main API Service
+  - type: web
+    name: rez-notifications-hub
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: API_VERSION
+        value: v1
+
+  # PostgreSQL Database
+  - type: pserv
+    name: notifications-db
+    plan: starter
+    region: oregon
+    databaseName: rez_notifications
+    ipAllowList: []
+
+  # Redis Cache
+  - type: redis
+    name: notifications-cache
+    plan: starter
+    region: oregon
+    ipAllowList: []

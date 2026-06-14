@@ -1,0 +1,85 @@
+# CorpPerks Docker Compose
+# Run all CorpPerks services with one command
+
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: corpperks-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=corpperks
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - corpperks-network
+
+  # CorpPerks Gateway API
+  corpperks-api:
+    build:
+      context: ../rez-corpperks-service
+      dockerfile: Dockerfile
+    container_name: corpperks-api
+    ports:
+      - "4013:4013"
+    environment:
+      - NODE_ENV=production
+      - PORT=4013
+      - MONGODB_URI=mongodb://mongodb:27017/corpperks
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - WALLET_SERVICE_URL=${WALLET_SERVICE_URL:-http://wallet:4004}
+      - FINANCE_SERVICE_URL=${FINANCE_SERVICE_URL:-http://finance:4005}
+      - KARMA_SERVICE_URL=${KARMA_SERVICE_URL:-http://karma:4006}
+      - HOTEL_SERVICE_URL=${HOTEL_SERVICE_URL:-http://hotel:4015}
+      - PROCUREMENT_SERVICE_URL=${PROCUREMENT_SERVICE_URL:-http://procurement:4012}
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - corpperks-network
+
+  # Hotel Service (StayOwn)
+  hotel-service:
+    build:
+      context: ../rez-hotel-service
+      dockerfile: Dockerfile
+    container_name: hotel-service
+    ports:
+      - "4015:4015"
+    environment:
+      - NODE_ENV=production
+      - PORT=4015
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - STAYOWN_API_URL=${STAYOWN_API_URL:-https://api.stayown.com}
+    restart: unless-stopped
+    networks:
+      - corpperks-network
+
+  # Procurement Service (NextaBizz)
+  procurement-service:
+    build:
+      context: ../rez-procurement-service
+      dockerfile: Dockerfile
+    container_name: procurement-service
+    ports:
+      - "4012:4012"
+    environment:
+      - NODE_ENV=production
+      - PORT=4012
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - NEXTABIZZ_API_URL=${NEXTABIZZ_API_URL:-https://api.nextabizz.com}
+      - NEXTABIZZ_API_KEY=${NEXTABIZZ_API_KEY}
+    restart: unless-stopped
+    networks:
+      - corpperks-network
+
+networks:
+  corpperks-network:
+    driver: bridge
+
+volumes:
+  mongo-data:

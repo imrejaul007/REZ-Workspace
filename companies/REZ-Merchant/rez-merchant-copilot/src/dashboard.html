@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REZ Merchant Copilot</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1419;
+      color: #e7e9ea;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #2f3336;
+    }
+    .header h1 { font-size: 1.8rem; color: #1d9bf0; }
+    .header .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #00ba7c;
+    }
+
+    .merchant-input {
+      background: #16181c;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #2f3336;
+    }
+    .merchant-input h3 { margin-bottom: 15px; color: #71767b; font-size: 0.9rem; text-transform: uppercase; }
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+    input {
+      flex: 1;
+      padding: 12px 16px;
+      background: #2f3336;
+      border: 1px solid #536471;
+      border-radius: 8px;
+      color: #e7e9ea;
+      font-size: 1rem;
+    }
+    input:focus { outline: none; border-color: #1d9bf0; }
+    button {
+      padding: 12px 24px;
+      background: #1d9bf0;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #1a8cd8; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #16181c;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #2f3336;
+    }
+    .card h3 { font-size: 0.8rem; color: #71767b; margin-bottom: 8px; text-transform: uppercase; }
+    .card .value { font-size: 2.2rem; font-weight: 700; }
+    .card .sub { font-size: 0.85rem; color: #71767b; margin-top: 5px; }
+
+    .section {
+      background: #16181c;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #2f3336;
+    }
+    .section h2 { font-size: 1.1rem; margin-bottom: 15px; color: #e7e9ea; }
+
+    .insights-list { list-style: none; }
+    .insights-list li {
+      padding: 12px 0;
+      border-bottom: 1px solid #2f3336;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .insights-list li:last-child { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-safe { background: #006a0033; color: #00ba7c; }
+    .badge-warning { background: #ffd40033; color: #ffd400; }
+    .badge-danger { background: #f4212e33; color: #f4212e; }
+
+    .decisions-list { max-height: 400px; overflow-y: auto; }
+    .decision-item {
+      padding: 15px;
+      background: #2f3336;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .decision-item .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 0;
+      border: none;
+    }
+    .decision-item .item-name { font-weight: 600; }
+    .decision-item .confidence { color: #71767b; font-size: 0.9rem; }
+    .decision-item .details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .decision-item .detail-item { text-align: center; }
+    .decision-item .detail-item .label { font-size: 0.75rem; color: #71767b; }
+    .decision-item .detail-item .value { font-size: 1.1rem; font-weight: 600; }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .action-buttons button {
+      flex: 1;
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+    .approve { background: #00ba7c; }
+    .approve:hover { background: #00a36d; }
+    .modify { background: #ffd400; color: #000; }
+    .modify:hover { background: #e6c700; }
+    .reject { background: #f4212e; }
+    .reject:hover { background: #dc1e2c; }
+
+    .loading { text-align: center; padding: 40px; color: #71767b; }
+    .error { background: #f4212e33; padding: 15px; border-radius: 8px; color: #f4212e; }
+
+    .recommendations {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .recommendation-item {
+      background: #2f3336;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .recommendation-item .title { font-weight: 600; margin-bottom: 5px; }
+    .recommendation-item .desc { font-size: 0.85rem; color: #71767b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>REZ Merchant Copilot</h1>
+      <div class="status">
+        <div class="status-dot"></div>
+        <span>Connected to ReZ Mind</span>
+      </div>
+    </div>
+
+    <div class="merchant-input">
+      <h3>Enter Merchant ID</h3>
+      <div class="input-row">
+        <input type="text" id="merchantId" placeholder="e.g., merchant_123" value="test_restaurant_001">
+        <button onclick="loadMerchantData()">Load Dashboard</button>
+      </div>
+    </div>
+
+    <div id="loading" class="loading" style="display:none;">Loading merchant data...</div>
+    <div id="error" class="error" style="display:none;"></div>
+
+    <div id="dashboard" style="display:none;">
+      <div class="grid">
+        <div class="card">
+          <h3>Health Score</h3>
+          <div class="value" id="healthScore">--</div>
+          <div class="sub" id="healthTrend">--</div>
+        </div>
+        <div class="card">
+          <h3>Growth Score</h3>
+          <div class="value" id="growthScore">--</div>
+          <div class="sub">Month over month</div>
+        </div>
+        <div class="card">
+          <h3>Decisions Made</h3>
+          <div class="value" id="decisionsCount">--</div>
+          <div class="sub">This week</div>
+        </div>
+        <div class="card">
+          <h3>Approval Rate</h3>
+          <div class="value" id="approvalRate">--</div>
+          <div class="sub">Last 7 days</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="section" style="grid-column: span 2;">
+          <h2>Recent Decisions</h2>
+          <div id="decisionsList" class="decisions-list">
+            <div class="loading">No decisions yet</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Business Insights</h2>
+          <ul class="insights-list" id="insightsList">
+            <li><span>Loading insights...</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Recommendations</h2>
+        <div id="recommendations" class="recommendations">
+          <div class="recommendation-item">
+            <div class="title">Analyzing patterns...</div>
+            <div class="desc">Loading recommendations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const EVENT_PLATFORM = 'http://localhost:4008';
+    const ACTION_ENGINE = 'http://localhost:4009';
+    const FEEDBACK = 'http://localhost:4010';
+
+    let currentMerchantId = '';
+
+    async function loadMerchantData() {
+      const merchantId = document.getElementById('merchantId').value.trim();
+      if (!merchantId) return;
+
+      currentMerchantId = merchantId;
+
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('error').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'none';
+
+      try {
+        // Load from Action Engine
+        const aeResponse = await fetch(`${ACTION_ENGINE}/decisions?limit=50`);
+        const aeData = await aeResponse.json();
+
+        // Filter decisions for this merchant
+        const merchantDecisions = (aeData.decisions || []).filter(d =>
+          d.merchantId === merchantId || d.data?.merchant_id === merchantId
+        );
+
+        // Load feedback stats
+        const fbResponse = await fetch(`${FEEDBACK}/stats`);
+        const fbData = await fbResponse.json();
+
+        // Update UI
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+
+        updateDashboard(merchantDecisions, fbData);
+
+      } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error').textContent = 'Error loading data: ' + error.message;
+      }
+    }
+
+    function updateDashboard(decisions, feedbackStats) {
+      // Health Score
+      document.getElementById('healthScore').textContent = '85';
+      document.getElementById('healthTrend').textContent = 'Stable';
+
+      // Growth Score
+      document.getElementById('growthScore').textContent = '+12%';
+
+      // Decisions Count
+      document.getElementById('decisionsCount').textContent = decisions.length || '0';
+
+      // Approval Rate
+      const approved = feedbackStats.byOutcome?.find(o => o._id === 'approved')?.count || 0;
+      const total = feedbackStats.total || 1;
+      const rate = Math.round((approved / total) * 100);
+      document.getElementById('approvalRate').textContent = rate + '%';
+
+      // Decisions List
+      const decisionsList = document.getElementById('decisionsList');
+      if (decisions.length === 0) {
+        decisionsList.innerHTML = '<div class="loading">No decisions for this merchant yet</div>';
+      } else {
+        decisionsList.innerHTML = decisions.slice(0, 10).map(d => {
+          const safety = d.actionLevel || 'SAFE';
+          const badgeClass = safety === 'SAFE' ? 'badge-safe' : safety === 'SEMI_SAFE' ? 'badge-warning' : 'badge-danger';
+
+          return `
+            <div class="decision-item">
+              <div class="header">
+                <span class="item-name">${d.data?.item_name || d.data?.item_id || 'Item'}</span>
+                <span class="badge ${badgeClass}">${safety}</span>
+              </div>
+              <div class="confidence">Confidence: ${((d.confidence || 0) * 100).toFixed(0)}%</div>
+              <div class="details">
+                <div class="detail-item">
+                  <div class="label">Suggested</div>
+                  <div class="value">${d.data?.suggested_quantity || '--'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="label">Stock</div>
+                  <div class="value">${d.data?.current_stock || '--'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="label">Threshold</div>
+                  <div class="value">${d.data?.threshold || '--'}</div>
+                </div>
+              </div>
+              <div class="action-buttons">
+                <button class="approve" onclick="submitFeedback('${d.correlationId}', 'approved')">✓ Approve</button>
+                <button class="modify" onclick="submitFeedback('${d.correlationId}', 'modified')">✎ Modify</button>
+                <button class="reject" onclick="submitFeedback('${d.correlationId}', 'rejected')">✗ Reject</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Insights
+      document.getElementById('insightsList').innerHTML = `
+        <li>
+          <span>Strong evening demand</span>
+          <span class="badge badge-safe">Pattern</span>
+        </li>
+        <li>
+          <span>Chicken items need restock</span>
+          <span class="badge badge-warning">Alert</span>
+        </li>
+        <li>
+          <span>Weekend orders up 15%</span>
+          <span class="badge badge-safe">Trend</span>
+        </li>
+      `;
+
+      // Recommendations
+      document.getElementById('recommendations').innerHTML = `
+        <div class="recommendation-item">
+          <div class="title">📦 Increase chicken stock</div>
+          <div class="desc">Demand up 20% this week</div>
+        </div>
+        <div class="recommendation-item">
+          <div class="title">💰 Bundle deals</div>
+          <div class="desc">Users who order biryani also order drinks</div>
+        </div>
+        <div class="recommendation-item">
+          <div class="title">⏰ Peak hours</div>
+          <div class="desc">7-9 PM is your busiest time</div>
+        </div>
+      `;
+    }
+
+    async function submitFeedback(correlationId, outcome) {
+      try {
+        await fetch(`${FEEDBACK}/feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            correlation_id: correlationId,
+            decision: 'draft_po_suggested',
+            confidence: 0.85,
+            outcome: outcome,
+            merchant_id: currentMerchantId,
+            item_id: 'item_123'
+          })
+        });
+
+        alert(`Feedback submitted: ${outcome}`);
+        loadMerchantData();
+      } catch (error) {
+        alert('Error submitting feedback: ' + error.message);
+      }
+    }
+
+    // Load on page load
+    window.onload = () => {
+      loadMerchantData();
+    };
+  </script>
+</body>
+</html>

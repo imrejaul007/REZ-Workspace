@@ -1,0 +1,40 @@
+{
+  "extends": "./node_modules/expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "noEmit": true
+  },
+  "files": [
+    "services/insightsApi.ts",
+    "services/tableBookingApi.ts",
+    "services/ugcApi.ts",
+    "services/externalWalletApi.ts",
+    "services/consultationApi.ts",
+    "app/sign-in.tsx",
+    "app/my-vouchers.tsx",
+    "app/challenges/index.tsx",
+    "components/homepage/cards/BrandedStoreCard.tsx",
+    "components/homepage/cards/CategoryProductCard.tsx",
+    "components/homepage/cards/CategorySectionCard.tsx",
+    "components/homepage/cards/ChallengesCard.tsx",
+    "components/homepage/cards/DailySpinCard.tsx",
+    "components/homepage/cards/EventCard.tsx",
+    "components/homepage/cards/HomepageProductCard.tsx",
+    "components/homepage/cards/PopularStoreCard.tsx",
+    "components/homepage/cards/ProductCard.tsx",
+    "components/homepage/cards/RecommendationCard.tsx",
+    "components/homepage/cards/StoreCard.tsx",
+    "components/homepage/cards/StoreExperienceCard.tsx",
+    "components/homepage/cards/StreakRewardsCard.tsx",
+    "components/homepage/cards/SurpriseCoinDropCard.tsx",
+    "components/homepage/cards/TopStoreCard.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

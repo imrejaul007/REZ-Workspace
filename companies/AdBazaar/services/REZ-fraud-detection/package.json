@@ -1,0 +1,31 @@
+{
+  "name": "rez-fraud-detection",
+  "version": "1.0.0",
+  "description": "Ad fraud detection service with bot detection, click fraud patterns, and viewability scoring",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4",
+    "winston": "^3.11.0",
+    "geoip-lite": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "@types/geoip-lite": "^1.4.4",
+    "typescript": "^5.3.2",
+    "ts-node": "^10.9.2"
+  }
+}

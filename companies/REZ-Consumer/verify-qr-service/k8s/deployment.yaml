@@ -1,0 +1,205 @@
+# REZ Verify QR Service - Kubernetes Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: verify-qr-service
+  namespace: rez-platform
+  labels:
+    app: verify-qr-service
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: verify-qr-service
+  template:
+    metadata:
+      labels:
+        app: verify-qr-service
+        version: v1
+    spec:
+      containers:
+        - name: verify-qr-service
+          image: rezplatform/verify-qr-service:latest
+          ports:
+            - containerPort: 4003
+              name: http
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "4003"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: verify-qr-secrets
+                  key: mongodb-uri
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: redis-url
+            - name: MERCHANT_API
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: merchant-api
+            - name: WALLET_API
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: wallet-api
+            - name: MIND_API
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: mind-api
+            - name: INTELLIGENCE_API
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: intelligence-api
+            - name: NOTIF_API
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: notif-api
+            - name: AGENT_API
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: agent-api
+            - name: CARE_API
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: care-api
+            - name: DELIVERY_API
+              valueFrom:
+                configMapKeyRef:
+                  name: verify-qr-config
+                  key: delivery-api
+            - name: INTERNAL_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: verify-qr-secrets
+                  key: internal-key
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4003
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4003
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: verify-qr-service
+  namespace: rez-platform
+  labels:
+    app: verify-qr-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4003
+      targetPort: 4003
+      protocol: TCP
+      name: http
+  selector:
+    app: verify-qr-service
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: verify-qr-service
+  namespace: rez-platform
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+    - hosts:
+        - verify-qr.rezapp.com
+      secretName: verify-qr-tls
+  rules:
+    - host: verify-qr.rezapp.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: verify-qr-service
+                port:
+                  number: 4003
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: verify-qr-service
+  namespace: rez-platform
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: verify-qr-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: verify-qr-config
+  namespace: rez-platform
+data:
+  redis-url: "redis://redis:6379"
+  merchant-api: "https://rez-merchant.onrender.com"
+  wallet-api: "https://rez-wallet.onrender.com"
+  mind-api: "https://REZ-mind.onrender.com"
+  intelligence-api: "https://rez-intelligence.onrender.com"
+  notif-api: "https://rez-notifications.onrender.com"
+  agent-api: "https://REZ-agent.onrender.com"
+  care-api: "https://REZ-care.onrender.com"
+  delivery-api: "https://rez-delivery-service.onrender.com"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: verify-qr-secrets
+  namespace: rez-platform
+type: Opaque
+stringData:
+  mongodb-uri: "mongodb://mongo:27017/verify-qr"
+  internal-key: "your-internal-key-here"

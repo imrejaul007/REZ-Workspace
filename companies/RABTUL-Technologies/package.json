@@ -1,0 +1,37 @@
+{
+  "name": "rabtul-technologies",
+  "version": "1.0.0",
+  "description": "Core Platform - Auth, Wallet, Payment Infrastructure",
+  "private": true,
+  "workspaces": [
+    "REZ-auth-service",
+    "REZ-wallet-service",
+    "REZ-payment-service",
+    "REZ-notification-service",
+    "REZ-catalog-service",
+    "REZ-order-service",
+    "REZ-*",
+    "rez-*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "start": "npm run start --workspaces --if-present",
+    "health": "curl -s http://localhost:4002/health && curl -s http://localhost:4004/health && curl -s http://localhost:4001/health",
+    "postinstall": "npm run build --workspaces --if-present"
+  },
+  "keywords": [
+    "auth",
+    "wallet",
+    "payment",
+    "fintech",
+    "rez"
+  ],
+  "author": "RABTUL Technologies",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=10.0.0"
+  }
+}

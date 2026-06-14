@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "dist/index.js"
+    },
+    {
+      "src": "/health/(.*)",
+      "dest": "dist/index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "PORT": "4090"
+  },
+  "regions": ["bom1"],
+  "functions": {
+    "dist/index.js": {
+      "memory": 512,
+      "maxDuration": 10
+    }
+  }
+}

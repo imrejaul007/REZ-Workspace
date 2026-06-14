@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "MyRisa",
+    "slug": "myrisa-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E57373"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.myrisa.app",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "MyRisa needs access to Health data to sync your health information.",
+        "NSHealthUpdateUsageDescription": "MyRisa needs access to update your Health data."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#E57373"
+      },
+      "package": "com.myrisa.app",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "myrisa-app"
+      }
+    }
+  }
+}

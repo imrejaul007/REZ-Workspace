@@ -1,0 +1,293 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User role enum - must match canonical USER_ROLE
+enum UserRole {
+  user
+  consumer
+  merchant
+  admin
+  support
+  operator
+  super_admin
+}
+
+// Gender enum
+enum Gender {
+  male
+  female
+  other
+  prefer_not_to_say
+}
+
+// Account verification status
+enum AccountVerificationStatus {
+  unverified
+  pending
+  verified
+  rejected
+}
+
+// User auth status
+enum AuthStatus {
+  active
+  inactive
+  suspended
+  deleted
+}
+
+model User {
+  id            String    @id @default(uuid())
+
+  // Authentication
+  email         String    @unique
+  phone         String    @unique
+  password      String?   // Hashed password (nullable for OTP-only users)
+
+  // Profile
+  firstName     String?
+  lastName      String?
+  name          String?   // Full name (denormalized for display)
+  avatar        String?
+  bio           String?
+
+  // Demographics
+  gender        Gender?
+  dateOfBirth   DateTime?
+
+  // Location
+  location      String?   // City/location string
+  coordinates   Json?     // { lat, lng }
+
+  // Role & Auth
+  role          UserRole @default(user)
+  authStatus    AuthStatus @default(active)
+
+  // Verification
+  isVerified    Boolean   @default(false)
+  verificationStatus AccountVerificationStatus @default(unverified)
+  verifiedAt    DateTime?
+
+  // Preferences
+  preferences   Json?     // { notifications, language, theme, etc. }
+
+  // Auth tracking
+  lastLogin     DateTime?
+  loginAttempts  Int       @default(0)
+  totpEnabled   Boolean   @default(false)
+
+  // Gamification
+  points        Int       @default(0)
+  tier          ExplorerTier @default(CURIOUS)
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  bookings      Booking[]
+  reviews       Review[]
+  rewards       UserReward[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@map("users")
+}
+
+enum ExplorerTier {
+  CURIOUS
+  EXPLORER
+  ADVENTURER
+  PIONEER
+}
+
+model Merchant {
+  id            String    @id @default(uuid())
+  name          String
+  slug          String    @unique
+  category      String
+  address       String
+  lat           Float
+  lng           Float
+  images        String[]
+  rating        Float     @default(0)
+  reviewCount   Int       @default(0)
+  status        MerchantStatus @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  trials        Trial[]
+  bookings      Booking[]
+  reviews       Review[]
+  @@map("merchants")
+}
+
+enum MerchantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Trial {
+  id            String    @id @default(uuid())
+  merchantId    String
+  name          String
+  description   String
+  category      String
+  images        String[]
+  coinPrice     Int       // Coins to pay
+  commitmentFee Int       // Refundable commitment in ₹
+  originalPrice Int       // Full price reference
+  rating        Float     @default(0)
+  reviewCount   Int       @default(0)
+  dailySlots    Int       @default(10)
+  qrWindowType  QrWindowType @default(FIXED)
+  qrWindowMinutes Int     @default(60)
+  status        TrialStatus @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  merchant      Merchant  @relation(fields: [merchantId], references: [id])
+  bookings      Booking[]
+  reviews       Review[]
+  @@map("trials")
+}
+
+enum TrialStatus {
+  ACTIVE
+  INACTIVE
+  SOLD_OUT
+  EXPIRED
+}
+
+enum QrWindowType {
+  FIXED
+  MINUTES_30
+  HOURS_2
+  AUTO
+}
+
+model Booking {
+  id            String    @id @default(uuid())
+  userId        String
+  trialId      String
+  merchantId    String
+  qrToken       String    @unique
+  qrSignature   String
+  slotTime      DateTime
+  qrExpiresAt   DateTime
+  status        BookingStatus @default(ACTIVE)
+  coinAmount   Int
+  commitmentFee Int
+  redeemedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id])
+  trial         Trial     @relation(fields: [trialId], references: [id])
+  merchant      Merchant  @relation(fields: [merchantId], references: [id])
+  reviews       Review?
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  EXPIRED
+}
+
+model Review {
+  id            String    @id @default(uuid())
+  userId        String
+  trialId       String
+  bookingId      String    @unique
+  merchantId    String
+  rating        Int       // 1-5
+  comment       String?
+  images        String[]
+  pointsEarned  Int       @default(25)
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id])
+  trial         Trial     @relation(fields: [trialId], references: [id])
+  merchant      Merchant  @relation(fields: [merchantId], references: [id])
+  booking       Booking   @relation(fields: [bookingId], references: [id])
+  @@map("reviews")
+}
+
+model Campaign {
+  id            String    @id @default(uuid())
+  title         String
+  description   String
+  type          CampaignType
+  goal          String
+  reward        String
+  category      String?
+  targetTrials  Int?
+  startDate     DateTime
+  endDate       DateTime
+  status        CampaignStatus @default(DRAFT)
+  createdAt     DateTime  @default(now())
+  @@map("campaigns")
+}
+
+enum CampaignType {
+  MISSION_SPRINT
+  FESTIVAL
+  CATEGORY_PUSH
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+}
+
+model UserReward {
+  id            String    @id @default(uuid())
+  userId        String
+  type          RewardType
+  amount        Int
+  source        String
+  expiresAt     DateTime
+  claimedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id])
+  @@map("user_rewards")
+}
+
+enum RewardType {
+  TRIAL_COIN
+  REZ_COIN
+}
+
+model CoinPack {
+  id            String    @id @default(uuid())
+  name          String
+  coins         Int
+  price         Int       // In ₹
+  bonusCoins    Int       @default(0)
+  isActive      Boolean   @default(true)
+  @@map("coin_packs")
+}
+
+model Mission {
+  id            String    @id @default(uuid())
+  title         String
+  description   String
+  category      String?
+  target        Int
+  rezCoinsReward Int     @default(0)
+  trialCoinsReward Int   @default(0)
+  expiresAt     DateTime
+  status        MissionStatus @default(ACTIVE)
+  @@map("missions")
+}
+
+enum MissionStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+}

@@ -1,0 +1,606 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.backLink {
+  color: var(--gray-500);
+  text-decoration: none;
+  font-size: 14px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.backLink:hover {
+  color: var(--primary);
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--gray-500);
+}
+
+.pathSelector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pathCard {
+  background: white;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pathCard:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.pathCardActive {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%);
+}
+
+.pathIcon {
+  font-size: 32px;
+}
+
+.pathTitle {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.demandBadge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.demandHigh {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.demandVeryHigh {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.demandCritical {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.statLabel {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-bottom: 8px;
+}
+
+.statValue {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.statDesc {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: white;
+  padding: 8px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background: var(--gray-100);
+}
+
+.tabActive {
+  background: var(--primary);
+  color: white;
+}
+
+.roadmap {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.roadmapPath {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.levelNode {
+  display: flex;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.levelNode:last-child {
+  padding-bottom: 0;
+}
+
+.levelConnector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 48px;
+  margin-right: 16px;
+}
+
+.connectorLine {
+  width: 3px;
+  flex: 1;
+  background: var(--gray-200);
+  margin: 8px 0;
+}
+
+.levelCompleted .connectorLine {
+  background: var(--primary);
+}
+
+.levelBadge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid var(--gray-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--gray-400);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.levelCompleted .levelBadge {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.levelCurrent .levelBadge {
+  background: white;
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+}
+
+.levelContent {
+  flex: 1;
+  background: var(--gray-50);
+  border-radius: 12px;
+  padding: 20px;
+  margin-left: 16px;
+}
+
+.levelCurrent .levelContent {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%);
+  border: 1px solid var(--primary);
+}
+
+.levelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.levelHeader h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.levelSalary {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.levelNumber {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-bottom: 12px;
+}
+
+.levelSkills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skillTag {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.skillTagLearned {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.currentBadge {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: var(--primary);
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.nextBadge {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--primary);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.skillAnalysis {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.analysisHeader {
+  margin-bottom: 24px;
+}
+
+.analysisHeader h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.analysisHeader p {
+  color: var(--gray-500);
+}
+
+.gapList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gapCard {
+  background: var(--gray-50);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.gapHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.gapSkill {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.priorityBadge {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.priorityHigh {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.priorityMedium {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.gapBars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.gapBarRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gapLabel {
+  width: 70px;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.gapBar {
+  flex: 1;
+  height: 12px;
+  background: var(--gray-200);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.gapBarFill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+
+.gapPercent {
+  width: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.gapAction {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gapDiff {
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.gapBtn {
+  padding: 8px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.courses {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.coursesHeader {
+  margin-bottom: 24px;
+}
+
+.coursesHeader h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.coursesHeader p {
+  color: var(--gray-500);
+}
+
+.courseGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.courseCard {
+  display: flex;
+  background: var(--gray-50);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.courseCard:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.courseMatch {
+  width: 80px;
+  background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.matchValue {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.matchLabel {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.courseContent {
+  flex: 1;
+  padding: 20px;
+}
+
+.courseContent h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.courseMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-bottom: 16px;
+}
+
+.courseActions {
+  display: flex;
+  gap: 12px;
+}
+
+.enrollBtn {
+  flex: 1;
+  padding: 10px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.saveBtn {
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.learningPath {
+  background: var(--gray-50);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.learningPath h3 {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.pathSteps {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pathStep {
+  flex: 1;
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stepNumber {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.stepTitle {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.stepDuration {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.stepArrow {
+  font-size: 20px;
+  color: var(--gray-400);
+}
+
+@media (max-width: 1024px) {
+  .pathSelector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .courseGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pathSteps {
+    flex-direction: column;
+  }
+
+  .stepArrow {
+    transform: rotate(90deg);
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "rider-circle",
+  "version": "1.0.0",
+  "description": "The Operating System for Adventure Mobility",
+  "private": true,
+  "workspaces": [
+    "rider-circle-api",
+    "rider-circle-app",
+    "rider-circle-graph",
+    "rider-circle-intelligence",
+    "rider-circle-shared"
+  ],
+  "scripts": {
+    "dev:api": "cd rider-circle-api && npm run dev",
+    "dev:app": "cd rider-circle-app && npm start",
+    "dev:graph": "cd rider-circle-graph && npm run dev",
+    "dev:intelligence": "cd rider-circle-intelligence && npm run dev",
+    "build:api": "cd rider-circle-api && npm run build",
+    "build:app": "cd rider-circle-app && npx expo export",
+    "test": "npm run test:api && npm run test:app",
+    "test:api": "cd rider-circle-api && npm test",
+    "test:app": "cd rider-circle-app && npm run type-check",
+    "lint": "npm run lint:api && npm run lint:app",
+    "lint:api": "cd rider-circle-api && npm run lint",
+    "lint:app": "cd rider-circle-app && npm run lint",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": [
+    "rider",
+    "motorcycle",
+    "community",
+    "safety",
+    "tracking",
+    "maps",
+    "react-native",
+    "expo"
+  ],
+  "author": "REZ Ecosystem",
+  "license": "PROPRIETARY",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

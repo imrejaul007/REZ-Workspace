@@ -1,0 +1,21 @@
+{
+  "name": "@rez/hotel-services-tests",
+  "version": "1.0.0",
+  "description": "Test runner for all hotel services",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:pms": "vitest run rez-pms-service",
+    "test:payment": "vitest run rez-payment-gateway-service",
+    "test:offline": "vitest run rez-staff-app-offline-service",
+    "test:loyalty": "vitest run rez-loyalty-service",
+    "test:channel": "vitest run rez-channel-integration-service",
+    "test:all": "vitest run --reporter=verbose"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0",
+    "@types/node": "^20.10.0"
+  }
+}

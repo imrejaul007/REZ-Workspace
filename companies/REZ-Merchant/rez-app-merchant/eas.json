@@ -1,0 +1,57 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "development"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "staging",
+        "EXPO_PUBLIC_API_BASE_URL": "https://rez-api-gateway.onrender.com/api",
+        "EXPO_PUBLIC_API_TIMEOUT": "60000",
+        "EXPO_PUBLIC_SOCKET_URL": "https://rez-backend-8dfu.onrender.com",
+        "EXPO_PUBLIC_SOCKET_TIMEOUT": "15000",
+        "EXPO_PUBLIC_DEBUG_MODE": "false",
+        "EXPO_PUBLIC_LOG_LEVEL": "warn",
+        "EXPO_PUBLIC_ENABLE_PUSH_NOTIFICATIONS": "true"
+      }
+    },
+    "production": {
+      "distribution": "store",
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production",
+        "EXPO_PUBLIC_API_BASE_URL": "https://rez-api-gateway.onrender.com/api",
+        "EXPO_PUBLIC_API_TIMEOUT": "60000",
+        "EXPO_PUBLIC_SOCKET_URL": "https://rez-backend-8dfu.onrender.com",
+        "EXPO_PUBLIC_SOCKET_TIMEOUT": "15000",
+        "EXPO_PUBLIC_DEBUG_MODE": "false",
+        "EXPO_PUBLIC_MOCK_API": "false",
+        "EXPO_PUBLIC_LOG_LEVEL": "error",
+        "EXPO_PUBLIC_SHOW_DEV_TOOLS": "false",
+        "EXPO_PUBLIC_ENABLE_PUSH_NOTIFICATIONS": "true"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "${EXPO_APPLE_ID}",
+        "ascAppId": "${EXPO_ASC_APP_ID}",
+        "appleTeamId": "${EXPO_APPLE_TEAM_ID}"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      }
+    }
+  }
+}

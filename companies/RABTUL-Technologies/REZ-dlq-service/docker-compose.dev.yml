@@ -1,0 +1,27 @@
+version: '3.8'
+
+# Development override for docker-compose
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# This enables hot-reload with volume mounts for local development
+
+services:
+  rez-dlq-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/app/src:ro
+      - ./tsconfig.json:/app/tsconfig.json:ro
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    command: ["npx", "ts-node", "src/index.ts"]
+
+  rez-mongo:
+    ports:
+      - "27017:27017"
+
+  rez-redis:
+    ports:
+      - "6379:6379"

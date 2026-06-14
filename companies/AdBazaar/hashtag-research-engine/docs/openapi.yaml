@@ -1,0 +1,938 @@
+openapi: 3.0.0
+info:
+  title: Hashtag Research Engine API
+  version: 1.0.0
+  description: |
+    AI-powered hashtag research and optimization service.
+    Search, analyze, and suggest hashtags for maximum social media reach.
+    Features trending detection, banned hashtag checking, and content analysis.
+  contact:
+    name: AdBazaar Support
+    email: support@adbazaar.com
+  license:
+    name: Proprietary
+    url: https://adbazaar.com/license
+
+servers:
+  - url: http://localhost:5090
+    description: Local development server
+  - url: https://api.adbazaar.com/hashtags/v1
+    description: Production server
+
+tags:
+  - name: System
+    description: System health and monitoring
+  - name: Search
+    description: Hashtag search and discovery
+  - name: Suggestions
+    description: AI-powered hashtag suggestions
+  - name: Trending
+    description: Trending hashtag tracking
+  - name: Analysis
+    description: Content and hashtag analysis
+  - name: Sets
+    description: Hashtag set management
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the current health status of the service
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                success: true
+                data:
+                  status: healthy
+                  service: hashtag-research-engine
+                  version: "1.0.0"
+                  timestamp: "2026-06-08T10:30:00.000Z"
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics
+      tags:
+        - System
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  # ============ HASHTAG SEARCH ============
+  /api/hashtags/search:
+    post:
+      summary: Search hashtags
+      description: Search for hashtags by query with filtering options
+      tags:
+        - Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchHashtagsRequest'
+            example:
+              query: "fashion"
+              limit: 20
+              category: lifestyle
+              includeBanned: false
+      responses:
+        '200':
+          description: Search results retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagSearchResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Search failed
+
+  /api/hashtags/{tag}:
+    get:
+      summary: Get hashtag details
+      description: Get detailed information about a specific hashtag
+      tags:
+        - Search
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Hashtag name (with or without #)
+      responses:
+        '200':
+          description: Hashtag details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagDetailResponse'
+        '404':
+          description: Hashtag not found
+        '500':
+          description: Failed to retrieve hashtag
+
+  /api/hashtags/trending:
+    post:
+      summary: Get trending hashtags
+      description: Get trending hashtags by category
+      tags:
+        - Trending
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                limit:
+                  type: integer
+                  default: 20
+                  maximum: 100
+                direction:
+                  type: string
+                  enum: [asc, desc]
+                  default: desc
+            example:
+              category: fashion
+              limit: 20
+              direction: desc
+      responses:
+        '200':
+          description: Trending hashtags retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendingHashtagsResponse'
+
+  # ============ HASHTAG SUGGESTIONS ============
+  /api/hashtags/suggest:
+    post:
+      summary: Suggest hashtags
+      description: Get AI-powered hashtag suggestions based on content
+      tags:
+        - Suggestions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuggestHashtagsRequest'
+            example:
+              content: "Just launched our new summer collection! Check out these amazing pieces."
+              type: lifestyle
+              count: 15
+              includeNiche: true
+      responses:
+        '200':
+          description: Suggestions retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestedHashtagsResponse'
+
+  /api/hashtags/mix:
+    post:
+      summary: Create hashtag mix
+      description: Create an optimal mix of hashtags based on a primary tag
+      tags:
+        - Suggestions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - primaryTag
+              properties:
+                primaryTag:
+                  type: string
+                  description: Primary hashtag
+                count:
+                  type: integer
+                  default: 10
+                  minimum: 5
+                  maximum: 30
+            example:
+              primaryTag: travel
+              count: 10
+      responses:
+        '200':
+          description: Hashtag mix created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagMixResponse'
+
+  # ============ HASHTAG ANALYSIS ============
+  /api/hashtags/check:
+    post:
+      summary: Check banned hashtags
+      description: Check if hashtags are banned or restricted
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckBannedRequest'
+            example:
+              hashtags:
+                - fashion
+                - instagood
+                - bannedTag
+      responses:
+        '200':
+          description: Check results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannedCheckResponse'
+
+  /api/hashtags/analyze:
+    post:
+      summary: Analyze content
+      description: Analyze content and suggest optimal hashtags
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeContentRequest'
+            example:
+              content: "Amazing sunset at the beach today!"
+              title: "Beach Day"
+              imageDescription: "Orange sunset over calm ocean waves"
+              targetAudience: young_adults
+      responses:
+        '200':
+          description: Analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentAnalysisResponse'
+
+  /api/hashtags/init/health:
+    get:
+      summary: Data initialization status
+      description: Check if sample data has been initialized
+      tags:
+        - System
+      responses:
+        '200':
+          description: Status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      initialized:
+                        type: boolean
+                      service:
+                        type: string
+                      version:
+                        type: string
+
+  # ============ HASHTAG SETS ============
+  /api/hashtags/sets:
+    get:
+      summary: List hashtag sets
+      description: Get a list of hashtag sets with filtering
+      tags:
+        - Sets
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category
+        - name: isPublic
+          in: query
+          schema:
+            type: boolean
+          description: Filter public sets only
+      responses:
+        '200':
+          description: Hashtag sets retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagSetListResponse'
+
+  /api/hashtags/sets/popular:
+    get:
+      summary: Get popular sets
+      description: Get most popular hashtag sets
+      tags:
+        - Sets
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Popular sets retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PopularSetsResponse'
+
+  /api/hashtags/sets/search:
+    get:
+      summary: Search hashtag sets
+      description: Search hashtag sets by query
+      tags:
+        - Sets
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagSetListResponse'
+        '400':
+          description: Missing query parameter
+
+  /api/hashtags/sets/{id}:
+    get:
+      summary: Get hashtag set
+      description: Get a specific hashtag set by ID
+      tags:
+        - Sets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Hashtag set ID
+      responses:
+        '200':
+          description: Hashtag set retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagSetResponse'
+        '404':
+          description: Hashtag set not found
+
+    put:
+      summary: Update hashtag set
+      description: Update an existing hashtag set
+      tags:
+        - Sets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Hashtag set ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHashtagSetRequest'
+      responses:
+        '200':
+          description: Hashtag set updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagSetResponse'
+        '404':
+          description: Hashtag set not found
+
+    delete:
+      summary: Delete hashtag set
+      description: Delete a hashtag set
+      tags:
+        - Sets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Hashtag set ID
+      responses:
+        '200':
+          description: Hashtag set deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '404':
+          description: Hashtag set not found
+
+  /api/hashtags/sets:
+    post:
+      summary: Create hashtag set
+      description: Create a new hashtag set
+      tags:
+        - Sets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHashtagSetRequest'
+            example:
+              name: "Summer Vibes Mix"
+              tags:
+                - summer
+                - vacation
+                - beach
+                - sunshine
+                - travel
+              category: lifestyle
+              isPublic: true
+      responses:
+        '201':
+          description: Hashtag set created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashtagSetResponse'
+
+# ============ COMPONENTS ============
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+            service:
+              type: string
+            version:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+
+    SearchHashtagsRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          minLength: 1
+          description: Search query
+        limit:
+          type: integer
+          default: 20
+          maximum: 100
+          description: Maximum results to return
+        category:
+          type: string
+          description: Filter by category
+        includeBanned:
+          type: boolean
+          default: false
+          description: Include banned hashtags in results
+
+    Hashtag:
+      type: object
+      properties:
+        tag:
+          type: string
+        displayName:
+          type: string
+        postsCount:
+          type: integer
+          description: Number of posts using this hashtag
+        reachEstimate:
+          type: integer
+          description: Estimated reach
+        category:
+          type: string
+        isBanned:
+          type: boolean
+        trend:
+          type: object
+          properties:
+            direction:
+              type: string
+              enum: [up, down, stable]
+            changePercent:
+              type: number
+
+    HashtagSearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            hashtags:
+              type: array
+              items:
+                $ref: '#/components/schemas/Hashtag'
+            count:
+              type: integer
+
+    HashtagDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/HashtagDetail'
+
+    HashtagDetail:
+      type: object
+      properties:
+        tag:
+          type: string
+        displayName:
+          type: string
+        postsCount:
+          type: integer
+        reachEstimate:
+          type: integer
+        avgLikes:
+          type: integer
+        avgComments:
+          type: integer
+        avgEngagement:
+          type: number
+        category:
+          type: string
+        isBanned:
+          type: boolean
+        relatedHashtags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hashtag'
+        trend:
+          type: object
+          properties:
+            direction:
+              type: string
+            changePercent:
+              type: number
+            velocity:
+              type: string
+        lastUpdated:
+          type: string
+          format: date-time
+
+    TrendingHashtagsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            trending:
+              type: array
+              items:
+                $ref: '#/components/schemas/TrendingHashtag'
+            count:
+              type: integer
+
+    TrendingHashtag:
+      type: object
+      properties:
+        tag:
+          type: string
+        rank:
+          type: integer
+        postsCount:
+          type: integer
+        growthRate:
+          type: number
+          description: Growth rate percentage
+        velocity:
+          type: string
+          enum: [exploding, fast, steady, slow]
+        reason:
+          type: string
+        relatedEvents:
+          type: array
+          items:
+            type: string
+
+    SuggestHashtagsRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: Content to generate hashtags for
+        type:
+          type: string
+          description: Content type category
+        count:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 30
+        includeNiche:
+          type: boolean
+          default: false
+          description: Include niche hashtags
+
+    SuggestedHashtag:
+      type: object
+      properties:
+        tag:
+          type: string
+        type:
+          type: string
+          enum: [high, medium, niche]
+        reachEstimate:
+          type: integer
+        competition:
+          type: string
+          enum: [low, medium, high]
+        relevance:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    SuggestedHashtagsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            suggestions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SuggestedHashtag'
+            mix:
+              type: object
+              properties:
+                high:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SuggestedHashtag'
+                medium:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SuggestedHashtag'
+                niche:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SuggestedHashtag'
+            totalReaches:
+              type: integer
+
+    HashtagMixResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            primaryTag:
+              type: string
+            mix:
+              type: array
+              items:
+                $ref: '#/components/schemas/SuggestedHashtag'
+            totalReaches:
+              type: integer
+            recommendedPostingTime:
+              type: string
+              description: Best time to post with these hashtags
+
+    CheckBannedRequest:
+      type: object
+      required:
+        - hashtags
+      properties:
+        hashtags:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 30
+
+    BannedCheckResult:
+      type: object
+      properties:
+        tag:
+          type: string
+        isBanned:
+          type: boolean
+        reason:
+          type: string
+        alternatives:
+          type: array
+          items:
+            type: string
+
+    BannedCheckResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/BannedCheckResult'
+            safeHashtags:
+              type: array
+              items:
+                type: string
+            bannedHashtags:
+              type: array
+              items:
+                type: string
+
+    AnalyzeContentRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+        title:
+          type: string
+        imageDescription:
+          type: string
+        targetAudience:
+          type: string
+
+    ContentAnalysisResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            detectedTopics:
+              type: array
+              items:
+                type: string
+            sentiment:
+              type: string
+              enum: [positive, neutral, negative]
+            suggestedHashtags:
+              type: array
+              items:
+                $ref: '#/components/schemas/SuggestedHashtag'
+            optimalCount:
+              type: integer
+            warningMessages:
+              type: array
+              items:
+                type: string
+
+    HashtagSet:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        category:
+          type: string
+        isPublic:
+          type: boolean
+        usageCount:
+          type: integer
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    HashtagSetResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/HashtagSet'
+
+    HashtagSetListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            sets:
+              type: array
+              items:
+                $ref: '#/components/schemas/HashtagSet'
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+
+    PopularSetsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/HashtagSet'
+
+    CreateHashtagSetRequest:
+      type: object
+      required:
+        - name
+        - tags
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        tags:
+          type: array
+          items:
+            type: string
+          minItems: 3
+          maxItems: 30
+        category:
+          type: string
+        isPublic:
+          type: boolean
+          default: true
+
+    UpdateHashtagSetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        category:
+          type: string
+        isPublic:
+          type: boolean
+
+    DeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string

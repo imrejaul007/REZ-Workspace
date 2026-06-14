@@ -1,0 +1,1 @@
+export { localizationService, LocalizationService } from './localizationService';

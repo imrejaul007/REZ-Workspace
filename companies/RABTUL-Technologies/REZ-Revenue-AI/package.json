@@ -1,0 +1,31 @@
+{
+  "name": "@rez/revenue-ai",
+  "version": "1.0.0",
+  "description": "REZ Revenue AI - Revenue intelligence and optimization",
+  "private": true,
+  "workspaces": [
+    "agents/*",
+    "benchmark-score",
+    "campaign-generator",
+    "cashback-optimizer",
+    "cross-merchant-intelligence",
+    "dashboard",
+    "demand-forecast",
+    "merchant-advisor",
+    "merchant-gpt",
+    "offer-optimizer",
+    "pricing-engine",
+    "revenue-ai-gateway",
+    "segment-brain",
+    "simulation-engine"
+  ],
+  "scripts": {
+    "dev": "cd revenue-ai-gateway && npm run dev",
+    "build": "npm run build --workspaces",
+    "start": "cd revenue-ai-gateway && npm start",
+    "test": "jest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

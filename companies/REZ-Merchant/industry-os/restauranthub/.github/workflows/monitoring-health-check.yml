@@ -1,0 +1,423 @@
+name: Monitoring Stack Health Check
+
+on:
+  # Run after deployment
+  workflow_run:
+    workflows: ["Deploy to Production"]
+    types:
+      - completed
+
+  # Scheduled health checks
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: 'Type of health check'
+        required: false
+        default: 'comprehensive'
+        type: choice
+        options:
+          - comprehensive
+          - quick
+          - critical-only
+
+env:
+  MONITORING_TIMEOUT: '60s'
+
+jobs:
+  monitoring-health:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Prometheus health
+        id: prometheus
+        run: |
+          echo "Checking Prometheus health..."
+
+          # Check if Prometheus is responding
+          if curl -sf "http://prometheus:9090/-/healthy" > /dev/null 2>&1; then
+            echo "prometheus_status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ Prometheus is healthy"
+          else
+            echo "prometheus_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ Prometheus is unhealthy"
+          fi
+
+          # Check Prometheus targets
+          targets_response=$(curl -s "http://prometheus:9090/api/v1/targets" || echo '{"data":{"activeTargets":[]}}')
+          unhealthy_targets=$(echo "$targets_response" | jq -r '.data.activeTargets[] | select(.health != "up") | .scrapeUrl' | wc -l)
+
+          echo "unhealthy_targets=$unhealthy_targets" >> $GITHUB_OUTPUT
+          echo "Unhealthy targets: $unhealthy_targets"
+
+      - name: Check Grafana health
+        id: grafana
+        run: |
+          echo "Checking Grafana health..."
+
+          if curl -sf "http://grafana:3000/api/health" > /dev/null 2>&1; then
+            echo "grafana_status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ Grafana is healthy"
+          else
+            echo "grafana_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ Grafana is unhealthy"
+          fi
+
+      - name: Check AlertManager health
+        id: alertmanager
+        run: |
+          echo "Checking AlertManager health..."
+
+          if curl -sf "http://alertmanager:9093/-/healthy" > /dev/null 2>&1; then
+            echo "alertmanager_status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ AlertManager is healthy"
+          else
+            echo "alertmanager_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ AlertManager is unhealthy"
+          fi
+
+          # Check active alerts
+          alerts_response=$(curl -s "http://alertmanager:9093/api/v1/alerts" || echo '{"data":[]}')
+          critical_alerts=$(echo "$alerts_response" | jq -r '.data[] | select(.labels.severity == "critical") | .labels.alertname' | wc -l)
+
+          echo "critical_alerts=$critical_alerts" >> $GITHUB_OUTPUT
+          echo "Active critical alerts: $critical_alerts"
+
+      - name: Check Loki health
+        id: loki
+        run: |
+          echo "Checking Loki health..."
+
+          if curl -sf "http://loki:3100/ready" > /dev/null 2>&1; then
+            echo "loki_status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ Loki is healthy"
+          else
+            echo "loki_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ Loki is unhealthy"
+          fi
+
+      - name: Check Jaeger health
+        id: jaeger
+        run: |
+          echo "Checking Jaeger health..."
+
+          if curl -sf "http://jaeger:16686/" > /dev/null 2>&1; then
+            echo "jaeger_status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ Jaeger is healthy"
+          else
+            echo "jaeger_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ Jaeger is unhealthy"
+          fi
+
+      - name: Check application metrics availability
+        id: app_metrics
+        run: |
+          echo "Checking application metrics..."
+
+          # Check if main application metrics are being collected
+          query_response=$(curl -s "http://prometheus:9090/api/v1/query?query=up{job=\"restauranthub-api\"}" || echo '{"data":{"result":[]}}')
+          api_up=$(echo "$query_response" | jq -r '.data.result[0].value[1]' 2>/dev/null || echo "0")
+
+          if [ "$api_up" = "1" ]; then
+            echo "app_metrics_status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ Application metrics are being collected"
+          else
+            echo "app_metrics_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ Application metrics are not being collected"
+          fi
+
+      - name: Check log ingestion
+        id: log_ingestion
+        run: |
+          echo "Checking log ingestion..."
+
+          # Check if logs are being ingested in the last 5 minutes
+          current_time=$(date +%s)
+          five_minutes_ago=$((current_time - 300))
+
+          query="count_over_time({job=\"restauranthub-api\"}[5m])"
+          query_encoded=$(printf '%s' "$query" | jq -sRr @uri)
+
+          log_response=$(curl -s "http://loki:3100/loki/api/v1/query?query=$query_encoded&time=${current_time}000000000" || echo '{"data":{"result":[]}}')
+          log_count=$(echo "$log_response" | jq -r '.data.result[0].value[1]' 2>/dev/null || echo "0")
+
+          if [ "$log_count" -gt "0" ]; then
+            echo "log_ingestion_status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ Logs are being ingested (${log_count} in last 5 minutes)"
+          else
+            echo "log_ingestion_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ No logs ingested in the last 5 minutes"
+          fi
+
+      - name: Check alert notification channels
+        id: notification_channels
+        run: |
+          echo "Checking notification channels..."
+
+          # Test webhook notification service
+          webhook_response=$(curl -s -o /dev/null -w "%{http_code}" "http://webhook-notifications:9999/health" || echo "000")
+
+          if [ "$webhook_response" = "200" ]; then
+            echo "notifications_status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ Notification service is healthy"
+          else
+            echo "notifications_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ Notification service is unhealthy (HTTP $webhook_response)"
+          fi
+
+      - name: Generate monitoring health report
+        run: |
+          # Create comprehensive health report
+          cat > monitoring_health_report.py << 'EOF'
+          import json
+          import os
+          from datetime import datetime
+
+          # Get step outputs
+          def get_output(step_id, output_name):
+              return os.environ.get(f"{step_id}_{output_name}", "unknown")
+
+          prometheus_status = "${{ steps.prometheus.outputs.prometheus_status }}"
+          grafana_status = "${{ steps.grafana.outputs.grafana_status }}"
+          alertmanager_status = "${{ steps.alertmanager.outputs.alertmanager_status }}"
+          loki_status = "${{ steps.loki.outputs.loki_status }}"
+          jaeger_status = "${{ steps.jaeger.outputs.jaeger_status }}"
+          app_metrics_status = "${{ steps.app_metrics.outputs.app_metrics_status }}"
+          log_ingestion_status = "${{ steps.log_ingestion.outputs.log_ingestion_status }}"
+          notifications_status = "${{ steps.notification_channels.outputs.notifications_status }}"
+
+          unhealthy_targets = int("${{ steps.prometheus.outputs.unhealthy_targets }}" or "0")
+          critical_alerts = int("${{ steps.alertmanager.outputs.critical_alerts }}" or "0")
+
+          # Calculate overall health
+          all_statuses = [
+              prometheus_status, grafana_status, alertmanager_status,
+              loki_status, jaeger_status, app_metrics_status,
+              log_ingestion_status, notifications_status
+          ]
+
+          healthy_count = sum(1 for status in all_statuses if status == "healthy")
+          total_count = len(all_statuses)
+          health_percentage = (healthy_count / total_count) * 100
+
+          overall_status = "healthy" if health_percentage >= 90 else "degraded" if health_percentage >= 70 else "unhealthy"
+
+          # Create health report
+          report = f"""
+          # 📊 Monitoring Stack Health Report
+
+          **Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+          **Overall Health:** {'🟢' if overall_status == 'healthy' else '🟡' if overall_status == 'degraded' else '🔴'} **{overall_status.upper()}** ({health_percentage:.1f}%)
+
+          ## 🔍 Component Status
+
+          | Component | Status | Details |
+          |-----------|--------|---------|
+          | Prometheus | {'✅' if prometheus_status == 'healthy' else '❌'} {prometheus_status} | {unhealthy_targets} unhealthy targets |
+          | Grafana | {'✅' if grafana_status == 'healthy' else '❌'} {grafana_status} | Dashboard service |
+          | AlertManager | {'✅' if alertmanager_status == 'healthy' else '❌'} {alertmanager_status} | {critical_alerts} critical alerts |
+          | Loki | {'✅' if loki_status == 'healthy' else '❌'} {loki_status} | Log aggregation |
+          | Jaeger | {'✅' if jaeger_status == 'healthy' else '❌'} {jaeger_status} | Distributed tracing |
+          | App Metrics | {'✅' if app_metrics_status == 'healthy' else '❌'} {app_metrics_status} | Application monitoring |
+          | Log Ingestion | {'✅' if log_ingestion_status == 'healthy' else '❌'} {log_ingestion_status} | Log collection |
+          | Notifications | {'✅' if notifications_status == 'healthy' else '❌'} {notifications_status} | Alert delivery |
+
+          ## 📈 Health Metrics
+
+          - **Healthy Components:** {healthy_count}/{total_count}
+          - **Health Percentage:** {health_percentage:.1f}%
+          - **Unhealthy Prometheus Targets:** {unhealthy_targets}
+          - **Active Critical Alerts:** {critical_alerts}
+
+          ## 🚨 Issues Detected
+          """
+
+          issues = []
+          if prometheus_status != "healthy":
+              issues.append("- Prometheus service is not responding")
+          if unhealthy_targets > 0:
+              issues.append(f"- {unhealthy_targets} Prometheus targets are unhealthy")
+          if grafana_status != "healthy":
+              issues.append("- Grafana dashboard service is not responding")
+          if alertmanager_status != "healthy":
+              issues.append("- AlertManager is not responding")
+          if critical_alerts > 0:
+              issues.append(f"- {critical_alerts} critical alerts are currently active")
+          if loki_status != "healthy":
+              issues.append("- Loki log aggregation service is not responding")
+          if jaeger_status != "healthy":
+              issues.append("- Jaeger tracing service is not responding")
+          if app_metrics_status != "healthy":
+              issues.append("- Application metrics are not being collected")
+          if log_ingestion_status != "healthy":
+              issues.append("- Log ingestion has stopped or is severely delayed")
+          if notifications_status != "healthy":
+              issues.append("- Notification service is not responding")
+
+          if issues:
+              report += "\n".join(issues)
+          else:
+              report += "No issues detected - all monitoring components are healthy! 🎉"
+
+          report += f"""
+
+          ## 🔄 Recommended Actions
+
+          """
+
+          if overall_status == "unhealthy":
+              report += """
+          **IMMEDIATE ACTION REQUIRED:**
+          1. Investigate and resolve unhealthy monitoring components
+          2. Check system resources (CPU, memory, disk)
+          3. Review monitoring stack logs for errors
+          4. Verify network connectivity between components
+          5. Consider failover procedures if issues persist
+              """
+          elif overall_status == "degraded":
+              report += """
+          **ATTENTION NEEDED:**
+          1. Investigate degraded components
+          2. Monitor for further degradation
+          3. Check resource utilization
+          4. Review recent changes that might have affected monitoring
+              """
+          else:
+              report += """
+          **MAINTENANCE:**
+          1. Continue regular monitoring
+          2. Review monitoring performance trends
+          3. Update monitoring configurations as needed
+          4. Test alert notification channels
+              """
+
+          report += """
+
+          ---
+          *Generated by RestaurantHub AI Sentry Monitoring*
+          """
+
+          with open('monitoring-health-report.md', 'w') as f:
+              f.write(report)
+
+          # Create health metrics for Prometheus
+          health_metrics = f"""
+          # HELP monitoring_stack_health_percentage Overall monitoring stack health percentage
+          # TYPE monitoring_stack_health_percentage gauge
+          monitoring_stack_health_percentage {health_percentage}
+
+          # HELP monitoring_component_status Component health status (1=healthy, 0=unhealthy)
+          # TYPE monitoring_component_status gauge
+          monitoring_component_status{{component="prometheus"}} {1 if prometheus_status == "healthy" else 0}
+          monitoring_component_status{{component="grafana"}} {1 if grafana_status == "healthy" else 0}
+          monitoring_component_status{{component="alertmanager"}} {1 if alertmanager_status == "healthy" else 0}
+          monitoring_component_status{{component="loki"}} {1 if loki_status == "healthy" else 0}
+          monitoring_component_status{{component="jaeger"}} {1 if jaeger_status == "healthy" else 0}
+          monitoring_component_status{{component="app_metrics"}} {1 if app_metrics_status == "healthy" else 0}
+          monitoring_component_status{{component="log_ingestion"}} {1 if log_ingestion_status == "healthy" else 0}
+          monitoring_component_status{{component="notifications"}} {1 if notifications_status == "healthy" else 0}
+
+          # HELP monitoring_unhealthy_targets Number of unhealthy Prometheus targets
+          # TYPE monitoring_unhealthy_targets gauge
+          monitoring_unhealthy_targets {unhealthy_targets}
+
+          # HELP monitoring_critical_alerts Number of active critical alerts
+          # TYPE monitoring_critical_alerts gauge
+          monitoring_critical_alerts {critical_alerts}
+
+          # HELP monitoring_health_check_timestamp Last monitoring health check timestamp
+          # TYPE monitoring_health_check_timestamp gauge
+          monitoring_health_check_timestamp {int(datetime.now().timestamp())}
+          """
+
+          with open('monitoring-health-metrics.prom', 'w') as f:
+              f.write(health_metrics)
+
+          print(f"Overall monitoring health: {overall_status} ({health_percentage:.1f}%)")
+          print(f"::set-output name=overall_status::{overall_status}")
+          print(f"::set-output name=health_percentage::{health_percentage}")
+          EOF
+
+          python monitoring_health_report.py
+
+      - name: Push health metrics to Pushgateway
+        if: always()
+        run: |
+          if [ -f monitoring-health-metrics.prom ]; then
+            curl -X POST http://pushgateway:9091/metrics/job/monitoring-health/instance/github-actions \
+              --data-binary @monitoring-health-metrics.prom || echo "Could not push health metrics"
+          fi
+
+      - name: Upload monitoring health artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: monitoring-health-check
+          path: |
+            monitoring-health-report.md
+            monitoring-health-metrics.prom
+          retention-days: 7
+
+      - name: Send notification on monitoring issues
+        if: failure() || (success() && steps.monitoring-health.outputs.overall_status != 'healthy')
+        run: |
+          # Send notification to monitoring team
+          curl -X POST http://webhook-notifications:9999/webhook \
+            -H "Content-Type: application/json" \
+            -d '{
+              "receiver": "monitoring-team",
+              "status": "firing",
+              "alerts": [{
+                "status": "firing",
+                "labels": {
+                  "alertname": "MonitoringStackHealth",
+                  "severity": "warning",
+                  "team": "platform",
+                  "component": "monitoring"
+                },
+                "annotations": {
+                  "summary": "Monitoring stack health check detected issues",
+                  "description": "The monitoring stack health check found degraded or unhealthy components",
+                  "runbook_url": "https://runbooks.restauranthub.com/monitoring/health-issues"
+                },
+                "startsAt": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+              }],
+              "groupLabels": {
+                "alertname": "MonitoringStackHealth"
+              }
+            }' || echo "Could not send notification"
+
+      - name: Comment on recent commits if health is degraded
+        if: github.event_name == 'workflow_run' && steps.monitoring-health.outputs.overall_status != 'healthy'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            try {
+              const report = fs.readFileSync('monitoring-health-report.md', 'utf8');
+
+              // Get the most recent commit
+              const { data: commits } = await github.rest.repos.listCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 1
+              });
+
+              if (commits.length > 0) {
+                await github.rest.repos.createCommitComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  commit_sha: commits[0].sha,
+                  body: `## 📊 Monitoring Health Alert\n\n${report}\n\n*This comment was automatically generated by the monitoring health check.*`
+                });
+              }
+            } catch (error) {
+              console.log('Could not post monitoring health report:', error);
+            }

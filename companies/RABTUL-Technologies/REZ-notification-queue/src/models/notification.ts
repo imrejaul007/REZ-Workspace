@@ -1,0 +1,1 @@
+export interface Notification{id:string;userId:string;channel:'email'|'sms'|'push'|'whatsapp';type:string;title:string;body:string;data?:any;status:'queued'|'sent'|'failed';priority:'low'|'normal'|'high';createdAt:string;sentAt?:string;error?:string;}

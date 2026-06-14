@@ -1,0 +1,17 @@
+{
+  "name": "@rider-circle/shared",
+  "version": "1.0.0",
+  "description": "RiderCircle Shared Types and Utilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

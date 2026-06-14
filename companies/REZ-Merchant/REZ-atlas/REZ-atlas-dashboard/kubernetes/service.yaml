@@ -1,0 +1,20 @@
+# Kubernetes Service for REZ-atlas-dashboard
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-atlas-dashboard
+  namespace: rez-merchant
+  labels:
+    app: REZ-atlas-dashboard
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-atlas-dashboard service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5190
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-atlas-dashboard

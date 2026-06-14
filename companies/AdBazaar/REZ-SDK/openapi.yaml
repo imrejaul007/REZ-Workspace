@@ -1,0 +1,849 @@
+# REZ AdBazaar API - OpenAPI Specification
+openapi: 3.0.0
+info:
+  title: REZ AdBazaar Intelligence API
+  description: API for all 15 AdBazaar Intelligence Services
+  version: 1.0.0
+  contact:
+    name: REZ Support
+servers:
+  - url: http://localhost:4810
+    description: Email Validator
+  - url: http://localhost:4811
+    description: Fraud Detection
+  - url: http://localhost:4812
+    description: Creative A/B Testing
+  - url: http://localhost:4813
+    description: Brand Safety
+  - url: http://localhost:4814
+    description: Viewability Tracker
+  - url: http://localhost:4815
+    description: Attribution Modeling
+  - url: http://localhost:4816
+    description: Audience Sync
+  - url: http://localhost:4817
+    description: Creative Rotation
+  - url: http://localhost:4818
+    description: Frequency Capping
+  - url: http://localhost:4819
+    description: Budget Allocator
+  - url: http://localhost:4900
+    description: Churn Predictor
+  - url: http://localhost:4901
+    description: LTV Calculator
+  - url: http://localhost:4902
+    description: Next Best Action
+  - url: http://localhost:4903
+    description: Sentiment Analyzer
+  - url: http://localhost:4904
+    description: Competitor Monitor
+
+paths:
+  # ============================================
+  # Email Validator (4810)
+  # ============================================
+  /api/validate:
+    post:
+      summary: Validate email address
+      tags: [Email Validator]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailValidationResult'
+
+  # ============================================
+  # Fraud Detection (4811)
+  # ============================================
+  /api/detect:
+    post:
+      summary: Detect fraud
+      tags: [Fraud Detection]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FraudDetectionParams'
+      responses:
+        '200':
+          description: Fraud detection result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudResult'
+
+  # ============================================
+  # A/B Testing (4812)
+  # ============================================
+  /api/experiments:
+    post:
+      summary: Create experiment
+      tags: [A/B Testing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperimentParams'
+      responses:
+        '201':
+          description: Experiment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Experiment'
+    get:
+      summary: List experiments
+      tags: [A/B Testing]
+      responses:
+        '200':
+          description: List of experiments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Experiment'
+
+  # ============================================
+  # Brand Safety (4813)
+  # ============================================
+  /api/check:
+    post:
+      summary: Check brand safety
+      tags: [Brand Safety]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandSafetyParams'
+      responses:
+        '200':
+          description: Brand safety result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandSafetyResult'
+
+  # ============================================
+  # Viewability Tracker (4814)
+  # ============================================
+  /api/track:
+    post:
+      summary: Track viewability
+      tags: [Viewability]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewabilityParams'
+      responses:
+        '200':
+          description: Viewability tracked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewabilityResult'
+
+  # ============================================
+  # Attribution Modeling (4815)
+  # ============================================
+  /api/attribute:
+    post:
+      summary: Attribute conversion
+      tags: [Attribution]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttributionParams'
+      responses:
+        '200':
+          description: Attribution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttributionResult'
+
+  # ============================================
+  # Audience Sync (4816)
+  # ============================================
+  /api/audiences:
+    post:
+      summary: Create audience
+      tags: [Audience Sync]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudienceParams'
+      responses:
+        '201':
+          description: Audience created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Audience'
+    get:
+      summary: List audiences
+      tags: [Audience Sync]
+      responses:
+        '200':
+          description: List of audiences
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Audience'
+
+  # ============================================
+  # Creative Rotation (4817)
+  # ============================================
+  /api/rotate:
+    post:
+      summary: Get creative for rotation
+      tags: [Creative Rotation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RotationParams'
+      responses:
+        '200':
+          description: Selected creative
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RotationResult'
+
+  # ============================================
+  # Frequency Capping (4818)
+  # ============================================
+  /api/check:
+    post:
+      summary: Check frequency cap
+      tags: [Frequency Capping]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FrequencyParams'
+      responses:
+        '200':
+          description: Frequency check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrequencyResult'
+
+  # ============================================
+  # Budget Allocator (4819)
+  # ============================================
+  /api/allocate:
+    post:
+      summary: Allocate budget
+      tags: [Budget Allocator]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetParams'
+      responses:
+        '200':
+          description: Budget allocation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResult'
+
+  # ============================================
+  # Churn Predictor (4900)
+  # ============================================
+  /api/predict:
+    post:
+      summary: Predict churn
+      tags: [Churn Predictor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChurnParams'
+      responses:
+        '200':
+          description: Churn prediction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChurnResult'
+
+  # ============================================
+  # LTV Calculator (4901)
+  # ============================================
+  /api/calculate:
+    post:
+      summary: Calculate LTV
+      tags: [LTV Calculator]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LTVParams'
+      responses:
+        '200':
+          description: LTV calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LTVResult'
+
+  # ============================================
+  # Next Best Action (4902)
+  # ============================================
+  /api/recommend:
+    post:
+      summary: Get next best action
+      tags: [Next Best Action]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NBAParams'
+      responses:
+        '200':
+          description: Recommended action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NBAResult'
+
+  # ============================================
+  # Sentiment Analyzer (4903)
+  # ============================================
+  /api/analyze:
+    post:
+      summary: Analyze sentiment
+      tags: [Sentiment Analyzer]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SentimentParams'
+      responses:
+        '200':
+          description: Sentiment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentimentResult'
+
+  # ============================================
+  # Competitor Monitor (4904)
+  # ============================================
+  /api/competitors:
+    get:
+      summary: List competitors
+      tags: [Competitor Monitor]
+      responses:
+        '200':
+          description: List of competitors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competitor'
+    post:
+      summary: Add competitor
+      tags: [Competitor Monitor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitorParams'
+      responses:
+        '201':
+          description: Competitor added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competitor'
+
+  # Health endpoints
+  /health:
+    get:
+      summary: Health check
+      tags: [System]
+      responses:
+        '200':
+          description: Service is healthy
+
+components:
+  schemas:
+    # Email
+    EmailValidationResult:
+      type: object
+      properties:
+        email:
+          type: string
+        isValid:
+          type: boolean
+        isDisposable:
+          type: boolean
+        hasMx:
+          type: boolean
+        riskScore:
+          type: number
+
+    # Fraud
+    FraudDetectionParams:
+      type: object
+      required: [userId, ip, eventType]
+      properties:
+        userId:
+          type: string
+        ip:
+          type: string
+        deviceFingerprint:
+          type: string
+        eventType:
+          type: string
+          enum: [click, view, conversion]
+
+    FraudResult:
+      type: object
+      properties:
+        riskScore:
+          type: number
+        isBot:
+          type: boolean
+        isSuspicious:
+          type: boolean
+        reasons:
+          type: array
+          items:
+            type: string
+
+    # A/B Testing
+    ExperimentParams:
+      type: object
+      required: [name, variants, traffic]
+      properties:
+        name:
+          type: string
+        variants:
+          type: array
+          items:
+            type: string
+        traffic:
+          type: object
+          additionalProperties:
+            type: number
+
+    Experiment:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        variants:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, paused, completed]
+        createdAt:
+          type: string
+          format: date-time
+
+    # Brand Safety
+    BrandSafetyParams:
+      type: object
+      required: [content, type]
+      properties:
+        content:
+          type: string
+        type:
+          type: string
+          enum: [text, image]
+
+    BrandSafetyResult:
+      type: object
+      properties:
+        isSafe:
+          type: boolean
+        score:
+          type: number
+        issues:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
+
+    # Viewability
+    ViewabilityParams:
+      type: object
+      required: [adId, impressionId, visible, duration]
+      properties:
+        adId:
+          type: string
+        impressionId:
+          type: string
+        visible:
+          type: boolean
+        duration:
+          type: number
+
+    ViewabilityResult:
+      type: object
+      properties:
+        impressionId:
+          type: string
+        viewable:
+          type: boolean
+        measurable:
+          type: boolean
+
+    # Attribution
+    AttributionParams:
+      type: object
+      required: [customerId, touches, conversionValue]
+      properties:
+        customerId:
+          type: string
+        touches:
+          type: array
+          items:
+            type: object
+            properties:
+              channel:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+        conversionValue:
+          type: number
+        model:
+          type: string
+          enum: [first-click, last-click, linear, time-decay, position-based, data-driven]
+
+    AttributionResult:
+      type: object
+      properties:
+        customerId:
+          type: string
+        model:
+          type: string
+        channels:
+          type: array
+          items:
+            type: object
+            properties:
+              channel:
+                type: string
+              attributedValue:
+                type: number
+              percentage:
+                type: number
+        totalValue:
+          type: number
+
+    # Audience
+    AudienceParams:
+      type: object
+      required: [name, source, segments]
+      properties:
+        name:
+          type: string
+        source:
+          type: string
+        segments:
+          type: array
+          items:
+            type: string
+
+    Audience:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    # Creative Rotation
+    RotationParams:
+      type: object
+      required: [campaignId, userId]
+      properties:
+        campaignId:
+          type: string
+        userId:
+          type: string
+        context:
+          type: object
+
+    RotationResult:
+      type: object
+      properties:
+        adId:
+          type: string
+        creativeId:
+          type: string
+        content:
+          type: string
+        algorithm:
+          type: string
+
+    # Frequency
+    FrequencyParams:
+      type: object
+      required: [userId, campaignId]
+      properties:
+        userId:
+          type: string
+        campaignId:
+          type: string
+        adId:
+          type: string
+
+    FrequencyResult:
+      type: object
+      properties:
+        canServe:
+          type: boolean
+        impressions:
+          type: integer
+        limit:
+          type: integer
+        remaining:
+          type: integer
+
+    # Budget
+    BudgetParams:
+      type: object
+      required: [totalBudget, channels, historical]
+      properties:
+        totalBudget:
+          type: number
+        channels:
+          type: array
+          items:
+            type: string
+        historical:
+          type: array
+          items:
+            type: object
+            properties:
+              channel:
+                type: string
+              spend:
+                type: number
+              conversions:
+                type: integer
+
+    BudgetResult:
+      type: object
+      properties:
+        totalBudget:
+          type: number
+        allocation:
+          type: array
+          items:
+            type: object
+            properties:
+              channel:
+                type: string
+              allocatedBudget:
+                type: number
+              percentage:
+                type: number
+              expectedConversions:
+                type: number
+        algorithm:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+
+    # Churn
+    ChurnParams:
+      type: object
+      required: [customerId, features]
+      properties:
+        customerId:
+          type: string
+        features:
+          type: object
+          properties:
+            daysSinceLastPurchase:
+              type: integer
+            totalOrders:
+              type: integer
+            avgOrderValue:
+              type: number
+            engagementScore:
+              type: number
+
+    ChurnResult:
+      type: object
+      properties:
+        churnProbability:
+          type: number
+        riskSegment:
+          type: string
+          enum: [low, medium, high]
+        recommendedActions:
+          type: array
+          items:
+            type: string
+
+    # LTV
+    LTVParams:
+      type: object
+      required: [customerId, features]
+      properties:
+        customerId:
+          type: string
+        features:
+          type: object
+          properties:
+            totalRevenue:
+              type: number
+            totalOrders:
+              type: integer
+            avgOrderValue:
+              type: number
+            customerAge:
+              type: integer
+
+    LTVResult:
+      type: object
+      properties:
+        customerId:
+          type: string
+        predictedLTV:
+          type: number
+        confidence:
+          type: number
+        tier:
+          type: string
+          enum: [bronze, silver, gold, platinum]
+
+    # NBA
+    NBAParams:
+      type: object
+      required: [customerId, context]
+      properties:
+        customerId:
+          type: string
+        context:
+          type: object
+          properties:
+            lastPurchase:
+              type: string
+            cartValue:
+              type: number
+            segment:
+              type: string
+
+    NBAResult:
+      type: object
+      properties:
+        customerId:
+          type: string
+        recommendedAction:
+          type: string
+        actionType:
+          type: string
+        confidence:
+          type: number
+        alternativeActions:
+          type: array
+          items:
+            type: string
+
+    # Sentiment
+    SentimentParams:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+        source:
+          type: string
+
+    SentimentResult:
+      type: object
+      properties:
+        text:
+          type: string
+        score:
+          type: number
+        label:
+          type: string
+          enum: [positive, neutral, negative]
+        keywords:
+          type: array
+          items:
+            type: string
+
+    # Competitor
+    CompetitorParams:
+      type: object
+      required: [name, website, industry]
+      properties:
+        name:
+          type: string
+        website:
+          type: string
+        industry:
+          type: string
+
+    Competitor:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        website:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time

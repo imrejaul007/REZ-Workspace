@@ -1,0 +1,121 @@
+# KHAIRMOVE Logistics Aggregator API
+
+openapi: 3.0.3
+info:
+  title: KHAIRMOVE Logistics Aggregator
+  description: Multi-carrier shipping aggregator
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4604
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+
+  /api/carriers:
+    get:
+      summary: List available carriers
+      responses:
+        '200':
+          description: List of carriers
+
+  /api/rates:
+    post:
+      summary: Get shipping rates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pickup:
+                  type: object
+                drop:
+                  type: object
+                weight:
+                  type: number
+                isCOD:
+                  type: boolean
+      responses:
+        '200':
+          description: Rate quotes
+
+  /api/shipments:
+    post:
+      summary: Create shipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                carrier:
+                  type: string
+                pickup:
+                  type: object
+                drop:
+                  type: object
+                package:
+                  type: object
+                isCOD:
+                  type: boolean
+      responses:
+        '201':
+          description: Shipment created
+
+    get:
+      summary: List shipments
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of shipments
+
+  /api/shipments/{id}:
+    get:
+      summary: Get shipment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Shipment details
+
+  /api/shipments/{id}/track:
+    get:
+      summary: Track shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tracking info
+
+  /api/shipments/{id}/cancel:
+    post:
+      summary: Cancel shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Shipment cancelled

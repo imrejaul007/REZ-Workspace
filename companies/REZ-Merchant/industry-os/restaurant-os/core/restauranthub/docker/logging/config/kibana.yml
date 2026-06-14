@@ -1,0 +1,128 @@
+# Kibana configuration for RestaurantHub
+
+# Server settings
+server.port: 5601
+server.host: "0.0.0.0"
+server.name: "restauranthub-kibana"
+
+# Elasticsearch connection
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+
+# Security settings (disabled for development)
+xpack.security.enabled: false
+xpack.encryptedSavedObjects.encryptionKey: "restauranthub-kibana-encryption-key-32chars"
+
+# Monitoring
+monitoring.enabled: true
+monitoring.kibana.collection.enabled: true
+
+# Logging
+logging.appenders:
+  file:
+    type: file
+    fileName: /var/log/kibana.log
+    layout:
+      type: json
+  console:
+    type: console
+    layout:
+      type: pattern
+      pattern: "[%date][%level][%logger] %message"
+
+logging.root:
+  appenders: [file, console]
+  level: info
+
+# UI Settings
+map.includeElasticMapsService: false
+
+# Advanced settings for RestaurantHub dashboards
+kibana.defaultAppId: "dashboard"
+
+# Index patterns
+kibana.index: ".kibana"
+
+# Saved objects
+savedObjects.maxImportPayloadBytes: 26214400
+
+# Data views
+data.search.aggs.shardDelay.enabled: true
+
+# Canvas
+canvas.enabled: true
+
+# Machine Learning (disabled to save resources)
+xpack.ml.enabled: false
+
+# Alerting
+xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys: []
+
+# Advanced settings for log analysis
+newsfeed.enabled: false
+telemetry.enabled: false
+telemetry.optIn: false
+
+# Custom branding
+xpack.branding.applicationTitle: "RestaurantHub Logs"
+
+# Dev tools
+console.enabled: true
+dev_tools.enabled: true
+
+# Reporting (disabled for development)
+xpack.reporting.enabled: false
+
+# Dashboard-specific settings
+dashboard.defaultDarkMode: false
+
+# Time picker settings
+timepicker:
+  time_defaults:
+    from: now-24h
+    to: now
+  refresh_intervals:
+    - display: "5 seconds"
+      pause: false
+      value: 5000
+    - display: "10 seconds"
+      pause: false
+      value: 10000
+    - display: "30 seconds"
+      pause: false
+      value: 30000
+    - display: "1 minute"
+      pause: false
+      value: 60000
+    - display: "5 minutes"
+      pause: false
+      value: 300000
+    - display: "15 minutes"
+      pause: false
+      value: 900000
+    - display: "30 minutes"
+      pause: false
+      value: 1800000
+    - display: "1 hour"
+      pause: false
+      value: 3600000
+    - display: "2 hours"
+      pause: false
+      value: 7200000
+    - display: "12 hours"
+      pause: false
+      value: 43200000
+    - display: "1 day"
+      pause: false
+      value: 86400000
+
+# Memory and performance settings
+elasticsearch.requestHeadersWhitelist: ["authorization", "content-type"]
+elasticsearch.shardTimeout: 30000
+elasticsearch.requestTimeout: 30000
+elasticsearch.pingTimeout: 3000
+
+# Path settings
+path.data: /usr/share/kibana/data
+
+# Optimization
+optimize.enabled: true

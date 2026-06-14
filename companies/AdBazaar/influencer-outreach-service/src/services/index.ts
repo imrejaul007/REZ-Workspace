@@ -1,0 +1,1 @@
+export { OutreachService, outreachService } from './outreachService';

@@ -1,0 +1,1795 @@
+openapi: 3.0.3
+info:
+  title: REZ RisnaEstate API
+  description: |
+    Real Estate Transaction Management Platform
+
+    ## Overview
+    The RisnaEstate API provides comprehensive endpoints for managing real estate
+    transactions including leads, properties, deals, agreements, and handovers.
+
+    ## Authentication
+    All endpoints require Bearer token authentication. Include the token in the
+    Authorization header: `Authorization: Bearer <token>`
+
+    ## Rate Limits
+    - GET requests: 100/min
+    - POST requests: 50/min
+    - DELETE requests: 20/min
+  version: 1.0.0
+  contact:
+    name: REZ API Team
+    email: api@rez.com
+    url: https://docs.rez.com/risnaestate
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.staging.rez.com/risnaestate
+    description: Staging server
+  - url: https://api.rez.com/risnaestate
+    description: Production server
+
+tags:
+  - name: Leads
+    description: Lead management operations
+  - name: Properties
+    description: Property management operations
+  - name: Deals
+    description: Deal pipeline management
+  - name: Agreements
+    description: Agreement generation and management
+  - name: Handovers
+    description: Property handover operations
+  - name: Documents
+    description: Document generation and retrieval
+
+paths:
+  # ==================== LEADS ====================
+  /api/v1/leads:
+    get:
+      summary: List all leads
+      description: Retrieve a paginated list of leads with optional filtering
+      tags: [Leads]
+      operationId: listLeads
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [new, contacted, qualified, converted, lost]
+          description: Filter by lead status
+        - in: query
+          name: source
+          schema:
+            type: string
+          description: Filter by lead source
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search by name, email, or phone
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    post:
+      summary: Create a new lead
+      tags: [Leads]
+      operationId: createLead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLeadRequest'
+      responses:
+        '201':
+          description: Lead created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/leads/{id}:
+    get:
+      summary: Get lead by ID
+      tags: [Leads]
+      operationId: getLeadById
+      parameters:
+        - $ref: '#/components/parameters/LeadId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    patch:
+      summary: Update lead
+      tags: [Leads]
+      operationId: updateLead
+      parameters:
+        - $ref: '#/components/parameters/LeadId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLeadRequest'
+      responses:
+        '200':
+          description: Lead updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/leads/{id}/qualify:
+    post:
+      summary: Qualify lead
+      tags: [Leads]
+      operationId: qualifyLead
+      parameters:
+        - $ref: '#/components/parameters/LeadId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                budget:
+                  type: number
+                timeline:
+                  type: string
+                  enum: [immediate, 1_3_months, 3_6_months, 6_12_months, exploring]
+                propertyType:
+                  type: string
+                preferredLocations:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Lead qualified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
+
+  # ==================== PROPERTIES ====================
+  /api/v1/properties:
+    get:
+      summary: List all properties
+      tags: [Properties]
+      operationId: listProperties
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [apartment, villa, plot, commercial, industrial]
+          description: Filter by property type
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [available, sold, reserved, unavailable]
+        - in: query
+          name: minPrice
+          schema:
+            type: number
+          description: Minimum price filter
+        - in: query
+          name: maxPrice
+          schema:
+            type: number
+          description: Maximum price filter
+        - in: query
+          name: location
+          schema:
+            type: string
+          description: Filter by location
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    post:
+      summary: Create a new property
+      tags: [Properties]
+      operationId: createProperty
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePropertyRequest'
+      responses:
+        '201':
+          description: Property created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/properties/{id}:
+    get:
+      summary: Get property by ID
+      tags: [Properties]
+      operationId: getPropertyById
+      parameters:
+        - $ref: '#/components/parameters/PropertyId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    patch:
+      summary: Update property
+      tags: [Properties]
+      operationId: updateProperty
+      parameters:
+        - $ref: '#/components/parameters/PropertyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePropertyRequest'
+      responses:
+        '200':
+          description: Property updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  # ==================== DEALS ====================
+  /api/v1/deals:
+    get:
+      summary: List all deals
+      description: Retrieve a paginated list of deals with optional filtering by stage or status
+      tags: [Deals]
+      operationId: listDeals
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: stage
+          schema:
+            type: string
+            enum:
+              - inquiry
+              - site_visit
+              - offer_made
+              - negotiation
+              - agreement
+              - registry
+              - closed_won
+              - closed_lost
+          description: Filter by deal stage
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, won, lost, on_hold]
+          description: Filter by deal status
+        - in: query
+          name: assignedTo
+          schema:
+            type: string
+          description: Filter by assigned user ID
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DealListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    post:
+      summary: Create a new deal
+      tags: [Deals]
+      operationId: createDeal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDealRequest'
+      responses:
+        '201':
+          description: Deal created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/deals/{id}:
+    get:
+      summary: Get deal by ID
+      tags: [Deals]
+      operationId: getDealById
+      parameters:
+        - $ref: '#/components/parameters/DealId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    patch:
+      summary: Update deal
+      tags: [Deals]
+      operationId: updateDeal
+      parameters:
+        - $ref: '#/components/parameters/DealId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDealRequest'
+      responses:
+        '200':
+          description: Deal updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/deals/{id}/stage:
+    post:
+      summary: Move deal to next stage
+      tags: [Deals]
+      operationId: moveDealStage
+      parameters:
+        - $ref: '#/components/parameters/DealId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - stage
+              properties:
+                stage:
+                  type: string
+                  enum:
+                    - inquiry
+                    - site_visit
+                    - offer_made
+                    - negotiation
+                    - agreement
+                    - registry
+                    - closed_won
+                    - closed_lost
+                notes:
+                  type: string
+                expectedCloseDate:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Deal stage updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/deals/{id}/close:
+    post:
+      summary: Close deal (won or lost)
+      tags: [Deals]
+      operationId: closeDeal
+      parameters:
+        - $ref: '#/components/parameters/DealId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - outcome
+              properties:
+                outcome:
+                  type: string
+                  enum: [won, lost]
+                finalPrice:
+                  type: number
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Deal closed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  # ==================== AGREEMENTS ====================
+  /api/v1/agreements:
+    get:
+      summary: List all agreements
+      tags: [Agreements]
+      operationId: listAgreements
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [sale_agreement, rental_agreement, nri_agreement, commercial_lease]
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [draft, pending_signature, signed, executed, cancelled]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    post:
+      summary: Create a new agreement
+      tags: [Agreements]
+      operationId: createAgreement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgreementRequest'
+      responses:
+        '201':
+          description: Agreement created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/agreements/{id}:
+    get:
+      summary: Get agreement by ID
+      tags: [Agreements]
+      operationId: getAgreementById
+      parameters:
+        - $ref: '#/components/parameters/AgreementId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/agreements/{id}/generate:
+    post:
+      summary: Generate agreement PDF
+      tags: [Agreements]
+      operationId: generateAgreementPDF
+      parameters:
+        - $ref: '#/components/parameters/AgreementId'
+      responses:
+        '200':
+          description: PDF generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/agreements/{id}/sign:
+    post:
+      summary: Sign agreement
+      tags: [Agreements]
+      operationId: signAgreement
+      parameters:
+        - $ref: '#/components/parameters/AgreementId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - signatureData
+              properties:
+                signatureData:
+                  type: string
+                  description: Base64 encoded signature image
+                signerRole:
+                  type: string
+                  enum: [buyer, seller, witness]
+      responses:
+        '200':
+          description: Agreement signed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  # ==================== HANDOFFS ====================
+  /api/v1/handovers:
+    get:
+      summary: List all handovers
+      tags: [Handovers]
+      operationId: listHandovers
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [scheduled, in_progress, completed, cancelled]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoverListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    post:
+      summary: Schedule a new handover
+      tags: [Handovers]
+      operationId: createHandover
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHandoverRequest'
+      responses:
+        '201':
+          description: Handover scheduled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Handover'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/handovers/{id}:
+    get:
+      summary: Get handover by ID
+      tags: [Handovers]
+      operationId: getHandoverById
+      parameters:
+        - $ref: '#/components/parameters/HandoverId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Handover'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/handovers/{id}/status:
+    patch:
+      summary: Update handover status
+      tags: [Handovers]
+      operationId: updateHandoverStatus
+      parameters:
+        - $ref: '#/components/parameters/HandoverId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [scheduled, in_progress, completed, cancelled]
+                notes:
+                  type: string
+                completedItems:
+                  type: array
+                  items:
+                    type: string
+                pendingItems:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Handover status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Handover'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  # ==================== DOCUMENTS ====================
+  /api/v1/documents:
+    get:
+      summary: List all documents
+      tags: [Documents]
+      operationId: listDocuments
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [agreement, title_deed, noc, tax_receipt, insurance, other]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    post:
+      summary: Upload a document
+      tags: [Documents]
+      operationId: uploadDocument
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                type:
+                  type: string
+                  enum: [agreement, title_deed, noc, tax_receipt, insurance, other]
+                relatedTo:
+                  type: string
+                  description: ID of related entity (deal, agreement, etc.)
+                relatedType:
+                  type: string
+                  enum: [deal, agreement, property, handover]
+      responses:
+        '201':
+          description: Document uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/documents/{id}:
+    get:
+      summary: Get document by ID
+      tags: [Documents]
+      operationId: getDocumentById
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+    delete:
+      summary: Delete document
+      tags: [Documents]
+      operationId: deleteDocument
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '204':
+          description: Document deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/documents/{id}/download:
+    get:
+      summary: Download document
+      tags: [Documents]
+      operationId: downloadDocument
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Document downloaded successfully
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  # ==================== ANALYTICS ====================
+  /api/v1/analytics/deals:
+    get:
+      summary: Get deal analytics
+      description: Get aggregated analytics for deals including conversion rates, pipeline value, and stage distribution
+      tags: [Analytics]
+      operationId: getDealAnalytics
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Start date for analytics period
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: End date for analytics period
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalDeals:
+                    type: integer
+                  wonDeals:
+                    type: integer
+                  lostDeals:
+                    type: integer
+                  conversionRate:
+                    type: number
+                  totalPipelineValue:
+                    type: number
+                  averageDealSize:
+                    type: number
+                  stageDistribution:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  monthlyTrend:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        month:
+                          type: string
+                        deals:
+                          type: integer
+                        value:
+                          type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  /api/v1/analytics/properties:
+    get:
+      summary: Get property analytics
+      description: Get analytics for properties including inventory, sales velocity, and pricing trends
+      tags: [Analytics]
+      operationId: getPropertyAnalytics
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalProperties:
+                    type: integer
+                  availableProperties:
+                    type: integer
+                  soldProperties:
+                    type: integer
+                  averagePrice:
+                    type: number
+                  priceTrend:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        month:
+                          type: string
+                        avgPrice:
+                          type: number
+                  propertiesByType:
+                    type: object
+                    additionalProperties:
+                      type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearerAuth: []
+
+  # ==================== HEALTH ====================
+  /health:
+    get:
+      summary: Health check
+      description: Check the health status of the API
+      tags: [Health]
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from authentication endpoint
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      description: Page number for pagination
+
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+      description: Number of items per page
+
+    LeadId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for the lead
+
+    PropertyId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for the property
+
+    DealId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for the deal
+
+    AgreementId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for the agreement
+
+    HandoverId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for the handover
+
+    DocumentId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for the document
+
+  schemas:
+    # ==================== LEAD ====================
+    Lead:
+      type: object
+      properties:
+        _id:
+          type: string
+        leadId:
+          type: string
+          example: LEAD-001
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        source:
+          type: string
+          enum: [website, referral, walkin, campaign, partner]
+        status:
+          type: string
+          enum: [new, contacted, qualified, converted, lost]
+        budget:
+          type: number
+        timeline:
+          type: string
+          enum: [immediate, 1_3_months, 3_6_months, 6_12_months, exploring]
+        propertyType:
+          type: string
+          enum: [apartment, villa, plot, commercial, industrial]
+        preferredLocations:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        assignedTo:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    LeadListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lead'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreateLeadRequest:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        source:
+          type: string
+          enum: [website, referral, walkin, campaign, partner]
+        notes:
+          type: string
+
+    UpdateLeadRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+        budget:
+          type: number
+        timeline:
+          type: string
+        propertyType:
+          type: string
+        preferredLocations:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        assignedTo:
+          type: string
+
+    # ==================== PROPERTY ====================
+    Property:
+      type: object
+      properties:
+        _id:
+          type: string
+        propertyId:
+          type: string
+          example: PROP-001
+        title:
+          type: string
+        type:
+          type: string
+          enum: [apartment, villa, plot, commercial, industrial]
+        status:
+          type: string
+          enum: [available, sold, reserved, unavailable]
+        price:
+          type: number
+        location:
+          type: object
+          properties:
+            address:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            pincode:
+              type: string
+        specifications:
+          type: object
+          properties:
+            bedrooms:
+              type: integer
+            bathrooms:
+              type: integer
+            area:
+              type: number
+            areaUnit:
+              type: string
+        amenities:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PropertyListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreatePropertyRequest:
+      type: object
+      required:
+        - title
+        - type
+        - price
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          enum: [apartment, villa, plot, commercial, industrial]
+        price:
+          type: number
+        location:
+          type: object
+          properties:
+            address:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            pincode:
+              type: string
+        specifications:
+          type: object
+        amenities:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+
+    UpdatePropertyRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        price:
+          type: number
+        location:
+          type: object
+        specifications:
+          type: object
+        amenities:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+
+    # ==================== DEAL ====================
+    Deal:
+      type: object
+      properties:
+        _id:
+          type: string
+        dealId:
+          type: string
+          example: DEAL-001
+        leadId:
+          type: string
+        propertyId:
+          type: string
+        stage:
+          type: string
+          enum:
+            - inquiry
+            - site_visit
+            - offer_made
+            - negotiation
+            - agreement
+            - registry
+            - closed_won
+            - closed_lost
+        stageHistory:
+          type: array
+          items:
+            type: object
+            properties:
+              stage:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              notes:
+                type: string
+        finalPrice:
+          type: number
+        expectedPrice:
+          type: number
+        probability:
+          type: number
+          minimum: 0
+          maximum: 100
+        status:
+          type: string
+          enum: [active, won, lost, on_hold]
+        assignedTo:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DealListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Deal'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreateDealRequest:
+      type: object
+      required:
+        - leadId
+        - propertyId
+      properties:
+        leadId:
+          type: string
+        propertyId:
+          type: string
+        expectedPrice:
+          type: number
+        notes:
+          type: string
+
+    UpdateDealRequest:
+      type: object
+      properties:
+        finalPrice:
+          type: number
+        expectedPrice:
+          type: number
+        probability:
+          type: number
+        status:
+          type: string
+        assignedTo:
+          type: string
+        notes:
+          type: string
+
+    # ==================== AGREEMENT ====================
+    Agreement:
+      type: object
+      properties:
+        _id:
+          type: string
+        agreementId:
+          type: string
+          example: AGREEMENT-001
+        dealId:
+          type: string
+        type:
+          type: string
+          enum: [sale_agreement, rental_agreement, nri_agreement, commercial_lease]
+        status:
+          type: string
+          enum: [draft, pending_signature, signed, executed, cancelled]
+        terms:
+          type: object
+          properties:
+            price:
+              type: number
+            paymentSchedule:
+              type: array
+              items:
+                type: object
+                properties:
+                  milestone:
+                    type: string
+                  amount:
+                    type: number
+                  dueDate:
+                    type: string
+                    format: date
+            possessionDate:
+              type: string
+              format: date
+            agreementDate:
+              type: string
+              format: date
+        signatures:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+              signedAt:
+                type: string
+                format: date-time
+              signatureData:
+                type: string
+        documentUrl:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AgreementListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agreement'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreateAgreementRequest:
+      type: object
+      required:
+        - dealId
+        - type
+      properties:
+        dealId:
+          type: string
+        type:
+          type: string
+          enum: [sale_agreement, rental_agreement, nri_agreement, commercial_lease]
+        terms:
+          type: object
+          properties:
+            price:
+              type: number
+            paymentSchedule:
+              type: array
+              items:
+                type: object
+            possessionDate:
+              type: string
+              format: date
+            agreementDate:
+              type: string
+              format: date
+
+    # ==================== HANDOFF ====================
+    Handover:
+      type: object
+      properties:
+        _id:
+          type: string
+        handoverId:
+          type: string
+          example: HANDOVER-001
+        dealId:
+          type: string
+        propertyId:
+          type: string
+        status:
+          type: string
+          enum: [scheduled, in_progress, completed, cancelled]
+        scheduledDate:
+          type: string
+          format: date-time
+        completedDate:
+          type: string
+          format: date-time
+        checklist:
+          type: array
+          items:
+            type: object
+            properties:
+              item:
+                type: string
+              completed:
+                type: boolean
+              notes:
+                type: string
+        keys:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              quantity:
+                type: integer
+              handedOver:
+                type: boolean
+        documents:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    HandoverListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Handover'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreateHandoverRequest:
+      type: object
+      required:
+        - dealId
+        - propertyId
+        - scheduledDate
+      properties:
+        dealId:
+          type: string
+        propertyId:
+          type: string
+        scheduledDate:
+          type: string
+          format: date-time
+        checklist:
+          type: array
+          items:
+            type: object
+            properties:
+              item:
+                type: string
+              completed:
+                type: boolean
+        notes:
+          type: string
+
+    # ==================== DOCUMENT ====================
+    Document:
+      type: object
+      properties:
+        _id:
+          type: string
+        documentId:
+          type: string
+          example: DOC-001
+        type:
+          type: string
+          enum: [agreement, title_deed, noc, tax_receipt, insurance, other]
+        filename:
+          type: string
+        mimeType:
+          type: string
+        size:
+          type: integer
+        url:
+          type: string
+        relatedTo:
+          type: string
+        relatedType:
+          type: string
+          enum: [deal, agreement, property, handover]
+        uploadedBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    DocumentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ==================== COMMON ====================
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: BadRequest
+            message: Invalid request parameters
+            details:
+              - "email must be a valid email address"
+
+    Unauthorized:
+      description: Unauthorized - invalid or missing authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Unauthorized
+            message: Invalid or expired token
+
+    NotFound:
+      description: Not found - resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NotFound
+            message: Resource not found
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: InternalError
+            message: An unexpected error occurred
+
+tags:
+  - name: Health
+    description: API health check endpoints

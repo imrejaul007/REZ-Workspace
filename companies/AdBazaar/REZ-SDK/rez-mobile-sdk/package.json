@@ -1,0 +1,26 @@
+{
+  "name": "@rez/adbazaar-mobile",
+  "version": "1.0.0",
+  "description": "React Native SDK for REZ AdBazaar Intelligence Services",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint index.ts"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "adbazaar",
+    "advertising",
+    "analytics",
+    "sdk"
+  ],
+  "author": "REZ Media",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-native": ">=0.70.0"
+  },
+  "dependencies": {}
+}

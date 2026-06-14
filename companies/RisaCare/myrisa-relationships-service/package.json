@@ -1,0 +1,25 @@
+{
+  "name": "myrisa-relationships-service",
+  "version": "1.0.0",
+  "description": "MyRisa Relationships Service - Partner Tracking, Quality Time, Intimacy",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "typescript": "^5.3.2",
+    "tsx": "^4.6.0"
+  }
+}

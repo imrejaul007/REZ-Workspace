@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: rez-wallet-service
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    # M24 FIX: Add memory limit. Limits protect against OOM on Render's shared hosting.
+    memoryMB: 512
+    autoDeploy: false
+    cacheDisabled: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: INTERNAL_SERVICE_TOKENS_JSON
+        sync: false
+      # INTERNAL_SERVICE_HMAC_SECRET — HMAC key for internal service token verification
+      - key: INTERNAL_SERVICE_HMAC_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: MONOLITH_URL
+        sync: false

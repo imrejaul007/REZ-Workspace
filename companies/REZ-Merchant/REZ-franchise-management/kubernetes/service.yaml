@@ -1,0 +1,47 @@
+# ================================================
+# REZ-Merchant Kubernetes Service Template
+# ================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-franchise-management
+  namespace: rez-merchant
+  labels:
+    app: REZ-franchise-management
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-franchise-management service"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4025
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-franchise-management
+
+---
+
+# Headless service for StatefulSets (if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: REZ-franchise-management-internal
+  namespace: rez-merchant
+  labels:
+    app: REZ-franchise-management
+    managed-by: rez-merchant
+  annotations:
+    description: "REZ-franchise-management internal headless service"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 4025
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: REZ-franchise-management

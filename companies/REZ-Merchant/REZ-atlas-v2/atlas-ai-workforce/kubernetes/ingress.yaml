@@ -1,0 +1,29 @@
+# Atlas AI Workforce - Kubernetes Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: atlas-ai-workforce
+  namespace: rez-merchant
+  labels:
+    app: atlas-ai-workforce
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  tls:
+    - hosts:
+        - atlas-ai-workforce.rez.money
+      secretName: atlas-ai-workforce-tls
+  rules:
+    - host: atlas-ai-workforce.rez.money
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: atlas-ai-workforce
+                port:
+                  number: 5190

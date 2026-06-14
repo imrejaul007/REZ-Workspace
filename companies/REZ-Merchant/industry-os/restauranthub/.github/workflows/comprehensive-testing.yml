@@ -1,0 +1,626 @@
+name: Comprehensive Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '18'
+  POSTGRES_VERSION: '15'
+  REDIS_VERSION: '7'
+  COVERAGE_THRESHOLD: '80'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      api-changed: ${{ steps.changes.outputs.api }}
+      web-changed: ${{ steps.changes.outputs.web }}
+      db-changed: ${{ steps.changes.outputs.db }}
+      config-changed: ${{ steps.changes.outputs.config }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/**'
+            web:
+              - 'apps/web/**'
+              - 'packages/**'
+            db:
+              - 'packages/db/**'
+              - '**/prisma/**'
+              - '**/*.sql'
+            config:
+              - '.github/workflows/**'
+              - '**/package.json'
+              - '**/package-lock.json'
+              - '**/jest.config.*'
+              - '**/playwright.config.*'
+
+  code-quality:
+    name: Code Quality & Static Analysis
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript compilation check
+        run: npm run type-check
+        continue-on-error: false
+
+      - name: ESLint analysis
+        run: npm run lint -- --format=json --output-file=eslint-report.json
+        continue-on-error: true
+
+      - name: Prettier check
+        run: npm run format -- --check
+        continue-on-error: true
+
+      - name: Security audit
+        run: npm audit --audit-level moderate --json > audit-report.json
+        continue-on-error: true
+
+      - name: Upload analysis artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: code-quality-reports
+          path: |
+            eslint-report.json
+            audit-report.json
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: [detect-changes, code-quality]
+    if: needs.detect-changes.outputs.api-changed == 'true' || needs.detect-changes.outputs.web-changed == 'true' || github.event_name == 'schedule'
+
+    strategy:
+      matrix:
+        test-suite: [api, web]
+        exclude:
+          - test-suite: api
+            if: ${{ needs.detect-changes.outputs.api-changed != 'true' && github.event_name != 'schedule' }}
+          - test-suite: web
+            if: ${{ needs.detect-changes.outputs.web-changed != 'true' && github.event_name != 'schedule' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup test environment
+        run: |
+          cp .env.example .env.test
+          echo "NODE_ENV=test" >> .env.test
+          echo "DATABASE_URL=postgresql://test:test@localhost:5432/test_db" >> .env.test
+          echo "REDIS_URL=redis://localhost:6379" >> .env.test
+          echo "JWT_SECRET=test-secret-key" >> .env.test
+          echo "JWT_REFRESH_SECRET=test-refresh-secret" >> .env.test
+
+      - name: Run unit tests - API
+        if: matrix.test-suite == 'api'
+        working-directory: apps/api
+        run: |
+          npm run test:unit -- \
+            --coverage \
+            --coverageReporters=text \
+            --coverageReporters=lcov \
+            --coverageReporters=json \
+            --coverageDirectory=coverage \
+            --coverageThreshold='{"global":{"branches":${{ env.COVERAGE_THRESHOLD }},"functions":${{ env.COVERAGE_THRESHOLD }},"lines":${{ env.COVERAGE_THRESHOLD }},"statements":${{ env.COVERAGE_THRESHOLD }}}}'
+
+      - name: Run unit tests - Web
+        if: matrix.test-suite == 'web'
+        working-directory: apps/web
+        run: |
+          npm run test -- \
+            --coverage \
+            --coverageReporters=text \
+            --coverageReporters=lcov \
+            --coverageReporters=json \
+            --watchAll=false
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./apps/${{ matrix.test-suite }}/coverage/lcov.info
+          flags: ${{ matrix.test-suite }}-unit-tests
+          name: ${{ matrix.test-suite }}-unit-coverage
+          fail_ci_if_error: true
+
+      - name: Store coverage reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-reports-${{ matrix.test-suite }}
+          path: apps/${{ matrix.test-suite }}/coverage/
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [detect-changes, unit-tests]
+    if: needs.detect-changes.outputs.api-changed == 'true' || github.event_name == 'schedule'
+
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:${{ env.REDIS_VERSION }}-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup test database
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+        run: |
+          cp .env.example .env.test
+          echo "NODE_ENV=test" >> .env.test
+          echo "DATABASE_URL=postgresql://test:test@localhost:5432/test_db" >> .env.test
+          echo "REDIS_URL=redis://localhost:6379" >> .env.test
+          echo "JWT_SECRET=test-secret-key" >> .env.test
+          echo "JWT_REFRESH_SECRET=test-refresh-secret" >> .env.test
+          npm run db:migrate
+          npm run db:seed
+
+      - name: Wait for services
+        run: |
+          timeout 60 bash -c 'until pg_isready -h localhost -p 5432 -U test; do sleep 1; done'
+          timeout 60 bash -c 'until redis-cli -h localhost -p 6379 ping; do sleep 1; done'
+
+      - name: Run integration tests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+        working-directory: apps/api
+        run: |
+          npm run test:integration -- \
+            --coverage \
+            --coverageReporters=lcov \
+            --coverageDirectory=coverage-integration \
+            --testTimeout=30000 \
+            --forceExit \
+            --detectOpenHandles
+
+      - name: Upload integration coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./apps/api/coverage-integration/lcov.info
+          flags: integration-tests
+          name: integration-coverage
+
+      - name: Store integration test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            apps/api/coverage-integration/
+            apps/api/test-results.xml
+
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [detect-changes, integration-tests]
+    if: needs.detect-changes.outputs.web-changed == 'true' || github.event_name == 'schedule'
+
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Setup test environment
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+        run: |
+          cp .env.example .env.test
+          echo "NODE_ENV=test" >> .env.test
+          echo "DATABASE_URL=postgresql://test:test@localhost:5432/test_db" >> .env.test
+          echo "NEXTAUTH_URL=http://localhost:3001" >> .env.test
+          echo "NEXTAUTH_SECRET=test-secret" >> .env.test
+          npm run db:migrate
+          npm run db:seed
+
+      - name: Build applications
+        run: |
+          npm run build
+
+      - name: Start API server
+        run: |
+          cd apps/api && npm run start:prod &
+          sleep 10
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          NODE_ENV: test
+          PORT: 3000
+
+      - name: Start Web server
+        run: |
+          cd apps/web && npm run start &
+          sleep 15
+        env:
+          NODE_ENV: test
+          PORT: 3001
+          NEXT_PUBLIC_API_URL: http://localhost:3000
+
+      - name: Wait for servers
+        run: |
+          timeout 120 bash -c 'until curl -f http://localhost:3000/health; do sleep 2; done'
+          timeout 120 bash -c 'until curl -f http://localhost:3001; do sleep 2; done'
+
+      - name: Run E2E tests
+        working-directory: apps/web
+        run: npx playwright test
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3001
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-test-results
+          path: |
+            apps/web/test-results/
+            apps/web/playwright-report/
+
+  database-tests:
+    name: Database Tests
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.db-changed == 'true' || github.event_name == 'schedule'
+
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database tests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+        working-directory: apps/api
+        run: |
+          npm run test -- --testPathPattern=database --coverage
+
+      - name: Test database migrations
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+        run: |
+          npm run db:migrate
+          npm run db:reset
+          npm run db:migrate
+
+      - name: Test database seeding
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+        run: |
+          npm run db:seed
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [integration-tests]
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[perf-test]')
+
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:${{ env.REDIS_VERSION }}-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup performance test environment
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+        run: |
+          npm run db:migrate
+          npm run db:seed
+
+      - name: Run performance tests
+        working-directory: apps/api
+        run: |
+          npm run test:performance -- --verbose
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          NODE_ENV: test
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-test-results
+          path: apps/api/performance-results.json
+
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: |
+          npm audit --audit-level moderate --json > security-audit.json || true
+
+      - name: SAST with Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+            p/nodejs
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      - name: Dependency vulnerability check
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --json > snyk-report.json
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            security-audit.json
+            snyk-report.json
+
+  test-report:
+    name: Test Summary Report
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, e2e-tests, database-tests, performance-tests, security-tests]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Generate test summary
+        run: |
+          echo "# Test Summary Report" > test-summary.md
+          echo "" >> test-summary.md
+          echo "## Test Results" >> test-summary.md
+          echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> test-summary.md
+          echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> test-summary.md
+          echo "- E2E Tests: ${{ needs.e2e-tests.result }}" >> test-summary.md
+          echo "- Database Tests: ${{ needs.database-tests.result }}" >> test-summary.md
+          echo "- Performance Tests: ${{ needs.performance-tests.result }}" >> test-summary.md
+          echo "- Security Tests: ${{ needs.security-tests.result }}" >> test-summary.md
+          echo "" >> test-summary.md
+          echo "## Coverage Reports" >> test-summary.md
+          echo "Coverage reports are available in the artifacts." >> test-summary.md
+          echo "" >> test-summary.md
+          echo "## Timestamp" >> test-summary.md
+          echo "Generated at: $(date)" >> test-summary.md
+
+      - name: Upload test summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-summary-report
+          path: test-summary.md
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('test-summary.md', 'utf8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+  cleanup:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    needs: [test-report]
+    if: always()
+
+    steps:
+      - name: Clean up old artifacts
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+
+            // Keep only the latest 10 artifacts
+            const oldArtifacts = artifacts.data.artifacts
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .slice(10);
+
+            for (const artifact of oldArtifacts) {
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+              });
+            }
+
+  notification:
+    name: Notification
+    runs-on: ubuntu-latest
+    needs: [test-report]
+    if: always() && (github.ref == 'refs/heads/main' || github.event_name == 'schedule')
+
+    steps:
+      - name: Notify on failure
+        if: contains(needs.*.result, 'failure')
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#testing'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+
+      - name: Notify on success
+        if: needs.test-report.result == 'success'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#testing'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow

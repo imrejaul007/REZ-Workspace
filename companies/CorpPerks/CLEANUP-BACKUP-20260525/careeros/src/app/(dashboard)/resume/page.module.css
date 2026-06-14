@@ -1,0 +1,507 @@
+.container {
+  padding: 2rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  width: fit-content;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  background: var(--primary);
+  color: white;
+}
+
+.buildSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+}
+
+.formSection {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.formSection h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem;
+  color: var(--text);
+}
+
+.formSection h3:first-child {
+  margin-top: 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.formGroup input,
+.textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: border-color 0.2s;
+}
+
+.formGroup input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.experienceItem {
+  background: var(--bg);
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.addBtn {
+  width: 100%;
+  padding: 0.875rem;
+  background: none;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 1rem 0;
+}
+
+.addBtn:hover {
+  background: var(--bg);
+  border-color: var(--primary);
+}
+
+.skillsInput {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skillTag {
+  background: var(--primary);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.skillTag:hover {
+  background: var(--primary-dark);
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.primaryBtn {
+  padding: 0.875rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primaryBtn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.primaryBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondaryBtn {
+  padding: 0.875rem 1.5rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondaryBtn:hover {
+  background: var(--bg);
+  border-color: var(--text-muted);
+}
+
+.preview {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.previewHeader h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.previewActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.previewActions button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.previewActions button:hover {
+  background: var(--bg);
+}
+
+.previewContent {
+  padding: 1.5rem;
+  background: var(--bg);
+}
+
+.resumeDoc {
+  background: white;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.resumeDoc h1 {
+  font-size: 1.25rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.contact {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.resumeDoc hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+.resumeDoc h2 {
+  font-size: 0.875rem;
+  color: var(--primary);
+  margin: 1rem 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.expEntry {
+  margin-bottom: 1rem;
+}
+
+.expHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.expMeta {
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+}
+
+.resumeDoc ul {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+}
+
+.resumeDoc li {
+  margin-bottom: 0.25rem;
+}
+
+.templatesSection {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.templatesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.templateCard {
+  position: relative;
+  background: var(--bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.templateCard:hover {
+  border-color: var(--border);
+}
+
+.templateCard.selected {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.templatePreview {
+  height: 180px;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.templateIcon {
+  font-size: 3rem;
+}
+
+.templateName {
+  font-weight: 600;
+}
+
+.selectedBadge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: var(--primary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.templateActions {
+  text-align: center;
+}
+
+.tipsSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.atsScore {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.scoreCircle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--primary) 0% 72%,
+    var(--border) 72% 100%
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.scoreCircle::before {
+  content: '';
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  background: white;
+  border-radius: 50%;
+}
+
+.scoreValue,
+.scoreLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.scoreValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.scoreLabel {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.scoreInfo h3 {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+}
+
+.scoreInfo p {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.tipsList {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.tipsList h3 {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tipCard {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tipCard:last-child {
+  border-bottom: none;
+}
+
+.tipNum {
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tipCard p {
+  color: var(--text);
+  line-height: 1.6;
+}
+
+@media (max-width: 1200px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+  }
+
+  .preview {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .templatesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tipsSection {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  atlas-research-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atlas-research-agent
+    restart: unless-stopped
+    ports:
+      - "5158:5158"
+    environment:
+      NODE_ENV: production
+      PORT: 5158
+      SERVICE_NAME: atlas-research-agent
+      MONGODB_URI: mongodb://mongodb:27017/atlas-research-agent
+      LOG_LEVEL: info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5158/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rez-network
+
+  mongodb:
+    image: mongo:6-alpine
+    container_name: research-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: atlas-research-agent
+    ports:
+      - "27022:27017"
+    volumes:
+      - research-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - rez-network
+
+networks:
+  rez-network:
+    driver: bridge
+
+volumes:
+  research-mongo-data:
+    driver: local

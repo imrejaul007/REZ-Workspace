@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ad-bazaar-follower-growth-config
+  labels:
+    app: ad-bazaar-follower-growth
+data:
+  NODE_ENV: "production"
+  PORT: "5093"
+  LOG_LEVEL: "info"
+  MONGODB_URI: "mongodb://mongo-cluster.mongodb.svc.cluster.local:27017/follower_growth"
+  REDIS_URL: "redis://redis-cluster.redis.svc.cluster.local:6379"
+  GROWTH_METRICS_WINDOW: "30"
+  POLL_INTERVAL_MINUTES: "60"

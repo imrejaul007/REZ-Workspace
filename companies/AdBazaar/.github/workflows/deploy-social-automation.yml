@@ -1,0 +1,334 @@
+name: Deploy Social Automation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'instagram-shop-integration/**'
+      - 'instagram-publishing-service/**'
+      - 'instagram-insights-service/**'
+      - 'social-content-publisher/**'
+      - 'hashtag-research-engine/**'
+      - 'caption-generator-ai/**'
+      - 'content-calendar-service/**'
+      - 'follower-growth-tracker/**'
+      - 'youtube-integration/**'
+      - 'pinterest-integration/**'
+      - 'content-repurposing-engine/**'
+      - 'ugc-management-service/**'
+      - 'unified-social-inbox/**'
+      - 'crisis-alert-service/**'
+      - 'snapchat-integration/**'
+      - 'social-competitor-tracker/**'
+      - 'reddit-integration/**'
+      - 'influencer-authenticity-check/**'
+      - 'brand-partnership-portal/**'
+      - 'content-compliance-ai/**'
+
+env:
+  REGISTRY: ghcr.io
+  CLUSTER_NAME: adbazaar-social-cluster
+  NAMESPACE: social-automation
+  NODE_VERSION: '18'
+
+jobs:
+  pre-deploy:
+    name: Pre-Deployment Check
+    runs-on: ubuntu-latest
+    outputs:
+      services_to_deploy: ${{ steps.changes.outputs.services }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for service changes
+        id: changes
+        run: |
+          CHANGED_SERVICES=""
+          for service in instagram-shop-integration instagram-publishing-service instagram-insights-service social-content-publisher hashtag-research-engine caption-generator-ai content-calendar-service follower-growth-tracker youtube-integration pinterest-integration content-repurposing-engine ugc-management-service unified-social-inbox crisis-alert-service snapchat-integration social-competitor-tracker reddit-integration influencer-authenticity-check brand-partnership-portal content-compliance-ai; do
+            if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "^$service/"; then
+              CHANGED_SERVICES="$CHANGED_SERVICES,$service"
+            fi
+          done
+          echo "services=$CHANGED_SERVICES" >> $GITHUB_OUTPUT
+
+      - name: Determine deploy scope
+        run: |
+          if [ -z "${{ steps.changes.outputs.services }}" ]; then
+            echo "No service changes detected. Deploying all services."
+            echo "services=instagram-shop-integration,instagram-publishing-service,instagram-insights-service,social-content-publisher,hashtag-research-engine,caption-generator-ai,content-calendar-service,follower-growth-tracker,youtube-integration,pinterest-integration,content-repurposing-engine,ugc-management-service,unified-social-inbox,crisis-alert-service,snapchat-integration,social-competitor-tracker,reddit-integration,influencer-authenticity-check,brand-partnership-portal,content-compliance-ai" >> $GITHUB_OUTPUT
+          fi
+
+  build-images:
+    name: Build Images ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: pre-deploy
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - instagram-shop-integration
+          - instagram-publishing-service
+          - instagram-insights-service
+          - social-content-publisher
+          - hashtag-research-engine
+          - caption-generator-ai
+          - content-calendar-service
+          - follower-growth-tracker
+          - youtube-integration
+          - pinterest-integration
+          - content-repurposing-engine
+          - ugc-management-service
+          - unified-social-inbox
+          - crisis-alert-service
+          - snapchat-integration
+          - social-competitor-tracker
+          - reddit-integration
+          - influencer-authenticity-check
+          - brand-partnership-portal
+          - content-compliance-ai
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+            type=ref,event=branch
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_SHA=${{ github.sha }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+
+      - name: Update deployment manifest
+        run: |
+          mkdir -p kubernetes-manifests/${{ matrix.service }}
+          cat > kubernetes-manifests/${{ matrix.service }}/deployment.yaml << EOF
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${{ matrix.service }}
+            namespace: ${{ env.NAMESPACE }}
+            labels:
+              app: ${{ matrix.service }}
+              version: ${{ github.sha }}
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: ${{ matrix.service }}
+            template:
+              metadata:
+                labels:
+                  app: ${{ matrix.service }}
+                  version: ${{ github.sha }}
+              spec:
+                containers:
+                - name: ${{ matrix.service }}
+                  image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ github.sha }}
+                  ports:
+                  - containerPort: 3000
+                  resources:
+                    requests:
+                      memory: "256Mi"
+                      cpu: "250m"
+                    limits:
+                      memory: "512Mi"
+                      cpu: "500m"
+                  livenessProbe:
+                    httpGet:
+                      path: /health
+                      port: 3000
+                    initialDelaySeconds: 30
+                    periodSeconds: 10
+                  readinessProbe:
+                    httpGet:
+                      path: /health
+                      port: 3000
+                    initialDelaySeconds: 5
+                    periodSeconds: 5
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${{ matrix.service }}
+            namespace: ${{ env.NAMESPACE }}
+          spec:
+            selector:
+              app: ${{ matrix.service }}
+            ports:
+            - port: 80
+              targetPort: 3000
+            type: ClusterIP
+          EOF
+
+      - name: Upload deployment manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: k8s-manifests-${{ matrix.service }}
+          path: kubernetes-manifests/${{ matrix.service }}/
+
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: build-images
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Download all deployment manifests
+        uses: actions/download-artifact@v4
+        with:
+          path: manifests
+          merge-multiple: true
+
+      - name: Deploy to Kubernetes
+        run: |
+          echo "Applying Kubernetes manifests..."
+          for dir in manifests/k8s-manifests-*/; do
+            if [ -d "$dir" ]; then
+              for f in "$dir"/*.yaml; do
+                if [ -f "$f" ]; then
+                  echo "Applying $f"
+                  kubectl apply -f "$f" --namespace=${{ env.NAMESPACE }}
+                fi
+              done
+            fi
+          done
+
+      - name: Wait for deployments
+        run: |
+          echo "Waiting for deployments to be ready..."
+          for service in instagram-shop-integration instagram-publishing-service instagram-insights-service social-content-publisher hashtag-research-engine caption-generator-ai content-calendar-service follower-growth-tracker youtube-integration pinterest-integration content-repurposing-engine ugc-management-service unified-social-inbox crisis-alert-service snapchat-integration social-competitor-tracker reddit-integration influencer-authenticity-check brand-partnership-portal content-compliance-ai; do
+            echo "Waiting for $service..."
+            kubectl rollout status deployment/$service --namespace=${{ env.NAMESPACE }} --timeout=300s || true
+          done
+
+  health-check:
+    name: Health Check All Services
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Get service endpoints
+        run: |
+          echo "## Health Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status | Response Time |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|--------------|" >> $GITHUB_STEP_SUMMARY
+
+          for service in instagram-shop-integration instagram-publishing-service instagram-insights-service social-content-publisher hashtag-research-engine caption-generator-ai content-calendar-service follower-growth-tracker youtube-integration pinterest-integration content-repurposing-engine ugc-management-service unified-social-inbox crisis-alert-service snapchat-integration social-competitor-tracker reddit-integration influencer-authenticity-check brand-partnership-portal content-compliance-ai; do
+            POD=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=$service -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+            if [ -n "$POD" ]; then
+              START=$(date +%s)
+              RESPONSE=$(kubectl exec -n ${{ env.NAMESPACE }} $POD -- curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health 2>/dev/null || echo "000")
+              END=$(date +%s)
+              RESPONSE_TIME=$((END - START))
+
+              if [ "$RESPONSE" = "200" ]; then
+                echo "| $service | :white_check_mark: Healthy | ${RESPONSE_TIME}s |" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "| $service | :x: Unhealthy ($RESPONSE) | ${RESPONSE_TIME}s |" >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "| $service | :warning: No pod found | N/A |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+      - name: Run detailed health checks
+        run: |
+          echo "Running detailed health checks..."
+          for service in instagram-shop-integration instagram-publishing-service instagram-insights-service social-content-publisher hashtag-research-engine caption-generator-ai content-calendar-service follower-growth-tracker youtube-integration pinterest-integration content-repurposing-engine ugc-management-service unified-social-inbox crisis-alert-service snapchat-integration social-competitor-tracker reddit-integration influencer-authenticity-check brand-partnership-portal content-compliance-ai; do
+            POD=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=$service -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+            if [ -n "$POD" ]; then
+              echo "Checking $service..."
+              kubectl exec -n ${{ env.NAMESPACE }} $POD -- wget -qO- http://localhost:3000/health 2>/dev/null || echo "{}"
+            fi
+          done
+
+  rollback:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [health-check]
+    if: failure()
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Rollback deployments
+        run: |
+          echo "Initiating rollback..."
+          for service in instagram-shop-integration instagram-publishing-service instagram-insights-service social-content-publisher hashtag-research-engine caption-generator-ai content-calendar-service follower-growth-tracker youtube-integration pinterest-integration content-repurposing-engine ugc-management-service unified-social-inbox crisis-alert-service snapchat-integration social-competitor-tracker reddit-integration influencer-authenticity-check brand-partnership-portal content-compliance-ai; do
+            echo "Rolling back $service..."
+            kubectl rollout undo deployment/$service --namespace=${{ env.NAMESPACE }} || true
+          done
+
+      - name: Notify deployment failure
+        if: always()
+        run: |
+          echo "Deployment failed and rolled back. Please check the logs."
+          echo "## Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "All services have been rolled back to the previous stable version." >> $GITHUB_STEP_SUMMARY
+
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy, health-check]
+    if: always()
+    steps:
+      - name: Deployment notification
+        run: |
+          if [ "${{ needs.deploy.result }}" = "success" ] && [ "${{ needs.health-check.result }}" = "success" ]; then
+            echo "## Deployment Successful :tada:" >> $GITHUB_STEP_SUMMARY
+            echo "All 20 social automation services have been deployed successfully." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## Deployment Status: ${{ needs.deploy.result }}" >> $GITHUB_STEP_SUMMARY
+          fi

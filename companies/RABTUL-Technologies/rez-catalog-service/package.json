@@ -1,0 +1,45 @@
+{
+  "name": "rez-catalog-service",
+  "version": "1.0.0",
+  "description": "REZ Catalog Service",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@rez/shared": "file:../rez-shared",
+    "@sentry/node": "^7.119.0",
+    "axios": "^1.7.0",
+    "bullmq": "^5.0.0",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.0",
+    "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
+    "express-mongo-sanitize": "^2.2.0",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.3.0",
+    "mongoose": "^8.23.1",
+    "typescript": "^5.9.3",
+    "winston": "^3.11.0",
+    "zod": "3.23.6"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "devDependencies": {
+    "@types/helmet": "^0.0.48",
+    "@types/jest": "^30.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.0"
+  }
+}

@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad-bazaar-brand-partnership
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-brand-partnership
+    tier: social-automation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ad-bazaar-brand-partnership
+  template:
+    metadata:
+      labels:
+        app: ad-bazaar-brand-partnership
+        tier: social-automation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5112"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: brand-partnership-portal
+        image: adbazaar/brand-partnership-portal:latest
+        ports:
+        - containerPort: 5112
+          name: http
+        env:
+        - name: PORT
+          value: "5112"
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: ad-bazaar-brand-partnership-config
+              key: NODE_ENV
+        - name: MONGODB_URI
+          valueFrom:
+            configMapKeyRef:
+              name: ad-bazaar-brand-partnership-config
+              key: MONGODB_URI
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ad-bazaar-brand-partnership-config
+              key: REDIS_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: adbazaar-secrets
+              key: jwt-secret
+        - name: SENDGRID_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: adbazaar-secrets
+              key: sendgrid-api-key
+        - name: RAZORPAY_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: adbazaar-secrets
+              key: razorpay-key-id
+        - name: RAZORPAY_KEY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: adbazaar-secrets
+              key: razorpay-key-secret
+        resources:
+          requests:
+            cpu: 150m
+            memory: 384Mi
+          limits:
+            cpu: 750m
+            memory: 768Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5112
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5112
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: app-config
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: app-config
+        configMap:
+          name: ad-bazaar-brand-partnership-config

@@ -1,0 +1,158 @@
+# Codecov Configuration for RestaurantHub
+# https://docs.codecov.com/docs/codecov-yaml
+
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 1%
+        base: auto
+        branches:
+          - main
+          - develop
+        if_ci_failed: error
+
+    patch:
+      default:
+        target: 75%
+        threshold: 5%
+        base: auto
+        branches:
+          - main
+          - develop
+
+  flags:
+    api-unit-tests:
+      paths:
+        - apps/api/src/
+      target: 85%
+      threshold: 2%
+      base: auto
+
+    web-unit-tests:
+      paths:
+        - apps/web/
+      target: 75%
+      threshold: 3%
+      base: auto
+
+    integration-tests:
+      paths:
+        - apps/api/src/
+      target: 70%
+      threshold: 5%
+      base: auto
+
+    e2e-tests:
+      paths:
+        - apps/web/
+      target: 60%
+      threshold: 5%
+      base: auto
+
+comment:
+  layout: "reach,diff,flags,tree,betaprofiling"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+  branches:
+    - main
+    - develop
+
+ignore:
+  - "**/*.config.js"
+  - "**/*.config.ts"
+  - "**/jest.setup.js"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/__tests__/**"
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.next/**"
+  - "**/coverage/**"
+  - "apps/api/src/main.ts"
+  - "apps/api/src/**/*.module.ts"
+  - "apps/api/src/**/*.interface.ts"
+  - "apps/api/src/**/*.dto.ts"
+  - "apps/api/src/**/*.entity.ts"
+  - "apps/web/next.config.js"
+  - "apps/web/tailwind.config.js"
+  - "apps/web/postcss.config.js"
+  - "packages/db/prisma/migrations/**"
+  - "packages/db/prisma/seed.ts"
+
+github_checks:
+  annotations: true
+
+slack_app:
+  bot_user_oauth_token: "xoxb-your-bot-token"
+  default_channel: "#testing"
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+component_management:
+  individual_components:
+    - component_id: "authentication"
+      name: "Authentication Module"
+      paths:
+        - apps/api/src/modules/auth/**
+      target: 90%
+
+    - component_id: "jobs"
+      name: "Jobs Module"
+      paths:
+        - apps/api/src/modules/jobs/**
+      target: 85%
+
+    - component_id: "users"
+      name: "Users Module"
+      paths:
+        - apps/api/src/modules/users/**
+      target: 85%
+
+    - component_id: "restaurants"
+      name: "Restaurants Module"
+      paths:
+        - apps/api/src/modules/restaurants/**
+      target: 80%
+
+    - component_id: "web-components"
+      name: "Web Components"
+      paths:
+        - apps/web/components/**
+      target: 75%
+
+    - component_id: "web-pages"
+      name: "Web Pages"
+      paths:
+        - apps/web/app/**
+      target: 70%
+
+profiling:
+  critical_files_paths:
+    - apps/api/src/modules/auth/**
+    - apps/api/src/modules/jobs/**
+    - apps/api/src/modules/users/**
+    - apps/api/src/prisma/**
+    - apps/web/components/ui/**
+    - apps/web/lib/**

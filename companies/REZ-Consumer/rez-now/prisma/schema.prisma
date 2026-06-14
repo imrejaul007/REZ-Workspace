@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model LoyaltyVisit {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  storeId String @map("store_id")
+  visitType String @map("visit_type") @default("dine_in")
+  visitDate DateTime @default(now()) @map("visit_date")
+  coinsEarned Int @default(0) @map("coins_earned")
+  karmaLevel String? @map("karma_level")
+  loyaltyTier String? @map("loyalty_tier")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Performance indexes for common queries
+  @@index([userId])
+  @@index([storeId])
+  @@index([userId, visitDate])              // Index for user visit history by date
+  @@index([storeId, visitDate])            // Index for store analytics by date
+  @@index([createdAt])                      // Index for time-based queries
+  @@index([userId, loyaltyTier])           // Index for tier-based queries
+  @@map("loyalty_visits")
+}
+
+model LoyaltyStreak {
+  id String @id @default(uuid())
+  userId String @unique @map("user_id")
+  streakType String @map("streak_type")
+  current Int @default(0)
+  longest Int @default(0)
+  lastActivity DateTime? @map("last_activity")
+  streakData Json @default("{}") @map("streak_data")
+
+  // Performance indexes
+  @@index([streakType])
+  @@index([lastActivity])                   // Index for streak recovery queries
+  @@index([current])                        // Index for leaderboard queries
+  @@map("loyalty_streaks")
+}
+
+model LoyaltyMilestone {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  milestoneType String @map("milestone_type")
+  milestoneId String @map("milestone_id")
+  target Int
+  current Int @default(0)
+  reached Boolean @default(false)
+  reachedAt DateTime? @map("reached_at")
+  claimed Boolean @default(false)
+  claimedAt DateTime? @map("claimed_at")
+
+  @@unique([userId, milestoneId])
+  @@index([userId])                         // Index for user's milestones
+  @@index([reached, claimed])               // Index for milestone claim queries
+  @@index([milestoneType])                  // Index for type-based queries
+  @@index([userId, reached])                // Index for unreached milestones per user
+  @@map("loyalty_milestones")
+}

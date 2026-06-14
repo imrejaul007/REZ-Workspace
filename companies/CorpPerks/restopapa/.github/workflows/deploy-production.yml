@@ -1,0 +1,221 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: restauranthub_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install backend dependencies
+      run: cd backend && npm ci
+
+    - name: Install frontend dependencies
+      run: cd frontend && npm ci
+
+    - name: Run backend tests
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/restauranthub_test
+        JWT_SECRET: test-secret
+        REDIS_URL: redis://localhost:6379
+      run: |
+        cd backend
+        npx prisma generate
+        npx prisma db push
+        npm run test
+
+    - name: Run frontend tests
+      env:
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+      run: |
+        cd frontend
+        npm run test:ci
+
+    - name: Build backend
+      run: cd backend && npm run build
+
+    - name: Build frontend
+      env:
+        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      run: cd frontend && npm run build
+
+    - name: Run E2E tests
+      run: |
+        # Start services
+        cd backend && npm start &
+        cd frontend && npm start &
+        
+        # Wait for services
+        sleep 30
+        
+        # Run E2E tests
+        npm run test:e2e
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service: [backend, frontend]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./${{ matrix.service }}
+        file: ./${{ matrix.service }}/Dockerfile.prod
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    needs: [test, build-and-push]
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to production server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          # Navigate to application directory
+          cd /opt/restauranthub
+          
+          # Pull latest code
+          git pull origin main
+          
+          # Update environment variables
+          cp .env.production .env
+          
+          # Pull latest Docker images
+          docker-compose -f docker-compose.prod.yml pull
+          
+          # Run database migrations
+          docker-compose -f docker-compose.prod.yml run --rm backend npx prisma migrate deploy
+          
+          # Deploy with zero downtime
+          docker-compose -f docker-compose.prod.yml up -d --remove-orphans
+          
+          # Clean up old images
+          docker image prune -f
+          
+          # Health check
+          sleep 30
+          curl -f http://localhost/health || exit 1
+          
+          echo "Deployment successful!"
+
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+
+  backup:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+    - name: Create database backup
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          # Create backup
+          BACKUP_NAME="backup_$(date +%Y%m%d_%H%M%S)"
+          docker exec restauranthub-postgres-prod pg_dump -U restauranthub_user restauranthub_prod > /opt/backups/$BACKUP_NAME.sql
+          
+          # Compress backup
+          gzip /opt/backups/$BACKUP_NAME.sql
+          
+          # Upload to S3 (if configured)
+          if [ ! -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+            aws s3 cp /opt/backups/$BACKUP_NAME.sql.gz s3://${{ secrets.S3_BACKUP_BUCKET }}/database/
+          fi
+          
+          # Keep only last 7 days of local backups
+          find /opt/backups -name "backup_*.sql.gz" -mtime +7 -delete
+          
+          echo "Backup completed: $BACKUP_NAME"

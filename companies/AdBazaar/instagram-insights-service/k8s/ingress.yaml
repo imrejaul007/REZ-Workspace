@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ad-bazaar-instagram-insights
+  labels:
+    app: ad-bazaar-instagram-insights
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - instagram-insights.adbazaar.internal
+    secretName: ad-bazaar-instagram-insights-tls
+  rules:
+  - host: instagram-insights.adbazaar.internal
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ad-bazaar-instagram-insights
+            port:
+              number: 80

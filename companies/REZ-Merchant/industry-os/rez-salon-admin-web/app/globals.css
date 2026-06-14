@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --salon-primary: #ec4899;
+  --salon-secondary: #db2777;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+@layer utilities {
+  .text-salon {
+    @apply text-pink-600;
+  }
+  .bg-salon {
+    @apply bg-pink-600;
+  }
+}

@@ -1,0 +1,168 @@
+// @ts-nocheck
+/**
+ * Integration Tests for REZ-Consumer Services
+ * Tests all service integrations with backend services
+ */
+
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+
+const BASE_URL = process.env.TEST_API_URL || 'https://rez-api-gateway.onrender.com/api';
+
+// Test configuration
+const TIMEOUT = 30000;
+
+describe('API Gateway Health', () => {
+  test('should respond to health check', async () => {
+    const response = await fetch(`${BASE_URL.replace('/api', '')}/health`);
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.status).toBe('ok');
+  }, TIMEOUT);
+});
+
+describe('Auth Service Integration', () => {
+  test('should send OTP', async () => {
+    const response = await fetch(`${BASE_URL}/user/auth/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phoneNumber: '+919876543210',
+        countryCode: '+91',
+      }),
+    });
+    // Expect 200 or 400 (rate limit)
+    expect([200, 400]).toContain(response.status);
+  }, TIMEOUT);
+
+  test('should reject invalid OTP format', async () => {
+    const response = await fetch(`${BASE_URL}/user/auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phoneNumber: '+919876543210',
+        otp: '123', // Invalid format (should be 6 digits)
+      }),
+    });
+    expect(response.status).toBe(400);
+  }, TIMEOUT);
+});
+
+describe('Wallet Service Integration', () => {
+  test('should require auth for wallet balance', async () => {
+    const response = await fetch(`${BASE_URL}/wallet/balance`);
+    expect(response.status).toBe(401);
+  }, TIMEOUT);
+});
+
+describe('Order Service Integration', () => {
+  test('should require auth for orders', async () => {
+    const response = await fetch(`${BASE_URL}/orders`);
+    expect(response.status).toBe(401);
+  }, TIMEOUT);
+});
+
+describe('Catalog Service Integration', () => {
+  test('should get products without auth', async () => {
+    const response = await fetch(`${BASE_URL}/products?limit=10`);
+    // Should return 200 or empty array if no products exist
+    expect([200, 404]).toContain(response.status);
+  }, TIMEOUT);
+
+  test('should get categories', async () => {
+    const response = await fetch(`${BASE_URL}/categories`);
+    expect([200, 404]).toContain(response.status);
+  }, TIMEOUT);
+});
+
+describe('Search Service Integration', () => {
+  test('should search products', async () => {
+    const response = await fetch(`${BASE_URL}/search?q=test`);
+    expect([200, 404, 400]).toContain(response.status);
+  }, TIMEOUT);
+});
+
+describe('Articles Service Integration', () => {
+  test('should get articles', async () => {
+    const response = await fetch(`${BASE_URL}/articles`);
+    expect([200, 404]).toContain(response.status);
+  }, TIMEOUT);
+
+  test('should get article categories', async () => {
+    const response = await fetch(`${BASE_URL}/articles/categories`);
+    expect([200, 404]).toContain(response.status);
+  }, TIMEOUT);
+});
+
+describe('Bill Payments Service Integration', () => {
+  test('should get bill providers', async () => {
+    const response = await fetch(`${BASE_URL}/bills/providers`);
+    expect([200, 404]).toContain(response.status);
+  }, TIMEOUT);
+});
+
+describe('Cashback Service Integration', () => {
+  test('should require auth for cashback', async () => {
+    const response = await fetch(`${BASE_URL}/cashback/summary`);
+    expect(response.status).toBe(401);
+  }, TIMEOUT);
+});
+
+describe('Gamification Service Integration', () => {
+  test('should get leaderboard without auth', async () => {
+    const response = await fetch(`${BASE_URL}/leaderboard`);
+    expect([200, 404]).toContain(response.status);
+  }, TIMEOUT);
+
+  test('should require auth for achievements', async () => {
+    const response = await fetch(`${BASE_URL}/achievements`);
+    expect(response.status).toBe(401);
+  }, TIMEOUT);
+});
+
+describe('Creator Earnings Service Integration', () => {
+  test('should require auth for creator profile', async () => {
+    const response = await fetch(`${BASE_URL}/creators/profile`);
+    expect(response.status).toBe(401);
+  }, TIMEOUT);
+});
+
+describe('Booking Service Integration', () => {
+  test('should get restaurants', async () => {
+    const response = await fetch(`${BASE_URL}/bookings/restaurants`);
+    expect([200, 404, 401]).toContain(response.status);
+  }, TIMEOUT);
+});
+
+describe('Notifications Service Integration', () => {
+  test('should require auth for notifications', async () => {
+    const response = await fetch(`${BASE_URL}/notifications`);
+    expect(response.status).toBe(401);
+  }, TIMEOUT);
+});
+
+describe('Analytics Service Integration', () => {
+  test('should track events', async () => {
+    const response = await fetch(`${BASE_URL}/events/track`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        events: [{
+          eventType: 'test_event',
+          timestamp: new Date().toISOString(),
+        }],
+      }),
+    });
+    expect([200, 400, 401]).toContain(response.status);
+  }, TIMEOUT);
+});
+
+// Performance tests
+describe('Performance', () => {
+  test('gateway response time < 2s', async () => {
+    const start = Date.now();
+    const response = await fetch(`${BASE_URL.replace('/api', '')}/health`);
+    const duration = Date.now() - start;
+    expect(duration).toBeLessThan(2000);
+    expect(response.status).toBe(200);
+  }, TIMEOUT);
+});

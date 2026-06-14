@@ -1,0 +1,319 @@
+# =============================================================================
+# RisaCare - Kubernetes Base Configuration
+# Healthcare OS Platform
+# =============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: risacare
+  labels:
+    app.kubernetes.io/name: risacare
+    app.kubernetes.io/managed-by: kubectl
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: risacare-config
+  namespace: risacare
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  REDIS_URL: "redis://redis:6379"
+  HOJAI_LLM_URL: "http://hojai-llm:4730"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: risacare-secrets
+  namespace: risacare
+type: Opaque
+stringData:
+  MONGODB_URI: "mongodb://mongo-primary:27017/risa_care"
+  JWT_SECRET: "REPLACE_WITH_SECURE_SECRET"
+  REDIS_PASSWORD: "REPLACE_WITH_SECURE_PASSWORD"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risacare-api-gateway
+  namespace: risacare
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: risacare-api-gateway
+  template:
+    metadata:
+      labels:
+        app: risacare-api-gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4700"
+    spec:
+      serviceAccountName: risacare
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+      containers:
+        - name: api-gateway
+          image: risacare/risa-care-api-gateway:latest
+          ports:
+            - containerPort: 4700
+          envFrom:
+            - configMapRef:
+                name: risacare-config
+            - secretRef:
+                name: risacare-secrets
+          env:
+            - name: PORT
+              value: "4700"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 4700
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 4700
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: risacare-api-gateway
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: risacare-api-gateway
+  namespace: risacare
+spec:
+  selector:
+    app: risacare-api-gateway
+  ports:
+    - port: 80
+      targetPort: 4700
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risacare-ai-service
+  namespace: risacare
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: risacare-ai-service
+  template:
+    metadata:
+      labels:
+        app: risacare-ai-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4733"
+    spec:
+      serviceAccountName: risacare
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+      containers:
+        - name: ai-service
+          image: risacare/risa-care-ai-service:latest
+          ports:
+            - containerPort: 4733
+          envFrom:
+            - configMapRef:
+                name: risacare-config
+            - secretRef:
+                name: risacare-secrets
+          env:
+            - name: PORT
+              value: "4733"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4733
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4733
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: risacare-ai-service
+  namespace: risacare
+spec:
+  selector:
+    app: risacare-ai-service
+  ports:
+    - port: 80
+      targetPort: 4733
+  type: ClusterIP
+---
+# =============================================================================
+# RBAC Configuration
+# =============================================================================
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: risacare
+  namespace: risacare
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: risacare
+  namespace: risacare
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: risacare
+  namespace: risacare
+subjects:
+  - kind: ServiceAccount
+    name: risacare
+    namespace: risacare
+roleRef:
+  kind: Role
+  name: risacare
+  apiGroup: rbac.authorization.k8s.io
+---
+# =============================================================================
+# HPA (Horizontal Pod Autoscaler)
+# =============================================================================
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: risacare-api-gateway-hpa
+  namespace: risacare
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: risacare-api-gateway
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: risacare-ai-service-hpa
+  namespace: risacare
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: risacare-ai-service
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+---
+# =============================================================================
+# PodDisruptionBudget
+# =============================================================================
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: risacare-api-gateway-pdb
+  namespace: risacare
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: risacare-api-gateway
+---
+# =============================================================================
+# NetworkPolicy
+# =============================================================================
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: risacare-default
+  namespace: risacare
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+  egress:
+    - to:
+        - podSelector: {}
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53

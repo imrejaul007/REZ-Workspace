@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@common/*": ["../../packages/common/src/*"],
+      "@db/*": ["../../packages/db/src/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*spec.ts",
+    "src/client/vue-composables.ts",
+    "disabled_modules/**/*",
+    "src/disabled_modules/**/*",
+    "src/modules/admin/**/*",
+    "src/modules/files/**/*",
+    "src/modules/messaging/**/*",
+    "src/modules/orders/**/*",
+    "src/modules/payments/**/*",
+    "src/modules/marketplace/**/*",
+    "src/modules/websocket/**/*",
+    "src/decorators/**/*"
+  ]
+}

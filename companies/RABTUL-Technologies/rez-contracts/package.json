@@ -1,0 +1,23 @@
+{
+  "name": "@imrejaul007/rez-contracts",
+  "version": "1.0.1",
+  "description": "Shared API schemas, types, and validation for REZ ecosystem",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint schemas/ types/ validation/",
+    "validate": "npx ts-node scripts/validate-schemas.ts",
+    "bump": "npx ts-node scripts/bump-version.ts"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.19.17",
+    "typescript": "^5.9.3",
+    "zod": "^3.23.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

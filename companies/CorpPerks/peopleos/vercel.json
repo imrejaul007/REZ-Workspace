@@ -1,0 +1,66 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "outputDirectory": ".next",
+  "installCommand": "npm ci --prefer-offline --no-audit",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, must-revalidate"
+        },
+        {
+          "key": "X-RateLimit-Remaining",
+          "value": "unavailable"
+        }
+      ]
+    }
+  ],
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "region": "sin1"
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@corpperks-api-url",
+    "NEXT_PUBLIC_CORPINTEL_URL": "@corpintel-url",
+    "NEXT_PUBLIC_PROJECTOS_URL": "@projectos-url",
+    "NEXT_PUBLIC_CORPID_URL": "@corpid-url"
+  },
+  "regions": ["sin1"]
+}

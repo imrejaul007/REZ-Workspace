@@ -1,0 +1,32 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://corpperks-api.onrender.com",
+    "NEXT_PUBLIC_CORPID_URL": "https://corpperks-corpid.onrender.com",
+    "NEXT_PUBLIC_CORPID_IDENTITY_URL": "https://corpperks-corpid-identity.onrender.com",
+    "NEXT_PUBLIC_ANALYTICS_URL": "https://corpperks-analytics.onrender.com",
+    "NEXT_PUBLIC_REPORTS_URL": "https://corpperks-reports.onrender.com"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'rez-production'
+    environment: 'production'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+rule_files:
+  - 'alerts.yml'
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+
+  # rez-delivery-service (4010)
+  - job_name: 'rez-delivery-service'
+    static_configs:
+      - targets: ['rez-delivery-service:4010']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'rez-delivery-service:4010'
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-delivery-service'
+
+  # rez-analytics-service (4016)
+  - job_name: 'rez-analytics-service'
+    static_configs:
+      - targets: ['rez-analytics-service:4016']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-analytics-service'
+
+  # rez-payment-links-service (4018)
+  - job_name: 'rez-payment-links-service'
+    static_configs:
+      - targets: ['rez-payment-links-service:4018']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-payment-links-service'
+
+  # rez-journey-service (4019)
+  - job_name: 'rez-journey-service'
+    static_configs:
+      - targets: ['rez-journey-service:4019']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-journey-service'
+
+  # rez-automation-service (4020)
+  - job_name: 'rez-automation-service'
+    static_configs:
+      - targets: ['rez-automation-service:4020']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-automation-service'
+
+  # rez-gdpr-service (4021)
+  - job_name: 'rez-gdpr-service'
+    static_configs:
+      - targets: ['rez-gdpr-service:4021']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-gdpr-service'
+
+  # rez-validation-service (4022)
+  - job_name: 'rez-validation-service'
+    static_configs:
+      - targets: ['rez-validation-service:4022']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-validation-service'
+
+  # rez-cohort-service (4027)
+  - job_name: 'rez-cohort-service'
+    static_configs:
+      - targets: ['rez-cohort-service:4027']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-cohort-service'
+
+  # rez-currency-service (4026)
+  - job_name: 'rez-currency-service'
+    static_configs:
+      - targets: ['rez-currency-service:4026']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-currency-service'
+
+  # rez-invoice-service (4028)
+  - job_name: 'rez-invoice-service'
+    static_configs:
+      - targets: ['rez-invoice-service:4028']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-invoice-service'
+
+  # rez-menu-service (4030)
+  - job_name: 'rez-menu-service'
+    static_configs:
+      - targets: ['rez-menu-service:4030']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-menu-service'
+
+  # rez-refund-service (4031)
+  - job_name: 'rez-refund-service'
+    static_configs:
+      - targets: ['rez-refund-service:4031']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-refund-service'
+
+  # rez-tracking-service (4032)
+  - job_name: 'rez-tracking-service'
+    static_configs:
+      - targets: ['rez-tracking-service:4032']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-tracking-service'
+
+  # rez-marketing (4000)
+  - job_name: 'rez-marketing'
+    static_configs:
+      - targets: ['rez-marketing:4000']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-marketing'
+
+  # rez-auth-service (4002)
+  - job_name: 'rez-auth-service'
+    static_configs:
+      - targets: ['rez-auth-service:4002']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'rez-auth-service'
+
+  # Kubernetes Pod Monitoring (if running in K8s)
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: pod

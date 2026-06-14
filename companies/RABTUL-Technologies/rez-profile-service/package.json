@@ -1,0 +1,32 @@
+{
+  "name": "rez-profile-service",
+  "version": "1.0.0",
+  "description": "ReZ Profile Service - User preferences, addresses, static profile data",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@rez/shared": "file:../rez-shared",
+    "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^8.4.1",
+    "isomorphic-dompurify": "^3.12.0",
+    "mongoose": "^8.23.1",
+    "redis": "^5.12.1",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5",
+    "@types/node": "^25.6.2",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.5",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6"
+  }
+}

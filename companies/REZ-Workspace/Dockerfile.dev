@@ -1,0 +1,25 @@
+# ============================================
+# REZ Workspace - Development Dockerfile
+# ============================================
+
+FROM node:20-alpine
+
+# Install ts-node globally for development
+RUN npm install -g tsx nodemon
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Expose ports
+EXPOSE 4300 9229
+
+# Start with tsx for hot reload
+CMD ["nodemon", "--exec", "tsx", "--watch", "src", "--watch", "shared", "src/index.ts"]

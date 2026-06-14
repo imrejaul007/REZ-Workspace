@@ -1,0 +1,417 @@
+.container {
+  padding: 2rem;
+}
+
+.heroCard {
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.heroLeft h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.heroLeft p {
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}
+
+.startBtn {
+  padding: 1rem 2rem;
+  background: white;
+  color: var(--primary);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.startBtn:hover {
+  transform: scale(1.05);
+}
+
+.scoreCard {
+  background: rgba(255,255,255,0.2);
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.scoreNum {
+  display: block;
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+.scoreLabel {
+  display: block;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.scoreTrend {
+  display: inline-block;
+  margin-top: 0.5rem;
+  background: var(--success);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.section h2 {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.typeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background: var(--bg);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.typeCard:hover {
+  border-color: var(--border);
+}
+
+.typeCard.selected {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.typeIcon {
+  font-size: 2rem;
+}
+
+.typeName {
+  font-weight: 600;
+}
+
+.typeCount {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.questionCard {
+  padding: 1.5rem;
+  background: var(--bg);
+  border-radius: 10px;
+}
+
+.question {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.questionTips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tip {
+  background: white;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.practiceBtn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.practiceBtn:hover {
+  background: var(--primary-dark);
+}
+
+.sessionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sessionCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.sessionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sessionInfo strong {
+  font-weight: 600;
+}
+
+.sessionInfo span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.sessionMeta {
+  font-size: 0.625rem !important;
+}
+
+.sessionScore {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+}
+
+.sessionScore.good {
+  background: var(--success);
+}
+
+.sessionScore.okay {
+  background: var(--warning);
+}
+
+.sessionScore.low {
+  background: var(--danger);
+}
+
+.tipsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tipItem {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.tipIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.tipItem p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.interviewModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.interviewContent {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 700px;
+  overflow: hidden;
+}
+
+.interviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.interviewType {
+  background: var(--primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.questionNum {
+  flex: 1;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--border);
+  border-radius: 50%;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.closeBtn:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.questionDisplay {
+  padding: 2rem;
+}
+
+.questionDisplay h2 {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.revealBtn {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.revealBtn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.sampleAnswer {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--bg);
+  border-radius: 10px;
+  border-left: 4px solid var(--primary);
+}
+
+.sampleAnswer p {
+  line-height: 1.7;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.interviewActions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.navBtn {
+  flex: 1;
+  padding: 0.875rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.navBtn:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.navBtn:disabled {
+  background: var(--border);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .typeGrid {
+    grid-template-columns: 1fr;
+  }
+}

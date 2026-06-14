@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ad-bazaar-snapchat-integration-config
+  namespace: adbazaar
+  labels:
+    app: ad-bazaar-snapchat-integration
+data:
+  NODE_ENV: "production"
+  MONGODB_URI: "mongodb://mongodb.adbazaar.svc.cluster.local:27017/snapchat_integration"
+  REDIS_URL: "redis://redis.adbazaar.svc.cluster.local:6379/0"
+  API_VERSION: "1.0.0"
+  LOG_LEVEL: "info"
+  SNAPCHAT_API_VERSION: "v1"
+  WEBHOOK_VERIFICATION_TOKEN: "snapchat-webhook-verification"
+  AD_SYNC_INTERVAL_MINUTES: "15"
+  CAMPAIGN_STATUS_POLL_INTERVAL: "300000"
+  AUDIENCE_SYNC_ENABLED: "true"
+  CONVERSION_TRACKING_ENABLED: "true"
+  SNAP_PIXEL_ENABLED: "true"
+  LENS_ENABLED: "true"
+  STORY_ADS_ENABLED: "true"
+  COLLECTION_ADS_ENABLED: "true"
+  COMMERCE_PRODUCT_CATALOG_ENABLED: "true"
