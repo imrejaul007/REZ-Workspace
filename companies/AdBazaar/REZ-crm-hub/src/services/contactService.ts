@@ -465,6 +465,16 @@ export class ContactService {
       { syncStatus: ContactSyncStatus.PENDING }
     );
   }
+
+  async createContact(contactData: Partial<ICRMContact>): Promise<ICRMContactDocument | null> {
+    try {
+      const contact = new CRMContact(contactData);
+      return await contact.save();
+    } catch (error) {
+      console.error('Failed to create contact:', error);
+      return null;
+    }
+  }
 }
 
 export const contactService = new ContactService();
