@@ -1316,3 +1316,120 @@ The Genie Dashboard is the Vellum competitor - a simple unified interface for al
 ## Documentation
 
 `companies/hojai-ai/genie-dashboard-service/README.md`
+
+---
+
+# HOJAI Dental AI - SmileCraft Integration (Added June 14, 2026)
+
+## New Dental Services
+
+| Service | Port | Purpose | Location |
+|---------|------|---------|----------|
+| Dental Imaging AI | 4501 | X-ray analysis, cavity detection | `HOJAI-CLINIC-AI/src/routes/dental.routes.ts` |
+| Dental Expansion Agent | 4555 | Multi-agent for "Open 20 clinics" | `services/hojai-dental-expansion-agent/` |
+| Genie Dental Health | 4708 | Dental reminders, risk assessment | `genie-dental-health-service/` |
+
+## Dental Imaging AI Module
+
+**File:** `HOJAI-CLINIC-AI/src/routes/dental.routes.ts` (350+ lines)
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/ai/dental/analyze` | POST | Analyze dental X-ray |
+| `/api/v1/ai/dental/compare` | POST | Compare X-rays |
+| `/api/v1/ai/dental/cavity-detect` | POST | Early cavity detection |
+| `/api/v1/ai/dental/treatment-plan` | POST | Generate treatment plan |
+| `/api/v1/ai/dental/gum-health` | POST | Gum health analysis |
+
+### Dental Findings
+
+| Finding | Code | Severity |
+|---------|------|----------|
+| Caries | `caries` | mild/moderate/severe |
+| Bone Loss | `bone_loss` | mild/moderate/severe |
+| Crack | `crack` | mild/severe |
+| Fracture | `fracture` | mild/moderate/severe |
+| Abscess | `abscess` | moderate/severe |
+| Normal | `normal` | none |
+
+## Dental Expansion Agent
+
+**File:** `services/hojai-dental-expansion-agent/src/index.js` (500+ lines)
+
+### Goal: Open 20 Clinics
+
+```bash
+# Create goal
+curl -X POST http://localhost:4555/api/expansion/goal \
+  -H "Content-Type: application/json" \
+  -d '{"owner": "dr_meera", "targetCount": 20}'
+
+# Execute
+curl -X POST http://localhost:4555/api/expansion/execute/:goalId
+
+# Get report
+curl http://localhost:4555/api/expansion/:goalId/report
+```
+
+### Coordinated Agents
+
+| Agent | Role | Output |
+|-------|------|--------|
+| RisnaEstate | Location | 1500 sqft, ₹80K/mo |
+| CorpPerks | Staffing | 9 staff, ₹2.95L/mo |
+| Nexha | Equipment | ₹13.5L |
+| AdBazaar | Marketing | ₹1.3L campaign |
+| RIDZA | Finance | ₹50L investment |
+
+## Genie Dental Health Service
+
+**File:** `genie-dental-health-service/src/index.js` (320+ lines)
+
+### Dental Reminders
+
+```bash
+# Calculate risk
+curl http://localhost:4708/api/risk/:corpId
+
+# Send reminder
+curl -X POST http://localhost:4708/api/reminder \
+  -d '{"corpId": "xxx", "patientName": "Karim", "lastVisitMonths": 14}'
+```
+
+### Risk Messages
+
+| Risk | Message |
+|------|---------|
+| High (24+ mo) | "It's been {X} months. Gum inflammation risk is increasing." |
+| Medium (14 mo) | "You skipped your last dental checkup. It's been {X} months." |
+
+## Story Flow - Services
+
+| Time | Event | Service | Status |
+|------|-------|---------|--------|
+| 11:40 AM | Digital scan | Dental Imaging AI | ✅ |
+| 7:00 PM | "Open 20 clinics" | Expansion Agent | ✅ |
+| 7:00 AM | Reminder | Genie Dental Health | ✅ |
+
+## Quick Start
+
+```bash
+# Dental Imaging AI
+cd companies/hojai-ai/HOJAI-CLINIC-AI
+npm run dev  # Port 4501
+
+# Dental Expansion Agent
+cd companies/hojai-ai/services/hojai-dental-expansion-agent
+npm install && npm start  # Port 4555
+
+# Genie Dental Health
+cd companies/hojai-ai/genie-dental-health-service
+npm install && npm start  # Port 4708
+```
+
+---
+
+*Last Updated: June 14, 2026*
+*SmileCraft Dental Clinic - All Services Integrated*
