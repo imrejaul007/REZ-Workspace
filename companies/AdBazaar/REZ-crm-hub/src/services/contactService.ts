@@ -468,7 +468,12 @@ export class ContactService {
 
   async createContact(contactData: Partial<ICRMContact>): Promise<ICRMContactDocument | null> {
     try {
-      const contact = new CRMContact(contactData);
+      const { v4: uuidv4 } = require('uuid');
+      const contact = new CRMContact({
+        ...contactData,
+        externalId: contactData.externalId || uuidv4(),
+        syncStatus: contactData.syncStatus || ContactSyncStatus.PENDING,
+      });
       return await contact.save();
     } catch (error) {
       console.error('Failed to create contact:', error);

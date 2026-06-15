@@ -267,6 +267,52 @@ router.get(
 );
 
 /**
+ * Create a new contact
+ * POST /api/contacts
+ */
+router.post(
+  '/contacts',
+  validateBody(z.object({
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    email: z.string().email().optional(),
+    phone: z.string().optional(),
+    phones: z.array(z.object({
+      number: z.string(),
+      type: z.string().optional(),
+      isPrimary: z.boolean().optional(),
+    })).optional(),
+    emails: z.array(z.object({
+      address: z.string(),
+      isPrimary: z.boolean().optional(),
+    })).optional(),
+    company: z.string().optional(),
+    jobTitle: z.string().optional(),
+    lifecycleStage: z.string().optional(),
+    leadSource: z.string().optional(),
+    provider: z.enum(['hubspot', 'zoho']).default('hubspot'),
+  })),
+  asyncHandler(async (req: Request, res: Response) => {
+    const contactData = {
+      ...req.body,
+      provider: req.body.provider as CRMProvider,
+    };
+
+    const contact = await contactService.createContact(contactData);
+
+    if (!contact) {
+      throw ApiError.internal('Failed to create contact');
+    }
+
+    res.status(201).json({
+      success: true,
+      data: contact,
+      message: 'Contact created successfully',
+    });
+  })
+);
+
+/**
  * Get a single contact
  * GET /api/contacts/:id
  */
