@@ -3,15 +3,16 @@
  *
  * Routes voice input to:
  * - Voice Typing (speech → text)
- * - Genie Mode (AI tasks)
+ * - Genie Mode (AI tasks) → Genie Services
  * - CoPilot Mode (Business AI)
  * - Action Execution
  *
- * This is the CORE missing piece!
+ * CONNECTED TO GENIE SERVICES
  */
 
 import express from 'express';
 import cors from 'cors';
+import axios from 'axios';
 
 const app = express();
 app.use(cors({
@@ -23,6 +24,16 @@ app.use(cors({
 app.use(express.json({ limit: "10kb" }));
 
 const PORT = parseInt(process.env.PORT || '4650', 10);
+
+// ============================================
+// GENIE SERVICE URLS
+// ============================================
+
+const GENIE_URL = process.env.GENIE_DASHBOARD_URL || 'http://localhost:4701';
+const GENIE_MEMORY_URL = process.env.GENIE_MEMORY_URL || 'http://localhost:4703';
+const GENIE_PERSONAL_TWIN_URL = process.env.GENIE_PERSONAL_TWIN_URL || 'http://localhost:4708';
+const GENIE_RELATIONSHIP_TWIN_URL = process.env.GENIE_RELATIONSHIP_TWIN_URL || 'http://localhost:4705';
+const GENIE_BRIEFING_URL = process.env.GENIE_BRIEFING_URL || 'http://localhost:4706';
 
 // ============================================
 // WAKE WORDS & TRIGGERS
