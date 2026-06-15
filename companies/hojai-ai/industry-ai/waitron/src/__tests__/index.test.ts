@@ -163,8 +163,10 @@ describe('Waitron API Endpoints', () => {
       const discount = 0.1; // 10%
       const gst = 0.18; // 18%
 
+      // Formula: subtotal * (1 - discount) * (1 + gst)
+      // 1000 * 0.9 * 1.18 = 1062
       const total = subtotal * (1 - discount) * (1 + gst);
-      expect(total).toBeCloseTo(1036.8, 1);
+      expect(total).toBeCloseTo(1062, 0);
     });
   });
 
@@ -176,8 +178,9 @@ describe('Waitron API Endpoints', () => {
         rice: 100,
       };
 
+      // 10 * 200 + 25 * 300 + 100 * 80 = 2000 + 7500 + 8000 = 17500
       const totalValue = stock.chicken * 200 + stock.paneer * 300 + stock.rice * 80;
-      expect(totalValue).toBe(27500);
+      expect(totalValue).toBe(17500);
     });
   });
 });
