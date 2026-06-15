@@ -1,169 +1,177 @@
-# HOJAI Revenue Intelligence - Developer Guide
+# HOJAI Revenue Intelligence - Service Documentation
 
-## Service Purpose
+**Company:** HOJAI AI  
+**Port:** 4757  
+**Version:** 1.0.0  
+**Status:** ✅ **BUILT** (June 13, 2026)
 
-HOJAI Revenue Intelligence is a microservice for HOJAI AI's CoPilot product that provides:
+---
 
-- Revenue tracking (ARR, MRR, pipeline, CAC, LTV)
-- AI-powered revenue forecasting
-- Churn prediction and analysis
-- Revenue alerts and notifications
-- Analytics and cohort analysis
+## Overview
 
-## Port
+**HOJAI Revenue Intelligence** provides comprehensive revenue analytics and forecasting. Track ARR, MRR, LTV, CAC, churn rate, and generate predictive insights.
 
-**4757** - All API endpoints are available at `http://localhost:4757`
+### Key Capabilities
 
-## MongoDB Collections
+- **Revenue Metrics** - Track ARR, MRR, LTV, CAC, churn rate
+- **Forecasting** - ML-based revenue predictions
+- **Churn Analysis** - Detect and track customer churn
+- **LTV Calculation** - Customer lifetime value tracking
+- **CAC Tracking** - Customer acquisition cost monitoring
+- **Alert System** - Automatic alerts for churn risk
+- **Burn Rate** - Track burn rate and runway
+- **Health Metrics** - Comprehensive business health
 
-| Collection | Purpose |
-|------------|---------|
-| `RevenueMetric` | ARR, MRR, and other revenue metrics over time |
-| `RevenuePipeline` | Sales deals and pipeline management |
-| `RevenueForecast` | AI-generated revenue predictions |
-| `RevenueAlert` | Revenue alerts (churn, drop, pipeline risk) |
-| `Subscription` | Customer subscriptions with MRR/ARR |
-| `RevenueBreakdown` | Revenue segmented by product/segment/region |
-| `ConversionMetric` | Funnel conversion rates by stage |
-| `CACMetric` | Customer acquisition cost by channel |
-| `LTVMetric` | Lifetime value by segment/plan |
+---
 
-## API Routes Summary
+## Architecture
 
-### Health (No Auth)
-- `GET /health` - Service health
-- `GET /health/live` - Liveness probe
-- `GET /health/ready` - Readiness probe
+### Tech Stack
 
-### Dashboard (Tenant Required)
-- `GET /api/dashboard` - Revenue overview
+| Component | Technology |
+|-----------|------------|
+| Runtime | Node.js 20+ |
+| Framework | Express.js 4.x |
+| Language | TypeScript 5.x |
+| Database | MongoDB 6.x |
+| Validation | Zod 3.x |
+| Logging | Pino |
+| Auth | JWT + API Key |
 
-### Metrics (Tenant Required)
-- `GET /api/arr` - ARR metrics
-- `GET /api/mrr` - MRR metrics
-- `GET /api/metrics` - List metrics
-- `POST /api/metrics` - Record metric
-- `GET /api/breakdown` - Revenue breakdown
-- `POST /api/breakdown` - Record breakdown
-- `GET /api/cac` - CAC metrics
-- `POST /api/cac` - Record CAC
-- `GET /api/ltv` - LTV metrics
-- `POST /api/ltv` - Record LTV
+### Directory Structure
 
-### Pipeline (Tenant Required)
-- `GET /api/pipeline` - List deals
-- `POST /api/pipeline` - Create deal
-- `GET /api/pipeline/:id` - Get deal
-- `PATCH /api/pipeline/:id` - Update deal
-
-### Subscriptions (Tenant Required)
-- `GET /api/subscriptions` - List subscriptions
-- `POST /api/subscriptions` - Create subscription
-- `GET /api/subscriptions/:id` - Get subscription
-- `PATCH /api/subscriptions/:id` - Update subscription
-
-### Conversion (Tenant Required)
-- `GET /api/conversion` - Conversion metrics
-- `POST /api/conversion` - Record conversion
-
-### Forecast (Tenant Required)
-- `GET /api/forecast` - List forecasts
-- `POST /api/forecast` - Generate forecast
-- `GET /api/forecast/pipeline-risk` - Pipeline risk
-- `GET /api/forecast/sales` - Sales forecast
-- `GET /api/forecast/churn` - Churn analysis
-
-### Alerts (Tenant Required)
-- `GET /api/alerts` - List alerts
-- `POST /api/alerts` - Create alert
-- `POST /api/alerts/check` - Auto-check alerts
-- `PATCH /api/alerts/:id/read` - Mark read
-- `POST /api/alerts/mark-all-read` - Mark all read
-- `DELETE /api/alerts/:id` - Delete alert
-
-### Analytics (Tenant Required)
-- `GET /api/analytics` - Analytics overview
-- `GET /api/analytics/growth` - Growth trends
-- `GET /api/analytics/cohort` - Cohort analysis
-- `GET /api/analytics/unit-economics` - Unit economics
-
-## AI Features
-
-### Revenue Forecasting
-- Time series forecasting (linear, exponential, moving average)
-- Confidence intervals based on historical fit
-- Factor analysis showing what drives revenue
-
-### Pipeline Risk Scoring
-- Identifies stale deals (>14 days without update)
-- Flags large deals in early stages
-- Detects past-due expected close dates
-- Scores deals by multiple risk factors
-
-### Churn Prediction
-- Identifies at-risk subscriptions
-- Checks trial expiration timing
-- Analyzes MRR and tenure patterns
-- Monitors renewal engagement
-
-### Sales Forecasting
-- Quarterly weighted pipeline forecasting
-- Annual projection based on growth trends
-- Confidence-adjusted predictions
-- Deal-stage weighted calculations
-
-### Revenue Alerts
-- Revenue drop alerts (>10% MoM decline)
-- Churn spike alerts (>5% churn rate)
-- Pipeline risk alerts (3+ stale deals)
-- Growth stall warnings (<2% growth)
-
-## Integration Points
-
-### hojai-board (AI CFO)
-- Exposes revenue forecasts for AI CFO dashboard
-- Provides pipeline risk analysis
-- Delivers revenue alerts for CFO review
-
-### hojai-customer-intelligence
-- Reads customer data for churn analysis
-- Correlates revenue with customer engagement
-- Enriches subscription data with customer profile
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development with hot reload
-npm run dev
-
-# Build for production
-npm run build
-
-# Run production
-npm start
+```
+hojai-revenue-intelligence/
+├── src/
+│   ├── index.ts          # Main server
+│   └── types/
+│       └── index.ts     # Type definitions
+├── Dockerfile
+├── docker-compose.yml
+├── package.json
+├── tsconfig.json
+├── vitest.config.ts
+├── .env.example
+├── README.md
+└── CLAUDE.md
 ```
 
-## Pattern Compliance
+---
 
-This service follows patterns from `hojai-customer-intelligence`:
-- Same middleware stack (helmet, cors, express.json)
-- Same health endpoint pattern
-- Same tenant middleware
-- Same response format (createResponse/createErrorResponse)
-- Same logging pattern (createLogger)
-- Same MongoDB connection pattern
-- Same graceful shutdown pattern
-- Same tenant isolation on all schemas
+## Data Models
+
+### RevenueMetric
+
+```typescript
+{
+  id: string;
+  metricType: 'arr' | 'mrr' | 'revenue' | 'new_revenue' | 'expansion' | 'churn' | 'net_new' | 'ltv' | 'cac' | 'burn_rate' | 'runway_months';
+  value: number;
+  currency: string;
+  period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  startDate: Date;
+  endDate: Date;
+}
+```
+
+### Alert
+
+```typescript
+{
+  id: string;
+  type: 'churn_risk' | 'revenue_drop' | 'burn_rate' | 'milestone' | 'opportunity';
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  metricValue?: number;
+  threshold?: number;
+  acknowledged: boolean;
+}
+```
+
+---
+
+## API Endpoints
+
+### Health
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/health` | No | Full health check |
+| GET | `/health/live` | No | Liveness probe |
+| GET | `/health/ready` | No | Readiness probe |
+
+### Metrics
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/v1/metrics` | Yes | List metrics |
+| POST | `/api/v1/metrics` | Yes | Record metric |
+
+### Analytics
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/v1/analytics` | Yes | Business analytics |
+
+### Alerts
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/v1/alerts` | Yes | List alerts |
+| POST | `/api/v1/alerts/:id/acknowledge` | Yes | Acknowledge alert |
+
+---
+
+## Calculations
+
+### Churn Rate
+
+```typescript
+churnRate = (churned / total) * 100
+```
+
+### CAC
+
+```typescript
+cac = marketingCost / newCustomers
+```
+
+### LTV
+
+```typescript
+ltv = revenue / (churnRate / 100)
+```
+
+### Runway
+
+```typescript
+runway = cash / burnRate
+```
+
+---
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 4757 | Service port |
-| `MONGODB_URI` | mongodb://localhost:27017/hojai-revenue-intelligence | MongoDB connection |
-| `JWT_SECRET` | CHANGE_ME | JWT signing secret |
-| `CORS_ORIGIN` | * | CORS allowed origin |
-| `NODE_ENV` | production | Environment mode |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| PORT | No | 4757 | Service port |
+| MONGODB_URI | Yes | - | MongoDB connection |
+| JWT_SECRET | Yes | - | JWT signing |
+| HOJAI_REVENUE_INTELLIGENCE_API_KEY | Yes | - | API key |
+| CORS_ORIGIN | No | - | Allowed origins |
+
+---
+
+## Related Documents
+
+| Document | Location |
+|----------|----------|
+| README.md | ./README.md |
+| RTNM-COMPANIES-AUDIT.md | ../../../RTNM-COMPANIES-AUDIT.md |
+| RTNM-PRODUCTS-FEATURES-AUDIT.md | ../../../RTNM-PRODUCTS-FEATURES-AUDIT.md |
+
+---
+
+**Last Updated:** June 13, 2026  
+**Built by:** Claude Code

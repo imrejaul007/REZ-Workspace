@@ -1,126 +1,107 @@
-# HOJAI Goal-OS Service
+# HOJAI GoalOS - Goal & OKR Management
+
+> **HOJAI AI** | Company: hojai-ai  
+> **Port:** 4242 | **Status:** ✅ **BUILT** (June 13, 2026)
 
 ## Overview
 
-HOJAI Goal-OS is a goal management and OKR tracking microservice for HOJAI AI's CoPilot product. It provides comprehensive goal lifecycle management including creation, tracking, progress monitoring, and AI-powered risk alerting.
+**HOJAI GoalOS** provides comprehensive goal and OKR management. Create goals, track progress, manage objectives and key results.
 
-**Port:** 4242
-**MongoDB Database:** `hojai-goal-os`
-**MongoDB Collections:**
-- `goals` - Goal definitions and metadata
-- `o krs` - Objectives and Key Results
-- `milestones` - Goal milestones
-- `goaldependencies` - Goal dependency mappings
-- `goalprogresses` - Progress history records
-- `goalalerts` - Risk and status alerts
+### Key Features
 
-## API Routes Summary
+- 🎯 **Goal Management** - Create and track company/team goals
+- 📊 **Progress Tracking** - Track goal completion percentage
+- ✅ **OKR System** - Objectives and Key Results framework
+- 📈 **Key Results** - Measurable key results with targets
+- 📅 **Due Dates** - Set and track deadlines
+- 👤 **Owner Assignment** - Assign goals to team members
 
-### Health (No auth required)
-- `GET /health` - Service health check
-- `GET /health/live` - Kubernetes liveness probe
-- `GET /health/ready` - Kubernetes readiness probe (checks MongoDB)
+## Architecture
 
-### Goals (`/goals`)
-- `GET /` - List goals with filtering (status, category, owner, type, priority)
-- `POST /` - Create goal
-- `GET /:id` - Get goal by ID
-- `PATCH /:id` - Update goal
-- `DELETE /:id` - Delete goal
-- `POST /:id/progress` - Record progress update
-- `GET /:id/progress` - Get progress history and snapshot
-- `GET /:id/risks` - Get risk assessment for goal
-- `GET /:id/dependencies` - Get dependency mapping
-- `POST /:id/dependencies` - Add dependency
-- `GET /:id/milestones` - Get milestones for goal
-- `POST /:id/milestones` - Add milestone
-- `PATCH /:id/milestones/:milestoneId` - Update milestone
+| Component | Technology |
+|-----------|------------|
+| Runtime | Node.js 20+ |
+| Framework | Express.js 4.x |
+| Language | TypeScript 5.x |
+| Database | MongoDB 6.x |
+| Validation | Zod 3.x |
 
-### OKRs (`/okrs`)
-- `GET /` - List OKRs with filtering (goal, period, year)
-- `POST /` - Create OKR
-- `GET /:id` - Get OKR with calculated progress
-- `PATCH /:id` - Update OKR
-- `POST /:id/key-results/:krId/progress` - Update key result progress
+## API Endpoints
 
-### Milestones (`/milestones`)
-- `GET /` - List all milestones with filtering
-- `GET /:id` - Get milestone by ID
-- `PATCH /:id` - Update milestone
+### Goals
 
-### Alerts (`/alerts`)
-- `GET /` - List alerts with filtering (goal, severity, read status)
-- `PATCH /:id/read` - Mark alert as read
-- `POST /read-all` - Mark all alerts as read
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/goals` | List goals |
+| POST | `/api/v1/goals` | Create goal |
+| GET | `/api/v1/goals/:id` | Get goal |
+| PUT | `/api/v1/goals/:id` | Update goal |
+| PATCH | `/api/v1/goals/:id` | Partial update |
+| DELETE | `/api/v1/goals/:id` | Delete goal |
 
-### Analytics (`/analytics`)
-- `GET /dashboard` - Dashboard statistics
-- `GET /` - Detailed analytics
-- `GET /dependencies` - Dependency graph
-- `GET /cascade/:goalId` - Cascade impact analysis
-- `POST /suggest` - AI-generated OKR suggestions
+### OKRs
 
-## AI Features
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/okrs` | List OKRs |
+| POST | `/api/v1/okrs` | Create OKR |
+| GET | `/api/v1/okrs/:id` | Get OKR |
+| PUT | `/api/v1/okrs/:id` | Update OKR |
 
-### Progress Monitoring
-- Track progress over time with history
-- Calculate velocity (progress per day/week)
-- Predict completion date based on current velocity
-- Identify at-risk goals (falling behind by >20%)
+## Data Models
 
-### Risk Alerts
-- **Off-track alerts** - Triggered when progress falls >20% behind expected
-- **Deadline approaching alerts** - Triggered 7 days before deadline
-- **Milestone missed alerts** - Triggered when milestones pass their target date
-- **Dependency risk alerts** - Triggered when a dependent goal is at risk
+### Goal
 
-### Dependency Mapping
-- Visualize goal dependencies (blocks/enables/related)
-- Detect circular dependencies
-- Cascade impact analysis (what breaks if this goal fails)
-- Identify at-risk dependents
+```typescript
+{
+  id: string;
+  title: string;
+  description?: string;
+  status: 'active' | 'completed' | 'paused' | 'cancelled';
+  progress: number; // 0-100
+  dueDate?: Date;
+  ownerId?: string;
+  teamId?: string;
+}
+```
 
-### OKR Suggestions
-- Generate OKRs based on category (revenue, growth, product, team, operational)
-- Suggest key results with targets
-- Score ambition level (conservative, moderate, ambitious)
-- Provide reasoning for suggestions
+### OKR
 
-### Goal Analytics
-- Completion rate by category, owner, and period
-- Average time to achieve goals
-- Goal-setting patterns analysis
-- Team performance comparison
+```typescript
+{
+  id: string;
+  objective: string;
+  keyResults: KeyResult[];
+  goalId?: string;
+}
 
-## Integration Points
+interface KeyResult {
+  id: string;
+  metric: string;
+  target: number;
+  current: number;
+  unit?: string;
+}
+```
 
-### hojai-board (AI C-Suite Integration)
-Goal-OS integrates with hojai-board for:
-- C-Suite dashboard visibility into organizational goals
-- Executive-level goal status reporting
-- Strategic alignment verification
+## Security Features
 
-### hojai-twin (What-If Scenarios)
-Goal-OS can leverage hojai-twin for:
-- Simulating goal achievement scenarios
-- Testing resource allocation impact on goals
-- Predicting goal outcomes under different conditions
+| Feature | Status |
+|---------|--------|
+| Input Validation (Zod) | ✅ |
+| Graceful Shutdown | ✅ |
+| Health Checks | ✅ |
 
-## Service Patterns
-
-All services in this codebase follow consistent patterns:
-- Tenant isolation via `X-Tenant-Id` header
-- Zod validation for all request bodies
-- Structured JSON logging with `createLogger`
-- MongoDB connection with graceful shutdown
-- Standard API response format (`success`, `data`, `error`, `meta`)
-- Compound indexes for query performance
-
-## Development Commands
+## Quick Start
 
 ```bash
-npm install        # Install dependencies
-npm run dev        # Run in development (tsx watch)
-npm run build      # Build for production
-npm start          # Run production build
+npm install
+npm run dev
+npm run build
+npm start
 ```
+
+---
+
+**License:** Proprietary - RTNM Digital  
+**Last Updated:** June 13, 2026

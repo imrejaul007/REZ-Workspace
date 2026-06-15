@@ -951,3 +951,114 @@ HEALTH_EXPERT_URL=http://localhost:3011
 
 **License:** Proprietary - RTNM Digital
 **GitHub:** github.com/imrejaul007/RisaCare
+---
+
+# RisaCare Dental Services - SmileCraft Integration (Added June 14, 2026)
+
+## New Dental Services
+
+| Service | Port | Purpose | Location |
+|---------|------|---------|----------|
+| Dental Twin | 4751 | Tooth records, oral health | `risa-care-dental-twin-service/` |
+| Dental Inventory | 4752 | Supplies, auto-reorder | `risa-care-dental-inventory-service/` |
+
+## Dental Twin Service
+
+**File:** `risa-care-dental-twin-service/src/index.js`
+
+### Features
+
+| Category | Features |
+|---------|----------|
+| Tooth Records | 32 teeth mapping, position, sensitivity, mobility, prognosis |
+| Treatment History | 15 types (filling, root canal, implant, etc.) |
+| X-Ray Management | 7 types, AI analysis, comparison |
+| Oral Health | Gum health, cavity risk, predictions |
+
+### Quick Commands
+
+```bash
+cd companies/RisaCare/risa-care-dental-twin-service
+npm install && npm start  # Port 4751
+
+# Initialize patient teeth
+curl -X POST http://localhost:4751/api/dental/init \
+  -H "Content-Type: application/json" \
+  -d '{"patientId": "xxx"}'
+
+# Get dental summary
+curl http://localhost:4751/api/dental/summary/xxx
+
+# Generate predictions
+curl -X POST http://localhost:4751/api/dental/predict \
+  -d '{"patientId": "xxx"}'
+```
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/dental/init` | POST | Initialize 32 teeth |
+| `/api/dental/summary/:patientId` | GET | Get summary |
+| `/api/dental/predict` | POST | Generate predictions |
+| `/api/tooth/:id/:num/treatment` | POST | Add treatment |
+| `/api/xray` | POST | Add X-ray |
+| `/api/xray/compare` | POST | Compare X-rays |
+
+## Dental Inventory Service
+
+**File:** `risa-care-dental-inventory-service/src/index.js`
+
+### Features
+
+| Category | Features |
+|---------|----------|
+| Supplies Catalog | 40+ SKUs (implants, anesthetics, whitening, etc.) |
+| Inventory | Stock tracking, low-stock alerts |
+| Auto-Reorder | Nexha integration for procurement |
+
+### Quick Commands
+
+```bash
+cd companies/RisaCare/risa-care-dental-inventory-service
+npm install && npm start  # Port 4752
+
+# Initialize clinic inventory
+curl -X POST http://localhost:4752/api/inventory/init \
+  -d '{"clinicId": "xxx"}'
+
+# Get low stock
+curl http://localhost:4752/api/inventory/xxx/low-stock
+
+# Get catalog
+curl http://localhost:4752/api/inventory/catalog
+```
+
+### Supply Categories
+
+| Category | SKUs | Example |
+|----------|------|---------|
+| Implants | 5 | Titanium Implant (₹2,500) |
+| Anesthetics | 4 | Lidocaine 2% (₹25) |
+| Whitening | 3 | Professional Gel (₹1,200) |
+| Surgical | 5 | Forceps (₹800) |
+| Restorative | 6 | Composite Resin (₹800) |
+| Preventive | 4 | Sealant (₹600) |
+| Orthodontic | 3 | Brackets (₹3,000) |
+| Lab | 3 | Dental Stone (₹200) |
+| General | 8 | Gloves (₹250) |
+
+## Story Flow - Services
+
+| Time | Event | Service | Status |
+|------|-------|---------|--------|
+| 6:00 AM | Twin predictions | Dental Twin | ✅ |
+| 11:30 AM | Patient context | Dental Twin | ✅ |
+| 11:40 AM | Digital scan | Dental Twin + HOJAI | ✅ |
+| 1:00 PM | Inventory notice | Dental Inventory | ✅ |
+| 1:00 PM | Auto-reorder | Nexha | ✅ |
+
+---
+
+*Last Updated: June 14, 2026*
+*SmileCraft Dental Clinic - All Services Integrated*
