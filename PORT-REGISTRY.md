@@ -548,25 +548,27 @@ This document consolidates all port allocations across the 24 industry verticals
 | Construction | 5 | 4001-4045 |
 | Education | 5 | 3000-5100 |
 | Entertainment | 10 | 7001-7005, 8101, 8201-8204, 8210 |
+| Energy | 2 | 4514-5100 |
 | Fashion | 19 | 5543-5948 |
 | Financial | 10 | 8943-8952 |
 | Fitness | 5 | 3100-4400 |
 | Gaming | 6 | 3001-3030 |
-| Government | 9 | 5443-9443 |
+| Government | 10 | 4511, 5443-9443 |
 | Healthcare | 7 | 8643-8649 |
 | Home Services | 10 | 7601-7604, 8103, 8209-8213 |
 | Hotel | 11 | 8443-8452, 4142 |
-| Legal | 10 | 3000-5004 |
+| Legal | 11 | 4510, 3000-5004 |
 | Manufacturing | 6 | 6001-6006 |
+| Media | 2 | 4515, 5600 |
 | Non-Profit | 9 | 6343-8348 |
 | Professional Services | 6 | 6101-6106 |
 | Real Estate | 9 | 8843-8850, 4142 |
 | Restaurant | 10 | 8543-8551, 4007 |
 | Retail | 10 | 8743-8752 |
-| Sports | 17 | 5543-5656, 7343 |
+| Sports | 18 | 4513, 5543-5656, 7343 |
 | Transport | 7 | 9043-9049 |
 | Travel | 6 | 6501-6506 |
-| **HOJAI AI** | 12 | 4500-4780 |
+| **HOJAI AI** | 18 | 4500-4780 |
 
 ---
 
@@ -623,10 +625,10 @@ This document consolidates all port allocations across the 24 industry verticals
 | Attribute | Value |
 |-----------|-------|
 | Document | PORT-REGISTRY.md |
-| Version | 1.0 |
-| Last Updated | 2026-06-13 |
-| Total Industries | 25 |
-| Total Ports | 210+ |
+| Version | 1.1 |
+| Last Updated | 2026-06-15 |
+| Total Industries | 24 |
+| Total Ports | 220+ |
 | Port Ranges | 3000-9999 |
 
 ---

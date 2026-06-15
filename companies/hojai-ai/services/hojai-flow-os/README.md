@@ -1,21 +1,93 @@
-# HOJAI FLOW OS
+# HOJAI FlowOS - Workflow Automation
 
 > **HOJAI AI** | Company: hojai-ai  
-> **Port:** 0000 | **Status:** ✅ **BUILT** (June 13, 2026)
+> **Port:** 4150 | **Status:** ✅ **BUILT** (June 13, 2026)
 
 ## Overview
 
-flow os service for the HOJAI AI ecosystem.
+**HOJAI FlowOS** provides workflow automation capabilities. Create multi-step workflows and execute them programmatically.
 
-### Features
+### Key Features
 
-- Built with security best practices
-- MongoDB, Express, TypeScript, Zod validation
-- JWT/API Key authentication
-- Rate limiting
-- Graceful shutdown
+- 🔄 **Flow Management** - Create and manage workflows
+- 📝 **Multi-Step Flows** - Define complex multi-step processes
+- ▶️ **Flow Execution** - Execute workflows
+- 🎯 **Step Orchestration** - Orchestrate skill execution
+- 🔀 **Conditions** - Conditional step execution
+- 📜 **Flow Runs** - Track execution history
+- ✅ **Status Tracking** - Pending, running, completed, failed
 
----
+## Architecture
+
+| Component | Technology |
+|-----------|------------|
+| Runtime | Node.js 20+ |
+| Framework | Express.js 4.x |
+| Language | TypeScript 5.x |
+| Database | MongoDB 6.x |
+| Validation | Zod 3.x |
+
+## API Endpoints
+
+### Flows
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/flows` | List flows |
+| POST | `/api/v1/flows` | Create flow |
+| GET | `/api/v1/flows/:id` | Get flow |
+| PUT | `/api/v1/flows/:id` | Update flow |
+| DELETE | `/api/v1/flows/:id` | Delete flow |
+| POST | `/api/v1/flows/:id/execute` | Execute flow |
+
+### Runs
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/runs` | List flow runs |
+| GET | `/api/v1/runs/:id` | Get flow run |
+
+## Data Models
+
+### Flow
+
+```typescript
+{
+  id: string;
+  name: string;
+  description?: string;
+  steps: FlowStep[];
+  enabled: boolean;
+}
+
+interface FlowStep {
+  id: string;
+  skillId: string;
+  input?: Record<string, unknown>;
+  condition?: string;
+}
+```
+
+### FlowRun
+
+```typescript
+{
+  id: string;
+  flowId: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  results: unknown[];
+  startedAt: Date;
+  completedAt?: Date;
+}
+```
+
+## Security Features
+
+| Feature | Status |
+|---------|--------|
+| Input Validation (Zod) | ✅ |
+| Graceful Shutdown | ✅ |
+| Health Checks | ✅ |
 
 ## Quick Start
 
@@ -28,24 +100,5 @@ npm start
 
 ---
 
-## Environment Variables
-
-| Variable | Required | Default |
-|----------|----------|---------|
-| PORT | No | 0000 |
-| MONGODB_URI | Yes | - |
-| CORS_ORIGIN | No | - |
-
----
-
-## API Endpoints
-
-See CLAUDE.md for full API documentation.
-
----
-
-## License
-
-Proprietary - RTNM Digital
-
+**License:** Proprietary - RTNM Digital  
 **Last Updated:** June 13, 2026

@@ -380,8 +380,9 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     service: 'razo-intent-router',
-    version: '1.0.0',
+    version: '1.1.0',
     modes: ['voice_typing', 'genie', 'copilot', 'action'],
+    genie_connected: true,
   });
 });
 
@@ -403,6 +404,44 @@ app.post('/route', async (req, res) => {
     res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// GENIE SERVICE ENDPOINTS
+// ============================================
+
+// Get Genie briefing
+app.get('/api/genie/briefing', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    const briefing = await router.getBriefing(userId);
+    res.json(briefing);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get Genie memory
+app.get('/api/genie/memory', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    const query = req.query.q as string;
+    const memory = await router.getMemory(userId, query);
+    res.json(memory);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get Personal Twin
+app.get('/api/genie/twin', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    const twin = await router.getPersonalTwin(userId);
+    res.json(twin);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

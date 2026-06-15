@@ -1,21 +1,71 @@
-# HOJAI EXECUTIVE DASHBOARD
+# HOJAI Executive Dashboard - KPI Reports
 
 > **HOJAI AI** | Company: hojai-ai  
-> **Port:** 0000 | **Status:** ✅ **BUILT** (June 13, 2026)
+> **Port:** 4759 | **Status:** ✅ **BUILT** (June 13, 2026)
 
 ## Overview
 
-executive dashUoard service for the HOJAI AI ecosystem.
+**HOJAI Executive Dashboard** provides KPI report generation and management for executives.
 
-### Features
+### Key Features
 
-- Built with security best practices
-- MongoDB, Express, TypeScript, Zod validation
-- JWT/API Key authentication
-- Rate limiting
-- Graceful shutdown
+- 📊 **KPI Reports** - Daily, weekly, monthly, quarterly reports
+- 📈 **Metrics Tracking** - Custom metric tracking
+- 💡 **Insights Generation** - AI-generated insights
+- 📜 **Report History** - Historical report access
+- ⚡ **Latest Report** - Quick access to most recent
 
----
+## Architecture
+
+| Component | Technology |
+|-----------|------------|
+| Runtime | Node.js 20+ |
+| Framework | Express.js 4.x |
+| Language | TypeScript 5.x |
+| Database | MongoDB 6.x |
+| Validation | Zod 3.x |
+
+## API Endpoints
+
+### Reports
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/reports` | List reports |
+| POST | `/api/v1/reports` | Create report |
+| GET | `/api/v1/reports/:id` | Get report |
+| GET | `/api/v1/reports/latest` | Get latest report |
+
+## Report Types
+
+| Type | Description |
+|------|-------------|
+| daily | Daily summary report |
+| weekly | Weekly summary report |
+| monthly | Monthly summary report |
+| quarterly | Quarterly summary report |
+
+## Data Models
+
+### KPIReport
+
+```typescript
+{
+  id: string;
+  title: string;
+  type: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+  metrics: Record<string, number>;
+  insights: string[];
+}
+```
+
+## Security Features
+
+| Feature | Status |
+|---------|--------|
+| Input Validation (Zod) | ✅ |
+| Graceful Shutdown | ✅ |
+| Health Checks | ✅ |
 
 ## Quick Start
 
@@ -28,24 +78,5 @@ npm start
 
 ---
 
-## Environment Variables
-
-| Variable | Required | Default |
-|----------|----------|---------|
-| PORT | No | 0000 |
-| MONGODB_URI | Yes | - |
-| CORS_ORIGIN | No | - |
-
----
-
-## API Endpoints
-
-See CLAUDE.md for full API documentation.
-
----
-
-## License
-
-Proprietary - RTNM Digital
-
+**License:** Proprietary - RTNM Digital  
 **Last Updated:** June 13, 2026
