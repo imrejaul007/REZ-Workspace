@@ -5521,3 +5521,924 @@ SmileCraft Dental OS connects the SmileCraft Dental Clinic story to the RTNM eco
 
 *Last Updated: June 14, 2026*
 *SmileCraft Dental OS - Complete Product Specification*
+
+---
+
+# RTMN Industry Operating Systems - Complete Features (Built June 15, 2026)
+
+## Industry OS Complete Feature Matrix
+
+| Industry OS | Port | Digital Twins | API Endpoints | Lines | Status |
+|------------|------|--------------|---------------|-------|--------|
+| Restaurant OS | 5010 | Menu, Order, Kitchen, Table, Customer | 35+ | 570+ | ✅ COMPLETE |
+| Hotel OS | 5025 | Room, Booking, Guest, Service, Revenue | 30+ | 520+ | ✅ COMPLETE |
+| Healthcare OS | 5020 | Patient, Appointment, Doctor, Prescription, Record | 40+ | 600+ | ✅ COMPLETE |
+| Retail OS | 5030 | Product, Inventory, Customer, Cart, Order, Supplier | 35+ | 550+ | ✅ COMPLETE |
+| RealEstate OS | 5230 | Property, Listing, Lead, Agent, Viewing, Offer | 30+ | 480+ | ✅ COMPLETE |
+| Legal OS | 5035 | Client, Case, Lawyer, Document, Appointment, Invoice | 35+ | 510+ | ✅ COMPLETE |
+| Education OS | 5060 | Course, Student, Instructor, Enrollment, Assignment, Grade | 40+ | 540+ | ✅ COMPLETE |
+| Automotive OS | 5080 | Vehicle, Customer, Service, Appointment | 25+ | 420+ | ✅ COMPLETE |
+| Beauty OS | 5090 | Client, Service, Staff, Appointment, Product | 30+ | 450+ | ✅ COMPLETE |
+| Fitness OS | 5110 | Member, Trainer, Class, Membership, Attendance, Workout | 35+ | 480+ | ✅ COMPLETE |
+| Manufacturing OS | 5150 | Product, Order, Machine, Material, Worker, Production, Quality | 40+ | 560+ | ✅ COMPLETE |
+| Hospitality OS | 5050 | Establishment, Staff, Customer, Transaction, Event | 35+ | 520+ | ✅ COMPLETE |
+| TwinOS Hub | 4705 | 35+ Twins Registry | 20+ | 450+ | ✅ COMPLETE |
+
+---
+
+## 1. Restaurant OS - Complete Features
+
+**Port:** 5010  
+**Digital Twins:** Menu, Order, Kitchen, Table, Customer  
+**Technology:** Express.js, Winston Logger, Helmet, CORS, Memory Store
+
+### 1.1 Menu Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Categories | Create and manage food categories | `GET/POST /api/menu/categories` |
+| Items | CRUD operations for menu items | `GET/POST/PUT/DELETE /api/menu/items` |
+| Modifiers | Add-ons and customizations | `GET/POST /api/menu/modifiers` |
+| Pricing | Item prices with currency | `GET/PUT /api/menu/items/:id/price` |
+| Availability | Item availability toggle | `PUT /api/menu/items/:id/availability` |
+| Images | Menu item images | `POST /api/menu/items/:id/image` |
+
+### 1.2 Order Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Create Order | New order with items | `POST /api/orders` |
+| Update Order | Modify existing order | `PUT /api/orders/:id` |
+| Order Status | Track order lifecycle | `PUT /api/orders/:id/status` |
+| Order Queue | Pending orders list | `GET /api/orders/queue` |
+| Order History | Past orders | `GET /api/orders/history` |
+| Cancel Order | Cancel with reason | `POST /api/orders/:id/cancel` |
+| Split Bill | Divide among customers | `POST /api/orders/:id/split` |
+
+### 1.3 Kitchen Display System (KDS)
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Kitchen Queue | Orders waiting to be prepared | `GET /api/kitchen/queue` |
+| Start Cooking | Mark order in progress | `POST /api/kitchen/:orderId/start` |
+| Complete Item | Mark item done | `POST /api/kitchen/:orderId/items/:itemId/complete` |
+| Ready to Serve | Order ready notification | `POST /api/kitchen/:orderId/ready` |
+| Bump Order | Remove from display | `POST /api/kitchen/:orderId/bump` |
+| Rush Orders | Priority handling | `POST /api/kitchen/:orderId/rush` |
+| Kitchen Stats | Performance metrics | `GET /api/kitchen/stats` |
+
+### 1.4 Table Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Floor Plan | Restaurant layout | `GET/POST /api/tables/floor-plan` |
+| Table Status | Occupied/Available/Reserved | `GET/PUT /api/tables/:id/status` |
+| Reservations | Booking management | `GET/POST /api/tables/reservations` |
+| QR Codes | Table-specific QR | `GET /api/tables/:id/qr` |
+| Table Assignment | Assign to order | `POST /api/tables/:id/assign` |
+| Merge Tables | Combine for groups | `POST /api/tables/merge` |
+
+### 1.5 Customer Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Customer Profiles | Name, phone, email, dietary | `GET/POST /api/customers` |
+| Order History | Past orders by customer | `GET /api/customers/:id/orders` |
+| Preferences | Favorite items, dietary restrictions | `GET/PUT /api/customers/:id/preferences` |
+| Loyalty Points | Rewards tracking | `GET/PUT /api/customers/:id/loyalty` |
+| VIP Status | Priority customers | `PUT /api/customers/:id/vip` |
+
+### 1.6 Reviews & Analytics
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Submit Review | Rating (1-5) with comment | `POST /api/reviews` |
+| Get Reviews | All reviews or by item | `GET /api/reviews` |
+| Analytics Dashboard | Revenue, orders, customers | `GET /api/analytics/dashboard` |
+| Popular Items | Best sellers report | `GET /api/analytics/popular-items` |
+| Peak Hours | Busy times analysis | `GET /api/analytics/peak-hours` |
+| Customer Retention | Return rate metrics | `GET /api/analytics/retention` |
+
+### 1.7 Restaurant OS API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/menu/categories` | List categories |
+| POST | `/api/menu/categories` | Create category |
+| GET | `/api/menu/items` | List menu items |
+| POST | `/api/menu/items` | Create menu item |
+| PUT | `/api/menu/items/:id` | Update menu item |
+| DELETE | `/api/menu/items/:id` | Delete menu item |
+| GET | `/api/orders` | List orders |
+| POST | `/api/orders` | Create order |
+| PUT | `/api/orders/:id` | Update order |
+| PUT | `/api/orders/:id/status` | Update order status |
+| POST | `/api/orders/:id/cancel` | Cancel order |
+| POST | `/api/orders/:id/split` | Split bill |
+| GET | `/api/kitchen/queue` | Kitchen queue |
+| POST | `/api/kitchen/:orderId/start` | Start cooking |
+| POST | `/api/kitchen/:orderId/ready` | Mark ready |
+| POST | `/api/kitchen/:orderId/bump` | Bump order |
+| GET | `/api/tables` | List tables |
+| POST | `/api/tables` | Create table |
+| PUT | `/api/tables/:id/status` | Update table status |
+| GET | `/api/tables/:id/qr` | Get table QR |
+| GET | `/api/customers` | List customers |
+| POST | `/api/customers` | Create customer |
+| GET | `/api/customers/:id` | Get customer |
+| PUT | `/api/customers/:id/loyalty` | Update loyalty |
+| POST | `/api/reviews` | Submit review |
+| GET | `/api/reviews` | List reviews |
+| GET | `/api/analytics/dashboard` | Dashboard data |
+| GET | `/api/analytics/popular-items` | Popular items |
+
+---
+
+## 2. Hotel OS - Complete Features
+
+**Port:** 5025  
+**Digital Twins:** Room, Booking, Guest, Service, Revenue  
+**Technology:** Express.js, Winston Logger, Helmet, CORS, Memory Store
+
+### 2.1 Room Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Room Inventory | All hotel rooms | `GET/POST /api/rooms` |
+| Room Types | Standard, Deluxe, Suite | `GET/POST /api/rooms/types` |
+| Room Status | Available/Occupied/Maintenance | `PUT /api/rooms/:id/status` |
+| Room Features | Amenities per room | `GET/PUT /api/rooms/:id/features` |
+| Room Pricing | Dynamic pricing | `GET/PUT /api/rooms/:id/pricing` |
+| Housekeeping | Cleaning status | `PUT /api/rooms/:id/housekeeping` |
+| Maintenance | Issue tracking | `POST /api/rooms/:id/maintenance` |
+
+### 2.2 Booking Engine
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Create Booking | Reserve room | `POST /api/bookings` |
+| Modify Booking | Change dates/details | `PUT /api/bookings/:id` |
+| Cancel Booking | With refund policy | `POST /api/bookings/:id/cancel` |
+| Check-in | Guest arrival | `POST /api/bookings/:id/checkin` |
+| Check-out | Guest departure | `POST /api/bookings/:id/checkout` |
+| No-show | Mark as no-show | `POST /api/bookings/:id/noshow` |
+| Waitlist | When fully booked | `POST /api/bookings/waitlist` |
+| Availability | Check open dates | `GET /api/bookings/availability` |
+
+### 2.3 Guest Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Guest Profiles | Personal info, preferences | `GET/POST /api/guests` |
+| Stay History | Previous visits | `GET /api/guests/:id/history` |
+| Guest Preferences | Room, dietary, special needs | `PUT /api/guests/:id/preferences` |
+| VIP Guests | Priority guests | `PUT /api/guests/:id/vip` |
+| Communication | Guest notifications | `POST /api/guests/:id/notify` |
+| Loyalty Program | Points and rewards | `GET/PUT /api/guests/:id/loyalty` |
+
+### 2.4 Hotel Services
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Service Catalog | Available services | `GET/POST /api/services` |
+| Room Service | In-room dining | `POST /api/services/roomservice` |
+| Housekeeping | Request cleaning | `POST /api/services/housekeeping` |
+| Concierge | Special requests | `POST /api/services/concierge` |
+| Spa Booking | Spa appointments | `POST /api/services/spa` |
+| Transport | Airport pickup | `POST /api/services/transport` |
+| Service History | Guest service log | `GET /api/guests/:id/services` |
+
+### 2.5 Invoicing & Revenue
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Generate Invoice | Stay charges | `POST /api/invoices` |
+| Add Charges | Room, services | `POST /api/invoices/:id/charges` |
+| Payment | Process payment | `POST /api/invoices/:id/payment` |
+| Folio | Guest account | `GET /api/invoices/:bookingId/folio` |
+| Revenue Report | Daily/weekly/monthly | `GET /api/revenue/report` |
+| Occupancy Rate | Room utilization | `GET /api/revenue/occupancy` |
+| ADR | Average daily rate | `GET /api/revenue/adr` |
+
+### 2.6 Hotel OS API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/rooms` | List rooms |
+| POST | `/api/rooms` | Create room |
+| PUT | `/api/rooms/:id/status` | Update room status |
+| GET | `/api/rooms/types` | List room types |
+| POST | `/api/rooms/types` | Create room type |
+| GET | `/api/bookings` | List bookings |
+| POST | `/api/bookings` | Create booking |
+| PUT | `/api/bookings/:id` | Update booking |
+| POST | `/api/bookings/:id/cancel` | Cancel booking |
+| POST | `/api/bookings/:id/checkin` | Check-in guest |
+| POST | `/api/bookings/:id/checkout` | Check-out guest |
+| GET | `/api/bookings/availability` | Check availability |
+| GET | `/api/guests` | List guests |
+| POST | `/api/guests` | Create guest |
+| GET | `/api/guests/:id/history` | Guest history |
+| PUT | `/api/guests/:id/preferences` | Update preferences |
+| GET | `/api/services` | List services |
+| POST | `/api/services` | Create service |
+| POST | `/api/services/roomservice` | Room service order |
+| GET | `/api/invoices` | List invoices |
+| POST | `/api/invoices` | Create invoice |
+| POST | `/api/invoices/:id/charges` | Add charges |
+| POST | `/api/invoices/:id/payment` | Process payment |
+| GET | `/api/revenue/report` | Revenue report |
+
+---
+
+## 3. Healthcare OS - Complete Features
+
+**Port:** 5020  
+**Technology:** Express.js, Winston Logger, Helmet, CORS, Memory Store
+
+### 3.1 Patient Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Patient Registration | New patient | `POST /api/patients` |
+| Patient Records | Medical history | `GET/PUT /api/patients/:id` |
+| Demographics | Personal info | `GET/PUT /api/patients/:id/demographics` |
+| Emergency Contacts | Contact info | `POST /api/patients/:id/emergency` |
+| Insurance | Insurance details | `GET/PUT /api/patients/:id/insurance` |
+| Allergies | Allergy records | `POST /api/patients/:id/allergies` |
+| Conditions | Medical conditions | `POST /api/patients/:id/conditions` |
+
+### 3.2 Doctor Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Doctor Profiles | Specialty, schedule | `GET/POST /api/doctors` |
+| Availability | Working hours | `GET/PUT /api/doctors/:id/availability` |
+| Specialties | Medical specialties | `GET/POST /api/specialties` |
+| Qualifications | Degrees, certifications | `GET/PUT /api/doctors/:id/qualifications` |
+| Reviews | Patient ratings | `GET /api/doctors/:id/reviews` |
+
+### 3.3 Appointments
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Schedule | Book appointment | `POST /api/appointments` |
+| Calendar | Doctor schedule | `GET /api/appointments/calendar/:doctorId` |
+| Update | Modify appointment | `PUT /api/appointments/:id` |
+| Cancel | Cancel with reason | `POST /api/appointments/:id/cancel` |
+| Complete | Mark as completed | `POST /api/appointments/:id/complete` |
+| No-show | Mark as no-show | `POST /api/appointments/:id/noshow` |
+| Reminders | SMS/email alerts | `POST /api/appointments/:id/remind` |
+
+### 3.4 Prescriptions
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Create Rx | New prescription | `POST /api/prescriptions` |
+| Medications | Drug database | `GET/POST /api/medications` |
+| Dosages | Standard dosages | `GET /api/dosages` |
+| Drug Interactions | Safety check | `GET /api/interactions/:drug1/:drug2` |
+| Pharmacy | Send to pharmacy | `POST /api/prescriptions/:id/send` |
+| Refill | Request refill | `POST /api/prescriptions/:id/refill` |
+
+### 3.5 Medical Records
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Visit Notes | Doctor notes | `POST /api/records/:patientId/visits` |
+| Diagnoses | ICD codes | `POST /api/records/:patientId/diagnoses` |
+| Lab Results | Test results | `POST /api/records/:patientId/labs` |
+| Imaging | X-rays, MRIs | `POST /api/records/:patientId/imaging` |
+| Vitals | BP, temp, etc. | `POST /api/records/:patientId/vitals` |
+| Export | PDF generation | `GET /api/records/:patientId/export` |
+
+### 3.6 Healthcare OS API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/patients` | List patients |
+| POST | `/api/patients` | Register patient |
+| GET | `/api/patients/:id` | Get patient |
+| PUT | `/api/patients/:id` | Update patient |
+| POST | `/api/patients/:id/allergies` | Add allergy |
+| POST | `/api/patients/:id/conditions` | Add condition |
+| GET | `/api/doctors` | List doctors |
+| POST | `/api/doctors` | Add doctor |
+| GET | `/api/doctors/:id` | Get doctor |
+| PUT | `/api/doctors/:id/availability` | Update availability |
+| GET | `/api/specialties` | List specialties |
+| GET | `/api/appointments` | List appointments |
+| POST | `/api/appointments` | Book appointment |
+| PUT | `/api/appointments/:id` | Update appointment |
+| POST | `/api/appointments/:id/cancel` | Cancel appointment |
+| POST | `/api/appointments/:id/complete` | Complete appointment |
+| GET | `/api/appointments/calendar/:doctorId` | Doctor calendar |
+| GET | `/api/prescriptions` | List prescriptions |
+| POST | `/api/prescriptions` | Create prescription |
+| POST | `/api/prescriptions/:id/send` | Send to pharmacy |
+| GET | `/api/medications` | List medications |
+| GET | `/api/interactions/:drug1/:drug2` | Check interactions |
+| POST | `/api/records/:patientId/visits` | Add visit note |
+| POST | `/api/records/:patientId/diagnoses` | Add diagnosis |
+| POST | `/api/records/:patientId/labs` | Add lab result |
+| POST | `/api/records/:patientId/vitals` | Add vitals |
+| GET | `/api/records/:patientId/export` | Export records |
+
+---
+
+## 4. Retail OS - Complete Features
+
+**Port:** 5030  
+**Technology:** Express.js, Winston Logger, Helmet, CORS, Memory Store
+
+### 4.1 Product Catalog
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Products | CRUD operations | `GET/POST /api/products` |
+| Categories | Product categories | `GET/POST /api/categories` |
+| Brands | Brand management | `GET/POST /api/brands` |
+| Variants | Size, color options | `POST /api/products/:id/variants` |
+| Pricing | Multiple price types | `GET/PUT /api/products/:id/pricing` |
+| Images | Product images | `POST /api/products/:id/images` |
+| Descriptions | Rich text descriptions | `PUT /api/products/:id/description` |
+
+### 4.2 Inventory Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Stock Levels | Current inventory | `GET /api/inventory` |
+| Adjustments | Stock corrections | `POST /api/inventory/adjust` |
+| Transfers | Between locations | `POST /api/inventory/transfer` |
+| Reorder Points | Min stock levels | `GET/PUT /api/inventory/:sku/reorder` |
+| Low Stock Alerts | Notifications | `GET /api/inventory/low-stock` |
+| Batch Updates | Bulk operations | `POST /api/inventory/batch` |
+| Stock History | Audit trail | `GET /api/inventory/:sku/history` |
+
+### 4.3 Customer Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Customer Profiles | Contact, preferences | `GET/POST /api/customers` |
+| Purchase History | Past orders | `GET /api/customers/:id/orders` |
+| Wishlist | Saved products | `GET/POST /api/customers/:id/wishlist` |
+| Segments | Customer groups | `GET/POST /api/segments` |
+| Loyalty Points | Rewards system | `GET/PUT /api/customers/:id/loyalty` |
+| Communication | Marketing, notifications | `POST /api/customers/:id/notify` |
+
+### 4.4 Shopping Cart
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Create Cart | New cart session | `POST /api/cart` |
+| Add Items | Add to cart | `POST /api/cart/:id/items` |
+| Update Items | Change qty, options | `PUT /api/cart/:id/items/:itemId` |
+| Remove Items | Delete from cart | `DELETE /api/cart/:id/items/:itemId` |
+| Apply Coupons | Discount codes | `POST /api/cart/:id/coupon` |
+| Calculate Totals | Price breakdown | `GET /api/cart/:id/totals` |
+| Abandoned Carts | Recovery | `GET /api/cart/abandoned` |
+
+### 4.5 Orders
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Create Order | From cart or direct | `POST /api/orders` |
+| Order Status | Lifecycle tracking | `PUT /api/orders/:id/status` |
+| Fulfillment | Picking, packing | `POST /api/orders/:id/fulfill` |
+| Shipping | Delivery tracking | `POST /api/orders/:id/ship` |
+| Returns | Return requests | `POST /api/orders/:id/return` |
+| Refunds | Process refund | `POST /api/orders/:id/refund` |
+| Invoices | Generate invoice | `GET /api/orders/:id/invoice` |
+
+### 4.6 Suppliers
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Supplier Directory | Vendor list | `GET/POST /api/suppliers` |
+| Purchase Orders | Order from supplier | `POST /api/purchase-orders` |
+| Delivery Schedules | Expected deliveries | `GET /api/suppliers/:id/deliveries` |
+| Performance | On-time rate | `GET /api/suppliers/:id/performance` |
+| Product Sourcing | Find suppliers | `GET /api/suppliers/sourcing/:productId` |
+
+### 4.7 Retail OS API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/products` | List products |
+| POST | `/api/products` | Create product |
+| GET | `/api/products/:id` | Get product |
+| PUT | `/api/products/:id` | Update product |
+| DELETE | `/api/products/:id` | Delete product |
+| POST | `/api/products/:id/variants` | Add variant |
+| GET | `/api/categories` | List categories |
+| POST | `/api/categories` | Create category |
+| GET | `/api/brands` | List brands |
+| POST | `/api/brands` | Create brand |
+| GET | `/api/inventory` | List inventory |
+| POST | `/api/inventory/adjust` | Adjust stock |
+| POST | `/api/inventory/transfer` | Transfer stock |
+| GET | `/api/inventory/low-stock` | Low stock items |
+| GET | `/api/inventory/:sku/history` | Stock history |
+| GET | `/api/customers` | List customers |
+| POST | `/api/customers` | Create customer |
+| GET | `/api/customers/:id/wishlist` | Customer wishlist |
+| GET | `/api/segments` | List segments |
+| POST | `/api/cart` | Create cart |
+| POST | `/api/cart/:id/items` | Add to cart |
+| PUT | `/api/cart/:id/items/:itemId` | Update cart item |
+| DELETE | `/api/cart/:id/items/:itemId` | Remove cart item |
+| POST | `/api/cart/:id/coupon` | Apply coupon |
+| GET | `/api/orders` | List orders |
+| POST | `/api/orders` | Create order |
+| PUT | `/api/orders/:id/status` | Update status |
+| POST | `/api/orders/:id/fulfill` | Fulfill order |
+| POST | `/api/orders/:id/ship` | Ship order |
+| POST | `/api/orders/:id/return` | Return request |
+| POST | `/api/orders/:id/refund` | Process refund |
+| GET | `/api/suppliers` | List suppliers |
+| POST | `/api/suppliers` | Add supplier |
+| POST | `/api/purchase-orders` | Create PO |
+
+---
+
+## 5. RealEstate OS - Complete Features
+
+**Port:** 5230  
+**Technology:** Express.js, Winston Logger, Helmet, CORS, Memory Store
+
+### 5.1 Property Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Properties | CRUD operations | `GET/POST /api/properties` |
+| Property Types | Residential, Commercial | `GET/POST /api/property-types` |
+| Features | Amenities list | `GET/POST /api/features` |
+| Location | Address, coordinates | `PUT /api/properties/:id/location` |
+| Media | Photos, videos | `POST /api/properties/:id/media` |
+| Documents | Legal docs | `POST /api/properties/:id/documents` |
+| Valuations | Market value | `GET /api/properties/:id/valuation` |
+
+### 5.2 Listings
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Create Listing | List property | `POST /api/listings` |
+| Listing Status | Active, Pending, Sold | `PUT /api/listings/:id/status` |
+| Pricing History | Price changes | `GET /api/listings/:id/pricing` |
+| Showings | Schedule viewings | `POST /api/listings/:id/showings` |
+| Offers Received | All offers | `GET /api/listings/:id/offers` |
+| Comp Analysis | Comparable properties | `GET /api/listings/:id/comps` |
+| Listing Report | Performance metrics | `GET /api/listings/:id/report` |
+
+### 5.3 Lead Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Leads | Buyer/seller leads | `GET/POST /api/leads` |
+| Lead Status | New, Contacted, Qualified | `PUT /api/leads/:id/status` |
+| Lead Sources | Where leads come from | `GET /api/lead-sources` |
+| Lead Assignment | Assign to agent | `POST /api/leads/:id/assign` |
+| Lead Scoring | Priority ranking | `GET /api/leads/:id/score` |
+| Follow-ups | Scheduled tasks | `GET/POST /api/leads/:id/followups` |
+| Lead Notes | Communication log | `POST /api/leads/:id/notes` |
+
+### 5.4 Agent Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Agents | Sales team | `GET/POST /api/agents` |
+| Agent Profile | Bio, stats | `GET/PUT /api/agents/:id` |
+| Agent Listings | Their listings | `GET /api/agents/:id/listings` |
+| Agent Leads | Assigned leads | `GET /api/agents/:id/leads` |
+| Agent Performance | Sales metrics | `GET /api/agents/:id/performance` |
+| Commissions | Split calculations | `GET /api/agents/:id/commissions` |
+
+### 5.5 Viewings & Offers
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Schedule Viewing | Book appointment | `POST /api/viewings` |
+| Viewing Calendar | Agent availability | `GET /api/viewings/calendar` |
+| Confirm/Cancel | Update status | `PUT /api/viewings/:id/status` |
+| Submit Offer | Buyer offer | `POST /api/offers` |
+| Counter Offer | Negotiate | `POST /api/offers/:id/counter` |
+| Accept/Reject | Decision | `PUT /api/offers/:id/status` |
+| Offer History | All offers | `GET /api/properties/:id/offers` |
+
+### 5.6 RealEstate OS API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/properties` | List properties |
+| POST | `/api/properties` | Create property |
+| GET | `/api/properties/:id` | Get property |
+| PUT | `/api/properties/:id` | Update property |
+| DELETE | `/api/properties/:id` | Delete property |
+| GET | `/api/properties/:id/valuation` | Get valuation |
+| POST | `/api/properties/:id/media` | Add media |
+| GET | `/api/property-types` | List types |
+| POST | `/api/property-types` | Create type |
+| GET | `/api/features` | List features |
+| POST | `/api/features` | Create feature |
+| GET | `/api/listings` | List listings |
+| POST | `/api/listings` | Create listing |
+| PUT | `/api/listings/:id/status` | Update status |
+| GET | `/api/listings/:id/offers` | Listing offers |
+| GET | `/api/listings/:id/report` | Listing report |
+| GET | `/api/leads` | List leads |
+| POST | `/api/leads` | Create lead |
+| PUT | `/api/leads/:id/status` | Update status |
+| PUT | `/api/leads/:id/assign` | Assign lead |
+| GET | `/api/leads/:id/score` | Lead score |
+| GET | `/api/agents` | List agents |
+| POST | `/api/agents` | Create agent |
+| GET | `/api/agents/:id/performance` | Agent performance |
+| GET | `/api/viewings` | List viewings |
+| POST | `/api/viewings` | Schedule viewing |
+| PUT | `/api/viewings/:id/status` | Update viewing |
+| GET | `/api/offers` | List offers |
+| POST | `/api/offers` | Submit offer |
+| POST | `/api/offers/:id/counter` | Counter offer |
+| PUT | `/api/offers/:id/status` | Accept/Reject |
+
+---
+
+## 6. Legal OS - Complete Features
+
+**Port:** 5035  
+**Technology:** Express.js, Winston Logger, Helmet, CORS, Memory Store
+
+### 6.1 Client Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Clients | Client records | `GET/POST /api/clients` |
+| Contact Info | Phone, email, address | `GET/PUT /api/clients/:id/contact` |
+| Billing Info | Payment details | `GET/PUT /api/clients/:id/billing` |
+| Documents | Client files | `POST /api/clients/:id/documents` |
+| Notes | Internal notes | `POST /api/clients/:id/notes` |
+| Communication | Email, calls log | `GET/POST /api/clients/:id/communications` |
+| Matter Summary | Active matters | `GET /api/clients/:id/matters` |
+
+### 6.2 Case Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Cases | Case records | `GET/POST /api/cases` |
+| Case Status | Active, Closed, Pending | `PUT /api/cases/:id/status` |
+| Case Type | Litigation, Corporate | `GET/POST /api/case-types` |
+| Case Parties | Defendants, plaintiffs | `POST /api/cases/:id/parties` |
+| Case Timeline | Important dates | `GET/POST /api/cases/:id/timeline` |
+| Case Documents | Legal files | `POST /api/cases/:id/documents` |
+| Case Expenses | Costs incurred | `POST /api/cases/:id/expenses` |
+| Case Revenue | Billing summary | `GET /api/cases/:id/revenue` |
+
+### 6.3 Lawyer Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Lawyers | Attorney records | `GET/POST /api/lawyers` |
+| Specializations | Practice areas | `GET/POST /api/specializations` |
+| Availability | Calendar | `GET/PUT /api/lawyers/:id/availability` |
+| Bar Info | License details | `GET/PUT /api/lawyers/:id/bar` |
+| Cases Assigned | Active cases | `GET /api/lawyers/:id/cases` |
+| Utilization | Billable hours | `GET /api/lawyers/:id/utilization` |
+| Performance | Success metrics | `GET /api/lawyers/:id/performance` |
+
+### 6.4 Document Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Templates | Document templates | `GET/POST /api/templates` |
+| Generate | Create from template | `POST /api/documents/generate` |
+| Upload | Store document | `POST /api/documents/upload` |
+| Download | Retrieve document | `GET /api/documents/:id` |
+| Sign | E-signature | `POST /api/documents/:id/sign` |
+| Versioning | Version history | `GET /api/documents/:id/versions` |
+| Share | Share with client | `POST /api/documents/:id/share` |
+
+### 6.5 Appointments & Billing
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Schedule | Book appointment | `POST /api/appointments` |
+| Calendar | Lawyer calendar | `GET /api/appointments/calendar/:lawyerId` |
+| Time Entries | Track hours | `POST /api/time-entries` |
+| Invoices | Generate bill | `POST /api/invoices` |
+| Payments | Record payment | `POST /api/invoices/:id/payments` |
+| Trust Account | Client funds | `GET/POST /api/trust-accounts` |
+| Billing Report | Revenue by period | `GET /api/billing/report` |
+
+### 6.6 Legal OS API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/clients` | List clients |
+| POST | `/api/clients` | Create client |
+| GET | `/api/clients/:id` | Get client |
+| PUT | `/api/clients/:id/contact` | Update contact |
+| PUT | `/api/clients/:id/billing` | Update billing |
+| POST | `/api/clients/:id/notes` | Add note |
+| GET | `/api/cases` | List cases |
+| POST | `/api/cases` | Create case |
+| GET | `/api/cases/:id` | Get case |
+| PUT | `/api/cases/:id/status` | Update status |
+| POST | `/api/cases/:id/parties` | Add party |
+| GET | `/api/cases/:id/timeline` | Case timeline |
+| POST | `/api/cases/:id/documents` | Add document |
+| POST | `/api/cases/:id/expenses` | Add expense |
+| GET | `/api/lawyers` | List lawyers |
+| POST | `/api/lawyers` | Create lawyer |
+| GET | `/api/lawyers/:id/performance` | Lawyer performance |
+| GET | `/api/specializations` | List specializations |
+| GET | `/api/templates` | List templates |
+| POST | `/api/templates` | Create template |
+| POST | `/api/documents/generate` | Generate document |
+| POST | `/api/documents/upload` | Upload document |
+| GET | `/api/documents/:id` | Get document |
+| POST | `/api/documents/:id/sign` | Sign document |
+| GET | `/api/appointments` | List appointments |
+| POST | `/api/appointments` | Create appointment |
+| GET | `/api/appointments/calendar/:lawyerId` | Lawyer calendar |
+| POST | `/api/time-entries` | Log time |
+| GET | `/api/invoices` | List invoices |
+| POST | `/api/invoices` | Create invoice |
+| POST | `/api/invoices/:id/payments` | Record payment |
+| GET | `/api/billing/report` | Billing report |
+
+---
+
+## 7. Education OS - Complete Features
+
+**Port:** 5060  
+**Technology:** Express.js, Winston Logger, Helmet, CORS, Memory Store
+
+### 7.1 Course Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Courses | Course catalog | `GET/POST /api/courses` |
+| Modules | Course sections | `GET/POST /api/courses/:id/modules` |
+| Lessons | Individual lessons | `GET/POST /api/modules/:id/lessons` |
+| Content | Videos, docs, quizzes | `POST /api/lessons/:id/content` |
+| Prerequisites | Course requirements | `GET/PUT /api/courses/:id/prerequisites` |
+| Enrollment Limits | Max students | `GET/PUT /api/courses/:id/limits` |
+| Course Categories | Subject areas | `GET/POST /api/categories` |
+
+### 7.2 Student Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Students | Student records | `GET/POST /api/students` |
+| Profiles | Bio, photo | `GET/PUT /api/students/:id/profile` |
+| Contact | Email, phone | `GET/PUT /api/students/:id/contact` |
+| Emergency Info | Contacts, allergies | `GET/PUT /api/students/:id/emergency` |
+| Documents | Transcripts, IDs | `POST /api/students/:id/documents` |
+| Attendance | Daily tracking | `POST /api/attendance` |
+| Progress | Course completion | `GET /api/students/:id/progress` |
+
+### 7.3 Instructor Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Instructors | Faculty records | `GET/POST /api/instructors` |
+| Qualifications | Degrees, certs | `GET/PUT /api/instructors/:id/qualifications` |
+| Availability | Schedule | `GET/PUT /api/instructors/:id/availability` |
+| Courses Assigned | Teaching load | `GET /api/instructors/:id/courses` |
+| Ratings | Student reviews | `GET /api/instructors/:id/ratings` |
+| Performance | Teaching metrics | `GET /api/instructors/:id/performance` |
+
+### 7.4 Enrollments
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Enroll | Register for course | `POST /api/enrollments` |
+| Enrollment Status | Active, Dropped | `PUT /api/enrollments/:id/status` |
+| Drop Course | Withdraw | `POST /api/enrollments/:id/drop` |
+| Waitlist | When full | `POST /api/enrollments/waitlist` |
+| Promotions | Next level courses | `GET /api/enrollments/:id/promotions` |
+| Completion | Graduation | `POST /api/enrollments/:id/complete` |
+| Transfer Credits | From other institutions | `POST /api/transfers` |
+
+### 7.5 Assignments & Grades
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Assignments | Create task | `POST /api/assignments` |
+| Submit | Student submission | `POST /api/assignments/:id/submit` |
+| Grade | Score submission | `POST /api/submissions/:id/grade` |
+| Feedback | Instructor comments | `POST /api/submissions/:id/feedback` |
+| Rubrics | Grading criteria | `GET/POST /api/rubrics` |
+| Grade Scale | A, B, C scale | `GET/PUT /api/courses/:id/grade-scale` |
+| Transcripts | Official record | `GET /api/students/:id/transcript` |
+
+### 7.6 Education OS API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/courses` | List courses |
+| POST | `/api/courses` | Create course |
+| GET | `/api/courses/:id` | Get course |
+| PUT | `/api/courses/:id` | Update course |
+| GET | `/api/courses/:id/modules` | Course modules |
+| POST | `/api/courses/:id/modules` | Add module |
+| GET | `/api/modules/:id/lessons` | Module lessons |
+| POST | `/api/modules/:id/lessons` | Add lesson |
+| POST | `/api/lessons/:id/content` | Add content |
+| GET | `/api/categories` | List categories |
+| POST | `/api/categories` | Create category |
+| GET | `/api/students` | List students |
+| POST | `/api/students` | Create student |
+| GET | `/api/students/:id` | Get student |
+| PUT | `/api/students/:id/profile` | Update profile |
+| GET | `/api/students/:id/progress` | Student progress |
+| POST | `/api/attendance` | Record attendance |
+| GET | `/api/instructors` | List instructors |
+| POST | `/api/instructors` | Create instructor |
+| GET | `/api/instructors/:id/performance` | Instructor performance |
+| GET | `/api/enrollments` | List enrollments |
+| POST | `/api/enrollments` | Create enrollment |
+| PUT | `/api/enrollments/:id/status` | Update status |
+| POST | `/api/enrollments/:id/drop` | Drop course |
+| POST | `/api/enrollments/waitlist` | Add to waitlist |
+| GET | `/api/assignments` | List assignments |
+| POST | `/api/assignments` | Create assignment |
+| POST | `/api/assignments/:id/submit` | Submit assignment |
+| POST | `/api/submissions/:id/grade` | Grade submission |
+| POST | `/api/submissions/:id/feedback` | Add feedback |
+| GET | `/api/rubrics` | List rubrics |
+| POST | `/api/rubrics` | Create rubric |
+| GET | `/api/students/:id/transcript` | Get transcript |
+
+---
+
+## 8. TwinOS Hub - Complete Features
+
+**Port:** 4705  
+**Registry:** 35+ Digital Twins  
+**Technology:** Express.js, Winston Logger, Helmet, CORS, Memory Store
+
+### 8.1 Twin Registry
+
+| Twin | Description | Attributes |
+|------|-------------|------------|
+| menu-twin | Restaurant menu | items, categories, prices, availability |
+| order-twin | Customer orders | items, status, totals, customer |
+| kitchen-twin | Kitchen operations | queue, prep times, staff |
+| table-twin | Table management | status, capacity, position |
+| customer-twin | Customer profiles | preferences, history, loyalty |
+| room-twin | Hotel rooms | type, status, features, price |
+| booking-twin | Reservations | dates, guest, room, status |
+| guest-twin | Guest profiles | preferences, history, loyalty |
+| service-twin | Hotel services | type, schedule, availability |
+| revenue-twin | Financial data | revenue, occupancy, ADR |
+| patient-twin | Patient records | demographics, history, insurance |
+| appointment-twin | Appointments | date, doctor, patient, status |
+| doctor-twin | Doctor profiles | specialty, schedule, qualifications |
+| prescription-twin | Prescriptions | medications, dosages, refills |
+| record-twin | Medical records | visits, diagnoses, labs |
+| product-twin | Products | name, price, category, stock |
+| inventory-twin | Stock levels | sku, quantity, reorder |
+| cart-twin | Shopping carts | items, customer, totals |
+| supplier-twin | Vendors | name, products, delivery |
+| property-twin | Properties | address, type, features, price |
+| listing-twin | Real estate listings | property, status, offers |
+| lead-twin | Sales leads | source, status, score |
+| agent-twin | Sales agents | profile, listings, performance |
+| viewing-twin | Property viewings | date, time, attendees |
+| offer-twin | Purchase offers | amount, status, terms |
+| client-twin | Legal clients | contact, billing, matters |
+| case-twin | Legal cases | type, status, parties |
+| lawyer-twin | Attorneys | profile, specialization |
+| document-twin | Documents | type, content, signatures |
+| course-twin | Courses | modules, prerequisites |
+| student-twin | Students | profile, progress, grades |
+| instructor-twin | Teachers | qualifications, schedule |
+| enrollment-twin | Enrollments | course, student, status |
+| assignment-twin | Assignments | due date, submissions |
+| vehicle-twin | Vehicles | make, model, status |
+| service-twin | Auto services | type, cost, duration |
+
+### 8.2 Core Operations
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Create Twin | Initialize new twin | `POST /api/twins` |
+| Get Twin | Retrieve twin data | `GET /api/twins/:type/:id` |
+| Update Twin | Modify twin state | `PUT /api/twins/:type/:id` |
+| Delete Twin | Remove twin | `DELETE /api/twins/:type/:id` |
+| Search Twins | Find by attributes | `GET /api/twins/search` |
+| Twin History | State changes | `GET /api/twins/:type/:id/history` |
+| Twin Relationships | Linked twins | `GET /api/twins/:type/:id/relations` |
+
+### 8.3 State Management
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Current State | Active state | `GET /api/twins/:type/:id/state` |
+| State Transitions | Change log | `GET /api/twins/:type/:id/transitions` |
+| Snapshot | Point-in-time | `POST /api/twins/:type/:id/snapshot` |
+| Restore | Revert to snapshot | `POST /api/twins/:type/:id/restore` |
+| Lock | Prevent changes | `POST /api/twins/:type/:id/lock` |
+| Unlock | Allow changes | `POST /api/twins/:type/:id/unlock` |
+
+### 8.4 Sync Operations
+
+| Feature | Description | API Endpoints |
+|---------|-------------|---------------|
+| Sync Twin | Refresh data | `POST /api/twins/:type/:id/sync` |
+| Batch Sync | Multiple twins | `POST /api/sync/batch` |
+| Sync Status | Last sync time | `GET /api/twins/:type/:id/sync-status` |
+| Conflict Resolution | Handle conflicts | `POST /api/sync/resolve` |
+| Webhook | Event notifications | `POST /api/webhooks` |
+
+### 8.5 TwinOS Hub API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/twins` | List all twin types |
+| POST | `/api/twins` | Create twin |
+| GET | `/api/twins/:type` | List twins by type |
+| GET | `/api/twins/:type/:id` | Get twin |
+| PUT | `/api/twins/:type/:id` | Update twin |
+| DELETE | `/api/twins/:type/:id` | Delete twin |
+| GET | `/api/twins/search` | Search twins |
+| GET | `/api/twins/:type/:id/history` | Twin history |
+| GET | `/api/twins/:type/:id/relations` | Get relations |
+| GET | `/api/twins/:type/:id/state` | Get state |
+| GET | `/api/twins/:type/:id/transitions` | Get transitions |
+| POST | `/api/twins/:type/:id/snapshot` | Create snapshot |
+| POST | `/api/twins/:type/:id/restore` | Restore snapshot |
+| POST | `/api/twins/:type/:id/lock` | Lock twin |
+| POST | `/api/twins/:type/:id/unlock` | Unlock twin |
+| POST | `/api/twins/:type/:id/sync` | Sync twin |
+| POST | `/api/sync/batch` | Batch sync |
+| GET | `/api/twins/:type/:id/sync-status` | Sync status |
+| POST | `/api/sync/resolve` | Resolve conflicts |
+| POST | `/api/webhooks` | Create webhook |
+
+---
+
+## Complete Port Registry Summary
+
+| Port Range | Service | Description |
+|-----------|---------|-------------|
+| **3000-3099** | Core Platform | |
+| 3000 | API Gateway | Main gateway |
+| 3001 | AgentOS | Agent orchestration |
+| 3011 | Agent Twin | Agent profiles, karma |
+| 3015 | Property Twin | Property listings |
+| 3016 | Referral Twin | Referrals, rewards |
+| **4001-4040** | RABTUL | Auth/Payment |
+| 4001 | Payment Service | Payment processing |
+| 4002 | Auth Service | Authentication |
+| 4003 | Order Service | Order management |
+| 4004 | Wallet Service | Digital wallet |
+| 4005 | Notification Service | SMS/Email |
+| **4100-4119** | REZ-Mart | Retail |
+| **4140-4256** | SUTAR OS | Autonomous |
+| 4240 | Decision Engine | Policy engine |
+| 4241 | SimulationOS | Digital twins |
+| 4242 | GoalOS | Goal decomposition |
+| 4243 | Network Learning | ML/AI |
+| 4250 | Marketplace | Buy/Sell |
+| 4251 | Agent Economy | Karma/Payments |
+| **4300-4399** | Axom | Community |
+| 4300 | BuzzLocal | Local discovery |
+| **4500-4550** | HOJAI AI | Intelligence |
+| 4500 | HOJAI Hub | Main AI |
+| 4501 | Clinic AI | Healthcare AI |
+| 4555 | Expansion Agent | Growth agent |
+| **4702-4725** | Genie AI | Personal AI |
+| 4702 | CorpID | Identity |
+| 4703 | MemoryOS | Memory |
+| 4705 | TwinOS Hub | Digital twins |
+| 4708 | Genie Dental | Dental health |
+| **4800-4899** | REZ-Merchant | Merchant |
+| **4900-4999** | Industry-specific | |
+| **5000-5240** | Industry OS | |
+| 5010 | Restaurant OS | Hospitality |
+| 5020 | Healthcare OS | Medical |
+| 5025 | Hotel OS | Accommodation |
+| 5030 | Retail OS | Commerce |
+| 5035 | Legal OS | Law |
+| 5050 | Hospitality OS | Establishments |
+| 5060 | Education OS | Learning |
+| 5080 | Automotive OS | Vehicles |
+| 5090 | Beauty OS | Salon |
+| 5110 | Fitness OS | Gym |
+| 5150 | Manufacturing OS | Production |
+| 5230 | RealEstate OS | Property |
+
+---
+
+*Last Updated: June 15, 2026*
+*RTMN Industry Operating Systems - Complete Features Documentation*

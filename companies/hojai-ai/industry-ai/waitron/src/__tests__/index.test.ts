@@ -244,8 +244,9 @@ describe('Waitron Analytics', () => {
         { name: 'Curry', orders: 120, margin: 0.35 },
       ];
 
+      // All items have orders > 100, so we get 3
       const popular = items.filter(i => i.orders > 100);
-      expect(popular).toHaveLength(2);
+      expect(popular).toHaveLength(3);
     });
 
     it('should calculate menu item profitability', () => {
