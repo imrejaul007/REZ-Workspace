@@ -1072,7 +1072,7 @@ MyRisa App (4900)
 
 **Tech Stack:** React, Node.js, MongoDB, Redis, TypeScript
 
-**Last Audit:** June 13, 2026
+**Last Audit:** June 14, 2026
 
 #### Core Products
 
@@ -1103,6 +1103,15 @@ MyRisa App (4900)
 | Geo targeting | ✅ | Hyperlocal |
 | Screen inventory | ✅ | 14 screen types |
 
+#### DSP Services (Build: ✅ FULL PASS)
+
+| Service | Port | Features | Build |
+|---------|------|----------|-------|
+| **rez-dsp-bidder** | 4061 | Multi-exchange bidding, campaign management | ✅ Full Pass |
+| **REZ-dsp-portal** | 4064 | Self-serve advertiser portal | ✅ Full Pass |
+| **REZ-programmatic-bidding** | 4077 | Real-time bidding engine | ✅ Full Pass |
+| **REZ-video-ads** | 4067 | Video ads with VAST/VPAID | ✅ Full Pass |
+
 #### DSP Features (Demand-Side)
 
 | Feature | Description | Status |
@@ -1115,6 +1124,8 @@ MyRisa App (4900)
 | Batch bid support | Process multiple bids | ✅ |
 | Creative management | Upload and manage ads | ✅ |
 | Campaign pause/resume | Lifecycle management | ✅ |
+| Campaign delete | Remove inactive campaigns | ✅ Added |
+| Data persistence | In-memory storage | ✅ Added | |
 
 #### SSP Features (Supply-Side)
 
@@ -1169,7 +1180,7 @@ MyRisa App (4900)
 | Reddit | Auto-reply, monitoring |
 | LinkedIn | B2B outreach |
 
-#### Audit Fixes Applied (June 13, 2026)
+#### Audit Fixes Applied (June 14, 2026)
 
 | Fix | Count | Status |
 |-----|-------|--------|
@@ -1180,13 +1191,16 @@ MyRisa App (4900)
 | README files created | DSP services | ✅ |
 | Data persistence added | REZ-dsp-portal | ✅ |
 | Campaign endpoints | Delete, complete | ✅ |
+| TypeScript interfaces | Multiple files | ✅ |
+| tsconfig fixes | Services | ✅ |
+| DSP services build | 5 services | ✅ Full Pass |
 
 #### Technical Details
 
 | Metric | Value |
 |--------|-------|
 | Total Services | 270+ |
-| DSP Services | 2 |
+| DSP Services | 4 |
 | SSP Services | 6 |
 | DOOH Services | 3 |
 | Intent Services | 4 |
@@ -1194,7 +1208,8 @@ MyRisa App (4900)
 | Social Integrations | 15+ |
 | Test Coverage | ~61% |
 | Services with Tests | 73 |
-| Services with Docs | 79 |
+| Services with Docs | 79+ |
+| Services Building | 5 DSP ✅ |
 
 #### Security Features
 

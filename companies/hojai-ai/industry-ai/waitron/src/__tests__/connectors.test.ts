@@ -158,10 +158,10 @@ describe('Nexha Procurement Connector', () => {
   }
 
   describe('inventoryAlerts', () => {
-    it('should generate critical alert for low stock', () => {
+    it('should generate critical alert for zero stock', () => {
       const item = {
         name: 'Chicken',
-        currentStock: 2,
+        currentStock: 0, // Zero stock
         reorderPoint: 10,
         maxStock: 50,
       };
@@ -173,6 +173,23 @@ describe('Nexha Procurement Connector', () => {
         : 'medium';
 
       expect(urgency).toBe('critical');
+    });
+
+    it('should generate high alert for very low stock', () => {
+      const item = {
+        name: 'Chicken',
+        currentStock: 2, // Very low but not zero
+        reorderPoint: 10,
+        maxStock: 50,
+      };
+
+      const urgency: InventoryAlert['urgency'] = item.currentStock <= 0
+        ? 'critical'
+        : item.currentStock < item.reorderPoint / 2
+        ? 'high'
+        : 'medium';
+
+      expect(urgency).toBe('high');
     });
 
     it('should calculate reorder quantity', () => {
