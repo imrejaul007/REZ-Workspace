@@ -105,20 +105,24 @@
 
 ---
 
-### 2. Business Intelligence (11 Products)
+### 2. Business Intelligence (15 Products)
 
 | Product | Port | Features |
 |---------|------|----------|
 | hojai-business-copilot | 4600 | 24 industry skill packs, 120+ skills, NL queries |
-| hojai-product-intelligence | 4755 | Product analytics, trends, insights |
-| hojai-competitive-intelligence | 4756 | Competitor tracking, alerts, benchmarking |
-| hojai-revenue-intelligence | 4757 | Revenue forecasting, trends |
-| hojai-customer-intelligence | 4752 | Customer behavior, segmentation |
+| **hojai-expert-os** | 4550 | Agent Runtime, Expert Twins, Workflow Execution |
+| **hojai-product-intelligence** | 4755 | Product analytics, features, feedback, roadmap, RICE |
+| **hojai-competitive-intelligence** | 4756 | Competitor tracking, funding, hiring, news, alerts |
+| **hojai-revenue-intelligence** | 4757 | Revenue metrics, ARR/MRR/LTV/CAC, forecasting |
+| **hojai-customer-intelligence** | 4758 | Customer 360, lifecycle, interactions, sentiment |
+| **hojai-meeting-intelligence** | 4700 | Meeting management, action items, decisions |
+| **hojai-goal-os** | 4242 | Goal management, OKRs, milestones |
+| **hojai-command-center** | 4801 | Executive dashboard, widgets |
+| **hojai-executive-dashboard** | 4759 | KPI reports, insights, metrics |
+| **hojai-flow-os** | 4150 | Workflow automation, flow execution |
+| **hojai-graph-enrichment** | 4810 | Knowledge graph, entities, relationships |
 | hojai-merchant-intelligence | 4753 | Merchant analytics, performance |
 | hojai-marketing-intelligence | 4754 | Campaign analytics, attribution |
-| hojai-financial-intelligence | 4758 | Financial metrics, projections |
-| hojai-commerce-intelligence | 4759 | Commerce analytics, conversion |
-| hojai-company-intelligence | - | Company-wide analytics |
 | hojai-industry | 4700 | Industry-specific frameworks |
 
 ---
@@ -127,7 +131,7 @@
 
 | Product | Port | Features |
 |---------|------|----------|
-| hojai-expert-os | 4550 | Professional AI marketplace |
+| **hojai-expert-os** | 4550 | Agent Runtime Platform, Professional AI marketplace |
 | hojai-agent-marketplace | 4580 | AI agents, skills, pricing |
 | hojai-agent-marketplace-2 | 4581 | Agent marketplace v2 |
 | hojai-agent-identity | - | Agent identity & verification |
