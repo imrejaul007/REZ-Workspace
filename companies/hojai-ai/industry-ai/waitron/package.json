@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "axios": "^1.6.0",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
-    "compression": "^1.7.4",
     "prom-client": "^15.1.0",
-    "winston": "^3.11.0",
-    "dotenv": "^16.3.1"
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@types/compression": "^1.7.5",
@@ -27,7 +27,7 @@
     "@types/node": "^20.10.0",
     "tsx": "^4.6.0",
     "typescript": "^5.3.0",
-    "vitest": "^1.0.0"
+    "vitest": "^1.6.1"
   },
   "engines": {
     "node": ">=20.0.0"

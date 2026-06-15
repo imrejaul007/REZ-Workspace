@@ -578,7 +578,12 @@ This document consolidates all port allocations across the 24 industry verticals
 | Port | Service | Protocol | Description |
 |------|---------|----------|-------------|
 | 4500 | HOJAI Gateway | REST | Primary API gateway |
-| 4510 | Event Bus | REST | Event publishing and subscriptions |
+| 4510 | **Legal AI** | REST | AI-powered legal management |
+| 4511 | **Government AI** | REST | AI-powered government services |
+| 4512 | **Agriculture AI** | REST | Smart agriculture intelligence |
+| 4513 | **Sports AI** | REST | AI-powered sports management |
+| 4514 | **Energy AI** | REST | Smart energy intelligence |
+| 4515 | **Media AI** | REST | AI-powered media intelligence |
 | 4520 | Memory Service | REST | Multi-tier memory infrastructure |
 | 4521 | TwinOS | REST | Digital twin management |
 | 4530 | Intelligence | REST | AI intelligence services |
@@ -597,6 +602,19 @@ This document consolidates all port allocations across the 24 industry verticals
 | 4850 | VoiceOS | REST | Voice AI platform |
 
 **File:** [docs/hojai-ai/BRANDPULSE.md](./docs/hojai-ai/BRANDPULSE.md)
+
+---
+
+### Industry OS Services
+
+**Location:** `services/`
+
+| Port | Service | Industry | Description |
+|------|---------|----------|-------------|
+| 5100 | **Energy OS** | Energy | Smart energy management platform |
+| 5600 | **Media OS** | Media | Digital media & content management |
+
+**File:** [services/energy-os/](./services/energy-os/) | [services/media-os/](./services/media-os/)
 
 ---
 
