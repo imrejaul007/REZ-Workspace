@@ -299,6 +299,74 @@ class IntentRouter {
 
     return suggestions[intentType] || ['Continue'];
   }
+
+  // ============================================
+  // GENIE SERVICE INTEGRATION
+  // ============================================
+
+  /**
+   * Get Genie response
+   */
+  private async getGenieResponse(query: string, userId: string): Promise<string> {
+    try {
+      // Try dashboard first
+      const response = await axios.get(`${GENIE_URL}/api/search`, {
+        params: { q: query },
+        headers: { 'X-User-Id': userId },
+        timeout: 5000,
+      });
+      if (response.data?.data?.memories?.length) {
+        return response.data.data.memories[0].content;
+      }
+    } catch {}
+    return 'How can I help you?';
+  }
+
+  /**
+   * Get Genie briefing
+   */
+  async getBriefing(userId: string): Promise<any> {
+    try {
+      const response = await axios.get(`${GENIE_URL}/api/dashboard`, {
+        headers: { 'X-User-Id': userId },
+        timeout: 10000,
+      });
+      return response.data;
+    } catch (error) {
+      return { success: false, error: 'Genie unavailable' };
+    }
+  }
+
+  /**
+   * Get Genie memory
+   */
+  async getMemory(userId: string, query: string): Promise<any> {
+    try {
+      const response = await axios.get(`${GENIE_MEMORY_URL}/api/memories/recall`, {
+        params: { query },
+        headers: { 'X-User-Id': userId },
+        timeout: 10000,
+      });
+      return response.data;
+    } catch (error) {
+      return { success: false, error: 'Memory unavailable' };
+    }
+  }
+
+  /**
+   * Get Personal Twin
+   */
+  async getPersonalTwin(userId: string): Promise<any> {
+    try {
+      const response = await axios.get(`${GENIE_PERSONAL_TWIN_URL}/api/twin`, {
+        headers: { 'X-User-Id': userId },
+        timeout: 10000,
+      });
+      return response.data;
+    } catch (error) {
+      return { success: false, error: 'Twin unavailable' };
+    }
+  }
 }
 
 const router = new IntentRouter();
