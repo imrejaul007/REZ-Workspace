@@ -9,7 +9,7 @@ import { messageBroker } from './utils/message-broker';
 import { corsMiddleware } from './middleware/cors';
 import { rateLimiter } from './middleware/rate-limiter';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
-import inventorytwinserviceRoutes from './routes/inventorytwinservice.routes';
+import inventorytwinserviceRoutes from './routes/inventorytwin.routes';
 
 const app = express();
 const PORT = parseInt(process.env.SERVICE_PORT || '4016');
