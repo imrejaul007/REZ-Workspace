@@ -11,6 +11,7 @@
 
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
+import { policyClient, PolicyDecision } from './policy-client';
 
 // ============================================================================
 // Types
@@ -323,19 +324,70 @@ export class DealStateMachine {
   }
 
   /**
-   * Award deal to a supplier
+   * Award deal to a supplier.
+   *
+   * Calls policy-os BEFORE transitioning to `awarded` to enforce
+   * procurement governance. Possible outcomes:
+   *   - effect=allow           → proceed with award
+   *   - effect=require_approval → set pending_approval flag, do not award yet
+   *   - effect=deny             → throw, no state change
+   *   - source=fail-open        → log + proceed (fail-safe)
+   *
+   * Returns:
+   *   - { deal, decision } if the deal was awarded
+   *   - { deal, decision, pending: true } if approval is required
+   *   - null if the dealId is unknown
+   *   - throws PolicyDeniedError if policy explicitly denies
    */
-  awardDeal(input: AwardDealInput): Deal | null {
+  async awardDeal(input: AwardDealInput): Promise<{ deal: Deal; decision: PolicyDecision; pending?: boolean } | null> {
     const deal = this.deals.get(input.dealId);
     if (!deal) return null;
 
-    // Mark the awarded quote
+    const decision = await policyClient.evaluateAward({
+      dealId: deal.id,
+      buyerId: deal.buyerId,
+      sellerId: input.supplierId,
+      total: input.finalAmount,
+      currency: deal.currency || 'INR',
+      items: (deal.items || []).map((it: any) => ({
+        sku: it.sku || it.productId || 'unknown',
+        quantity: it.quantity || 1,
+        unitPrice: it.unitPrice || 0,
+      })),
+      supplier: {
+        id: input.supplierId,
+        knownToBuyer: true, // TODO: source from buyer-supplier history
+      },
+      buyerIndustry: 'restaurant',
+    });
+
+    // Persist the decision on the deal for audit + UI
+    (deal as any).policyDecision = decision;
+
+    if (!decision.allowed && decision.effect === 'deny') {
+      // Policy explicitly denied — do not change state, surface to caller.
+      this.deals.set(deal.id, deal);
+      const err: any = new Error(`Policy denied: ${decision.reason}`);
+      err.code = 'POLICY_DENIED';
+      err.decision = decision;
+      throw err;
+    }
+
+    if (decision.effect === 'require_approval') {
+      // Mark deal as pending approval; orchestrator UI will show banner.
+      (deal as any).pendingApproval = true;
+      (deal as any).pendingApprover = decision.approver || 'manager';
+      this.deals.set(deal.id, deal);
+      // Best-effort audit (no await — don't block the response)
+      policyClient.recordDecision(deal.id, decision).catch(() => {});
+      return { deal, decision, pending: true };
+    }
+
+    // Allowed (or fail-open) — proceed with the award.
     const quote = deal.quotes.find(q => q.id === input.quoteId);
     if (quote) {
       quote.status = 'accepted';
     }
-
-    // Reject other quotes
     deal.quotes.forEach(q => {
       if (q.id !== input.quoteId) {
         q.status = 'rejected';
@@ -348,6 +400,22 @@ export class DealStateMachine {
 
     this.transition(deal.id, 'deal_accepted');
 
+    this.deals.set(deal.id, deal);
+    policyClient.recordDecision(deal.id, decision).catch(() => {});
+    return { deal, decision };
+  }
+
+  /**
+   * Approve a deal that is in `pending_approval` state. Called when
+   * a human manager clicks "Approve" in the dashboard.
+   */
+  approvePendingApproval(dealId: string, approver: string): Deal | null {
+    const deal = this.deals.get(dealId);
+    if (!deal) return null;
+    if (!(deal as any).pendingApproval) return deal;
+    (deal as any).pendingApproval = false;
+    (deal as any).approvedBy = approver;
+    (deal as any).approvedAt = new Date().toISOString();
     this.deals.set(deal.id, deal);
     return deal;
   }

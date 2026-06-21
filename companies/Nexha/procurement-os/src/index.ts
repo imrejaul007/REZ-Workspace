@@ -711,14 +711,51 @@ app.post('/api/deals/:id/quotes',
   }
 );
 
-// Award deal to supplier
+// Award deal to supplier.
+// Triggers policy-os evaluation. Possible responses:
+//   200 { success: true, data: deal, decision }           — allowed, awarded
+//   202 { success: true, pending: true, data: deal, decision } — needs approval
+//   403 { success: false, code: 'POLICY_DENIED', decision }    — blocked
+//   404 { success: false, error: 'Deal not found' }
 app.post('/api/deals/:id/award',
   requireAuth(),
   async (req, res) => {
     try {
-      const deal = dealStateMachine.awardDeal({ dealId: req.params.id, ...req.body });
-      if (!deal) {
+      const result = await dealStateMachine.awardDeal({ dealId: req.params.id, ...req.body });
+      if (!result) {
         return res.status(404).json({ success: false, error: 'Deal not found or invalid award' });
+      }
+      const status = result.pending ? 202 : 200;
+      res.status(status).json({
+        success: true,
+        pending: !!result.pending,
+        data: result.deal,
+        decision: result.decision,
+      });
+    } catch (error: any) {
+      if (error && error.code === 'POLICY_DENIED') {
+        return res.status(403).json({
+          success: false,
+          code: 'POLICY_DENIED',
+          error: error.message,
+          decision: error.decision,
+        });
+      }
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+);
+
+// Approve a deal that is awaiting policy approval.
+// Manager clicks "Approve" in the dashboard.
+app.post('/api/deals/:id/approve',
+  requireAuth(),
+  async (req, res) => {
+    try {
+      const approver = (req.body && req.body.approver) || 'manager';
+      const deal = dealStateMachine.approvePendingApproval(req.params.id, approver);
+      if (!deal) {
+        return res.status(404).json({ success: false, error: 'Deal not found' });
       }
       res.json({ success: true, data: deal });
     } catch (error) {
