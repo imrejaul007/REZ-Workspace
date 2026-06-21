@@ -19,6 +19,7 @@ import { staffRoutes } from './routes/staff.js';
 import { customerRoutes } from './routes/customers.js';
 import inventoryProxyRoutes from './routes/inventory.proxy.js';
 import tablesProxyRoutes from './routes/tables.proxy.js';
+import contractsProxyRoutes from './routes/contracts.proxy.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { digitalTwinsRoutes } from './routes/twins.js';
 import { agentRoutes } from './routes/agents.js';
@@ -30,6 +31,7 @@ const PORT = process.env.PORT || 5010;
 const INVENTORY_TWIN_URL = process.env.INVENTORY_TWIN_URL || 'http://localhost:4016';
 const TABLE_TWIN_URL = process.env.TABLE_TWIN_URL || 'http://localhost:4012';
 const PROCUREMENT_OS_URL = process.env.PROCUREMENT_OS_URL || 'http://localhost:4320';
+const SUTAR_GATEWAY_URL = process.env.SUTAR_GATEWAY_URL || 'http://localhost:4140';
 const INTERNAL_SERVICE_TOKEN = process.env.INTERNAL_SERVICE_TOKEN || '';
 
 // Middleware
@@ -125,7 +127,8 @@ app.get('/api/dashboard', async (req, res) => {
       { name: 'Butter Chicken', orders: 45 },
       { name: 'Biryani', orders: 38 },
       { name: 'Naan', orders: 62 }
-    ]
+    ],
+    liveBackends: ['table-twin', 'inventory-twin', 'sutar-contracts']
   });
 });
 
@@ -138,6 +141,7 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/inventory', inventoryProxyRoutes);
 app.use('/api/tables', tablesProxyRoutes);
+app.use('/api/contracts', contractsProxyRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/twins', digitalTwinsRoutes);
 app.use('/api/agents', agentRoutes);
