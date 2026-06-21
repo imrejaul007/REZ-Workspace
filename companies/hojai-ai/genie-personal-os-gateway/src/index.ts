@@ -5,7 +5,7 @@
  *
  * Tagline: "You don't use Genie. You talk to Genie."
  *
- * Port: 4705
+ * Port: 4734 (moved from 4705 to avoid collision with TwinOS Hub)
  */
 
 import 'dotenv/config';
@@ -19,7 +19,7 @@ import osRoutes from './routes/osRoutes.js';
 
 const SERVICE_NAME = 'genie-personal-os-gateway';
 const SERVICE_VERSION = '1.0.0';
-const PORT = parseInt(process.env.PORT || '4705', 10);
+const PORT = parseInt(process.env.PORT || '4734', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const logger = createLogger(SERVICE_NAME);
