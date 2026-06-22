@@ -401,6 +401,106 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // ACP-MESSAGING (ADR-0010 Phase 4, 2026-06-22)
+  // Reachable via the RTMN Hub at `/api/nexha/nexha-acp-messaging/*`.
+  // Real impl: companies/Nexha/services/nexha-acp-messaging/
+  // Implements 8 ACP message types (QUERY, QUOTE, COUNTER, ACCEPT, REJECT,
+  // ORDER, TRACK, DISPUTE) with per-tenant state-machine validation.
+  // ============================================
+
+  /**
+   * Send an ACP message — either start a new negotiation (omit negotiationId)
+   * or append to an existing one. The server validates the state transition
+   * and returns 422 ACP_INVALID_TRANSITION on illegal moves.
+   */
+  async sendAcpMessage(msg) {
+    try {
+      const path = msg.negotiationId
+        ? `/api/nexha/nexha-acp-messaging/api/negotiations/${encodeURIComponent(msg.negotiationId)}/messages`
+        : '/api/nexha/nexha-acp-messaging/api/negotiations';
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(msg),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('ACP message send failed:', error.message);
+      return null;
+    }
+  }
+
+  /** Validate a message body without persisting (returns 400 on bad input). */
+  async validateAcpMessage(msg) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-acp-messaging/api/validate`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(msg),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('ACP validate failed:', error.message);
+      return null;
+    }
+  }
+
+  /** List the tenant's negotiations (filters: status, agent, limit). */
+  async listAcpNegotiations(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.status) qs.set('status', query.status);
+      if (query.agent) qs.set('agent', query.agent);
+      if (query.limit) qs.set('limit', String(query.limit));
+      const path = `/api/nexha/nexha-acp-messaging/api/negotiations${qs.toString() ? `?${qs.toString()}` : ''}`;
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('ACP list negotiations failed:', error.message);
+      return null;
+    }
+  }
+
+  /** Get one negotiation by id. */
+  async getAcpNegotiation(id) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-acp-messaging/api/negotiations/${encodeURIComponent(id)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('ACP get negotiation failed:', error.message);
+      return null;
+    }
+  }
+
+  /** List messages in a negotiation, in conversation order. */
+  async listAcpMessages(negotiationId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-acp-messaging/api/negotiations/${encodeURIComponent(negotiationId)}/messages`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('ACP list messages failed:', error.message);
+      return null;
+    }
+  }
+
+  /** Per-tenant ACP stats. */
+  async getAcpStats() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-acp-messaging/api/stats`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('ACP stats failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
