@@ -1,0 +1,141 @@
+# ============================================
+# REZ Workspace - Docker Compose
+# Production-ready configuration with all services
+# ============================================
+
+version: '3.9'
+
+services:
+  # REZ Workspace Service
+  rez-workspace:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rez-workspace
+    restart: unless-stopped
+    ports:
+      - "${PORT:-4300}:4300"
+    environment:
+      # Service
+      - NODE_ENV=production
+      - SERVICE_NAME=rez-workspace
+      - PORT=4300
+
+      # MongoDB
+      - MONGODB_URI=mongodb://mongodb:27017/rez-workspace
+      - MONGODB_USER=${MONGODB_USER:-admin}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD:-password}
+
+      # Redis
+      - REDIS_URL=redis://redis:6379
+
+      # JWT
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRY=7d
+
+      # RABTUL Services
+      - RABTUL_AUTH_URL=${RABTUL_AUTH_URL:-http://rabtul-auth:4002}
+
+      # Unified Hub
+      - UNIFIED_HUB_URL=${UNIFIED_HUB_URL:-http://unified-hub:4600}
+
+      # Internal Token
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+
+      # CORS
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+
+      # Security
+      - ENABLE_RATE_LIMIT=true
+      - ENABLE_HELMET=true
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4300/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - rez-network
+    volumes:
+      - rez-workspace-data:/app/data
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: rez-mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD:-password}
+      - MONGO_INITDB_DATABASE=rez-workspace
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    volumes:
+      - mongodb-data:/data/db
+      - ./docker/mongodb/init.js:/docker-entrypoint-initdb.d/init.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - rez-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: rez-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis-password}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rez-network
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: rez-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - rez-workspace
+    networks:
+      - rez-network
+    profiles:
+      - production
+
+# Networks
+networks:
+  rez-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  mongodb-data:
+    driver: local
+  redis-data:
+    driver: local
+  rez-workspace-data:
+    driver: local

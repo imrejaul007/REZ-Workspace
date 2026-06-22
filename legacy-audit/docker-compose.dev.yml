@@ -1,0 +1,72 @@
+# ============================================
+# REZ Workspace - Development Docker Compose
+# ============================================
+
+version: '3.9'
+
+services:
+  # Development service with hot reload
+  rez-workspace-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: rez-workspace-dev
+    restart: unless-stopped
+    ports:
+      - "4300:4300"
+      - "9229:9229"  # Debug port
+    environment:
+      - NODE_ENV=development
+      - SERVICE_NAME=rez-workspace
+      - PORT=4300
+      - MONGODB_URI=mongodb://mongodb:27017/rez-workspace
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=dev-jwt-secret-change-in-production
+      - RABTUL_AUTH_URL=http://host.docker.internal:4002
+      - UNIFIED_HUB_URL=http://host.docker.internal:4600
+      - INTERNAL_SERVICE_TOKEN=dev-internal-token
+      - LOG_LEVEL=debug
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/dist
+    networks:
+      - rez-dev-network
+
+  # MongoDB for development
+  mongodb:
+    image: mongo:7.0
+    container_name: rez-mongodb-dev
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongodb-dev-data:/data/db
+    networks:
+      - rez-dev-network
+
+  # Redis for development
+  redis:
+    image: redis:7-alpine
+    container_name: rez-redis-dev
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass password
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - rez-dev-network
+
+networks:
+  rez-dev-network:
+    driver: bridge
+
+volumes:
+  mongodb-dev-data:
+  redis-dev-data:
