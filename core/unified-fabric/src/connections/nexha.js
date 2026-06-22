@@ -3,7 +3,14 @@
  * Connects Nexha services to RTMN Core Platform
  */
 
-import fetch from 'node-fetch';
+// Use built-in fetch (Node 18+) via globalThis so tests that swap
+// `globalThis.fetch` are picked up. Falls back to dynamic import of
+// node-fetch if running on an older Node where globalThis.fetch is
+// not available (rare in practice).
+if (!globalThis.fetch) {
+  globalThis.fetch = (await import('node-fetch')).default;
+}
+const fetch = (...args) => globalThis.fetch(...args);
 
 const NEXHA_GATEWAY_URL = process.env.NEXHA_GATEWAY_URL || 'http://localhost:5002';
 const NEXHA_DISTRIBUTION_URL = process.env.NEXHA_DISTRIBUTION_URL || 'http://localhost:4300';
@@ -12,6 +19,9 @@ const NEXHA_PROCUREMENT_URL = process.env.NEXHA_PROCUREMENT_URL || 'http://local
 const NEXHA_TRADE_FINANCE_URL = process.env.NEXHA_TRADE_FINANCE_URL || 'http://localhost:4340';
 const NEXHA_INTELLIGENCE_URL = process.env.NEXHA_INTELLIGENCE_URL || 'http://localhost:4350';
 const NEXHA_CONNECTOR_URL = process.env.NEXHA_CONNECTOR_URL || 'http://localhost:4399';
+// ADR-0009 Phase 3 (2026-06-22) — business directory reached via the Hub.
+const NEXHA_BUSINESS_DIRECTORY_URL = process.env.NEXHA_BUSINESS_DIRECTORY_URL || 'http://localhost:4360';
+const RTMN_HUB_URL = process.env.RTMN_HUB_URL || NEXHA_CONNECTOR_URL;
 
 /**
  * Nexha Connection Interface
@@ -289,6 +299,108 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // BUSINESS DIRECTORY (ADR-0009 Phase 3, 2026-06-22)
+  // Reachable via the RTMN Hub (recommended) OR the upstream service.
+  // Real impl: companies/Nexha/services/nexha-business-directory/
+  // ============================================
+
+  /**
+   * Search the registered business directory.
+   * Goes through the Hub at `/api/nexha/nexha-business-directory/companies`.
+   */
+  async searchCompanies(query = {}) {
+    const qs = new URLSearchParams();
+    if (query.q) qs.set('q', query.q);
+    if (query.industry) qs.set('industry', query.industry);
+    if (query.capability) qs.set('capability', query.capability);
+    if (query.minTrust !== undefined && query.minTrust !== null) qs.set('minTrust', String(query.minTrust));
+    if (query.limit) qs.set('limit', String(query.limit));
+    const path = `/api/nexha/nexha-business-directory/companies${qs.toString() ? `?${qs.toString()}` : ''}`;
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, {
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Directory search unavailable:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Fetch one company from the directory, enriched with public trust.
+   */
+  async getCompany(id) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-business-directory/companies/${encodeURIComponent(id)}`, {
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Directory getCompany unavailable:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Search AI agents linked to companies in the directory.
+   */
+  async searchAgents(query = {}) {
+    const qs = new URLSearchParams();
+    if (query.q) qs.set('q', query.q);
+    if (query.category) qs.set('category', query.category);
+    if (query.companyId) qs.set('companyId', query.companyId);
+    if (query.limit) qs.set('limit', String(query.limit));
+    const path = `/api/nexha/nexha-business-directory/agents${qs.toString() ? `?${qs.toString()}` : ''}`;
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, {
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Directory searchAgents unavailable:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Fetch the capability co-occurrence graph (useful for "find partners
+   * like X").
+   */
+  async getCapabilityGraph() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-business-directory/capabilities/graph`, {
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Capability graph unavailable:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Fetch the sanitized public trust score for one entity from SADA,
+   * via the directory (never directly to SADA).
+   */
+  async getEntityTrust(entityId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-business-directory/trust/${encodeURIComponent(entityId)}`, {
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Entity trust unavailable:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
@@ -418,7 +530,9 @@ export const NexhaConnectionModule = {
       { name: 'ProcurementOS', url: NEXHA_PROCUREMENT_URL },
       { name: 'TradeFinance', url: NEXHA_TRADE_FINANCE_URL },
       { name: 'Intelligence', url: NEXHA_INTELLIGENCE_URL },
-      { name: 'Ecosystem Connector', url: NEXHA_CONNECTOR_URL }
+      { name: 'Ecosystem Connector', url: NEXHA_CONNECTOR_URL },
+      // ADR-0009 Phase 3 (2026-06-22)
+      { name: 'Business Directory', url: NEXHA_BUSINESS_DIRECTORY_URL },
     ];
 
     const results = {};
