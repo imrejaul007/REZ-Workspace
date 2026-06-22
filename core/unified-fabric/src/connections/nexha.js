@@ -501,6 +501,166 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // MARKETPLACE-LISTINGS (ADR-0010 Phase 5, 2026-06-22)
+  // Reachable via the RTMN Hub at `/api/sutar/marketplace-listings/*`.
+  // Real impl: companies/HOJAI-AI/blr-ai-marketplace/services/marketplace-listings/
+  // Per-tenant Agent Marketplace storefront with reviews, directory linkage,
+  // and visibility rules.
+  // ============================================
+
+  async createMarketplaceListing(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/listings`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace createListing failed:', error.message);
+      return null;
+    }
+  }
+
+  async searchMarketplaceListings(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      for (const [k, v] of Object.entries(query)) {
+        if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+      }
+      const path = `/api/sutar/marketplace-listings/api/listings${qs.toString() ? `?${qs.toString()}` : ''}`;
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace searchListings failed:', error.message);
+      return null;
+    }
+  }
+
+  async getMarketplaceListing(listingId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/listings/${encodeURIComponent(listingId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace getListing failed:', error.message);
+      return null;
+    }
+  }
+
+  async updateMarketplaceListing(listingId, patch) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/listings/${encodeURIComponent(listingId)}`, {
+        method: 'PATCH',
+        headers: this.headers,
+        body: JSON.stringify(patch),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace updateListing failed:', error.message);
+      return null;
+    }
+  }
+
+  async publishMarketplaceListing(listingId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/listings/${encodeURIComponent(listingId)}/publish`, {
+        method: 'POST',
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace publishListing failed:', error.message);
+      return null;
+    }
+  }
+
+  async recordMarketplaceView(listingId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/listings/${encodeURIComponent(listingId)}/view`, {
+        method: 'POST',
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace recordView failed:', error.message);
+      return null;
+    }
+  }
+
+  async recordMarketplaceInstall(listingId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/listings/${encodeURIComponent(listingId)}/install`, {
+        method: 'POST',
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace recordInstall failed:', error.message);
+      return null;
+    }
+  }
+
+  async listMarketplaceReviews(listingId, query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.status) qs.set('status', query.status);
+      if (query.limit) qs.set('limit', String(query.limit));
+      if (query.offset) qs.set('offset', String(query.offset));
+      const path = `/api/sutar/marketplace-listings/api/listings/${encodeURIComponent(listingId)}/reviews${qs.toString() ? `?${qs.toString()}` : ''}`;
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace listReviews failed:', error.message);
+      return null;
+    }
+  }
+
+  async upsertMarketplaceReview(listingId, review) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/listings/${encodeURIComponent(listingId)}/reviews`, {
+        method: 'PUT',
+        headers: this.headers,
+        body: JSON.stringify(review),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace upsertReview failed:', error.message);
+      return null;
+    }
+  }
+
+  async getMyMarketplaceReview(listingId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/my-reviews?listingId=${encodeURIComponent(listingId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace getMyReview failed:', error.message);
+      return null;
+    }
+  }
+
+  async getMarketplaceStats() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/marketplace-listings/api/stats`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Marketplace stats failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
