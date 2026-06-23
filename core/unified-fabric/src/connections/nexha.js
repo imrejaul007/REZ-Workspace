@@ -661,6 +661,203 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // MISSION PLANNER (ADR-0010 Phase 6, 2026-06-22)
+  // Reachable via the RTMN Hub at `/api/nexha/nexha-mission-planner/*`.
+  // Real impl: companies/Nexha/services/nexha-mission-planner/
+  // Cross-tenant mission composition: a tenant instantiates a template
+  // (or supplies a custom DAG), the planner resolves each subtask to an
+  // agent in nexha-business-directory, and subtasks progress through a
+  // state machine. Mission lifecycle:
+  //   DRAFT → PLANNED → EXECUTING → COMPLETED|FAILED|CANCELLED
+  // Subtask lifecycle:
+  //   PENDING → ASSIGNED → IN_PROGRESS → COMPLETED|FAILED|SKIPPED
+  // ============================================
+
+  async createMission(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/missions`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission createMission failed:', error.message);
+      return null;
+    }
+  }
+
+  async listMissions(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.status) qs.set('status', query.status);
+      if (query.templateId) qs.set('templateId', query.templateId);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/missions${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission listMissions failed:', error.message);
+      return null;
+    }
+  }
+
+  async getMission(missionId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/missions/${encodeURIComponent(missionId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission getMission failed:', error.message);
+      return null;
+    }
+  }
+
+  async updateMission(missionId, patch) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/missions/${encodeURIComponent(missionId)}`, {
+        method: 'PATCH',
+        headers: this.headers,
+        body: JSON.stringify(patch),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission updateMission failed:', error.message);
+      return null;
+    }
+  }
+
+  async planMission(missionId, assignments = {}) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/missions/${encodeURIComponent(missionId)}/plan`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({ assignments }),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission planMission failed:', error.message);
+      return null;
+    }
+  }
+
+  async startMission(missionId) {
+    return this._missionAction(missionId, 'start');
+  }
+
+  async pauseMission(missionId) {
+    return this._missionAction(missionId, 'pause');
+  }
+
+  async cancelMission(missionId) {
+    return this._missionAction(missionId, 'cancel');
+  }
+
+  async retryMission(missionId) {
+    return this._missionAction(missionId, 'retry');
+  }
+
+  async _missionAction(missionId, action) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/missions/${encodeURIComponent(missionId)}/${action}`, {
+        method: 'POST',
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`Mission ${action} failed:`, error.message);
+      return null;
+    }
+  }
+
+  async startSubtask(missionId, subtaskId, body = {}) {
+    return this._subtaskAction(missionId, subtaskId, 'start', body);
+  }
+
+  async completeSubtask(missionId, subtaskId, result, assignedTenant) {
+    return this._subtaskAction(missionId, subtaskId, 'complete', { result, assignedTenant });
+  }
+
+  async failSubtask(missionId, subtaskId, error) {
+    return this._subtaskAction(missionId, subtaskId, 'fail', { error });
+  }
+
+  async skipSubtask(missionId, subtaskId) {
+    return this._subtaskAction(missionId, subtaskId, 'skip', {});
+  }
+
+  async _subtaskAction(missionId, subtaskId, action, body) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/missions/${encodeURIComponent(missionId)}/subtasks/${encodeURIComponent(subtaskId)}/${action}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`Mission subtask ${action} failed:`, error.message);
+      return null;
+    }
+  }
+
+  async listMissionTemplates(tenantId) {
+    try {
+      const qs = tenantId ? `?tenantId=${encodeURIComponent(tenantId)}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/templates${qs}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission listTemplates failed:', error.message);
+      return null;
+    }
+  }
+
+  async getMissionTemplate(templateId, tenantId) {
+    try {
+      const qs = tenantId ? `?tenantId=${encodeURIComponent(tenantId)}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/templates/${encodeURIComponent(templateId)}${qs}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission getTemplate failed:', error.message);
+      return null;
+    }
+  }
+
+  async createMissionTemplate(body) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/templates`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission createTemplate failed:', error.message);
+      return null;
+    }
+  }
+
+  async getMissionStats() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-mission-planner/api/stats`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Mission stats failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
