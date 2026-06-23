@@ -1542,6 +1542,353 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // ADR-0011 Phase 12 (2026-06-23) — Provisioning Engine
+  // ============================================
+  // Declarative provisioning plans for per-tenant instances. Emits
+  // YAML/JSON plans (NOT real K8s/AWS) consumed by external orchestrators.
+  // State machine PENDING → APPLYING → READY → DESTROYING → DESTROYED.
+  // ============================================
+
+  async createProvisioningPlan(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-provisioning-engine/api/plans`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('createProvisioningPlan failed:', error.message);
+      return null;
+    }
+  }
+
+  async listProvisioningPlans(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.status) qs.set('status', query.status);
+      if (query.tenantId) qs.set('tenantId', query.tenantId);
+      if (query.targetInstanceKind) qs.set('targetInstanceKind', query.targetInstanceKind);
+      if (query.targetInstanceId) qs.set('targetInstanceId', query.targetInstanceId);
+      if (query.region) qs.set('region', query.region);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      if (query.skip != null) qs.set('skip', String(query.skip));
+      const path = `/api/nexha/nexha-provisioning-engine/api/plans${qs.toString() ? `?${qs}` : ''}`;
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('listProvisioningPlans failed:', error.message);
+      return null;
+    }
+  }
+
+  async getProvisioningPlan(planId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-provisioning-engine/api/plans/${encodeURIComponent(planId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getProvisioningPlan failed:', error.message);
+      return null;
+    }
+  }
+
+  async getProvisioningPlanJson(planId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-provisioning-engine/api/plans/${encodeURIComponent(planId)}/plan.json`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getProvisioningPlanJson failed:', error.message);
+      return null;
+    }
+  }
+
+  async _provisioningPlanAction(planId, action, body = {}) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-provisioning-engine/api/plans/${encodeURIComponent(planId)}/${action}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`_provisioningPlanAction(${action}) failed:`, error.message);
+      return null;
+    }
+  }
+
+  async transitionProvisioningPlan(planId, toStatus, opts = {}) {
+    return this._provisioningPlanAction(planId, 'transition', { toStatus, ...opts });
+  }
+
+  async recordResourceApplied(planId, resourceName, outputs = {}) {
+    return this._provisioningPlanAction(planId, 'apply', { resourceName, outputs });
+  }
+
+  async recordResourceFailed(planId, resourceName, reason) {
+    return this._provisioningPlanAction(planId, 'fail-resource', { resourceName, reason });
+  }
+
+  async recordProvisioningOutputs(planId, outputs) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-provisioning-engine/api/plans/${encodeURIComponent(planId)}/outputs`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(outputs),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('recordProvisioningOutputs failed:', error.message);
+      return null;
+    }
+  }
+
+  async cancelProvisioningPlan(planId, reason) {
+    return this._provisioningPlanAction(planId, 'cancel', { reason });
+  }
+
+  async destroyProvisioningPlan(planId, reason) {
+    return this._provisioningPlanAction(planId, 'destroy', { reason });
+  }
+
+  async markProvisioningDestroyed(planId) {
+    return this._provisioningPlanAction(planId, 'mark-destroyed', {});
+  }
+
+  async listProvisioningPlanEvents(planId, query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.kind) qs.set('kind', query.kind);
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      if (query.skip != null) qs.set('skip', String(query.skip));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-provisioning-engine/api/plans/${encodeURIComponent(planId)}/events${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('listProvisioningPlanEvents failed:', error.message);
+      return null;
+    }
+  }
+
+  async getProvisioningStats(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.tenantId) qs.set('tenantId', query.tenantId);
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-provisioning-engine/api/stats${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getProvisioningStats failed:', error.message);
+      return null;
+    }
+  }
+
+  // ============================================
+  // ADR-0011 Phase 12 (2026-06-23) — Hooks SDK
+  // ============================================
+  // Webhook subscriptions with HMAC-SHA256 signing and exponential
+  // retry. 28+ event types covering instance lifecycle, provisioning,
+  // missions, commerce, partners.
+  // ============================================
+
+  async createHookSubscription(body) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/subscriptions`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('createHookSubscription failed:', error.message);
+      return null;
+    }
+  }
+
+  async listHookSubscriptions(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.status) qs.set('status', query.status);
+      if (query.tenantId) qs.set('tenantId', query.tenantId);
+      if (query.eventType) qs.set('eventType', query.eventType);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      if (query.skip != null) qs.set('skip', String(query.skip));
+      const path = `/api/nexha/nexha-hooks-sdk/api/subscriptions${qs.toString() ? `?${qs}` : ''}`;
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('listHookSubscriptions failed:', error.message);
+      return null;
+    }
+  }
+
+  async getHookSubscription(subscriptionId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/subscriptions/${encodeURIComponent(subscriptionId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getHookSubscription failed:', error.message);
+      return null;
+    }
+  }
+
+  async updateHookSubscription(subscriptionId, patch) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+        method: 'PATCH',
+        headers: this.headers,
+        body: JSON.stringify(patch),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('updateHookSubscription failed:', error.message);
+      return null;
+    }
+  }
+
+  async _hookSubAction(subscriptionId, action, method = 'POST', body = {}) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/subscriptions/${encodeURIComponent(subscriptionId)}/${action}`, {
+        method,
+        headers: this.headers,
+        body: method === 'DELETE' || method === 'GET' ? undefined : JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`_hookSubAction(${action}) failed:`, error.message);
+      return null;
+    }
+  }
+
+  async disableHookSubscription(subscriptionId) {
+    return this._hookSubAction(subscriptionId, 'disable');
+  }
+
+  async enableHookSubscription(subscriptionId) {
+    return this._hookSubAction(subscriptionId, 'enable');
+  }
+
+  async deleteHookSubscription(subscriptionId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+        method: 'DELETE',
+        headers: this.headers,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('deleteHookSubscription failed:', error.message);
+      return null;
+    }
+  }
+
+  async rotateHookSecret(subscriptionId) {
+    return this._hookSubAction(subscriptionId, 'rotate-secret');
+  }
+
+  async emitHookEvent(body) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/events`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('emitHookEvent failed:', error.message);
+      return null;
+    }
+  }
+
+  async processHookDeliveries(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.batchSize != null) qs.set('batchSize', String(query.batchSize));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const headers = { ...this.headers, 'x-internal-token': this.internalToken || '' };
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/deliveries/process${suffix}`, {
+        method: 'POST',
+        headers,
+        body: '{}',
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('processHookDeliveries failed:', error.message);
+      return null;
+    }
+  }
+
+  async listHookDeliveries(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.subscriptionId) qs.set('subscriptionId', query.subscriptionId);
+      if (query.eventId) qs.set('eventId', query.eventId);
+      if (query.eventType) qs.set('eventType', query.eventType);
+      if (query.status) qs.set('status', query.status);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.skip != null) qs.set('skip', String(query.skip));
+      const path = `/api/nexha/nexha-hooks-sdk/api/deliveries${qs.toString() ? `?${qs}` : ''}`;
+      const response = await fetch(`${RTMN_HUB_URL}${path}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('listHookDeliveries failed:', error.message);
+      return null;
+    }
+  }
+
+  async getHookDelivery(deliveryId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/deliveries/${encodeURIComponent(deliveryId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getHookDelivery failed:', error.message);
+      return null;
+    }
+  }
+
+  async listHookEventTypes() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/event-types`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('listHookEventTypes failed:', error.message);
+      return null;
+    }
+  }
+
+  async getHookStats() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-hooks-sdk/api/stats`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getHookStats failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
