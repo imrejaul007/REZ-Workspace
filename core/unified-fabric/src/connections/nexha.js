@@ -968,6 +968,273 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // COMMERCE RUNTIME (ADR-0010 Phase 8, 2026-06-22)
+  // Reachable via the RTMN Hub at `/api/nexha/nexha-commerce-runtime/*`.
+  // Real impl: companies/Nexha/services/nexha-commerce-runtime/
+  // The execution plane: orders + payments + returns. Each entity has
+  // an explicit state machine. Order lifecycle:
+  //   DRAFT → PLACED → PAID → FULFILLING → SHIPPED → DELIVERED → COMPLETED
+  //                ↓         ↓            ↓
+  //             CANCELLED  REFUNDED    RETURNED → COMPLETED|REFUNDED
+  // Capturing a payment auto-promotes the order to PAID. Refunding a
+  // return auto-refunds the linked payment and promotes the order to
+  // RETURNED → COMPLETED|REFUNDED.
+  // ============================================
+
+  // ---- Orders ----
+
+  async createOrder(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/orders`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce createOrder failed:', error.message);
+      return null;
+    }
+  }
+
+  async listOrders(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.status) qs.set('status', query.status);
+      if (query.buyerRef) qs.set('buyerRef', query.buyerRef);
+      if (query.sellerRef) qs.set('sellerRef', query.sellerRef);
+      if (query.paymentId) qs.set('paymentId', query.paymentId);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/orders${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce listOrders failed:', error.message);
+      return null;
+    }
+  }
+
+  async getOrder(orderId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/orders/${encodeURIComponent(orderId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce getOrder failed:', error.message);
+      return null;
+    }
+  }
+
+  async updateOrder(orderId, patch) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/orders/${encodeURIComponent(orderId)}`, {
+        method: 'PATCH',
+        headers: this.headers,
+        body: JSON.stringify(patch),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce updateOrder failed:', error.message);
+      return null;
+    }
+  }
+
+  async placeOrder(orderId, opts = {}) {
+    return this._orderAction(orderId, 'place', opts);
+  }
+
+  async cancelOrder(orderId, reason) {
+    return this._orderAction(orderId, 'cancel', { reason });
+  }
+
+  async startFulfillment(orderId, body) {
+    return this._orderAction(orderId, 'fulfill', body || {});
+  }
+
+  async shipOrder(orderId, body) {
+    return this._orderAction(orderId, 'ship', body);
+  }
+
+  async deliverOrder(orderId, body) {
+    return this._orderAction(orderId, 'deliver', body || {});
+  }
+
+  async completeOrder(orderId) {
+    return this._orderAction(orderId, 'complete', {});
+  }
+
+  async refundOrder(orderId, body) {
+    return this._orderAction(orderId, 'refund', body || {});
+  }
+
+  async _orderAction(orderId, action, body) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/orders/${encodeURIComponent(orderId)}/${action}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`Commerce order ${action} failed:`, error.message);
+      return null;
+    }
+  }
+
+  // ---- Payments ----
+
+  async createPayment(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/payments`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce createPayment failed:', error.message);
+      return null;
+    }
+  }
+
+  async listPayments(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.orderId) qs.set('orderId', query.orderId);
+      if (query.status) qs.set('status', query.status);
+      if (query.method) qs.set('method', query.method);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/payments${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce listPayments failed:', error.message);
+      return null;
+    }
+  }
+
+  async getPayment(paymentId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/payments/${encodeURIComponent(paymentId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce getPayment failed:', error.message);
+      return null;
+    }
+  }
+
+  async _paymentAction(paymentId, action, body = {}) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/payments/${encodeURIComponent(paymentId)}/${action}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`Commerce payment ${action} failed:`, error.message);
+      return null;
+    }
+  }
+
+  async authorizePayment(paymentId, body) { return this._paymentAction(paymentId, 'authorize', body || {}); }
+  async capturePayment(paymentId, body) { return this._paymentAction(paymentId, 'capture', body || {}); }
+  async completePayment(paymentId) { return this._paymentAction(paymentId, 'complete', {}); }
+  async failPayment(paymentId, reason) { return this._paymentAction(paymentId, 'fail', { reason }); }
+  async cancelPayment(paymentId, reason) { return this._paymentAction(paymentId, 'cancel', { reason }); }
+  async refundPayment(paymentId, body) { return this._paymentAction(paymentId, 'refund', body || {}); }
+
+  // ---- Returns ----
+
+  async createReturn(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/returns`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce createReturn failed:', error.message);
+      return null;
+    }
+  }
+
+  async listReturns(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.orderId) qs.set('orderId', query.orderId);
+      if (query.status) qs.set('status', query.status);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/returns${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce listReturns failed:', error.message);
+      return null;
+    }
+  }
+
+  async getReturn(returnId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/returns/${encodeURIComponent(returnId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce getReturn failed:', error.message);
+      return null;
+    }
+  }
+
+  async _returnAction(returnId, action, body = {}) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/returns/${encodeURIComponent(returnId)}/${action}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`Commerce return ${action} failed:`, error.message);
+      return null;
+    }
+  }
+
+  async approveReturn(returnId, body) { return this._returnAction(returnId, 'approve', body || {}); }
+  async rejectReturn(returnId, reason) { return this._returnAction(returnId, 'reject', { reason }); }
+  async markReturnInTransit(returnId, body) { return this._returnAction(returnId, 'in-transit', body || {}); }
+  async markReturnReceived(returnId) { return this._returnAction(returnId, 'received', {}); }
+  async completeReturn(returnId) { return this._returnAction(returnId, 'complete', {}); }
+  async refundReturn(returnId, body) { return this._returnAction(returnId, 'refund', body || {}); }
+
+  // ---- Stats ----
+
+  async getCommerceStats() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-commerce-runtime/api/stats`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Commerce stats failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
