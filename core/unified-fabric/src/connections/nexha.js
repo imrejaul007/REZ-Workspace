@@ -1381,6 +1381,167 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // INDUSTRY TENANT INSTANCES (ADR-0010 Phase 10, 2026-06-22)
+  // Reachable via the RTMN Hub at `/api/nexha/industry-tenant-instances/*`.
+  // Real impl: industry-os/services/industry-tenant-instances/
+  // Lifecycle manager for per-tenant Industry OS shards (healthcare, finance,
+  // hotel, etc.). One active instance per (tenantId, industry) pair, with
+  // SHARED/DEDICATED/ISOLATED isolation, compliance metadata, per-instance
+  // API keys, usage metrics, and limit enforcement.
+  // ============================================
+
+  async provisionIndustryInstance(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/instances`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('provisionIndustryInstance failed:', error.message);
+      return null;
+    }
+  }
+
+  async listIndustryInstances(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.status) qs.set('status', query.status);
+      if (query.tenantId) qs.set('tenantId', query.tenantId);
+      if (query.industry) qs.set('industry', query.industry);
+      if (query.isolationLevel) qs.set('isolationLevel', query.isolationLevel);
+      if (query.region) qs.set('region', query.region);
+      if (query.complianceFramework) qs.set('complianceFramework', query.complianceFramework);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/instances${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('listIndustryInstances failed:', error.message);
+      return null;
+    }
+  }
+
+  async getIndustryInstance(instanceId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/instances/${encodeURIComponent(instanceId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getIndustryInstance failed:', error.message);
+      return null;
+    }
+  }
+
+  async getIndustryInstanceByTenant(tenantId, industry) {
+    try {
+      const qs = industry ? `?industry=${encodeURIComponent(industry)}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/instances/by-tenant/${encodeURIComponent(tenantId)}${qs}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getIndustryInstanceByTenant failed:', error.message);
+      return null;
+    }
+  }
+
+  async updateIndustryInstance(instanceId, patch) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/instances/${encodeURIComponent(instanceId)}`, {
+        method: 'PATCH',
+        headers: this.headers,
+        body: JSON.stringify(patch),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('updateIndustryInstance failed:', error.message);
+      return null;
+    }
+  }
+
+  async _industryInstanceAction(instanceId, action, body = {}) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/instances/${encodeURIComponent(instanceId)}/${action}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`industryInstance ${action} failed:`, error.message);
+      return null;
+    }
+  }
+
+  async suspendIndustryInstance(instanceId, reason) {
+    return this._industryInstanceAction(instanceId, 'suspend', { reason });
+  }
+  async resumeIndustryInstance(instanceId) {
+    return this._industryInstanceAction(instanceId, 'resume', {});
+  }
+  async destroyIndustryInstance(instanceId, reason) {
+    return this._industryInstanceAction(instanceId, 'destroy', { reason });
+  }
+  async failIndustryInstance(instanceId, reason) {
+    return this._industryInstanceAction(instanceId, 'fail', { reason });
+  }
+  async rotateIndustryInstanceKey(instanceId) {
+    return this._industryInstanceAction(instanceId, 'rotate-key', {});
+  }
+
+  async recordIndustryInstanceHealth(instanceId, status = 'healthy') {
+    return this._industryInstanceAction(instanceId, 'health', { status });
+  }
+
+  async recordIndustryInstanceUsage(instanceId, event) {
+    return this._industryInstanceAction(instanceId, 'usage', event);
+  }
+
+  async getIndustryInstanceUsage(instanceId, query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.date) qs.set('date', query.date);
+      if (query.startDate) qs.set('startDate', query.startDate);
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/instances/${encodeURIComponent(instanceId)}/usage${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getIndustryInstanceUsage failed:', error.message);
+      return null;
+    }
+  }
+
+  async checkIndustryInstanceLimits(instanceId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/instances/${encodeURIComponent(instanceId)}/limits`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('checkIndustryInstanceLimits failed:', error.message);
+      return null;
+    }
+  }
+
+  async getIndustryInstanceStats(industry) {
+    try {
+      const qs = industry ? `?industry=${encodeURIComponent(industry)}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/industry-tenant-instances/api/stats${qs}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getIndustryInstanceStats failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
