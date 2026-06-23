@@ -858,6 +858,116 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // PARTNER GRAPH (ADR-0010 Phase 7, 2026-06-22)
+  // Reachable via the RTMN Hub at `/api/nexha/nexha-partner-graph/*`.
+  // Real impl: companies/Nexha/services/nexha-partner-graph/
+  // Per-tenant partnership tracking + recommendation engine. Records
+  // interactions (transactions, missions, reviews) which update a
+  // computed "strength" score per partner (30% count + 30% GMV +
+  // 20% rating + 20% recency). recommendPartners() surfaces the best
+  // candidates given an optional capability context.
+  // ============================================
+
+  async recordInteraction(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-partner-graph/api/interactions`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Partner recordInteraction failed:', error.message);
+      return null;
+    }
+  }
+
+  async listInteractions(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.partnerRef) qs.set('partnerRef', query.partnerRef);
+      if (query.type) qs.set('type', query.type);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-partner-graph/api/interactions${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Partner listInteractions failed:', error.message);
+      return null;
+    }
+  }
+
+  async listPartners(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.relationshipType) qs.set('relationshipType', query.relationshipType);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-partner-graph/api/partners${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Partner listPartners failed:', error.message);
+      return null;
+    }
+  }
+
+  async getPartner(partnerRef) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-partner-graph/api/partners/${encodeURIComponent(partnerRef)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Partner getPartner failed:', error.message);
+      return null;
+    }
+  }
+
+  async listPartnersByType(relationshipType, query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-partner-graph/api/partners/by-type/${encodeURIComponent(relationshipType)}${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Partner listPartnersByType failed:', error.message);
+      return null;
+    }
+  }
+
+  async recommendPartners(input = {}) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-partner-graph/api/recommend`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Partner recommendPartners failed:', error.message);
+      return null;
+    }
+  }
+
+  async getPartnerStats() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/nexha/nexha-partner-graph/api/stats`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('Partner stats failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
