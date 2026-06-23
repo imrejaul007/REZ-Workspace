@@ -1889,6 +1889,69 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // ADR-0011 Phase 13 (2026-06-23) — Tenant Summary aggregator
+  // ============================================
+  // Read-only fan-out aggregator that returns a unified view of a tenant
+  // across all 9 ADR-0010 services. No state of its own.
+  // ============================================
+
+  async buildTenantSummary(tenantId) {
+    try {
+      const response = await fetch(
+        `${RTMN_HUB_URL}/api/nexha/nexha-tenant-summary/api/tenants/${encodeURIComponent(tenantId)}/summary`,
+        { headers: this.headers }
+      );
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('buildTenantSummary failed:', error.message);
+      return null;
+    }
+  }
+
+  async getTenantSummarySection(tenantId, section) {
+    try {
+      const response = await fetch(
+        `${RTMN_HUB_URL}/api/nexha/nexha-tenant-summary/api/tenants/${encodeURIComponent(tenantId)}/summary/${encodeURIComponent(section)}`,
+        { headers: this.headers }
+      );
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('getTenantSummarySection failed:', error.message);
+      return null;
+    }
+  }
+
+  async listTenantSummarySources() {
+    try {
+      const response = await fetch(
+        `${RTMN_HUB_URL}/api/nexha/nexha-tenant-summary/api/sources`,
+        { headers: this.headers }
+      );
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('listTenantSummarySources failed:', error.message);
+      return null;
+    }
+  }
+
+  async checkTenantSummaryUpstreams() {
+    try {
+      const response = await fetch(
+        `${RTMN_HUB_URL}/api/nexha/nexha-tenant-summary/api/health/upstreams`,
+        { headers: this.headers }
+      );
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('checkTenantSummaryUpstreams failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
