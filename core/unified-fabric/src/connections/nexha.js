@@ -1235,6 +1235,152 @@ export class NexhaConnection {
       return null;
     }
   }
+
+  // ============================================
+  // SUTAR TENANT INSTANCES (ADR-0010 Phase 9, 2026-06-22)
+  // Reachable via the RTMN Hub at `/api/sutar/sutar-tenant-instances/*`.
+  // Real impl: companies/HOJAI-AI/sutar-os/core/sutar-tenant-instances/
+  // Lifecycle manager for per-tenant SUTAR shards. Provisions isolated
+  // instances (SHARED/DEDICATED/ISOLATED) for large/regulated tenants,
+  // tracks usage, enforces limits.
+  // ============================================
+
+  async provisionInstance(input) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/instances`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('SUTAR provisionInstance failed:', error.message);
+      return null;
+    }
+  }
+
+  async listInstances(query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.status) qs.set('status', query.status);
+      if (query.tenantId) qs.set('tenantId', query.tenantId);
+      if (query.isolationLevel) qs.set('isolationLevel', query.isolationLevel);
+      if (query.region) qs.set('region', query.region);
+      if (query.limit != null) qs.set('limit', String(query.limit));
+      if (query.offset != null) qs.set('offset', String(query.offset));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/instances${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('SUTAR listInstances failed:', error.message);
+      return null;
+    }
+  }
+
+  async getInstance(instanceId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/instances/${encodeURIComponent(instanceId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('SUTAR getInstance failed:', error.message);
+      return null;
+    }
+  }
+
+  async getInstanceByTenant(tenantId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/instances/by-tenant/${encodeURIComponent(tenantId)}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('SUTAR getInstanceByTenant failed:', error.message);
+      return null;
+    }
+  }
+
+  async updateInstance(instanceId, patch) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/instances/${encodeURIComponent(instanceId)}`, {
+        method: 'PATCH',
+        headers: this.headers,
+        body: JSON.stringify(patch),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('SUTAR updateInstance failed:', error.message);
+      return null;
+    }
+  }
+
+  async _instanceAction(instanceId, action, body = {}) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/instances/${encodeURIComponent(instanceId)}/${action}`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn(`SUTAR ${action} failed:`, error.message);
+      return null;
+    }
+  }
+
+  async suspendInstance(instanceId, reason) { return this._instanceAction(instanceId, 'suspend', { reason }); }
+  async resumeInstance(instanceId) { return this._instanceAction(instanceId, 'resume', {}); }
+  async destroyInstance(instanceId, reason) { return this._instanceAction(instanceId, 'destroy', { reason }); }
+  async failInstance(instanceId, reason) { return this._instanceAction(instanceId, 'fail', { reason }); }
+  async rotateInstanceKey(instanceId) { return this._instanceAction(instanceId, 'rotate-key', {}); }
+
+  async recordInstanceHealth(instanceId, status = 'healthy') {
+    return this._instanceAction(instanceId, 'health', { status });
+  }
+
+  async recordInstanceUsage(instanceId, event) {
+    return this._instanceAction(instanceId, 'usage', event);
+  }
+
+  async getInstanceUsage(instanceId, query = {}) {
+    try {
+      const qs = new URLSearchParams();
+      if (query.date) qs.set('date', query.date);
+      if (query.startDate) qs.set('startDate', query.startDate);
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/instances/${encodeURIComponent(instanceId)}/usage${suffix}`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('SUTAR getInstanceUsage failed:', error.message);
+      return null;
+    }
+  }
+
+  async checkInstanceLimits(instanceId) {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/instances/${encodeURIComponent(instanceId)}/limits`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('SUTAR checkInstanceLimits failed:', error.message);
+      return null;
+    }
+  }
+
+  async getTenantInstanceStats() {
+    try {
+      const response = await fetch(`${RTMN_HUB_URL}/api/sutar/sutar-tenant-instances/api/stats`, { headers: this.headers });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      this.logger?.warn('SUTAR getTenantInstanceStats failed:', error.message);
+      return null;
+    }
+  }
 }
 
 /**
